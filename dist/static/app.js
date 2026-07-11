@@ -46,7 +46,8 @@ function navigateTo(page) {
     'adv-accounts': 'Advisory Accounts',
     'adv-estate': 'Estate Planning',
     'adv-smallbiz': 'Small Business Advisory',
-    'eapp-submissions': 'E-App & Submissions'
+    'eapp-submissions': 'E-App & Submissions',
+    'ltc-ai-agents': 'LTC AI Agents'
   };
 
   const breadcrumbs = {
@@ -78,7 +79,8 @@ function navigateTo(page) {
     'adv-accounts': 'Home / Advisory / Advisory Accounts',
     'adv-estate': 'Home / Advisory / Estate Planning',
     'adv-smallbiz': 'Home / Advisory / Small Business',
-    'eapp-submissions': 'Home / Insurance / E-App & Submissions'
+    'eapp-submissions': 'Home / Insurance / E-App & Submissions',
+    'ltc-ai-agents': 'Home / LTC Operations / AI Agents'
   };
 
   const titleEl = document.getElementById('page-title');
@@ -65393,6 +65395,11 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
     var titleEl = document.getElementById('page-title');
     var bcEl    = document.getElementById('page-breadcrumb');
 
+    if (page === 'ltc-ai-agents') {
+      if (titleEl) titleEl.textContent = 'AI Agents';
+      if (bcEl)    bcEl.textContent    = 'LTC Operations / AI Agents';
+      requestAnimationFrame(function(){ setTimeout(initLtcAiAgentsPage, 80); });
+    }
     if (page === 'ltc-claims') {
       if (titleEl) titleEl.textContent = 'LTC Claims Management';
       if (bcEl)    bcEl.textContent    = 'LTC Operations / Claims';
@@ -65452,8 +65459,423 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
   window.ltcUpdateCarePlan     = ltcUpdateCarePlan;
   window.ltcFilterClaims       = ltcFilterClaims;
   window.ltcFilterStatus       = ltcFilterStatus;
+  /* ═══════════════════════════════════════════════════════════════════════
+     LTC AI AGENTS PAGE — Agent Catalog + Live Run Console
+  ═══════════════════════════════════════════════════════════════════════ */
+  var _ltcAgentCatalog = [
+    /* ── NEW CLAIM WORKFLOW ── */
+    {
+      id:'AGT-NC-001', group:'New Claim Intake', groupColor:'#dc2626', groupIcon:'fa-file-medical-alt',
+      name:'HIPAA Authorization Agent',
+      desc:'Generates, routes, and confirms HIPAA Authorization Form 164 to claimant via DocuSign. Monitors e-signature completion and logs receipt timestamp to claim record.',
+      model:'Rule Engine + DocuSign API', triggers:['Submit Claim (Step 5)'], status:'Active',
+      avgTime:'< 90 sec', successRate:'99.2%', runsToday:14,
+      steps:['Pull claimant demographics from intake form','Generate HIPAA Auth Form 164 (prefilled)','Send DocuSign envelope to claimant email + SMS','Monitor signature status — retry at 24h if unsigned','Log completed authorization to claim record + audit trail'],
+      lastRun:'Jul 11 10:14am', tags:['Compliance','DocuSign','HIPAA']
+    },
+    {
+      id:'AGT-NC-002', group:'New Claim Intake', groupColor:'#dc2626', groupIcon:'fa-file-medical-alt',
+      name:'APS Request Agent',
+      desc:'Automatically faxes Attending Physician Statement (APS) request to the treating physician on record. Validates NPI number against CMS registry before transmission.',
+      model:'NPI Registry API + Fax Gateway', triggers:['Submit Claim (Step 5)'], status:'Active',
+      avgTime:'< 2 min', successRate:'97.8%', runsToday:14,
+      steps:['Extract attending physician NPI from clinical assessment','Validate NPI against CMS Provider Registry (live lookup)','Generate APS request form with claim-specific fields','Transmit via secure fax gateway (eFax HIPAA-compliant)','Set 5-business-day follow-up reminder if APS not received'],
+      lastRun:'Jul 11 10:14am', tags:['Clinical','APS','Physician']
+    },
+    {
+      id:'AGT-NC-003', group:'New Claim Intake', groupColor:'#dc2626', groupIcon:'fa-file-medical-alt',
+      name:'RN Assignment Agent',
+      desc:'Assigns a case manager from the available RN/MSW roster using round-robin load balancing weighted by specialty match, caseload, and geographic proximity to claimant.',
+      model:'Load Balancer + Specialty Matching ML', triggers:['Submit Claim (Step 5)'], status:'Active',
+      avgTime:'< 30 sec', successRate:'100%', runsToday:14,
+      steps:['Query available RN/MSW roster (real-time caseload)','Score candidates: specialty fit + caseload + geography','Auto-assign top-scored care manager','Send assignment notification to RN via portal + email','Log assignment to claim record; set first contact SLA (2 business days)'],
+      lastRun:'Jul 11 10:14am', tags:['Care Management','RN','Assignment']
+    },
+    {
+      id:'AGT-NC-004', group:'New Claim Intake', groupColor:'#dc2626', groupIcon:'fa-file-medical-alt',
+      name:'Carrier Notification Agent',
+      desc:'Sends statutory acknowledgment letter to the carrier within 24 hours of claim submission as required by state regulations. Auto-selects correct template per carrier + state.',
+      model:'Template Engine + Carrier API', triggers:['Submit Claim (Step 5)'], status:'Active',
+      avgTime:'< 45 sec', successRate:'100%', runsToday:14,
+      steps:['Identify carrier from policy record','Select statutory notice template (state-specific)','Populate: claim ID, claimant, policy number, receipt date','Transmit electronically to carrier EDI endpoint','Archive confirmation to claim + regulatory log'],
+      lastRun:'Jul 11 10:14am', tags:['Carrier','Compliance','Notification']
+    },
+    {
+      id:'AGT-NC-005', group:'New Claim Intake', groupColor:'#dc2626', groupIcon:'fa-file-medical-alt',
+      name:'SMARTS SR-004 Fraud Pre-Screen Agent',
+      desc:'Executes SMARTS Rule SR-004 fraud pre-screen on all newly submitted claims. Checks against SIU watchlist, billing anomaly patterns, and provider fraud history. Claims scoring ≥ 30 are routed to manual SIU review.',
+      model:'SMARTS Engine + IsoForest Anomaly Detection', triggers:['Submit Claim (Step 5)'], status:'Active',
+      avgTime:'< 60 sec', successRate:'94.1%', runsToday:14,
+      steps:['Load claim data into SMARTS fraud engine','Run SR-004: cross-reference SIU watchlist (FBI + CMS)','Apply IsoForest anomaly detection (billing + provider patterns)','Score claim 0–100 (threshold: 30 = SIU queue)','Log result to claim record; trigger SIU routing if score ≥ 30'],
+      lastRun:'Jul 11 10:14am', tags:['Fraud','SMARTS','SIU','Compliance']
+    },
+    /* ── TRIAGE RESOLUTION ── */
+    {
+      id:'AGT-TR-001', group:'Triage Resolution', groupColor:'#059669', groupIcon:'fa-check-circle',
+      name:'Resolution Workflow Agent',
+      desc:'Executes the full claim resolution workflow when a care manager approves a triage recommendation. Updates claim status across LTCAS, notifies carrier, and stops the SLA clock.',
+      model:'Workflow Orchestrator + LTCAS API', triggers:['Resolve button (Triage Engine)'], status:'Active',
+      avgTime:'< 2 min', successRate:'98.7%', runsToday:8,
+      steps:['Validate care plan documentation is complete','Confirm ADL assessment matches care setting','Post approval decision to LTCAS (benefit continuation)','Notify carrier of approval via EDI (Prudential / Lincoln / MassMutual)','Stop SLA clock; update claim status to Resolved; notify team'],
+      lastRun:'Jul 11 09:47am', tags:['Resolution','LTCAS','Carrier','SLA']
+    },
+    {
+      id:'AGT-TR-002', group:'Triage Resolution', groupColor:'#059669', groupIcon:'fa-check-circle',
+      name:'Payment Authorization Agent',
+      desc:'Triggers benefit payment run for resolved claims. Validates payment amount against daily benefit rate, confirms provider W-9 on file, and posts payment to LTCAS disbursement queue.',
+      model:'LTCAS Payment Engine + W-9 Validator', triggers:['Resolve button (Triage Engine)','Process Payment button'], status:'Active',
+      avgTime:'< 3 min', successRate:'99.5%', runsToday:6,
+      steps:['Calculate payment: daily benefit × eligible days','Verify provider W-9 status and banking details','Confirm no outstanding fraud flags on claim','Post to LTCAS disbursement queue (ACH/EFT)','Send payment confirmation to claimant + provider + carrier'],
+      lastRun:'Jul 11 09:52am', tags:['Payment','LTCAS','Provider','Finance']
+    },
+    /* ── TRIAGE ESCALATION ── */
+    {
+      id:'AGT-TE-001', group:'Triage Escalation', groupColor:'#dc2626', groupIcon:'fa-arrow-circle-up',
+      name:'Clinical Escalation Agent',
+      desc:'Activates the full clinical escalation protocol when a claim is flagged CRITICAL or escalated by a care manager. Pages RN Supervisor, notifies carrier medical director, and locks the claim for single-reviewer mode.',
+      model:'Alert Engine + Paging System + LTCAS Lock API', triggers:['Escalate button (Triage Engine)'], status:'Active',
+      avgTime:'< 90 sec', successRate:'100%', runsToday:3,
+      steps:['Page assigned RN Supervisor via SMS + portal alert','Lock claim record — single-reviewer mode activated','Send emergency alert to carrier medical director (EDI)','Draft family notification letter (pending supervisor approval)','Schedule Clinical Director review within 2 hours'],
+      lastRun:'Jul 11 08:31am', tags:['Escalation','Clinical','Supervisor','Alert']
+    },
+    {
+      id:'AGT-TE-002', group:'Triage Escalation', groupColor:'#dc2626', groupIcon:'fa-arrow-circle-up',
+      name:'Hospice Transition Agent',
+      desc:'Triggered when ClinicalBERT detects hospice trajectory (confidence ≥ 85%) or a care manager initiates hospice referral. Coordinates with preferred Compassus network and initiates benefit period transition workflow.',
+      model:'ClinicalBERT + Hospice Network API', triggers:['Escalate button (Triage Engine — CRITICAL)'], status:'Active',
+      avgTime:'< 5 min', successRate:'96.4%', runsToday:1,
+      steps:['Confirm hospice trajectory score (ClinicalBERT output)','Identify preferred hospice provider (Compassus network)','Initiate hospice referral — send Level of Care order to physician','Notify carrier: transition from LTC benefit to hospice benefit','Brief family + claimant via care manager; update care plan'],
+      lastRun:'Jul 11 08:35am', tags:['Hospice','Clinical','ClinicalBERT','Carrier']
+    },
+    /* ── TRIAGE SCHEDULING ── */
+    {
+      id:'AGT-TS-001', group:'Assessment Scheduling', groupColor:'#7c3aed', groupIcon:'fa-calendar-check',
+      name:'RN Assessment Scheduler Agent',
+      desc:'Books RN or MSW assessments by checking real-time calendar availability, claimant time-zone, and SLA deadline. Sends SMS to claimant and email to RN and facility automatically.',
+      model:'Calendar API + Twilio SMS + Availability Optimizer', triggers:['Schedule button (Triage Engine)'], status:'Active',
+      avgTime:'< 60 sec', successRate:'99.1%', runsToday:11,
+      steps:['Query RN roster for availability within SLA window','Match RN specialty to claim type (SNF / Home Health / Memory Care)','Book appointment slot + 30-min documentation buffer','Send SMS to claimant: date, time, RN name, what to expect','Email RN + facility coordinator; add to shared care calendar'],
+      lastRun:'Jul 11 10:02am', tags:['Scheduling','RN','SMS','SLA']
+    },
+    {
+      id:'AGT-TS-002', group:'Assessment Scheduling', groupColor:'#7c3aed', groupIcon:'fa-calendar-check',
+      name:'SLA Watch Agent',
+      desc:'Continuously monitors open claims for SLA breach risk. Sends automated warnings at 72h, 24h, and 2h before breach. Escalates to supervisor if care manager does not acknowledge.',
+      model:'SLA Engine + Alert Rules', triggers:['Always-on · Continuous monitoring'], status:'Active',
+      avgTime:'Real-time', successRate:'98.3%', runsToday:47,
+      steps:['Poll all open claims every 15 minutes','Calculate time remaining to SLA breach for each claim','Send 72h warning to care manager (portal + email)','Send 24h warning + SMS if unacknowledged','Escalate to RN Supervisor at 2h mark if still unresolved'],
+      lastRun:'Jul 11 10:14am', tags:['SLA','Monitoring','Alert','Escalation']
+    }
+  ];
+
+  function _ltcAgentStatusBadge(status) {
+    var colors = { Active:'#059669', Paused:'#d97706', Draft:'#9ca3af' };
+    return '<span style="font-size:9px;font-weight:700;background:'+( colors[status]||'#9ca3af')+'22;color:'+(colors[status]||'#9ca3af')+';border:1px solid '+(colors[status]||'#9ca3af')+'44;border-radius:20px;padding:2px 8px;">'+status+'</span>';
+  }
+
+  function initLtcAiAgentsPage() {
+    var groups = {};
+    _ltcAgentCatalog.forEach(function(a){
+      if (!groups[a.group]) groups[a.group] = { color: a.groupColor, icon: a.groupIcon, agents: [] };
+      groups[a.group].agents.push(a);
+    });
+
+    var totalRuns = _ltcAgentCatalog.reduce(function(s,a){ return s+a.runsToday; }, 0);
+    var activeCount = _ltcAgentCatalog.filter(function(a){ return a.status==='Active'; }).length;
+
+    /* KPI bar */
+    var kpiHtml = '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;">'
+      +'<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;text-align:center;">'
+      +'<div style="font-size:28px;font-weight:900;color:#7c3aed;">'+_ltcAgentCatalog.length+'</div>'
+      +'<div style="font-size:11px;font-weight:700;color:#374151;margin-top:4px;">Total AI Agents</div>'
+      +'<div style="font-size:10px;color:#9ca3af;margin-top:2px;">4 functional domains</div></div>'
+      +'<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;text-align:center;">'
+      +'<div style="font-size:28px;font-weight:900;color:#059669;">'+activeCount+'</div>'
+      +'<div style="font-size:11px;font-weight:700;color:#374151;margin-top:4px;">Active Agents</div>'
+      +'<div style="font-size:10px;color:#9ca3af;margin-top:2px;">All systems operational</div></div>'
+      +'<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;text-align:center;">'
+      +'<div style="font-size:28px;font-weight:900;color:#0891b2;">'+totalRuns+'</div>'
+      +'<div style="font-size:11px;font-weight:700;color:#374151;margin-top:4px;">Runs Today</div>'
+      +'<div style="font-size:10px;color:#9ca3af;margin-top:2px;">Across all agents</div></div>'
+      +'<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;text-align:center;">'
+      +'<div style="font-size:28px;font-weight:900;color:#dc2626;">98.4%</div>'
+      +'<div style="font-size:11px;font-weight:700;color:#374151;margin-top:4px;">Avg Success Rate</div>'
+      +'<div style="font-size:10px;color:#9ca3af;margin-top:2px;">vs 72% manual benchmark</div></div>'
+      +'</div>';
+
+    /* win theme banner */
+    var bannerHtml = '<div style="background:linear-gradient(135deg,#0f172a,#1e293b);border-radius:14px;padding:20px 24px;margin-bottom:24px;display:flex;align-items:center;gap:18px;">'
+      +'<div style="width:48px;height:48px;background:linear-gradient(135deg,#7c3aed,#0891b2);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
+      +'<i class="fas fa-robot" style="color:#fff;font-size:22px;"></i></div>'
+      +'<div><div style="font-size:16px;font-weight:800;color:#fff;margin-bottom:5px;">illumifin HAL — AI Agent Network</div>'
+      +'<div style="font-size:12px;color:#94a3b8;line-height:1.6;">Every LTC Operations workflow is powered by a purpose-built AI agent. Agents operate autonomously on trigger events — claim submission, triage actions, SLA thresholds — executing multi-step workflows in seconds that previously required hours of manual effort. Each agent is auditable, configurable via SMARTS rules, and fully integrated with LTCAS, CellTrak, and carrier EDI channels.</div></div>'
+      +'</div>';
+
+    /* agent group sections */
+    var groupsHtml = Object.keys(groups).map(function(gName){
+      var g = groups[gName];
+      var agentCards = g.agents.map(function(a){
+        var tagHtml = a.tags.map(function(t){
+          return '<span style="font-size:9px;font-weight:700;background:#f1f5f9;color:#475569;border-radius:4px;padding:2px 6px;">'+t+'</span>';
+        }).join(' ');
+        var triggerHtml = a.triggers.map(function(t){
+          return '<span style="font-size:9px;font-weight:700;background:'+g.color+'11;color:'+g.color+';border:1px solid '+g.color+'33;border-radius:4px;padding:2px 6px;">⚡ '+t+'</span>';
+        }).join(' ');
+        return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:10px;">'
+          +'<div style="display:flex;align-items:flex-start;gap:12px;">'
+          +'<div style="width:38px;height:38px;background:'+g.color+'15;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
+          +'<i class="fas fa-robot" style="color:'+g.color+';font-size:16px;"></i></div>'
+          +'<div style="flex:1;min-width:0;">'
+          +'<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;">'
+          +'<span style="font-size:13px;font-weight:800;color:#111827;">'+a.name+'</span>'
+          +_ltcAgentStatusBadge(a.status)
+          +'<span style="font-size:10px;color:#9ca3af;margin-left:auto;">'+a.id+'</span>'
+          +'</div>'
+          +'<div style="font-size:11px;color:#6b7280;line-height:1.6;margin-bottom:8px;">'+a.desc+'</div>'
+          +'<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px;">'+triggerHtml+'</div>'
+          +'<div style="display:flex;gap:4px;flex-wrap:wrap;">'+tagHtml+'</div>'
+          +'</div></div>'
+          /* metrics strip */
+          +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">'
+          +'<div style="background:#f8fafc;border-radius:6px;padding:7px 10px;"><div style="font-size:9px;color:#9ca3af;font-weight:700;text-transform:uppercase;">Avg Time</div><div style="font-size:11px;font-weight:800;color:#111827;margin-top:1px;">'+a.avgTime+'</div></div>'
+          +'<div style="background:#f8fafc;border-radius:6px;padding:7px 10px;"><div style="font-size:9px;color:#9ca3af;font-weight:700;text-transform:uppercase;">Success</div><div style="font-size:11px;font-weight:800;color:#059669;margin-top:1px;">'+a.successRate+'</div></div>'
+          +'<div style="background:#f8fafc;border-radius:6px;padding:7px 10px;"><div style="font-size:9px;color:#9ca3af;font-weight:700;text-transform:uppercase;">Runs Today</div><div style="font-size:11px;font-weight:800;color:#111827;margin-top:1px;">'+a.runsToday+'</div></div>'
+          +'<div style="background:#f8fafc;border-radius:6px;padding:7px 10px;"><div style="font-size:9px;color:#9ca3af;font-weight:700;text-transform:uppercase;">Last Run</div><div style="font-size:11px;font-weight:800;color:#111827;margin-top:1px;">'+a.lastRun+'</div></div>'
+          +'</div>'
+          /* steps accordion trigger */
+          +'<div style="border-top:1px solid #f1f5f9;padding-top:10px;display:flex;gap:8px;">'
+          +'<button onclick="ltcAgentRunDemo(\''+a.id+'\')" style="background:'+g.color+';color:#fff;border:none;border-radius:7px;padding:7px 16px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;"><i class="fas fa-play"></i>Run Agent</button>'
+          +'<button onclick="ltcAgentShowSteps(\''+a.id+'\')" style="background:#f1f5f9;color:#374151;border:none;border-radius:7px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;"><i class="fas fa-list-check"></i>View Steps</button>'
+          +'<span style="font-size:10px;color:#9ca3af;margin-left:auto;align-self:center;"><i class="fas fa-microchip" style="margin-right:4px;"></i>'+a.model+'</span>'
+          +'</div>'
+          +'</div>';
+      }).join('');
+
+      return '<div style="margin-bottom:28px;">'
+        +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">'
+        +'<div style="width:32px;height:32px;background:'+g.color+'15;border-radius:8px;display:flex;align-items:center;justify-content:center;">'
+        +'<i class="fas '+g.icon+'" style="color:'+g.color+';font-size:14px;"></i></div>'
+        +'<div style="font-size:14px;font-weight:800;color:#111827;">'+gName+'</div>'
+        +'<div style="font-size:11px;color:#9ca3af;margin-left:4px;">'+g.agents.length+' agent'+(g.agents.length>1?'s':'')+'</div>'
+        +'<div style="flex:1;height:1px;background:#e5e7eb;margin-left:12px;"></div>'
+        +'</div>'
+        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">'+agentCards+'</div>'
+        +'</div>';
+    }).join('');
+
+    var html = '<div class="page" style="padding:24px;background:#f8fafc;min-height:100vh;">'
+      +'<div style="max-width:1100px;margin:0 auto;">'
+      + bannerHtml
+      + kpiHtml
+      + groupsHtml
+      +'</div></div>';
+
+    _ltcBuildPage('tpl-ltc-ai-agents', html);
+  }
+
+  /* ── Agent Step Viewer Modal ──────────────────────────────────────────── */
+  window.ltcAgentShowSteps = function(agentId) {
+    var a = _ltcAgentCatalog.find(function(x){ return x.id===agentId; });
+    if (!a) return;
+    var g = { color: a.groupColor, icon: a.groupIcon };
+    var stepsHtml = a.steps.map(function(s,i){
+      return '<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:#f8fafc;border-radius:8px;border:1px solid #e5e7eb;margin-bottom:7px;">'
+        +'<div style="width:22px;height:22px;background:'+g.color+'22;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;font-weight:800;color:'+g.color+';">'+(i+1)+'</div>'
+        +'<div style="font-size:12px;color:#374151;line-height:1.6;">'+s+'</div>'
+        +'</div>';
+    }).join('');
+    var html = '<div style="background:#fff;border-radius:16px;width:580px;max-height:80vh;overflow-y:auto;box-shadow:0 20px 50px rgba(0,0,0,.3);">'
+      +'<div style="background:linear-gradient(135deg,'+g.color+','+g.color+'bb);padding:18px 22px;border-radius:16px 16px 0 0;color:#fff;position:sticky;top:0;">'
+      +'<div style="display:flex;align-items:center;gap:10px;">'
+      +'<i class="fas fa-robot" style="font-size:18px;"></i>'
+      +'<div><div style="font-size:14px;font-weight:800;">'+a.name+'</div>'
+      +'<div style="font-size:10px;opacity:.8;">'+a.id+' · '+a.group+'</div></div>'
+      +'<button onclick="_L4close(\'ltc-agent-steps-ov\')" style="margin-left:auto;background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:7px;padding:5px 12px;cursor:pointer;font-size:12px;">✕</button>'
+      +'</div></div>'
+      +'<div style="padding:20px;">'
+      +'<div style="font-size:12px;color:#6b7280;line-height:1.6;margin-bottom:14px;background:#f8fafc;border-radius:8px;padding:12px;">'+a.desc+'</div>'
+      +'<div style="font-size:12px;font-weight:700;color:#111827;margin-bottom:10px;"><i class="fas fa-list-check" style="color:'+g.color+';margin-right:6px;"></i>Execution Steps ('+a.steps.length+')</div>'
+      + stepsHtml
+      +'<div style="background:#f0f4ff;border:1px solid #c7d2fe;border-radius:8px;padding:11px 13px;margin-top:12px;font-size:11px;color:#4338ca;">'
+      +'<i class="fas fa-microchip" style="margin-right:5px;"></i><strong>Model:</strong> '+a.model
+      +'</div></div></div>';
+    _L4overlay('ltc-agent-steps-ov', html);
+  };
+
+  /* ── Agent Live Run Demo Modal ────────────────────────────────────────── */
+  window.ltcAgentRunDemo = function(agentId) {
+    var a = _ltcAgentCatalog.find(function(x){ return x.id===agentId; });
+    if (!a) return;
+    var g = { color: a.groupColor };
+    var stepsHtml = a.steps.map(function(s,i){
+      return '<div id="ltc-ard-step-'+agentId.replace(/[^a-z0-9]/gi,'_')+'-'+i+'" style="display:flex;align-items:flex-start;gap:10px;padding:9px 12px;background:#f8fafc;border:1px solid #e5e7eb;border-radius:8px;margin-bottom:6px;">'
+        +'<div class="ltc-ard-icon" style="width:22px;height:22px;background:#e5e7eb;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;font-weight:800;color:#64748b;">'+(i+1)+'</div>'
+        +'<div style="font-size:12px;color:#374151;line-height:1.5;flex:1;">'+s+'</div>'
+        +'<div class="ltc-ard-st" id="ltc-ard-st-'+agentId.replace(/[^a-z0-9]/gi,'_')+'-'+i+'" style="font-size:10px;color:#9ca3af;flex-shrink:0;margin-top:2px;">Queued</div>'
+        +'</div>';
+    }).join('');
+    var safeId = agentId.replace(/[^a-z0-9]/gi,'_');
+    var html = '<div style="background:#fff;border-radius:16px;width:600px;max-height:84vh;overflow-y:auto;box-shadow:0 20px 50px rgba(0,0,0,.3);">'
+      +'<div style="background:linear-gradient(135deg,#0f172a,#1e293b);padding:18px 22px;border-radius:16px 16px 0 0;color:#fff;position:sticky;top:0;">'
+      +'<div style="display:flex;align-items:center;gap:10px;">'
+      +'<div style="width:34px;height:34px;background:'+g.color+';border-radius:8px;display:flex;align-items:center;justify-content:center;"><i class="fas fa-robot" style="font-size:16px;"></i></div>'
+      +'<div><div style="font-size:14px;font-weight:800;">Live Agent Run — '+a.name+'</div>'
+      +'<div style="font-size:10px;color:#94a3b8;">'+a.id+' · Avg: '+a.avgTime+' · Success rate: '+a.successRate+'</div></div>'
+      +'<button onclick="_L4close(\'ltc-agent-run-ov\')" style="margin-left:auto;background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:7px;padding:5px 12px;cursor:pointer;font-size:12px;">✕</button>'
+      +'</div></div>'
+      +'<div style="padding:20px;">'
+      +'<div style="background:linear-gradient(135deg,'+g.color+'0d,'+g.color+'18);border:1.5px solid '+g.color+'33;border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:11px;color:#374151;line-height:1.6;">'
+      +'<i class="fas fa-info-circle" style="color:'+g.color+';margin-right:6px;"></i>'+a.desc+'</div>'
+      +'<div style="font-size:12px;font-weight:700;color:#111827;margin-bottom:10px;"><i class="fas fa-list-check" style="color:'+g.color+';margin-right:6px;"></i>Execution Plan ('+a.steps.length+' steps)</div>'
+      + stepsHtml
+      +'<div id="ltc-ard-result-'+safeId+'" style="display:none;margin-top:12px;"></div>'
+      +'<div id="ltc-ard-btns-'+safeId+'" style="display:flex;gap:8px;margin-top:14px;">'
+      +'<button onclick="ltcAgentExecSteps(\''+agentId+'\')" style="background:'+g.color+';color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:12px;font-weight:700;cursor:pointer;flex:1;"><i class="fas fa-play" style="margin-right:6px;"></i>Execute Agent</button>'
+      +'<button onclick="_L4close(\'ltc-agent-run-ov\')" style="background:#f1f5f9;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:600;cursor:pointer;">Cancel</button>'
+      +'</div></div></div>';
+    _L4overlay('ltc-agent-run-ov', html);
+  };
+
+  window.ltcAgentExecSteps = function(agentId) {
+    var a = _ltcAgentCatalog.find(function(x){ return x.id===agentId; });
+    if (!a) return;
+    var safeId = agentId.replace(/[^a-z0-9]/gi,'_');
+    var runBtn = document.querySelector('#ltc-ard-btns-'+safeId+' button');
+    if (runBtn) { runBtn.disabled=true; runBtn.innerHTML='<i class="fas fa-spinner fa-spin" style="margin-right:6px;"></i>Running…'; }
+    var i=0;
+    function runNext(){
+      if(i>=a.steps.length){
+        var res=document.getElementById('ltc-ard-result-'+safeId);
+        if(res){ res.style.display='block'; res.innerHTML='<div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:12px 16px;font-size:12px;font-weight:700;color:#059669;"><i class="fas fa-check-double" style="margin-right:8px;"></i>Agent completed successfully — all '+a.steps.length+' steps executed · '+a.successRate+' success rate · Logged to audit trail</div>'; }
+        var bArea=document.getElementById('ltc-ard-btns-'+safeId);
+        if(bArea){ bArea.innerHTML='<button onclick="_L4close(\'ltc-agent-run-ov\')" style="background:'+a.groupColor+';color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:12px;font-weight:700;cursor:pointer;flex:1;">Done — Close</button>'; }
+        _L4toast('<i class="fas fa-robot"></i> '+a.name+' completed — '+a.steps.length+' steps executed · Audit logged · '+a.successRate+' success', 4000);
+        return;
+      }
+      var stepEl=document.getElementById('ltc-ard-step-'+safeId+'-'+i);
+      var stEl=document.getElementById('ltc-ard-st-'+safeId+'-'+i);
+      var iconEl=stepEl?stepEl.querySelector('.ltc-ard-icon'):null;
+      if(stepEl){stepEl.style.background='#fffbeb';stepEl.style.borderColor='#fde68a';}
+      if(stEl){stEl.style.color='#d97706';stEl.textContent='Running…';}
+      if(iconEl){iconEl.style.background=a.groupColor;iconEl.style.color='#fff';iconEl.innerHTML='<i class="fas fa-spinner fa-spin" style="font-size:8px;"></i>';}
+      setTimeout(function(){
+        if(stepEl){stepEl.style.background='#f0fdf4';stepEl.style.borderColor='#bbf7d0';}
+        if(stEl){stEl.style.color='#059669';stEl.textContent='Done ✓';}
+        if(iconEl){iconEl.innerHTML='✓';iconEl.style.background='#059669';}
+        i++; setTimeout(runNext,280);
+      }, 600+Math.random()*500);
+    }
+    setTimeout(runNext,200);
+  };
+
+  /* ── Post-Submission Agent Workflow (Submit Claim button) ─────────────── */
+  window.ltcNcSubmit = function() {
+    var claimId = 'LTC-2026-0109';
+    var claimant = 'Eleanor Vasquez';
+    var carrier = 'Prudential';
+    var daily = '$195/day';
+
+    var postSubmitAgents = [
+      { id:'AGT-NC-001', name:'HIPAA Authorization Agent',       icon:'fa-file-signature', color:'#dc2626',  time:'< 90 sec',  detail:'HIPAA Auth Form 164 generated & sent to '+claimant+' via DocuSign. E-signature link valid 72 hours.' },
+      { id:'AGT-NC-002', name:'APS Request Agent',               icon:'fa-fax',            color:'#d97706',  time:'< 2 min',   detail:'APS request faxed to Dr. Anna Kessler (NPI: 1234567890) at St. Luke\'s Medical Center. 5-day response window set.' },
+      { id:'AGT-NC-003', name:'RN Assignment Agent',             icon:'fa-user-nurse',     color:'#0891b2',  time:'< 30 sec',  detail:'Case manager assigned: Sarah Johnson, RN. First contact SLA: 2 business days. Portal notification sent.' },
+      { id:'AGT-NC-004', name:'Carrier Notification Agent',      icon:'fa-building',       color:'#7c3aed',  time:'< 45 sec',  detail:'Statutory acknowledgment sent to '+carrier+' EDI endpoint. Claim ID '+claimId+' confirmed. Regulatory log updated.' },
+      { id:'AGT-NC-005', name:'SMARTS SR-004 Fraud Pre-Screen',  icon:'fa-shield-halved',  color:'#059669',  time:'< 60 sec',  detail:'Fraud score: 12/100 — Clear. SR-001 to SR-005 all passed. STP adjudication approved. LTCAS posting queued.' }
+    ];
+
+    /* Close intake wizard */
+    var ov = document.getElementById('ltc-newclaim-overlay'); if(ov) ov.remove();
+
+    var stepRows = postSubmitAgents.map(function(ag,i){
+      return '<div id="ltcps-step-'+i+'" style="display:flex;align-items:flex-start;gap:12px;padding:10px 14px;background:#f8fafc;border:1px solid #e5e7eb;border-radius:9px;margin-bottom:8px;">'
+        +'<div style="width:34px;height:34px;background:'+ag.color+'15;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
+        +'<i id="ltcps-icon-'+i+'" class="fas '+ag.icon+'" style="color:'+ag.color+';font-size:15px;"></i></div>'
+        +'<div style="flex:1;">'
+        +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;">'
+        +'<span style="font-size:12px;font-weight:700;color:#111827;">'+ag.name+'</span>'
+        +'<span style="font-size:9px;color:#9ca3af;">'+ag.id+'</span>'
+        +'<span id="ltcps-badge-'+i+'" style="margin-left:auto;font-size:9px;font-weight:700;background:#f1f5f9;color:#9ca3af;border-radius:20px;padding:2px 8px;">Queued</span>'
+        +'</div>'
+        +'<div id="ltcps-detail-'+i+'" style="font-size:11px;color:#6b7280;line-height:1.5;">Expected completion: '+ag.time+'</div>'
+        +'</div></div>';
+    }).join('');
+
+    var modalHtml = '<div style="background:#fff;border-radius:16px;width:660px;max-height:88vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.35);">'
+      +'<div style="background:linear-gradient(135deg,#059669,#047857);padding:18px 22px;border-radius:16px 16px 0 0;color:#fff;position:sticky;top:0;z-index:2;">'
+      +'<div style="display:flex;align-items:center;gap:12px;">'
+      +'<i class="fas fa-check-circle" style="font-size:22px;"></i>'
+      +'<div><div style="font-size:15px;font-weight:800;">Claim Submitted — AI Agents Executing</div>'
+      +'<div style="font-size:11px;opacity:.8;">'+claimId+' · '+claimant+' · '+carrier+' · '+daily+'</div></div>'
+      +'<button onclick="_L4close(\'ltc-postsubmit-ov\')" style="margin-left:auto;background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:8px;padding:5px 12px;cursor:pointer;font-size:12px;">✕ Close</button>'
+      +'</div></div>'
+      +'<div style="padding:20px 22px;">'
+      /* HAL agent intro */
+      +'<div style="background:linear-gradient(135deg,#0f172a,#1e293b);border-radius:12px;padding:14px 16px;margin-bottom:16px;display:flex;gap:12px;align-items:flex-start;">'
+      +'<div style="width:36px;height:36px;background:#059669;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
+      +'<i class="fas fa-robot" style="color:#fff;font-size:16px;"></i></div>'
+      +'<div><div style="font-size:12px;font-weight:700;color:#a78bfa;margin-bottom:4px;">illumifin HAL — Post-Submission Orchestrator</div>'
+      +'<div style="font-size:11px;color:#cbd5e1;line-height:1.6;">Claim '+claimId+' has been submitted. I am now orchestrating 5 AI agents in parallel to complete the post-submission workflow. Each agent executes autonomously — HIPAA authorization, APS request, care manager assignment, carrier notification, and SMARTS fraud pre-screen will all complete within 3 minutes.</div>'
+      +'</div></div>'
+      /* claim summary strip */
+      +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;">'
+      +'<div style="background:#f0fdf4;border-radius:8px;padding:9px 11px;"><div style="font-size:9px;color:#059669;font-weight:700;text-transform:uppercase;">Claim ID</div><div style="font-size:12px;font-weight:800;color:#111827;margin-top:1px;">'+claimId+'</div></div>'
+      +'<div style="background:#eff6ff;border-radius:8px;padding:9px 11px;"><div style="font-size:9px;color:#1d4ed8;font-weight:700;text-transform:uppercase;">Carrier</div><div style="font-size:12px;font-weight:800;color:#111827;margin-top:1px;">'+carrier+'</div></div>'
+      +'<div style="background:#fdf4ff;border-radius:8px;padding:9px 11px;"><div style="font-size:9px;color:#7c3aed;font-weight:700;text-transform:uppercase;">Daily Benefit</div><div style="font-size:12px;font-weight:800;color:#111827;margin-top:1px;">'+daily+'</div></div>'
+      +'</div>'
+      +'<div style="font-size:12px;font-weight:700;color:#111827;margin-bottom:10px;"><i class="fas fa-robot" style="color:#059669;margin-right:6px;"></i>Post-Submission Workflow — 5 AI Agents</div>'
+      + stepRows
+      +'<div id="ltcps-result" style="display:none;margin-top:12px;"></div>'
+      +'<div id="ltcps-btns" style="display:flex;gap:8px;margin-top:14px;">'
+      +'<button onclick="ltcNcRunPostSubmit()" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:12px;font-weight:700;cursor:pointer;flex:1;" id="ltcps-run-btn"><i class="fas fa-play" style="margin-right:6px;"></i>Start AI Agent Workflow</button>'
+      +'<button onclick="_L4close(\'ltc-postsubmit-ov\')" style="background:#f1f5f9;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:600;cursor:pointer;">Close</button>'
+      +'</div></div></div>';
+
+    _L4overlay('ltc-postsubmit-ov', modalHtml);
+  };
+
+  window._p8ncSubmit = window.ltcNcSubmit;
+
+  window.ltcNcRunPostSubmit = function() {
+    var agentColors = ['#dc2626','#d97706','#0891b2','#7c3aed','#059669'];
+    var agentDetails = [
+      'HIPAA Auth Form 164 generated & sent to Eleanor Vasquez via DocuSign. E-signature link valid 72 hours.',
+      'APS request faxed to Dr. Anna Kessler (NPI: 1234567890) at St. Luke\'s Medical Center. 5-day response window set.',
+      'Case manager assigned: Sarah Johnson, RN. First contact SLA: 2 business days. Portal notification sent.',
+      'Statutory acknowledgment sent to Prudential EDI endpoint. Claim ID LTC-2026-0109 confirmed. Regulatory log updated.',
+      'Fraud score: 12/100 — Clear. SR-001 to SR-005 all passed. STP adjudication approved. LTCAS posting queued.'
+    ];
+    var runBtn = document.getElementById('ltcps-run-btn');
+    if(runBtn){ runBtn.disabled=true; runBtn.innerHTML='<i class="fas fa-spinner fa-spin" style="margin-right:6px;"></i>Agents Running…'; }
+    var i=0;
+    function runNext(){
+      if(i>=5){
+        var res=document.getElementById('ltcps-result');
+        if(res){ res.style.display='block'; res.innerHTML='<div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:14px 16px;font-size:12px;font-weight:700;color:#059669;"><i class="fas fa-check-double" style="margin-right:8px;font-size:14px;"></i>Post-Submission Workflow Complete — All 5 AI agents executed successfully · Claim LTC-2026-0109 is now ACTIVE · First benefit payment estimated Aug 1, 2026</div>'; }
+        var bArea=document.getElementById('ltcps-btns');
+        if(bArea){ bArea.innerHTML='<button onclick="navigateTo(\'ltc-ai-agents\')" style="background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:12px;font-weight:700;cursor:pointer;"><i class=\"fas fa-robot\" style=\"margin-right:6px;\"></i>View AI Agents</button><button onclick="_L4close(\'ltc-postsubmit-ov\')" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:12px;font-weight:700;cursor:pointer;">Done</button>'; }
+        _L4toast('<i class="fas fa-check-circle"></i> LTC-2026-0109 post-submission complete · 5 agents executed · HIPAA ✓ · APS ✓ · RN Assigned ✓ · Carrier Notified ✓ · Fraud Clear ✓', 6000);
+        return;
+      }
+      var stepEl=document.getElementById('ltcps-step-'+i);
+      var badge=document.getElementById('ltcps-badge-'+i);
+      var detail=document.getElementById('ltcps-detail-'+i);
+      var iconEl=document.getElementById('ltcps-icon-'+i);
+      if(stepEl){stepEl.style.background='#fffbeb';stepEl.style.borderColor='#fde68a';}
+      if(badge){badge.style.background='#fef3c7';badge.style.color='#d97706';badge.textContent='Running…';}
+      setTimeout(function(){
+        if(stepEl){stepEl.style.background='#f0fdf4';stepEl.style.borderColor='#bbf7d0';}
+        if(badge){badge.style.background='#dcfce7';badge.style.color='#059669';badge.textContent='Done ✓';}
+        if(iconEl){iconEl.style.color='#059669';}
+        if(detail){detail.style.color='#059669';detail.textContent=agentDetails[i];}
+        i++; setTimeout(runNext,350);
+      }, 800+Math.random()*600);
+    }
+    setTimeout(runNext,300);
+  };
+
   window.ltcRunAiTriage        = ltcRunAiTriage;
   window.ltcNewClaim           = ltcNewClaim;
+  window.initLtcAiAgentsPage   = initLtcAiAgentsPage;
   window.ltcCarePlanAction     = ltcCarePlanAction;
   window.ltcRunAiCareAlert     = ltcRunAiCareAlert;
   window.ltcNewCarePlan        = ltcNewCarePlan;
@@ -67467,10 +67889,7 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
     var ov = document.getElementById('ltc-newclaim-overlay');
     if (ov) ov.innerHTML = _ncBuildStep(_ncStep);
   };
-  window.ltcNcSubmit = function() {
-    _L4close('ltc-newclaim-overlay');
-    _L4toast('<i class="fas fa-check-circle"></i> New LTC Claim LTC-2026-0109 submitted · Eleanor Vasquez · Prudential · $195/day · AI-approved · Carrier notified electronically · Care manager Sarah Johnson, RN assigned', 6000);
-  };
+  // ltcNcSubmit override suppressed — new modal version at line 65772 / restored by P26 fix block
 
   /* ═══════════════════════════════════════════════════════════════════════
      ENHANCED CLAIM DETAIL — full functional popup matching uploaded image
@@ -68153,7 +68572,7 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
   window.halOpenPolicyDetail       = halOpenPolicyDetail;
   window.ltcNcNext                 = ltcNcNext;
   window.ltcNcBack                 = ltcNcBack;
-  window.ltcNcSubmit               = ltcNcSubmit;
+  // window.ltcNcSubmit = ltcNcSubmit; // suppressed — new modal version handles submission
   window.ltcClaimTab               = ltcClaimTab;
   window.ltcDetailAction           = ltcDetailAction;
   window.ltcTriageAction           = ltcTriageAction;
@@ -71978,14 +72397,11 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
     var ov = document.getElementById('ltc-newclaim-overlay');
     if (ov) ov.innerHTML = _p8ncBuild(_p8ncStep);
   };
-  window._p8ncSubmit = function() {
-    var ov = document.getElementById('ltc-newclaim-overlay'); if(ov)ov.remove();
-    _p8toast('<i class="fas fa-check-circle"></i> New LTC Claim LTC-2026-0109 submitted · Eleanor Vasquez · Prudential · $195/day · AI-approved · SMARTS SR-001–005 passed · Carrier notified electronically · Care manager Sarah Johnson, RN assigned', 6000);
-  };
+  // _p8ncSubmit toast suppressed — new modal version at window.ltcNcSubmit (line 65772) is canonical
   /* Also export the nav functions under ltcNcNext/Back for compatibility */
   window.ltcNcNext = window._p8ncNext;
   window.ltcNcBack = window._p8ncBack;
-  window.ltcNcSubmit = window._p8ncSubmit;
+  // window.ltcNcSubmit = window._p8ncSubmit; // suppressed — P26 fix block restores correct modal version
 
   /* ─────────────────────────────────────────────────────────────────────
      5. SMARTS RULE EDITOR — full overlay (replaces _p7editRule toast)
@@ -86016,5 +86432,156 @@ var navigateTo=window.navigateTo;
   }
 
   console.log('[P26 Persona] Switcher loaded — modes: all / carrier / tpa');
+})();
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   P27 — AI AGENTS NAV INJECTION + SUBMIT CLAIM MODAL RESTORE
+   Runs last so it wins over all earlier overrides.
+═══════════════════════════════════════════════════════════════════════════ */
+(function() {
+  'use strict';
+
+  /* ── 1. Restore canonical ltcNcSubmit (new modal, not old toast) ───────── */
+  function _p27RestoreSubmit() {
+    if (typeof window._p26ncSubmitModal === 'function') {
+      window.ltcNcSubmit = window._p26ncSubmitModal;
+    } else if (typeof window._ltcNcSubmitModal === 'function') {
+      window.ltcNcSubmit = window._ltcNcSubmitModal;
+    } else {
+      // Re-define inline so it always works regardless of alias state
+      window.ltcNcSubmit = function() {
+        var ov = document.getElementById('ltc-newclaim-overlay');
+        if (ov) ov.remove();
+
+        var agents = [
+          { id:'AGT-NC-001', name:'HIPAA Auth Agent',     icon:'fa-shield-halved',  color:'#7c3aed', desc:'Generates & routes HIPAA Authorization form via DocuSign to Carlos Vasquez' },
+          { id:'AGT-NC-002', name:'APS Request Agent',    icon:'fa-file-medical',   color:'#0891b2', desc:'Faxes Attending Physician Statement request to Dr. Anna Kessler (NPI: 1234567890)' },
+          { id:'AGT-NC-003', name:'RN Assessment Agent',  icon:'fa-user-nurse',     color:'#059669', desc:'Schedules RN Assessment & assigns care manager within 2 business days' },
+          { id:'AGT-NC-004', name:'Carrier Notify Agent', icon:'fa-building-columns',color:'#dc2626',desc:'Sends statutory acknowledgment letter to Prudential within 24 hours' },
+          { id:'AGT-NC-005', name:'SMARTS Fraud Agent',   icon:'fa-radar',          color:'#d97706', desc:'Runs SMARTS SR-004 fraud pre-screen automatically' }
+        ];
+
+        var stepsHtml = agents.map(function(a, i) {
+          return '<div id="p27-step-'+i+'" style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:8px;background:#f8fafc;border:1px solid #e2e8f0;margin-bottom:8px;">'
+            + '<div style="width:36px;height:36px;border-radius:50%;background:'+a.color+';display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
+            + '<i class="fas '+a.icon+'" style="color:#fff;font-size:14px;"></i></div>'
+            + '<div style="flex:1;min-width:0;">'
+            + '<div style="font-size:12px;font-weight:700;color:#1e293b;">'+a.id+' · '+a.name+'</div>'
+            + '<div style="font-size:11px;color:#64748b;margin-top:2px;">'+a.desc+'</div></div>'
+            + '<div id="p27-status-'+i+'" style="font-size:11px;font-weight:700;color:#94a3b8;white-space:nowrap;">QUEUED</div>'
+            + '</div>';
+        }).join('');
+
+        var modal = '<div style="position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;">'
+          + '<div style="background:#fff;border-radius:16px;padding:28px 28px 24px;width:min(600px,95vw);max-height:90vh;overflow-y:auto;box-shadow:0 25px 60px rgba(0,0,0,0.4);">'
+          + '<div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;">'
+          + '<div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#7c3aed,#0891b2);display:flex;align-items:center;justify-content:center;">'
+          + '<i class="fas fa-robot" style="color:#fff;font-size:22px;"></i></div>'
+          + '<div><div style="font-size:17px;font-weight:800;color:#1e293b;">HAL Orchestration Engine</div>'
+          + '<div style="font-size:12px;color:#7c3aed;font-weight:600;">Post-Submission AI Workflow — LTC-2026-0109 · Eleanor Vasquez</div></div>'
+          + '<button onclick="document.getElementById(\'p27-postsubmit-ov\').remove()" style="margin-left:auto;background:#f1f5f9;border:none;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:16px;color:#64748b;">&times;</button>'
+          + '</div>'
+          + '<div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1px solid #86efac;border-radius:10px;padding:12px 16px;margin-bottom:18px;font-size:12px;color:#166534;">'
+          + '<i class="fas fa-check-circle" style="margin-right:6px;"></i>'
+          + '<strong>Claim LTC-2026-0109 submitted successfully.</strong> 5 AI agents are executing post-submission workflow steps.'
+          + '</div>'
+          + '<div id="p27-agent-steps">'+stepsHtml+'</div>'
+          + '<div id="p27-done-bar" style="display:none;margin-top:16px;padding:12px 16px;border-radius:10px;background:linear-gradient(135deg,#7c3aed,#0891b2);color:#fff;font-size:13px;font-weight:700;text-align:center;">'
+          + '<i class="fas fa-check-double" style="margin-right:8px;"></i>All 5 agents completed — claim is fully in-flight!'
+          + '</div>'
+          + '</div></div>';
+
+        var wrapper = document.createElement('div');
+        wrapper.id = 'p27-postsubmit-ov';
+        wrapper.innerHTML = modal;
+        document.body.appendChild(wrapper);
+
+        // Animate each agent step sequentially
+        var delays = [600, 1400, 2300, 3300, 4400];
+        agents.forEach(function(a, i) {
+          var statusEl = document.getElementById('p27-status-'+i);
+          var stepEl   = document.getElementById('p27-step-'+i);
+          // Mark running
+          setTimeout(function() {
+            if (!statusEl || !stepEl) return;
+            statusEl.textContent = 'RUNNING…';
+            statusEl.style.color = '#0891b2';
+            stepEl.style.border  = '1px solid #bae6fd';
+            stepEl.style.background = '#f0f9ff';
+          }, delays[i]);
+          // Mark done
+          setTimeout(function() {
+            if (!statusEl || !stepEl) return;
+            statusEl.innerHTML = '<i class="fas fa-check-circle" style="color:#059669;margin-right:3px;"></i>DONE';
+            statusEl.style.color = '#059669';
+            stepEl.style.border  = '1px solid #bbf7d0';
+            stepEl.style.background = '#f0fdf4';
+            if (i === agents.length - 1) {
+              var bar = document.getElementById('p27-done-bar');
+              if (bar) bar.style.display = 'block';
+            }
+          }, delays[i] + 700);
+        });
+      };
+    }
+  }
+
+  /* ── 2. Inject AI Agents nav item into sidebar DOM ─────────────────────── */
+  function _p27InjectAiAgentsNav() {
+    // Guard: don't inject twice
+    if (document.querySelector('.ltc-ai-agents-nav')) return;
+
+    // Find the anchor element to insert after
+    var anchor = document.querySelector('.ltc-arch-nav');
+    if (!anchor) {
+      // Fallback: look for the LTC Operations nav group
+      anchor = document.querySelector('[onclick*="ltc-system-arch"]') ||
+               document.querySelector('[onclick*="systemArchitecture"]');
+    }
+    if (!anchor) return;
+
+    var el = document.createElement('a');
+    el.className   = 'nav-item ltc-ai-agents-nav nav-grp-tpa';
+    el.href        = '#';
+    el.setAttribute('onclick', "navigateTo('ltc-ai-agents'); return false;");
+    el.innerHTML   =
+      '<i class="fas fa-robot"></i>'
+      + '<span>AI Agents</span>'
+      + '<span class="nav-badge" style="background:linear-gradient(135deg,#7c3aed,#0891b2);color:#fff;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;">12</span>';
+
+    // Insert immediately after the anchor element
+    if (anchor.nextSibling) {
+      anchor.parentNode.insertBefore(el, anchor.nextSibling);
+    } else {
+      anchor.parentNode.appendChild(el);
+    }
+
+    // Re-apply persona visibility so the new item obeys TPA/carrier/all rules
+    if (typeof applyPersonaMode === 'function') {
+      var saved = localStorage.getItem('nyl-persona') || 'all';
+      applyPersonaMode(saved);
+    } else if (typeof window._p26applyPersona === 'function') {
+      var saved2 = localStorage.getItem('nyl-persona') || 'all';
+      window._p26applyPersona(saved2);
+    }
+  }
+
+  /* ── 3. Init: run after DOM is ready ────────────────────────────────────── */
+  function _p27init() {
+    _p27RestoreSubmit();
+    // Nav injection: try immediately, then retry to catch late renders
+    _p27InjectAiAgentsNav();
+    setTimeout(_p27InjectAiAgentsNav, 500);
+    setTimeout(_p27InjectAiAgentsNav, 1200);
+    setTimeout(_p27InjectAiAgentsNav, 2500);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _p27init);
+  } else {
+    setTimeout(_p27init, 100);
+  }
+
+  console.log('[P27 Fix] ltcNcSubmit modal restored + AI Agents nav injection scheduled');
 })();
 

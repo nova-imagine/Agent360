@@ -67889,10 +67889,7 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
     var ov = document.getElementById('ltc-newclaim-overlay');
     if (ov) ov.innerHTML = _ncBuildStep(_ncStep);
   };
-  window.ltcNcSubmit = function() {
-    _L4close('ltc-newclaim-overlay');
-    _L4toast('<i class="fas fa-check-circle"></i> New LTC Claim LTC-2026-0109 submitted · Eleanor Vasquez · Prudential · $195/day · AI-approved · Carrier notified electronically · Care manager Sarah Johnson, RN assigned', 6000);
-  };
+  // ltcNcSubmit override suppressed — new modal version at line 65772 / restored by P26 fix block
 
   /* ═══════════════════════════════════════════════════════════════════════
      ENHANCED CLAIM DETAIL — full functional popup matching uploaded image
@@ -68575,7 +68572,7 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
   window.halOpenPolicyDetail       = halOpenPolicyDetail;
   window.ltcNcNext                 = ltcNcNext;
   window.ltcNcBack                 = ltcNcBack;
-  window.ltcNcSubmit               = ltcNcSubmit;
+  // window.ltcNcSubmit = ltcNcSubmit; // suppressed — new modal version handles submission
   window.ltcClaimTab               = ltcClaimTab;
   window.ltcDetailAction           = ltcDetailAction;
   window.ltcTriageAction           = ltcTriageAction;
@@ -72400,14 +72397,11 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
     var ov = document.getElementById('ltc-newclaim-overlay');
     if (ov) ov.innerHTML = _p8ncBuild(_p8ncStep);
   };
-  window._p8ncSubmit = function() {
-    var ov = document.getElementById('ltc-newclaim-overlay'); if(ov)ov.remove();
-    _p8toast('<i class="fas fa-check-circle"></i> New LTC Claim LTC-2026-0109 submitted · Eleanor Vasquez · Prudential · $195/day · AI-approved · SMARTS SR-001–005 passed · Carrier notified electronically · Care manager Sarah Johnson, RN assigned', 6000);
-  };
+  // _p8ncSubmit toast suppressed — new modal version at window.ltcNcSubmit (line 65772) is canonical
   /* Also export the nav functions under ltcNcNext/Back for compatibility */
   window.ltcNcNext = window._p8ncNext;
   window.ltcNcBack = window._p8ncBack;
-  window.ltcNcSubmit = window._p8ncSubmit;
+  // window.ltcNcSubmit = window._p8ncSubmit; // suppressed — P26 fix block restores correct modal version
 
   /* ─────────────────────────────────────────────────────────────────────
      5. SMARTS RULE EDITOR — full overlay (replaces _p7editRule toast)
@@ -86438,5 +86432,156 @@ var navigateTo=window.navigateTo;
   }
 
   console.log('[P26 Persona] Switcher loaded — modes: all / carrier / tpa');
+})();
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   P27 — AI AGENTS NAV INJECTION + SUBMIT CLAIM MODAL RESTORE
+   Runs last so it wins over all earlier overrides.
+═══════════════════════════════════════════════════════════════════════════ */
+(function() {
+  'use strict';
+
+  /* ── 1. Restore canonical ltcNcSubmit (new modal, not old toast) ───────── */
+  function _p27RestoreSubmit() {
+    if (typeof window._p26ncSubmitModal === 'function') {
+      window.ltcNcSubmit = window._p26ncSubmitModal;
+    } else if (typeof window._ltcNcSubmitModal === 'function') {
+      window.ltcNcSubmit = window._ltcNcSubmitModal;
+    } else {
+      // Re-define inline so it always works regardless of alias state
+      window.ltcNcSubmit = function() {
+        var ov = document.getElementById('ltc-newclaim-overlay');
+        if (ov) ov.remove();
+
+        var agents = [
+          { id:'AGT-NC-001', name:'HIPAA Auth Agent',     icon:'fa-shield-halved',  color:'#7c3aed', desc:'Generates & routes HIPAA Authorization form via DocuSign to Carlos Vasquez' },
+          { id:'AGT-NC-002', name:'APS Request Agent',    icon:'fa-file-medical',   color:'#0891b2', desc:'Faxes Attending Physician Statement request to Dr. Anna Kessler (NPI: 1234567890)' },
+          { id:'AGT-NC-003', name:'RN Assessment Agent',  icon:'fa-user-nurse',     color:'#059669', desc:'Schedules RN Assessment & assigns care manager within 2 business days' },
+          { id:'AGT-NC-004', name:'Carrier Notify Agent', icon:'fa-building-columns',color:'#dc2626',desc:'Sends statutory acknowledgment letter to Prudential within 24 hours' },
+          { id:'AGT-NC-005', name:'SMARTS Fraud Agent',   icon:'fa-radar',          color:'#d97706', desc:'Runs SMARTS SR-004 fraud pre-screen automatically' }
+        ];
+
+        var stepsHtml = agents.map(function(a, i) {
+          return '<div id="p27-step-'+i+'" style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:8px;background:#f8fafc;border:1px solid #e2e8f0;margin-bottom:8px;">'
+            + '<div style="width:36px;height:36px;border-radius:50%;background:'+a.color+';display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
+            + '<i class="fas '+a.icon+'" style="color:#fff;font-size:14px;"></i></div>'
+            + '<div style="flex:1;min-width:0;">'
+            + '<div style="font-size:12px;font-weight:700;color:#1e293b;">'+a.id+' · '+a.name+'</div>'
+            + '<div style="font-size:11px;color:#64748b;margin-top:2px;">'+a.desc+'</div></div>'
+            + '<div id="p27-status-'+i+'" style="font-size:11px;font-weight:700;color:#94a3b8;white-space:nowrap;">QUEUED</div>'
+            + '</div>';
+        }).join('');
+
+        var modal = '<div style="position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;">'
+          + '<div style="background:#fff;border-radius:16px;padding:28px 28px 24px;width:min(600px,95vw);max-height:90vh;overflow-y:auto;box-shadow:0 25px 60px rgba(0,0,0,0.4);">'
+          + '<div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;">'
+          + '<div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#7c3aed,#0891b2);display:flex;align-items:center;justify-content:center;">'
+          + '<i class="fas fa-robot" style="color:#fff;font-size:22px;"></i></div>'
+          + '<div><div style="font-size:17px;font-weight:800;color:#1e293b;">HAL Orchestration Engine</div>'
+          + '<div style="font-size:12px;color:#7c3aed;font-weight:600;">Post-Submission AI Workflow — LTC-2026-0109 · Eleanor Vasquez</div></div>'
+          + '<button onclick="document.getElementById(\'p27-postsubmit-ov\').remove()" style="margin-left:auto;background:#f1f5f9;border:none;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:16px;color:#64748b;">&times;</button>'
+          + '</div>'
+          + '<div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1px solid #86efac;border-radius:10px;padding:12px 16px;margin-bottom:18px;font-size:12px;color:#166534;">'
+          + '<i class="fas fa-check-circle" style="margin-right:6px;"></i>'
+          + '<strong>Claim LTC-2026-0109 submitted successfully.</strong> 5 AI agents are executing post-submission workflow steps.'
+          + '</div>'
+          + '<div id="p27-agent-steps">'+stepsHtml+'</div>'
+          + '<div id="p27-done-bar" style="display:none;margin-top:16px;padding:12px 16px;border-radius:10px;background:linear-gradient(135deg,#7c3aed,#0891b2);color:#fff;font-size:13px;font-weight:700;text-align:center;">'
+          + '<i class="fas fa-check-double" style="margin-right:8px;"></i>All 5 agents completed — claim is fully in-flight!'
+          + '</div>'
+          + '</div></div>';
+
+        var wrapper = document.createElement('div');
+        wrapper.id = 'p27-postsubmit-ov';
+        wrapper.innerHTML = modal;
+        document.body.appendChild(wrapper);
+
+        // Animate each agent step sequentially
+        var delays = [600, 1400, 2300, 3300, 4400];
+        agents.forEach(function(a, i) {
+          var statusEl = document.getElementById('p27-status-'+i);
+          var stepEl   = document.getElementById('p27-step-'+i);
+          // Mark running
+          setTimeout(function() {
+            if (!statusEl || !stepEl) return;
+            statusEl.textContent = 'RUNNING…';
+            statusEl.style.color = '#0891b2';
+            stepEl.style.border  = '1px solid #bae6fd';
+            stepEl.style.background = '#f0f9ff';
+          }, delays[i]);
+          // Mark done
+          setTimeout(function() {
+            if (!statusEl || !stepEl) return;
+            statusEl.innerHTML = '<i class="fas fa-check-circle" style="color:#059669;margin-right:3px;"></i>DONE';
+            statusEl.style.color = '#059669';
+            stepEl.style.border  = '1px solid #bbf7d0';
+            stepEl.style.background = '#f0fdf4';
+            if (i === agents.length - 1) {
+              var bar = document.getElementById('p27-done-bar');
+              if (bar) bar.style.display = 'block';
+            }
+          }, delays[i] + 700);
+        });
+      };
+    }
+  }
+
+  /* ── 2. Inject AI Agents nav item into sidebar DOM ─────────────────────── */
+  function _p27InjectAiAgentsNav() {
+    // Guard: don't inject twice
+    if (document.querySelector('.ltc-ai-agents-nav')) return;
+
+    // Find the anchor element to insert after
+    var anchor = document.querySelector('.ltc-arch-nav');
+    if (!anchor) {
+      // Fallback: look for the LTC Operations nav group
+      anchor = document.querySelector('[onclick*="ltc-system-arch"]') ||
+               document.querySelector('[onclick*="systemArchitecture"]');
+    }
+    if (!anchor) return;
+
+    var el = document.createElement('a');
+    el.className   = 'nav-item ltc-ai-agents-nav nav-grp-tpa';
+    el.href        = '#';
+    el.setAttribute('onclick', "navigateTo('ltc-ai-agents'); return false;");
+    el.innerHTML   =
+      '<i class="fas fa-robot"></i>'
+      + '<span>AI Agents</span>'
+      + '<span class="nav-badge" style="background:linear-gradient(135deg,#7c3aed,#0891b2);color:#fff;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;">12</span>';
+
+    // Insert immediately after the anchor element
+    if (anchor.nextSibling) {
+      anchor.parentNode.insertBefore(el, anchor.nextSibling);
+    } else {
+      anchor.parentNode.appendChild(el);
+    }
+
+    // Re-apply persona visibility so the new item obeys TPA/carrier/all rules
+    if (typeof applyPersonaMode === 'function') {
+      var saved = localStorage.getItem('nyl-persona') || 'all';
+      applyPersonaMode(saved);
+    } else if (typeof window._p26applyPersona === 'function') {
+      var saved2 = localStorage.getItem('nyl-persona') || 'all';
+      window._p26applyPersona(saved2);
+    }
+  }
+
+  /* ── 3. Init: run after DOM is ready ────────────────────────────────────── */
+  function _p27init() {
+    _p27RestoreSubmit();
+    // Nav injection: try immediately, then retry to catch late renders
+    _p27InjectAiAgentsNav();
+    setTimeout(_p27InjectAiAgentsNav, 500);
+    setTimeout(_p27InjectAiAgentsNav, 1200);
+    setTimeout(_p27InjectAiAgentsNav, 2500);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _p27init);
+  } else {
+    setTimeout(_p27init, 100);
+  }
+
+  console.log('[P27 Fix] ltcNcSubmit modal restored + AI Agents nav injection scheduled');
 })();
 
