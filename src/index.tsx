@@ -1001,10 +1001,6 @@ function Sidebar() {
           <i class="fas fa-user-check"></i><span>Eligibility &amp; Assessment</span>
           <span class="nav-badge" style="background:#0891b2;color:#fff">7</span>
         </a>
-        <a class="nav-item ltc-arch-nav nav-grp-tpa" onclick="navigateTo('ltc-arch')" href="#">
-          <i class="fas fa-sitemap"></i><span>System Architecture</span>
-          <span class="nav-badge" style="background:#475569;color:#fff">16</span>
-        </a>
         <a class="nav-item ltc-ai-agents-nav nav-grp-tpa" onclick="navigateTo('ltc-ai-agents')" href="#">
           <i class="fas fa-robot"></i><span>AI Agents</span>
           <span class="nav-badge" style="background:linear-gradient(135deg,#7c3aed,#0891b2);color:#fff">12</span>
@@ -1039,6 +1035,10 @@ function Sidebar() {
 
         {/* ── ILLUMIFIN PLATFORM ── */}
         <div class="nav-section-label nav-grp-tpa" style="color:#f59e0b">ILLUMIFIN PLATFORM</div>
+        <a class="nav-item ltc-arch-nav nav-grp-tpa" onclick="navigateTo('ltc-arch')" href="#">
+          <i class="fas fa-sitemap"></i><span>System Architecture</span>
+          <span class="nav-badge" style="background:#475569;color:#fff">16</span>
+        </a>
         <a class="nav-item core-admin-nav nav-grp-tpa" onclick="navigateTo('core-admin')" href="#">
           <i class="fas fa-server"></i><span>Core Admin Systems</span>
           <span class="nav-badge" style="background:#003087;color:#fff">4</span>
