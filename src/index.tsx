@@ -835,317 +835,337 @@ function Sidebar() {
           <span class="brand-analytics">WEALTHAI</span>
           <span class="brand-tagline">Agent 360</span>
         </div>
-
       </div>
 
-      <nav class="sidebar-nav">
+      <nav class="sidebar-nav" id="sidebar-nav">
 
         {/* ── HOME ── */}
-        <div class="nav-section-label">HOME</div>
-        <a class="nav-item active" onclick="navigateTo('dashboard')" href="#">
+        <div class="nav-section-label nav-grp-carrier nav-grp-tpa">HOME</div>
+        <a class="nav-item active nav-grp-carrier nav-grp-tpa" onclick="navigateTo('dashboard')" href="#">
           <i class="fas fa-th-large"></i><span>Dashboard</span>
         </a>
-        <a class="nav-item" onclick="navigateTo('clients')" href="#">
+        <a class="nav-item nav-grp-carrier nav-grp-tpa" onclick="navigateTo('clients')" href="#">
           <i class="fas fa-users"></i><span>Clients</span>
           <span class="nav-badge">247</span>
         </a>
-        <a class="nav-item" onclick="navigateTo('calendar')" href="#">
+        <a class="nav-item nav-grp-carrier nav-grp-tpa" onclick="navigateTo('calendar')" href="#">
           <i class="fas fa-calendar-alt"></i><span>AI Planner</span>
           <span class="nav-badge alert">3</span>
         </a>
 
+        {/* ── CARRIER DIVIDER ── */}
+        <div class="nav-persona-divider nav-grp-carrier" id="carrier-divider">
+          <div class="nav-persona-divider-line"></div>
+          <div class="nav-persona-divider-label"><i class="fas fa-building"></i> INSURANCE CARRIERS</div>
+          <div class="nav-persona-divider-sub">Life · Annuity · Brokerage · Wealth</div>
+        </div>
+
         {/* ── MARKETING ── */}
-        <div class="nav-section-label">MARKETING</div>
-        <a class="nav-item leads-nav" onclick="navigateTo('leads')" href="#">
+        <div class="nav-section-label nav-grp-carrier">MARKETING</div>
+        <a class="nav-item leads-nav nav-grp-carrier" onclick="navigateTo('leads')" href="#">
           <i class="fas fa-user-plus"></i><span>Leads</span>
           <span class="nav-badge" style="background:#f59e0b;color:#fff" id="leads-nav-badge">6</span>
         </a>
-        <a class="nav-item campaigns-nav" onclick="navigateTo('campaigns')" href="#">
+        <a class="nav-item campaigns-nav nav-grp-carrier" onclick="navigateTo('campaigns')" href="#">
           <i class="fas fa-bullhorn"></i><span>Campaigns</span>
           <span class="nav-badge" style="background:#0891b2;color:#fff">5</span>
         </a>
 
         {/* ── SALES ── */}
-        <div class="nav-section-label">SALES</div>
-        <a class="nav-item" onclick="navigateTo('fna')" href="#">
+        <div class="nav-section-label nav-grp-carrier">SALES</div>
+        <a class="nav-item nav-grp-carrier" onclick="navigateTo('fna')" href="#">
           <i class="fas fa-clipboard-list"></i><span>FNA Discovery</span>
           <span class="nav-badge" style="background:#059669;color:#fff">3</span>
         </a>
-        <a class="nav-item prospects-nav" onclick="navigateTo('prospects')" href="#">
+        <a class="nav-item prospects-nav nav-grp-carrier" onclick="navigateTo('prospects')" href="#">
           <i class="fas fa-user-clock"></i><span>Prospects</span>
           <span class="nav-badge" style="background:#7c3aed;color:#fff">14</span>
         </a>
-        <a class="nav-item" onclick="navigateTo('products')" href="#">
+        <a class="nav-item nav-grp-carrier" onclick="navigateTo('products')" href="#">
           <i class="fas fa-file-contract"></i><span>Product Proposals</span>
         </a>
-        <a class="nav-item" onclick="navigateTo('sales')" href="#">
+        <a class="nav-item nav-grp-carrier" onclick="navigateTo('sales')" href="#">
           <i class="fas fa-route"></i><span>Sales Pipeline</span>
           <span class="nav-badge" style="background:#003087;color:#fff">2</span>
         </a>
-        <a class="nav-item upsell-nav" onclick="navigateTo('upsell')" href="#">
+        <a class="nav-item upsell-nav nav-grp-carrier" onclick="navigateTo('upsell')" href="#">
           <i class="fas fa-arrow-trend-up"></i><span>Growth Opportunities</span>
           <span class="nav-badge" style="background:#059669;color:#fff">8</span>
         </a>
-        {/* Journey Pipeline nav removed — content merged into Sales Pipeline → Lifecycle tab */}
 
         {/* ── INSURANCE ── */}
-        <div class="nav-section-label">INSURANCE</div>
-        <a class="nav-item eapp-submissions-nav" onclick="navigateTo('eapp-submissions')" href="#">
+        <div class="nav-section-label nav-grp-carrier">INSURANCE</div>
+        <a class="nav-item eapp-submissions-nav nav-grp-carrier" onclick="navigateTo('eapp-submissions')" href="#">
           <i class="fas fa-file-signature"></i><span>E-App &amp; Submissions</span>
           <span class="nav-badge" style="background:#0891b2;color:#fff">2</span>
         </a>
-        <a class="nav-item" onclick="navigateTo('underwriting')" href="#">
+        <a class="nav-item nav-grp-carrier" onclick="navigateTo('underwriting')" href="#">
           <i class="fas fa-microscope"></i><span>Underwriting</span>
           <span class="nav-badge" style="background:#0891b2;color:white">4</span>
         </a>
-        <a class="nav-item delivery-nav" onclick="navigateTo('delivery')" href="#">
+        <a class="nav-item delivery-nav nav-grp-carrier" onclick="navigateTo('delivery')" href="#">
           <i class="fas fa-box-open"></i><span>Policy Delivery</span>
           <span class="nav-badge" style="background:#059669;color:#fff">2</span>
         </a>
-        <a class="nav-item policies-nav" onclick="navigateTo('policies')" href="#">
+        <a class="nav-item policies-nav nav-grp-carrier" onclick="navigateTo('policies')" href="#">
           <i class="fas fa-file-contract"></i><span>Policies</span>
           <span class="nav-badge">1.8K</span>
           <span class="nav-badge alert pol-alert-nav-badge" id="pol-alert-nav-badge" title="4 active alerts">4</span>
         </a>
-        <a class="nav-item claims-nav" onclick="navigateTo('claims')" href="#">
+        <a class="nav-item claims-nav nav-grp-carrier" onclick="navigateTo('claims')" href="#">
           <i class="fas fa-file-medical-alt"></i><span>Claims</span>
           <span class="nav-badge alert">7</span>
         </a>
 
-        {/* ── INVESTMENTS ── */}
-        <div class="nav-section-label">INVESTMENTS</div>
-        <a class="nav-item inv-accounts-nav" onclick="navigateTo('inv-accounts')" href="#">
+        {/* ── ANNUITIES ── */}
+        <div class="nav-section-label nav-grp-carrier">ANNUITIES</div>
+        <a class="nav-item ann-application-nav nav-grp-carrier" onclick="navigateTo('ann-application')" href="#">
+          <i class="fas fa-file-signature"></i><span>Annuity Application</span>
+          <span class="nav-badge" style="background:#0891b2;color:#fff">3</span>
+        </a>
+        <a class="nav-item suitability-review-nav nav-grp-carrier" onclick="navigateTo('suitability-review')" href="#">
+          <i class="fas fa-balance-scale"></i><span>Suitability Review</span>
+          <span class="nav-badge" style="background:#d97706;color:#fff">2</span>
+        </a>
+        <a class="nav-item contract-delivery-nav nav-grp-carrier" onclick="navigateTo('contract-delivery')" href="#">
+          <i class="fas fa-hand-holding-usd"></i><span>Contract Delivery</span>
+          <span class="nav-badge" style="background:#059669;color:#fff">1</span>
+        </a>
+        <a class="nav-item ret-accounts-nav nav-grp-carrier" onclick="navigateTo('ret-accounts')" href="#">
+          <i class="fas fa-umbrella-beach"></i><span>Annuity Accounts</span>
+          <span class="nav-badge" style="background:#0891b2;color:#fff">6</span>
+        </a>
+
+        {/* ── BROKERAGE ── */}
+        <div class="nav-section-label nav-grp-carrier">BROKERAGE</div>
+        <a class="nav-item inv-accounts-nav nav-grp-carrier" onclick="navigateTo('inv-accounts')" href="#">
           <i class="fas fa-chart-line"></i><span>Investment Accounts</span>
           <span class="nav-badge" style="background:#059669;color:#fff">12</span>
           <span class="nav-badge" style="background:#7c3aed;color:#fff;margin-left:2px">3 SR</span>
           <span class="nav-badge" style="background:#0d9488;color:#fff;margin-left:2px">5 IPS</span>
         </a>
-        <a class="nav-item inv-proposals-nav" onclick="navigateTo('inv-proposals')" href="#">
+        <a class="nav-item inv-proposals-nav nav-grp-carrier" onclick="navigateTo('inv-proposals')" href="#">
           <i class="fas fa-file-invoice-dollar"></i><span>Investment Proposals</span>
           <span class="nav-badge" style="background:#003087;color:#fff">4</span>
           <span class="nav-badge" style="background:#f59e0b;color:#fff;margin-left:2px">AI</span>
         </a>
 
-        {/* ── RETIREMENT ── */}
-        <div class="nav-section-label">RETIREMENT</div>
-        <a class="nav-item ann-application-nav" onclick="navigateTo('ann-application')" href="#">
-          <i class="fas fa-file-signature"></i><span>Annuity Application</span>
-          <span class="nav-badge" style="background:#0891b2;color:#fff">3</span>
-        </a>
-        <a class="nav-item suitability-review-nav" onclick="navigateTo('suitability-review')" href="#">
-          <i class="fas fa-balance-scale"></i><span>Suitability Review</span>
-          <span class="nav-badge" style="background:#d97706;color:#fff">2</span>
-        </a>
-        <a class="nav-item contract-delivery-nav" onclick="navigateTo('contract-delivery')" href="#">
-          <i class="fas fa-hand-holding-usd"></i><span>Contract Delivery</span>
-          <span class="nav-badge" style="background:#059669;color:#fff">1</span>
-        </a>
-        <a class="nav-item ret-accounts-nav" onclick="navigateTo('ret-accounts')" href="#">
-          <i class="fas fa-umbrella-beach"></i><span>Annuity Accounts</span>
-          <span class="nav-badge" style="background:#0891b2;color:#fff">6</span>
-        </a>
-
-        {/* ── LTC OPERATIONS ── */}
-        <div class="nav-section-label">LTC OPERATIONS</div>
-        <a class="nav-item ltc-claims-nav" onclick="navigateTo('ltc-claims')" href="#">
-          <i class="fas fa-file-medical-alt"></i><span>LTC Claims</span>
-          <span class="nav-badge" style="background:#dc2626;color:#fff">63K</span>
-        </a>
-        <a class="nav-item ltc-care-nav" onclick="navigateTo('ltc-care')" href="#">
-          <i class="fas fa-hands-helping"></i><span>Care Coordination</span>
-          <span class="nav-badge" style="background:#d97706;color:#fff">18</span>
-        </a>
-        <a class="nav-item ltc-eligibility-nav" onclick="navigateTo('ltc-eligibility')" href="#">
-          <i class="fas fa-user-check"></i><span>Eligibility & Assessment</span>
-          <span class="nav-badge" style="background:#0891b2;color:#fff">7</span>
-        </a>
-        <a class="nav-item ltc-claimant-nav" onclick="navigateTo('ltc-claimant')" href="#">
-          <i class="fas fa-id-card-alt"></i><span>Claimant 360</span>
-        </a>
-        <a class="nav-item insurance-carrier-360-nav" onclick="navigateTo('insurance-carrier-360')" href="#">
-          <i class="fas fa-building"></i><span>Insurance Carrier 360°</span>
-          <span class="nav-badge" style="background:#003087;color:#fff">6</span>
-        </a>
-        <a class="nav-item healthcare-provider-360-nav" onclick="navigateTo('healthcare-provider-360')" href="#">
-          <i class="fas fa-hospital"></i><span>Healthcare Provider 360°</span>
-          <span class="nav-badge" style="background:#0891b2;color:#fff">6</span>
-        </a>
-        <a class="nav-item ltc-arch-nav" onclick="navigateTo('ltc-arch')" href="#">
-          <i class="fas fa-sitemap"></i><span>System Architecture</span>
-          <span class="nav-badge" style="background:#475569;color:#fff">16</span>
-        </a>
-
-        {/* ── HAL OPERATIONS ── */}
-        <div class="nav-section-label">HAL OPERATIONS</div>
-        <a class="nav-item hal-health-nav" onclick="navigateTo('hal-health')" href="#">
-          <i class="fas fa-heart-pulse"></i><span>Health Operations</span>
-          <span class="nav-badge" style="background:#dc2626;color:#fff">5</span>
-        </a>
-        <a class="nav-item hal-annuity-nav" onclick="navigateTo('hal-annuity')" href="#">
-          <i class="fas fa-chart-pie"></i><span>Annuity Operations</span>
-          <span class="nav-badge" style="background:#d97706;color:#fff">5</span>
-        </a>
-        <a class="nav-item hal-life-nav" onclick="navigateTo('hal-life')" href="#">
-          <i class="fas fa-shield-heart"></i><span>Life Operations</span>
-          <span class="nav-badge" style="background:#059669;color:#fff">5</span>
-        </a>
-        <a class="nav-item hal-client360-nav" onclick="navigateTo('hal-client360')" href="#">
-          <i class="fas fa-users-viewfinder"></i><span>Client 360 Simulator</span>
-          <span class="nav-badge" style="background:linear-gradient(90deg,#7c3aed,#0891b2);color:#fff">NEW</span>
-        </a>
-        <a class="nav-item hal-policy-nav" onclick="navigateTo('hal-policy')" href="#">
-          <i class="fas fa-layer-group"></i><span>Policy Administration</span>
-          <span class="nav-badge" style="background:#059669;color:#fff">2.8M</span>
-        </a>
-        <a class="nav-item hal-pipeline-nav" onclick="navigateTo('hal-pipeline')" href="#">
-          <i class="fas fa-exchange-alt"></i><span>HAL Pipeline</span>
-          <span class="nav-badge" style="background:#7c3aed;color:#fff">5</span>
-        </a>
-        <a class="nav-item hal-medsup-nav" onclick="navigateTo('hal-medsup')" href="#">
-          <i class="fas fa-heartbeat"></i><span>Medicare Supplement</span>
-          <span class="nav-badge" style="background:#0891b2;color:#fff">40</span>
-        </a>
-        <a class="nav-item tpa-command-nav" onclick="navigateTo('tpa-command')" href="#">
-          <i class="fas fa-tachometer-alt"></i><span>TPA Command Center</span>
-          <span class="nav-badge ai-pulse">LIVE</span>
-        </a>
-        <a class="nav-item hybrid-ops-nav" onclick="navigateTo('hybrid-ops')" href="#">
-          <i class="fas fa-network-wired"></i><span>Hybrid LTC+HAL Hub</span>
-          <span class="nav-badge" style="background:linear-gradient(90deg,#dc2626,#7c3aed);color:#fff">NEW</span>
-        </a>
-        <a class="nav-item ai-modernization-nav" onclick="navigateTo('ai-modernization')" href="#">
-          <i class="fas fa-microchip"></i><span>AI Modernization</span>
-          <span class="nav-badge" style="background:#059669;color:#fff">AI</span>
-        </a>
-        <a class="nav-item rfp-showcase-nav" onclick="navigateTo('rfp-showcase')" href="#">
-          <i class="fas fa-award"></i><span>RFP Response Center</span>
-          <span class="nav-badge" style="background:#d97706;color:#fff">RFP</span>
-        </a>
-
-        {/* ── HYBRID LTC + HAL INTELLIGENCE ── */}
-        <div class="nav-section-label" style="background:linear-gradient(90deg,#0078d4,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800;letter-spacing:.08em">HYBRID LTC + HAL INTELLIGENCE</div>
-        <a class="nav-item hal-datalake-nav" onclick="navigateTo('hal-datalake')" href="#">
-          <i class="fas fa-database"></i><span>Azure Data Lake</span>
-          <span class="nav-badge" style="background:#0078d4;color:#fff">FABRIC</span>
-        </a>
-        <a class="nav-item hal-semantic-nav" onclick="navigateTo('hal-semantic')" href="#">
-          <i class="fas fa-layer-group"></i><span>Semantic Layer</span>
-          <span class="nav-badge" style="background:#0891b2;color:#fff">UNITY</span>
-        </a>
-        <a class="nav-item hal-ontology-nav" onclick="navigateTo('hal-ontology')" href="#">
-          <i class="fas fa-project-diagram"></i><span>Ontology &amp; Knowledge Graph</span>
-          <span class="nav-badge" style="background:#7c3aed;color:#fff">KG</span>
-        </a>
-        <a class="nav-item hal-vectorstore-nav" onclick="navigateTo('hal-vectorstore')" href="#">
-          <i class="fas fa-search"></i><span>Vector Store &amp; RAG</span>
-          <span class="nav-badge" style="background:#4f46e5;color:#fff">RAG</span>
-        </a>
-        <a class="nav-item hal-agents-nav" onclick="navigateTo('hal-agents')" href="#">
-          <i class="fas fa-robot"></i><span>Agentification Hub</span>
-          <span class="nav-badge ai-pulse" style="background:#059669;color:#fff">6 AGENTS</span>
-        </a>
-        <a class="nav-item hal-lineage-nav" onclick="navigateTo('hal-lineage')" href="#">
-          <i class="fas fa-sitemap"></i><span>Lineage &amp; Catalog</span>
-          <span class="nav-badge" style="background:#d97706;color:#fff">PURVIEW</span>
-        </a>
-        <a class="nav-item hal-coa-nav" onclick="navigateTo('hal-coa')" href="#">
-          <i class="fas fa-rocket"></i><span>Carrier Onboarding</span>
-          <span class="nav-badge" style="background:#d97706;color:#fff">COA</span>
-        </a>
-        <a class="nav-item hal-cih-nav" onclick="navigateTo('hal-cih')" href="#">
-          <i class="fas fa-headset"></i><span>Contact Intelligence</span>
-          <span class="nav-badge" style="background:#0891b2;color:#fff">CIH</span>
-        </a>
-        <a class="nav-item hal-caid-nav" onclick="navigateTo('hal-caid')" href="#">
-          <i class="fas fa-shield-virus"></i><span>Claims Fraud Engine</span>
-          <span class="nav-badge" style="background:#dc2626;color:#fff">CAID</span>
-        </a>
-        <a class="nav-item hal-rimd-nav" onclick="navigateTo('hal-rimd')" href="#">
-          <i class="fas fa-chart-line"></i><span>Rate Intelligence & Reserves</span>
-          <span class="nav-badge" style="background:#7c3aed;color:#fff">RIMD</span>
-        </a>
-        <a class="nav-item hal-policyholder-nav" onclick="navigateTo('hal-policyholder')" href="#">
-          <i class="fas fa-user-shield"></i><span>Policyholder Portal</span>
-          <span class="nav-badge" style="background:#059669;color:#fff">PSP</span>
-        </a>
-        <a class="nav-item hal-provider-net-nav" onclick="navigateTo('hal-provider-net')" href="#">
-          <i class="fas fa-hospital"></i><span>Provider Network Intel</span>
-          <span class="nav-badge" style="background:#0891b2;color:#fff">PNI</span>
-        </a>
-        <a class="nav-item hal-workforce-nav" onclick="navigateTo('hal-workforce')" href="#">
-          <i class="fas fa-users-cog"></i><span>Workforce Analytics</span>
-          <span class="nav-badge" style="background:#d97706;color:#fff">WFA</span>
-        </a>
-        <a class="nav-item hal-ai-gov-nav" onclick="navigateTo('hal-ai-gov')" href="#">
-          <i class="fas fa-robot"></i><span>AI Governance</span>
-          <span class="nav-badge" style="background:#4f46e5;color:#fff">AIG</span>
-        </a>
-        <a class="nav-item hal-litigation-nav" onclick="navigateTo('hal-litigation')" href="#">
-          <i class="fas fa-gavel"></i><span>Litigation Risk</span>
-          <span class="nav-badge" style="background:#dc2626;color:#fff">LIT</span>
-        </a>
-        <a class="nav-item hal-interop-nav" onclick="navigateTo('hal-interop')" href="#">
-          <i class="fas fa-exchange-alt"></i><span>Interoperability Hub</span>
-          <span class="nav-badge" style="background:#7c3aed;color:#fff">IOP</span>
-        </a>
-        <a class="nav-item hal-hybrid-compare-nav" onclick="navigateTo('hal-hybrid-compare')" href="#">
-          <i class="fas fa-columns"></i><span>Hybrid Comparison</span>
-          <span class="nav-badge" style="background:#0f766e;color:#fff">HCE</span>
-        </a>
-        <a class="nav-item hal-reg-tracker-nav" onclick="navigateTo('hal-reg-tracker')" href="#">
-          <i class="fas fa-landmark"></i><span>Regulatory Tracker</span>
-          <span class="nav-badge" style="background:#475569;color:#fff">RCT</span>
-        </a>
-
-        {/* ── ILLUMIFIN PLATFORM ── */}
-        <div class="nav-section-label">ILLUMIFIN PLATFORM</div>
-        <a class="nav-item core-admin-nav" onclick="navigateTo('core-admin')" href="#">
-          <i class="fas fa-server"></i><span>Core Admin Systems</span>
-          <span class="nav-badge" style="background:#003087;color:#fff">4</span>
-        </a>
-        <a class="nav-item data-ai-nav" onclick="navigateTo('data-ai')" href="#">
-          <i class="fas fa-brain"></i><span>Data & AI/ML Platform</span>
-          <span class="nav-badge" style="background:#7c3aed;color:#fff">AI</span>
-        </a>
-        <a class="nav-item digital-eco-nav" onclick="navigateTo('digital-eco')" href="#">
-          <i class="fas fa-project-diagram"></i><span>Digital Ecosystem</span>
-          <span class="nav-badge" style="background:#0891b2;color:#fff">180K</span>
-        </a>
-        <a class="nav-item contact-doc-nav" onclick="navigateTo('contact-doc')" href="#">
-          <i class="fas fa-headset"></i><span>Contact & Doc Mgmt</span>
-        </a>
-        <a class="nav-item mod-roadmap-nav" onclick="navigateTo('mod-roadmap')" href="#">
-          <i class="fas fa-road"></i><span>Modernization Roadmap</span>
-          <span class="nav-badge" style="background:#059669;color:#fff">NEW</span>
-        </a>
-
         {/* ── ADVISORY ── */}
-        <div class="nav-section-label">ADVISORY</div>
-        <a class="nav-item adv-accounts-nav" onclick="navigateTo('adv-accounts')" href="#">
+        <div class="nav-section-label nav-grp-carrier">ADVISORY</div>
+        <a class="nav-item adv-accounts-nav nav-grp-carrier" onclick="navigateTo('adv-accounts')" href="#">
           <i class="fas fa-gem"></i><span>Advisory Accounts</span>
           <span class="nav-badge" style="background:#7c3aed;color:#fff">4</span>
         </a>
-        <a class="nav-item adv-estate-nav" onclick="navigateTo('adv-estate')" href="#">
+        <a class="nav-item adv-estate-nav nav-grp-carrier" onclick="navigateTo('adv-estate')" href="#">
           <i class="fas fa-gavel"></i><span>Estate Planning</span>
           <span class="nav-badge" style="background:#7c3aed;color:#fff">4</span>
         </a>
-        <a class="nav-item adv-smallbiz-nav" onclick="navigateTo('adv-smallbiz')" href="#">
+        <a class="nav-item adv-smallbiz-nav nav-grp-carrier" onclick="navigateTo('adv-smallbiz')" href="#">
           <i class="fas fa-briefcase"></i><span>Small Business</span>
           <span class="nav-badge" style="background:#7c3aed;color:#fff">2</span>
         </a>
 
         {/* ── ANALYTICS ── */}
-        <div class="nav-section-label">ANALYTICS</div>
-        <a class="nav-item" onclick="navigateTo('reports')" href="#">
+        <div class="nav-section-label nav-grp-carrier">ANALYTICS</div>
+        <a class="nav-item nav-grp-carrier" onclick="navigateTo('reports')" href="#">
           <i class="fas fa-chart-bar"></i><span>Business Intelligence</span>
         </a>
-        <a class="nav-item ai-insights-nav" onclick="navigateTo('ai-insights')" href="#">
+        <a class="nav-item ai-insights-nav nav-grp-carrier" onclick="navigateTo('ai-insights')" href="#">
           <i class="fas fa-brain"></i><span>AI Insights</span>
           <span class="nav-badge ai-pulse">NEW</span>
         </a>
-        <a class="nav-item ai-nav" onclick="navigateTo('ai-agents')" href="#">
+        <a class="nav-item ai-nav nav-grp-carrier" onclick="navigateTo('ai-agents')" href="#">
           <i class="fas fa-robot"></i><span>Agentic AI</span>
           <span class="nav-badge ai-pulse">AI</span>
+        </a>
+
+        {/* ── TPA DIVIDER ── */}
+        <div class="nav-persona-divider nav-grp-tpa" id="tpa-divider">
+          <div class="nav-persona-divider-line"></div>
+          <div class="nav-persona-divider-label"><i class="fas fa-hospital-user"></i> TPA / ILLUMIFIN</div>
+          <div class="nav-persona-divider-sub">LTC · Health · Annuity · Life</div>
+        </div>
+
+        {/* ── LTC OPERATIONS ── */}
+        <div class="nav-section-label nav-grp-tpa">LTC OPERATIONS</div>
+        <a class="nav-item ltc-claims-nav nav-grp-tpa" onclick="navigateTo('ltc-claims')" href="#">
+          <i class="fas fa-file-medical-alt"></i><span>LTC Claims</span>
+          <span class="nav-badge" style="background:#dc2626;color:#fff">63K</span>
+        </a>
+        <a class="nav-item ltc-care-nav nav-grp-tpa" onclick="navigateTo('ltc-care')" href="#">
+          <i class="fas fa-hands-helping"></i><span>Care Coordination</span>
+          <span class="nav-badge" style="background:#d97706;color:#fff">18</span>
+        </a>
+        <a class="nav-item ltc-eligibility-nav nav-grp-tpa" onclick="navigateTo('ltc-eligibility')" href="#">
+          <i class="fas fa-user-check"></i><span>Eligibility &amp; Assessment</span>
+          <span class="nav-badge" style="background:#0891b2;color:#fff">7</span>
+        </a>
+        <a class="nav-item ltc-arch-nav nav-grp-tpa" onclick="navigateTo('ltc-arch')" href="#">
+          <i class="fas fa-sitemap"></i><span>System Architecture</span>
+          <span class="nav-badge" style="background:#475569;color:#fff">16</span>
+        </a>
+
+        {/* ── HAL OPERATIONS ── */}
+        <div class="nav-section-label nav-grp-tpa">HAL OPERATIONS</div>
+        <a class="nav-item hal-health-nav nav-grp-tpa" onclick="navigateTo('hal-health')" href="#">
+          <i class="fas fa-heart-pulse"></i><span>Health Operations</span>
+          <span class="nav-badge" style="background:#dc2626;color:#fff">5</span>
+        </a>
+        <a class="nav-item hal-annuity-nav nav-grp-tpa" onclick="navigateTo('hal-annuity')" href="#">
+          <i class="fas fa-chart-pie"></i><span>Annuity Operations</span>
+          <span class="nav-badge" style="background:#d97706;color:#fff">5</span>
+        </a>
+        <a class="nav-item hal-life-nav nav-grp-tpa" onclick="navigateTo('hal-life')" href="#">
+          <i class="fas fa-shield-heart"></i><span>Life Operations</span>
+          <span class="nav-badge" style="background:#059669;color:#fff">5</span>
+        </a>
+        <a class="nav-item hal-policy-nav nav-grp-tpa" onclick="navigateTo('hal-policy')" href="#">
+          <i class="fas fa-layer-group"></i><span>Policy Administration</span>
+          <span class="nav-badge" style="background:#059669;color:#fff">2.8M</span>
+        </a>
+        <a class="nav-item hal-pipeline-nav nav-grp-tpa" onclick="navigateTo('hal-pipeline')" href="#">
+          <i class="fas fa-exchange-alt"></i><span>HAL Pipeline</span>
+          <span class="nav-badge" style="background:#7c3aed;color:#fff">5</span>
+        </a>
+        <a class="nav-item hal-medsup-nav nav-grp-tpa" onclick="navigateTo('hal-medsup')" href="#">
+          <i class="fas fa-heartbeat"></i><span>Medicare Supplement</span>
+          <span class="nav-badge" style="background:#0891b2;color:#fff">40</span>
+        </a>
+
+        {/* ── ILLUMIFIN PLATFORM ── */}
+        <div class="nav-section-label nav-grp-tpa" style="color:#f59e0b">ILLUMIFIN PLATFORM</div>
+        <a class="nav-item core-admin-nav nav-grp-tpa" onclick="navigateTo('core-admin')" href="#">
+          <i class="fas fa-server"></i><span>Core Admin Systems</span>
+          <span class="nav-badge" style="background:#003087;color:#fff">4</span>
+        </a>
+        <a class="nav-item data-ai-nav nav-grp-tpa" onclick="navigateTo('data-ai')" href="#">
+          <i class="fas fa-brain"></i><span>Data &amp; AI/ML Platform</span>
+          <span class="nav-badge" style="background:#7c3aed;color:#fff">AI</span>
+        </a>
+        <a class="nav-item digital-eco-nav nav-grp-tpa" onclick="navigateTo('digital-eco')" href="#">
+          <i class="fas fa-project-diagram"></i><span>Digital Ecosystem</span>
+          <span class="nav-badge" style="background:#0891b2;color:#fff">180K</span>
+        </a>
+        <a class="nav-item contact-doc-nav nav-grp-tpa" onclick="navigateTo('contact-doc')" href="#">
+          <i class="fas fa-headset"></i><span>Contact &amp; Doc Mgmt</span>
+        </a>
+        <a class="nav-item mod-roadmap-nav nav-grp-tpa" onclick="navigateTo('mod-roadmap')" href="#">
+          <i class="fas fa-road"></i><span>Modernization Roadmap</span>
+          <span class="nav-badge" style="background:#059669;color:#fff">NEW</span>
+        </a>
+        {/* Systems Operations injected here by Phase 7 JS — relabelled to ILLUMIFIN PLATFORM sub-section */}
+
+        {/* ── HYBRID LTC + HAL INTELLIGENCE ── */}
+        <div class="nav-section-label nav-grp-tpa" style="background:linear-gradient(90deg,#0078d4,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800;letter-spacing:.08em">HYBRID LTC + HAL INTELLIGENCE</div>
+
+        {/* 360 Views */}
+        <a class="nav-item ltc-claimant-nav nav-grp-tpa" onclick="navigateTo('ltc-claimant')" href="#">
+          <i class="fas fa-id-card-alt"></i><span>Claimant 360</span>
+          <span class="nav-badge" style="background:#dc2626;color:#fff">360</span>
+        </a>
+        <a class="nav-item insurance-carrier-360-nav nav-grp-tpa" onclick="navigateTo('insurance-carrier-360')" href="#">
+          <i class="fas fa-building"></i><span>Insurance Carrier 360°</span>
+          <span class="nav-badge" style="background:#003087;color:#fff">6</span>
+        </a>
+        <a class="nav-item healthcare-provider-360-nav nav-grp-tpa" onclick="navigateTo('healthcare-provider-360')" href="#">
+          <i class="fas fa-hospital"></i><span>Healthcare Provider 360°</span>
+          <span class="nav-badge" style="background:#0891b2;color:#fff">6</span>
+        </a>
+        <a class="nav-item hal-client360-nav nav-grp-tpa" onclick="navigateTo('hal-client360')" href="#">
+          <i class="fas fa-users-viewfinder"></i><span>Client 360 Simulator</span>
+          <span class="nav-badge" style="background:linear-gradient(90deg,#7c3aed,#0891b2);color:#fff">NEW</span>
+        </a>
+
+        {/* Command &amp; Strategy */}
+        <a class="nav-item tpa-command-nav nav-grp-tpa" onclick="navigateTo('tpa-command')" href="#">
+          <i class="fas fa-tachometer-alt"></i><span>TPA Command Center</span>
+          <span class="nav-badge ai-pulse">LIVE</span>
+        </a>
+        <a class="nav-item hybrid-ops-nav nav-grp-tpa" onclick="navigateTo('hybrid-ops')" href="#">
+          <i class="fas fa-network-wired"></i><span>Hybrid LTC+HAL Hub</span>
+          <span class="nav-badge" style="background:linear-gradient(90deg,#dc2626,#7c3aed);color:#fff">NEW</span>
+        </a>
+        <a class="nav-item ai-modernization-nav nav-grp-tpa" onclick="navigateTo('ai-modernization')" href="#">
+          <i class="fas fa-microchip"></i><span>AI Modernization</span>
+          <span class="nav-badge" style="background:#059669;color:#fff">AI</span>
+        </a>
+        <a class="nav-item rfp-showcase-nav nav-grp-tpa" onclick="navigateTo('rfp-showcase')" href="#">
+          <i class="fas fa-award"></i><span>RFP Response Center</span>
+          <span class="nav-badge" style="background:#d97706;color:#fff">RFP</span>
+        </a>
+
+        {/* Intelligence Stack */}
+        <a class="nav-item hal-datalake-nav nav-grp-tpa" onclick="navigateTo('hal-datalake')" href="#">
+          <i class="fas fa-database"></i><span>Azure Data Lake</span>
+          <span class="nav-badge" style="background:#0078d4;color:#fff">FABRIC</span>
+        </a>
+        <a class="nav-item hal-semantic-nav nav-grp-tpa" onclick="navigateTo('hal-semantic')" href="#">
+          <i class="fas fa-layer-group"></i><span>Semantic Layer</span>
+          <span class="nav-badge" style="background:#0891b2;color:#fff">UNITY</span>
+        </a>
+        <a class="nav-item hal-ontology-nav nav-grp-tpa" onclick="navigateTo('hal-ontology')" href="#">
+          <i class="fas fa-project-diagram"></i><span>Ontology &amp; Knowledge Graph</span>
+          <span class="nav-badge" style="background:#7c3aed;color:#fff">KG</span>
+        </a>
+        <a class="nav-item hal-vectorstore-nav nav-grp-tpa" onclick="navigateTo('hal-vectorstore')" href="#">
+          <i class="fas fa-search"></i><span>Vector Store &amp; RAG</span>
+          <span class="nav-badge" style="background:#4f46e5;color:#fff">RAG</span>
+        </a>
+        <a class="nav-item hal-agents-nav nav-grp-tpa" onclick="navigateTo('hal-agents')" href="#">
+          <i class="fas fa-robot"></i><span>Agentification Hub</span>
+          <span class="nav-badge ai-pulse" style="background:#059669;color:#fff">6 AGENTS</span>
+        </a>
+        <a class="nav-item hal-lineage-nav nav-grp-tpa" onclick="navigateTo('hal-lineage')" href="#">
+          <i class="fas fa-sitemap"></i><span>Lineage &amp; Catalog</span>
+          <span class="nav-badge" style="background:#d97706;color:#fff">PURVIEW</span>
+        </a>
+        <a class="nav-item hal-coa-nav nav-grp-tpa" onclick="navigateTo('hal-coa')" href="#">
+          <i class="fas fa-rocket"></i><span>Carrier Onboarding</span>
+          <span class="nav-badge" style="background:#d97706;color:#fff">COA</span>
+        </a>
+        <a class="nav-item hal-cih-nav nav-grp-tpa" onclick="navigateTo('hal-cih')" href="#">
+          <i class="fas fa-headset"></i><span>Contact Intelligence</span>
+          <span class="nav-badge" style="background:#0891b2;color:#fff">CIH</span>
+        </a>
+        <a class="nav-item hal-caid-nav nav-grp-tpa" onclick="navigateTo('hal-caid')" href="#">
+          <i class="fas fa-shield-virus"></i><span>Claims Fraud Engine</span>
+          <span class="nav-badge" style="background:#dc2626;color:#fff">CAID</span>
+        </a>
+        <a class="nav-item hal-rimd-nav nav-grp-tpa" onclick="navigateTo('hal-rimd')" href="#">
+          <i class="fas fa-chart-line"></i><span>Rate Intelligence &amp; Reserves</span>
+          <span class="nav-badge" style="background:#7c3aed;color:#fff">RIMD</span>
+        </a>
+        <a class="nav-item hal-policyholder-nav nav-grp-tpa" onclick="navigateTo('hal-policyholder')" href="#">
+          <i class="fas fa-user-shield"></i><span>Policyholder Portal</span>
+          <span class="nav-badge" style="background:#059669;color:#fff">PSP</span>
+        </a>
+        <a class="nav-item hal-provider-net-nav nav-grp-tpa" onclick="navigateTo('hal-provider-net')" href="#">
+          <i class="fas fa-hospital"></i><span>Provider Network Intel</span>
+          <span class="nav-badge" style="background:#0891b2;color:#fff">PNI</span>
+        </a>
+        <a class="nav-item hal-workforce-nav nav-grp-tpa" onclick="navigateTo('hal-workforce')" href="#">
+          <i class="fas fa-users-cog"></i><span>Workforce Analytics</span>
+          <span class="nav-badge" style="background:#d97706;color:#fff">WFA</span>
+        </a>
+        <a class="nav-item hal-ai-gov-nav nav-grp-tpa" onclick="navigateTo('hal-ai-gov')" href="#">
+          <i class="fas fa-robot"></i><span>AI Governance</span>
+          <span class="nav-badge" style="background:#4f46e5;color:#fff">AIG</span>
+        </a>
+        <a class="nav-item hal-litigation-nav nav-grp-tpa" onclick="navigateTo('hal-litigation')" href="#">
+          <i class="fas fa-gavel"></i><span>Litigation Risk</span>
+          <span class="nav-badge" style="background:#dc2626;color:#fff">LIT</span>
+        </a>
+        <a class="nav-item hal-interop-nav nav-grp-tpa" onclick="navigateTo('hal-interop')" href="#">
+          <i class="fas fa-exchange-alt"></i><span>Interoperability Hub</span>
+          <span class="nav-badge" style="background:#7c3aed;color:#fff">IOP</span>
+        </a>
+        <a class="nav-item hal-hybrid-compare-nav nav-grp-tpa" onclick="navigateTo('hal-hybrid-compare')" href="#">
+          <i class="fas fa-columns"></i><span>Hybrid Comparison</span>
+          <span class="nav-badge" style="background:#0f766e;color:#fff">HCE</span>
+        </a>
+        <a class="nav-item hal-reg-tracker-nav nav-grp-tpa" onclick="navigateTo('hal-reg-tracker')" href="#">
+          <i class="fas fa-landmark"></i><span>Regulatory Tracker</span>
+          <span class="nav-badge" style="background:#475569;color:#fff">RCT</span>
         </a>
 
       </nav>
@@ -1179,6 +1199,20 @@ function TopBar() {
           <span class="search-placeholder-text">Search clients, policies…</span>
           <kbd class="search-kbd">⌘K</kbd>
         </div>
+
+        {/* ── Persona Switcher ── */}
+        <div class="persona-switcher" id="persona-switcher" title="Switch persona view">
+          <button class="persona-btn all-mode active" id="persona-btn-all" onclick="setPersonaMode('all')" title="Show all menu items">
+            <i class="fas fa-th-large"></i>ALL
+          </button>
+          <button class="persona-btn carrier" id="persona-btn-carrier" onclick="setPersonaMode('carrier')" title="Insurance Carrier view — Life, Annuity, Brokerage, Wealth">
+            <i class="fas fa-building"></i>CARRIER
+          </button>
+          <button class="persona-btn tpa" id="persona-btn-tpa" onclick="setPersonaMode('tpa')" title="TPA / Illumifin view — LTC, Health, Annuity, Life">
+            <i class="fas fa-hospital-user"></i>TPA
+          </button>
+        </div>
+
         <button class="topbar-btn" title="AI Quick Actions" onclick="navigateTo('ai-agents')">
           <i class="fas fa-robot"></i>
           <span class="ai-indicator"></span>
