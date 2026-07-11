@@ -64946,14 +64946,13 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
           + '<div style="font-size:12px;color:#6b7280;">120,000+ assessments/yr · MMSE & EMST cognitive tools · 50-state RN network · HIPAA-compliant scheduling</div>'
         + '</div>'
         + '<div style="margin-left:auto;display:flex;gap:8px;">'
-          + '<button onclick="ltcScheduleNew()" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-plus" style="margin-right:5px;"></i>Schedule Assessment</button>'
+          + '<button onclick="ltcScheduleNew()" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-plus" style="margin-right:5px;"></i>AI Powered Assessment</button>'
         + '</div>'
       + '</div>'
-      + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;">'
+      + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px;">'
         + _ltcKpiCard('7','Scheduled This Week','fa-calendar-check','#059669','Across all modalities')
         + _ltcKpiCard('120K+','Annual Volume','fa-chart-line','#0891b2','30-yr benchmark accuracy')
         + _ltcKpiCard('3','Assessment Modes','fa-video','#7c3aed','Phone · Video · In-Person')
-        + _ltcKpiCard('16th Ed.','LTC Underwriting Guidelines','fa-book-medical','#d97706','Proprietary clinical framework')
       + '</div>'
       + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;margin-bottom:20px;">'
         + '<div style="padding:14px 16px;background:#f8fafc;border-bottom:1px solid #e5e7eb;">'
@@ -87279,3 +87278,1046 @@ var navigateTo=window.navigateTo;
   console.log('[P28] Eligibility: LINK band suppressed · ltcScheduleNew Done → HAL modal · ltcAssessAction Done → HAL modal · 5 new AGT-AS agents registered');
 })();
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   P29 — UI REFINEMENTS
+   1. Rename "Eligibility & Assessment" → "Assessments" in nav + page header
+   2. Rename "AI Care Alerts" button label → "AI Powered Care Coordination"
+      & modal title → "AI Powered Care Coordination — Real-Time Monitoring"
+   3. Fix gibberish buttons in Care Coordination modals (Acknowledge All,
+      Create Care Plan, Confirm Schedule) using safe _p8run key callbacks
+   4. Remove eLTCAS CQRS Event Store band from Care Coordination page
+═══════════════════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  /* ── Helpers ──────────────────────────────────────────────────────────── */
+  function _p29ensureActions() {
+    if (!window._p8actions) window._p8actions = {};
+  }
+  function _p29run(key) {
+    _p29ensureActions();
+    if (typeof window._p8actions[key] === 'function') window._p8actions[key]();
+  }
+  window._p29run = _p29run;
+
+  /* ── 0. Expose _L4close / _L4toast safely for P29 wrappers ──────────── */
+  function _p29close(id) {
+    var el = document.getElementById(id);
+    if (el) el.remove();
+  }
+  function _p29toast(msg, dur) {
+    if (typeof window._L4toast === 'function') { window._L4toast(msg, dur || 3500); return; }
+    if (typeof window._raToast === 'function')  { window._raToast(msg, dur || 3500); return; }
+    /* fallback */
+    var t = document.createElement('div');
+    t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1e293b;color:#fff;padding:12px 20px;border-radius:10px;font-size:12px;z-index:999999;max-width:600px;text-align:center;';
+    t.innerHTML = msg;
+    document.body.appendChild(t);
+    setTimeout(function () { if (t.parentNode) t.parentNode.removeChild(t); }, dur || 3500);
+  }
+
+  /* ── 1. Rename "Eligibility & Assessment" → "Assessments" ───────────────
+     a) Nav item span text (DOM — runs when nav renders)
+     b) Page header h1/title text (DOM — runs on navigation)
+     c) Patch initLtcEligibilityPage so new renders use correct title
+  ─────────────────────────────────────────────────────────────────────────── */
+
+  /* Live DOM rename — runs immediately for already-rendered nav */
+  function _p29renameEligibility() {
+    /* nav item */
+    var navSpan = document.querySelector('.ltc-eligibility-nav span');
+    if (navSpan && navSpan.textContent.indexOf('Eligibility') > -1) {
+      navSpan.textContent = 'Assessments';
+    }
+    /* page header inside tpl-ltc-eligibility */
+    var tpl = document.getElementById('tpl-ltc-eligibility');
+    if (tpl) {
+      tpl.querySelectorAll('*').forEach(function (el) {
+        if (el.children.length === 0 && el.textContent.trim() === 'Eligibility & Assessment') {
+          el.textContent = 'Assessments';
+        }
+      });
+    }
+  }
+  setTimeout(_p29renameEligibility, 600);
+
+  /* Wrap navigateTo (piggyback on P28's wrapper) */
+  var _p29origNav = window.navigateTo;
+  window.navigateTo = function (page) {
+    if (typeof _p29origNav === 'function') _p29origNav(page);
+    if (page === 'ltc-eligibility') {
+      setTimeout(_p29renameEligibility, 350);
+    }
+    if (page === 'ltc-care') {
+      /* ── 4. Suppress eLTCAS CQRS band ─────────────────────────────────
+         Same sentinel trick as P28: pre-inject a zero-height .p7-eltcas-band
+         so P7's guard (!querySelector('.p7-eltcas-band')) skips injection */
+      setTimeout(function () {
+        var tpl = document.getElementById('tpl-ltc-care');
+        if (!tpl) return;
+        var existing = tpl.querySelector('.p7-eltcas-band');
+        if (existing && !existing.getAttribute('data-p29-sentinel')) { existing.remove(); existing = null; }
+        if (!existing) {
+          var sentinel = document.createElement('div');
+          sentinel.className = 'p7-eltcas-band';
+          sentinel.style.cssText = 'display:none;height:0;overflow:hidden;';
+          sentinel.setAttribute('data-p29-sentinel', 'true');
+          tpl.appendChild(sentinel);
+        }
+      }, 100);
+      /* safety net */
+      setTimeout(function () {
+        var tpl = document.getElementById('tpl-ltc-care');
+        if (!tpl) return;
+        tpl.querySelectorAll('.p7-eltcas-band').forEach(function (b) {
+          if (!b.getAttribute('data-p29-sentinel')) b.remove();
+        });
+      }, 700);
+    }
+  };
+
+  /* Also suppress any already-rendered eLTCAS band on page load */
+  setTimeout(function () {
+    document.querySelectorAll('.p7-eltcas-band').forEach(function (b) {
+      if (!b.getAttribute('data-p29-sentinel')) b.remove();
+    });
+  }, 800);
+
+  /* ── 2. Rename "AI Care Alerts" button + modal title ────────────────────
+     The button in Care Coordination page header calls ltcRunAiCareAlert().
+     We patch the rendered button text via MutationObserver on tpl-ltc-care,
+     and wrap ltcRunAiCareAlert to change the modal title on render.
+  ─────────────────────────────────────────────────────────────────────────── */
+
+  function _p29renameCareAlertBtn() {
+    var tpl = document.getElementById('tpl-ltc-care');
+    if (!tpl) return;
+    tpl.querySelectorAll('button').forEach(function (btn) {
+      if (btn.textContent.indexOf('AI Care Alerts') > -1 || btn.textContent.indexOf('AI Powered Assessments') > -1) {
+        /* keep icon, update label */
+        var icon = btn.querySelector('i');
+        btn.innerHTML = '';
+        if (icon) btn.appendChild(icon);
+        var span = document.createTextNode('\u00a0AI Powered Care Coordination');
+        btn.appendChild(span);
+      }
+    });
+  }
+
+  var _p29origCareNav = window.navigateTo; /* already updated above — use mutation observer instead */
+  var _p29careObs = new MutationObserver(function () {
+    _p29renameCareAlertBtn();
+  });
+  _p29careObs.observe(document.body, { childList: true, subtree: true });
+
+  /* ── 3. Fix gibberish buttons — wrap all three Care Coordination modals ──
+     Root cause: the onclick="..._L4toast(\'<i class=\\\"...
+     The escaped double-quotes inside the HTML onclick attribute break the
+     HTML parser — the attribute terminates at the first unescaped " and the
+     rest becomes visible text inside the button.
+     Fix: replace the three window functions so their confirm/action buttons
+     use a keyed _p8run() callback with no inline HTML in the onclick attr.
+  ─────────────────────────────────────────────────────────────────────────── */
+
+  /* 3a. AI Powered Care Coordination modal — "Acknowledge All" button */
+  var _p29origAiAlert = window.ltcRunAiCareAlert;
+  window.ltcRunAiCareAlert = function () {
+    var ovId = 'ltc-care-ai-ov';
+    var ackKey = 'p29-ack-' + Math.random().toString(36).slice(2);
+    _p29ensureActions();
+    window._p8actions[ackKey] = function () {
+      _p29close(ovId);
+      _p29toast('<i class="fas fa-bell"></i> All AI care alerts acknowledged \u00b7 Team notified \u00b7 Calendar entries created', 3000);
+    };
+
+    var ovFn = window._L4overlay || function (id, html) {
+      document.getElementById(id) && document.getElementById(id).remove();
+      document.body.insertAdjacentHTML('beforeend',
+        '<div id="' + id + '" style="position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:10000;display:flex;align-items:center;justify-content:center;padding:16px;">' + html + '</div>');
+    };
+    var cardFn = window._L4card || function (title, body, color) {
+      return '<div style="border:1.5px solid ' + color + '33;border-radius:10px;padding:13px 15px;margin-bottom:10px;">'
+        + '<div style="font-size:12px;font-weight:700;margin-bottom:5px;">' + title + '</div>'
+        + '<div style="font-size:12px;color:#374151;line-height:1.5;">' + body + '</div></div>';
+    };
+
+    ovFn(ovId,
+      '<div style="background:#fff;border-radius:14px;width:620px;max-height:85vh;overflow-y:auto;box-shadow:0 20px 50px rgba(0,0,0,.3);">'
+      + '<div style="background:linear-gradient(135deg,#7c3aed,#6d28d9);padding:18px 22px;border-radius:14px 14px 0 0;color:#fff;display:flex;align-items:center;gap:12px;">'
+      + '<i class="fas fa-robot" style="font-size:20px;"></i>'
+      + '<div><div style="font-size:15px;font-weight:800;">AI Powered Care Coordination \u2014 Real-Time Monitoring</div>'
+      + '<div style="font-size:11px;opacity:.85;">4 active care plans \u00b7 Analyzed across 18 clinical signals</div></div>'
+      + '<button onclick="_p29close(\'' + ovId + '\')" style="margin-left:auto;background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:11px;">\u2715</button>'
+      + '</div>'
+      + '<div style="padding:20px;">'
+      + cardFn('<span style="color:#dc2626;font-weight:800;">\ud83d\udea8 CRITICAL \u2014 Ruth Blackwood</span>',
+          'All 5 ADLs impaired \u00b7 Cognitive score 11/30 (severe) \u00b7 SNF escalation risk HIGH \u00b7 Family conference not yet scheduled \u00b7 Recommend hospice consult within 72h \u00b7 Care manager Angela Moore, RN notified.', '#dc2626')
+      + cardFn('<span style="color:#d97706;font-weight:800;">\u26a0\ufe0f HIGH \u2014 Harold Simmons</span>',
+          'Nurse assessment overdue 8 days \u00b7 Home health setting may be insufficient given ADL trajectory \u00b7 Consider SNF transition planning \u00b7 Bi-weekly visits should increase to weekly during assessment period.', '#d97706')
+      + cardFn('<span style="color:#d97706;font-weight:800;">\u26a0\ufe0f ATTENTION \u2014 Care Plan Renewals</span>',
+          '3 care plans due for annual renewal in next 30 days: Margaret O\'Brien (Jul 31), Harold Simmons (Aug 5), Arthur Kowalski (Aug 12). Proactive scheduling recommended to avoid lapses.', '#d97706')
+      + cardFn('<span style="color:#059669;font-weight:800;">\u2705 STABLE \u2014 Arthur Kowalski, Francis Delacroix, George Nakamura</span>',
+          'Memory care and home health settings appropriate. No immediate action required. Quarterly reviews on schedule. Provider billing verified clean.', '#059669')
+      + '<div style="margin-top:12px;display:flex;gap:8px;">'
+      + '<button onclick="_p29run(\'' + ackKey + '\')" style="background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:12px;font-weight:700;cursor:pointer;">Acknowledge All</button>'
+      + '<button onclick="_p29close(\'' + ovId + '\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:9px 18px;font-size:12px;font-weight:700;cursor:pointer;">Close</button>'
+      + '</div></div></div>'
+    );
+  };
+
+  /* 3b. New Care Plan modal — "Create Care Plan" button */
+  var _p29origNewCp = window.ltcNewCarePlan;
+  window.ltcNewCarePlan = function () {
+    var ovId = 'ltc-newcp-ov';
+    var createKey = 'p29-cp-' + Math.random().toString(36).slice(2);
+    _p29ensureActions();
+    window._p8actions[createKey] = function () {
+      _p29close(ovId);
+      _p29toast('<i class="fas fa-plus-circle"></i> New Care Plan CP-005 created \u00b7 Care manager assigned \u00b7 Initial assessment scheduled \u00b7 Carrier notified', 3500);
+    };
+
+    var ovFn = window._L4overlay || function (id, html) {
+      document.getElementById(id) && document.getElementById(id).remove();
+      document.body.insertAdjacentHTML('beforeend',
+        '<div id="' + id + '" style="position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:10000;display:flex;align-items:center;justify-content:center;padding:16px;">' + html + '</div>');
+    };
+
+    ovFn(ovId,
+      '<div style="background:#fff;border-radius:14px;width:520px;box-shadow:0 20px 50px rgba(0,0,0,.3);">'
+      + '<div style="background:linear-gradient(135deg,#0891b2,#06b6d4);padding:16px 20px;border-radius:14px 14px 0 0;color:#fff;display:flex;align-items:center;gap:10px;">'
+      + '<i class="fas fa-plus-circle" style="font-size:18px;"></i>'
+      + '<div style="font-size:15px;font-weight:800;">New Care Plan</div>'
+      + '<button onclick="_p29close(\'' + ovId + '\')" style="margin-left:auto;background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:11px;">\u2715</button>'
+      + '</div>'
+      + '<div style="padding:20px;">'
+      + '<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Claimant (Claim ID)</label>'
+      + '<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;">'
+      + '<option>LTC-2026-0105 \u2014 Evelyn Marchetti</option><option>LTC-2026-0101 \u2014 Margaret O\'Brien</option><option>LTC-2026-0102 \u2014 Harold Simmons</option>'
+      + '</select></div>'
+      + '<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Assign Care Manager</label>'
+      + '<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;">'
+      + '<option>Auto-assign (AI recommended)</option><option>Sarah Johnson, RN</option><option>Maria Castillo, MSW</option><option>James Park, RN</option><option>Angela Moore, RN</option>'
+      + '</select></div>'
+      + '<div style="margin-bottom:16px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Initial Goals</label>'
+      + '<textarea style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:12px;box-sizing:border-box;height:70px;"></textarea></div>'
+      + '<button onclick="_p29run(\'' + createKey + '\')" style="width:100%;background:#0891b2;color:#fff;border:none;border-radius:8px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;">Create Care Plan</button>'
+      + '</div></div>'
+    );
+  };
+
+  /* 3c. Schedule Care Visit modal — "Confirm Schedule" button */
+  var _p29origCarePlanAction = window.ltcCarePlanAction;
+  window.ltcCarePlanAction = function (action, id) {
+    if (action !== 'schedule') {
+      /* Pass all non-schedule actions to original */
+      if (typeof _p29origCarePlanAction === 'function') _p29origCarePlanAction(action, id);
+      return;
+    }
+    /* Rebuild schedule modal with safe button */
+    var ovId = 'ltc-schedule-ov';
+    var schedKey = 'p29-sched-' + Math.random().toString(36).slice(2);
+    _p29ensureActions();
+    window._p8actions[schedKey] = function () {
+      _p29close(ovId);
+      _p29toast('<i class="fas fa-calendar-check"></i> Visit scheduled Jul 15 \u00b7 Care manager notified \u00b7 SMS sent to family \u00b7 EVV tracking activated', 3500);
+    };
+
+    var ovFn = window._L4overlay || function (oid, html) {
+      document.getElementById(oid) && document.getElementById(oid).remove();
+      document.body.insertAdjacentHTML('beforeend',
+        '<div id="' + oid + '" style="position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:10000;display:flex;align-items:center;justify-content:center;padding:16px;">' + html + '</div>');
+    };
+    var aiPanelFn = window._L4aiPanel || function (txt) {
+      return '<div style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);border:1.5px solid #c4b5fd;border-radius:10px;padding:12px 14px;margin-bottom:14px;">'
+        + '<div style="font-size:11px;font-weight:800;color:#7c3aed;margin-bottom:5px;"><i class="fas fa-brain" style="margin-right:5px;"></i>AI Insight</div>'
+        + '<div style="font-size:12px;color:#374151;line-height:1.6;">' + txt + '</div></div>';
+    };
+
+    ovFn(ovId,
+      '<div style="background:#fff;border-radius:14px;width:480px;box-shadow:0 20px 50px rgba(0,0,0,.3);">'
+      + '<div style="background:linear-gradient(135deg,#0891b2,#06b6d4);padding:16px 20px;border-radius:14px 14px 0 0;color:#fff;display:flex;align-items:center;gap:10px;">'
+      + '<i class="fas fa-calendar-plus" style="font-size:18px;"></i>'
+      + '<div style="font-size:15px;font-weight:800;">Schedule Care Visit</div>'
+      + '<button onclick="_p29close(\'' + ovId + '\')" style="margin-left:auto;background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:11px;">\u2715</button>'
+      + '</div>'
+      + '<div style="padding:20px;">'
+      + '<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Visit Date</label>'
+      + '<input type="text" value="Jul 15, 2026" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"></div>'
+      + '<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Visit Mode</label>'
+      + '<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;">'
+      + '<option>In-Person</option><option>Telephonic</option><option>Video Call</option>'
+      + '</select></div>'
+      + '<div style="margin-bottom:16px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Notes</label>'
+      + '<textarea style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:12px;box-sizing:border-box;height:70px;">Review care plan adherence and assess need for level-of-care change.</textarea></div>'
+      + aiPanelFn('AI suggests: visit timing aligns with care plan milestone. RN Sarah Johnson available. SMS reminder will be sent to family.')
+      + '<div style="display:flex;gap:8px;">'
+      + '<button onclick="_p29run(\'' + schedKey + '\')" style="background:#0891b2;color:#fff;border:none;border-radius:8px;padding:9px 20px;font-size:13px;font-weight:700;cursor:pointer;flex:1;">Confirm Schedule</button>'
+      + '</div></div></div>'
+    );
+  };
+
+  console.log('[P29] Eligibility renamed to Assessments \u00b7 AI Care Alerts renamed to AI Powered Care Coordination \u00b7 Assessments btn renamed to AI Powered Assessment \u00b7 LTC UW Guidelines KPI removed \u00b7 3 gibberish buttons fixed \u00b7 eLTCAS CQRS band suppressed');
+})();
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   P30 — RICH CLAIMANT 360° VIEW
+   Overrides window.ltcOpenClaimDetail with an 860px, 8-tab modal that
+   mirrors the James Whitfield layout adapted for LTC / HAL TPA context.
+   Consolidates 1st-party (LTCAS/eLTCAS), 2nd-party (provider EVV/billing,
+   carrier portal, pharmacy), and 3rd-party (CMS, SDOH, What Care Costs,
+   hospital admissions) data in one unified claimant view.
+   Tabs: Overview · Clinical · Products · Timeline · Documents ·
+         Provider · Carrier · AI Insights
+   Safe callbacks: _p8run / window._p8actions pattern throughout.
+═══════════════════════════════════════════════════════════════════════════ */
+(function() {
+  'use strict';
+
+  /* ── helpers shared across tabs ───────────────────────────────────────── */
+  function _p30badge(status) {
+    var map = {
+      'Active':'#059669','Pending':'#d97706','Review':'#d97706',
+      'Escalated':'#dc2626','Resolved':'#6b7280','On Track':'#059669',
+      'Enrolled':'#0891b2','Lapsed':'#dc2626','In Force':'#059669',
+      'Surrendered':'#6b7280','Waiver':'#7c3aed'
+    };
+    var c = map[status] || '#6b7280';
+    return '<span style="background:'+c+'1a;color:'+c+';border:1px solid '+c+'44;border-radius:20px;padding:2px 9px;font-size:11px;font-weight:700;">'+status+'</span>';
+  }
+
+  function _p30row(label, value) {
+    return '<div style="background:#f8fafc;border-radius:8px;padding:9px 12px;">'
+      +'<div style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;">'+label+'</div>'
+      +'<div style="font-size:12px;font-weight:600;color:#111827;">'+value+'</div>'
+      +'</div>';
+  }
+
+  function _p30kpi(value, label, icon, color, sub) {
+    return '<div style="background:#fff;border:1.5px solid #e5e7eb;border-radius:10px;padding:12px 14px;text-align:center;">'
+      +'<div style="font-size:10px;color:'+color+';"><i class="fas fa-'+icon+'" style="font-size:16px;"></i></div>'
+      +'<div style="font-size:20px;font-weight:800;color:'+color+';margin:4px 0;">'+value+'</div>'
+      +'<div style="font-size:10px;font-weight:700;color:#374151;">'+label+'</div>'
+      +(sub?'<div style="font-size:9px;color:#9ca3af;margin-top:2px;">'+sub+'</div>':'')
+      +'</div>';
+  }
+
+  function _p30card(title, body, accent) {
+    return '<div style="background:#fff;border:1.5px solid '+accent+'33;border-left:4px solid '+accent+';border-radius:10px;padding:13px 15px;margin-bottom:10px;">'
+      +'<div style="font-size:11px;font-weight:800;color:'+accent+';margin-bottom:6px;">'+title+'</div>'
+      +'<div style="font-size:11px;color:#374151;line-height:1.6;">'+body+'</div>'
+      +'</div>';
+  }
+
+  function _p30timelineItem(title, date, desc, color) {
+    return '<div style="position:relative;padding:0 0 16px 18px;border-left:2px solid '+color+'33;">'
+      +'<div style="position:absolute;left:-7px;top:2px;width:12px;height:12px;border-radius:50%;background:'+color+';border:2px solid #fff;box-shadow:0 0 0 2px '+color+'44;"></div>'
+      +'<div style="font-size:10px;color:'+color+';font-weight:700;text-transform:uppercase;letter-spacing:.4px;">'+date+'</div>'
+      +'<div style="font-size:12px;font-weight:700;color:#111827;margin:2px 0;">'+title+'</div>'
+      +'<div style="font-size:11px;color:#6b7280;">'+desc+'</div>'
+      +'</div>';
+  }
+
+  function _p30docRow(name, author, date, status, type) {
+    var sc = status.includes('✅')?'#059669':status.includes('⚠️')?'#d97706':'#dc2626';
+    return '<div style="display:flex;align-items:center;gap:10px;padding:9px 13px;background:#f8fafc;border-radius:8px;margin-bottom:7px;">'
+      +'<div style="width:30px;height:30px;background:#dbeafe;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
+      +'<i class="fas fa-file-'+(type==='PDF'?'pdf':type==='EVV'?'signature':'alt')+'" style="color:#3b82f6;font-size:13px;"></i></div>'
+      +'<div style="flex:1;min-width:0;">'
+      +'<div style="font-size:11px;font-weight:700;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+name+'</div>'
+      +'<div style="font-size:10px;color:#9ca3af;">'+author+' · '+date+'</div>'
+      +'</div>'
+      +'<span style="font-size:10px;font-weight:700;color:'+sc+';white-space:nowrap;">'+status+'</span>'
+      +'<button onclick="_p8run(\'p30-view-doc\')" style="background:#003087;color:#fff;border:none;border-radius:5px;padding:3px 9px;font-size:10px;font-weight:700;cursor:pointer;white-space:nowrap;">View</button>'
+      +'</div>';
+  }
+
+  function _p30aiPanel(text) {
+    return '<div style="background:linear-gradient(135deg,#7c3aed11,#7c3aed06);border:1.5px solid #7c3aed33;border-radius:10px;padding:13px 15px;margin-bottom:12px;">'
+      +'<div style="font-size:10px;font-weight:800;color:#7c3aed;margin-bottom:5px;"><i class="fas fa-robot" style="margin-right:4px;"></i>AI INTELLIGENCE SUMMARY — eLTCAS</div>'
+      +'<div style="font-size:11px;color:#374151;line-height:1.65;">'+text+'</div>'
+      +'</div>';
+  }
+
+  function _p30sdohTag(label, color) {
+    return '<span style="background:'+color+'1a;color:'+color+';border:1px solid '+color+'44;border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700;margin:2px;">'+label+'</span>';
+  }
+
+  function _p30progressBar(label, value, max, color, note) {
+    var pct = Math.min(100, Math.round((value/max)*100));
+    return '<div style="margin-bottom:10px;">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">'
+      +'<span style="font-size:11px;font-weight:600;color:#374151;">'+label+'</span>'
+      +'<span style="font-size:11px;font-weight:700;color:'+color+';">'+value+'/'+max+(note?' — '+note:'')+'</span>'
+      +'</div>'
+      +'<div style="background:#e5e7eb;border-radius:99px;height:7px;">'
+      +'<div style="width:'+pct+'%;background:'+color+';border-radius:99px;height:7px;transition:width .4s;"></div>'
+      +'</div>'
+      +'</div>';
+  }
+
+  /* ── section header ───────────────────────────────────────────────────── */
+  function _p30sectionHead(icon, title, color) {
+    return '<div style="display:flex;align-items:center;gap:7px;margin:14px 0 10px;padding-bottom:6px;border-bottom:1.5px solid '+color+'22;">'
+      +'<i class="fas fa-'+icon+'" style="color:'+color+';font-size:13px;"></i>'
+      +'<span style="font-size:12px;font-weight:800;color:'+color+';text-transform:uppercase;letter-spacing:.4px;">'+title+'</span>'
+      +'</div>';
+  }
+
+  /* ── product strip ────────────────────────────────────────────────────── */
+  function _p30productStrip(icon, label, detail, status, color) {
+    var sc = status==='Active'||status==='In Force'?'#059669':status==='Pending'?'#d97706':status==='Enrolled'?'#0891b2':'#6b7280';
+    return '<div style="display:flex;align-items:center;gap:10px;padding:9px 13px;background:#f8fafc;border-radius:10px;margin-bottom:7px;border-left:4px solid '+color+';">'
+      +'<div style="width:32px;height:32px;background:'+color+'1a;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
+      +'<i class="fas fa-'+icon+'" style="color:'+color+';font-size:14px;"></i></div>'
+      +'<div style="flex:1;">'
+      +'<div style="font-size:12px;font-weight:700;color:#111827;">'+label+'</div>'
+      +'<div style="font-size:10px;color:#6b7280;">'+detail+'</div>'
+      +'</div>'
+      +'<span style="font-size:10px;font-weight:700;color:'+sc+';background:'+sc+'1a;border-radius:20px;padding:2px 9px;border:1px solid '+sc+'33;">'+status+'</span>'
+      +'</div>';
+  }
+
+  /* ── mini claimant summary stat box ──────────────────────────────────── */
+  function _p30summaryBox(value, label, color) {
+    return '<div style="text-align:center;padding:12px 8px;background:#f8fafc;border-radius:10px;border:1.5px solid #e5e7eb;">'
+      +'<div style="font-size:22px;font-weight:800;color:'+color+';">'+value+'</div>'
+      +'<div style="font-size:9px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.4px;">'+label+'</div>'
+      +'</div>';
+  }
+
+  /* ── main render ──────────────────────────────────────────────────────── */
+  window.ltcOpenClaimDetail = function(claimId) {
+    var ltcData = (typeof ltcClaimsData !== 'undefined') ? ltcClaimsData : [];
+    var c = ltcData.find(function(x){ return x.id === claimId; });
+    if (!c) {
+      _L4toast('<i class="fas fa-exclamation-circle"></i> Claim ' + claimId + ' not found', 2000);
+      return;
+    }
+
+    /* care plan for this claimant */
+    var cpData = (typeof ltcCarePlanData !== 'undefined') ? ltcCarePlanData : [];
+    var cp = cpData.find(function(p){ return p.claimant === c.claimant; }) || null;
+
+    /* HAL policies — search by claimant carrier or generic demo pool */
+    var halData = (typeof halPoliciesData !== 'undefined') ? halPoliciesData : [];
+
+    /* register safe callbacks */
+    if (!window._p8actions) window._p8actions = {};
+    window._p8actions['p30-payment']    = function(){ _L4toast('<i class="fas fa-dollar-sign"></i> Payment processed · ACH queued to '+c.provider+' · Cycle scheduled', 3500); };
+    window._p8actions['p30-assess']     = function(){ _L4toast('<i class="fas fa-user-check"></i> RN Assessment scheduled · SMS sent to family · Care manager notified', 3500); };
+    window._p8actions['p30-careplan']   = function(){ _L4toast('<i class="fas fa-clipboard-list"></i> Care Plan editor opened · Pre-populated from last visit notes', 3200); };
+    window._p8actions['p30-provider']   = function(){ _L4toast('<i class="fas fa-hospital"></i> Provider Hub opened · '+c.provider+' · EVV dashboard loading', 3200); };
+    window._p8actions['p30-ai']         = function(){ _L4toast('<i class="fas fa-robot"></i> Full AI Analysis report generated · Emailed to care manager', 3200); };
+    window._p8actions['p30-contact']    = function(){ _L4toast('<i class="fas fa-phone"></i> Contacting family POA · HIPAA call logging active', 3000); };
+    window._p8actions['p30-upload']     = function(){ _L4toast('<i class="fas fa-upload"></i> Secure document upload opened · HIPAA-encrypted storage', 3000); };
+    window._p8actions['p30-request']    = function(){ _L4toast('<i class="fas fa-envelope"></i> Missing doc request sent to provider & physician · Follow-up in 5 days', 3200); };
+    window._p8actions['p30-carrier']    = function(){ _L4toast('<i class="fas fa-external-link-alt"></i> Carrier portal authenticated · '+c.carrier+' portal loading', 3000); };
+    window._p8actions['p30-export']     = function(){ _L4toast('<i class="fas fa-file-export"></i> Claimant 360 report exported · PDF queued · Delivered to supervisor', 3500); };
+    window._p8actions['p30-view-doc']   = function(){ _L4toast('<i class="fas fa-file-pdf"></i> Secure document viewer loading · HIPAA audit logged', 2800); };
+
+    /* computed values */
+    var initials = c.claimant.split(' ').map(function(w){ return w[0]; }).join('').slice(0,2).toUpperCase();
+    var adlLabel = c.assessScore >= 4 ? 'Severe' : c.assessScore === 3 ? 'Moderate-Severe' : c.assessScore === 2 ? 'Moderate' : 'Mild';
+    var cogLabel = c.cogScore < 10 ? 'Severe' : c.cogScore < 18 ? 'Moderate' : c.cogScore < 24 ? 'Mild' : 'Normal';
+    var statusColor = c.status === 'Active' ? '#059669' : c.status === 'Escalated' ? '#dc2626' : c.status === 'Review' ? '#d97706' : '#6b7280';
+    var riskScore = c.priority === 'urgent' ? 82 : c.priority === 'high' ? 65 : c.priority === 'medium' ? 44 : 28;
+    var dailyAmt = parseInt(c.dailyBenefit.replace(/\D/g,''), 10) || 180;
+    var totalPaid = '$' + (dailyAmt * c.daysOpen).toLocaleString();
+    var annualCost = '$' + (dailyAmt * 365).toLocaleString();
+
+    /* tab definitions */
+    var tabDefs = [
+      { label:'Overview',   icon:'th-large'         },
+      { label:'Clinical',   icon:'heartbeat'         },
+      { label:'Products',   icon:'layer-group'       },
+      { label:'Timeline',   icon:'history'           },
+      { label:'Documents',  icon:'folder-open'       },
+      { label:'Provider',   icon:'hospital'          },
+      { label:'Carrier',    icon:'building'          },
+      { label:'AI Insights',icon:'robot'             }
+    ];
+
+    var tabBarHtml = tabDefs.map(function(t, i) {
+      var active = i === 0;
+      return '<button id="p30-tab-' + i + '" onclick="ltcClaimTab(' + i + ',\'' + claimId + '\')" '
+        + 'style="display:flex;align-items:center;gap:5px;background:' + (active ? '#dc2626' : 'transparent') + ';'
+        + 'color:' + (active ? '#fff' : '#6b7280') + ';border:none;border-radius:6px;'
+        + 'padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">'
+        + '<i class="fas fa-' + t.icon + '" style="font-size:10px;"></i> ' + t.label + '</button>';
+    }).join('');
+
+    /* ── LEFT SIDEBAR ─────────────────────────────────────────────────── */
+    var adlPct = Math.round((c.assessScore / 5) * 100);
+    var cogPct  = Math.round((c.cogScore / 30) * 100);
+    var adlColor = c.assessScore >= 4 ? '#dc2626' : c.assessScore === 3 ? '#d97706' : '#0891b2';
+    var cogColor  = c.cogScore < 10 ? '#dc2626' : c.cogScore < 18 ? '#d97706' : '#059669';
+    var complexPct = riskScore;
+    var complexColor = riskScore > 70 ? '#dc2626' : riskScore > 50 ? '#d97706' : '#059669';
+
+    var sidebarHtml = ''
+      /* avatar */
+      + '<div style="text-align:center;padding:18px 16px 14px;">'
+      + '<div style="width:62px;height:62px;border-radius:50%;background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;font-size:22px;font-weight:800;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;border:3px solid #fff;box-shadow:0 4px 14px rgba(220,38,38,.35);">'
+      + initials + '</div>'
+      + '<div style="font-size:14px;font-weight:800;color:#111827;line-height:1.2;">' + c.claimant + '</div>'
+      + '<div style="font-size:11px;color:#6b7280;margin:3px 0;">Age ' + c.age + ' · ' + c.type + '</div>'
+      + _p30badge(c.status)
+      + '</div>'
+
+      /* divider */
+      + '<div style="border-top:1px solid #f1f5f9;margin:0 12px;"></div>'
+
+      /* policy summary */
+      + '<div style="padding:12px 16px;">'
+      + '<div style="font-size:9px;font-weight:800;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">CLAIM SUMMARY</div>'
+      + '<div style="font-size:11px;color:#374151;margin-bottom:5px;"><span style="font-weight:700;color:#6b7280;">Carrier:</span> ' + c.carrier + '</div>'
+      + '<div style="font-size:11px;color:#374151;margin-bottom:5px;"><span style="font-weight:700;color:#6b7280;">Product:</span> ' + c.product + '</div>'
+      + '<div style="font-size:11px;color:#374151;margin-bottom:5px;"><span style="font-weight:700;color:#6b7280;">Benefit:</span> <strong style="color:#059669;">' + c.dailyBenefit + '</strong></div>'
+      + '<div style="font-size:11px;color:#374151;margin-bottom:5px;"><span style="font-weight:700;color:#6b7280;">Provider:</span> ' + c.provider + '</div>'
+      + '<div style="font-size:11px;color:#374151;margin-bottom:5px;"><span style="font-weight:700;color:#6b7280;">Next Pmt:</span> <strong style="color:#dc2626;">' + c.paymentDue + '</strong></div>'
+      + '<div style="font-size:11px;color:#374151;"><span style="font-weight:700;color:#6b7280;">Days Open:</span> ' + c.daysOpen + ' days</div>'
+      + '</div>'
+
+      /* open full claim button */
+      + '<div style="padding:0 12px 10px;">'
+      + '<button onclick="_p8run(\'p30-export\')" style="width:100%;background:#dc2626;color:#fff;border:none;border-radius:8px;padding:9px 0;font-size:11px;font-weight:700;cursor:pointer;">'
+      + '<i class="fas fa-file-medical-alt" style="margin-right:5px;"></i>Open Full Claim</button>'
+      + '</div>'
+
+      /* divider */
+      + '<div style="border-top:1px solid #f1f5f9;margin:0 12px;"></div>'
+
+      /* clinical scores */
+      + '<div style="padding:12px 16px 16px;">'
+      + '<div style="font-size:9px;font-weight:800;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">CLINICAL SCORES</div>'
+      + _p30progressBar('ADL Impairment', c.assessScore, 5, adlColor, adlLabel)
+      + _p30progressBar('Cognitive (MMSE)', c.cogScore, 30, cogColor, cogLabel)
+      + _p30progressBar('Care Complexity', complexPct, 100, complexColor, riskScore > 70 ? 'High' : riskScore > 50 ? 'Moderate' : 'Low')
+      + '</div>'
+
+      /* 1st/2nd/3rd party source legend */
+      + '<div style="padding:0 16px 16px;">'
+      + '<div style="font-size:9px;font-weight:800;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">DATA SOURCES</div>'
+      + '<div style="display:flex;flex-direction:column;gap:4px;font-size:10px;">'
+      + '<div><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#dc2626;margin-right:4px;"></span><strong>1st Party</strong> LTCAS · eLTCAS · Claims</div>'
+      + '<div><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#0891b2;margin-right:4px;"></span><strong>2nd Party</strong> Provider EVV · Carrier Portal · Rx</div>'
+      + '<div><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#7c3aed;margin-right:4px;"></span><strong>3rd Party</strong> CMS · SDOH · What Care Costs</div>'
+      + '</div>'
+      + '</div>';
+
+    /* ── OVERVIEW TAB ─────────────────────────────────────────────────── */
+    function buildOverview() {
+      var careManager = cp ? cp.careManager : 'Sarah Johnson, RN';
+      var adlList = cp ? cp.adls : ['Bathing','Dressing','Toileting'];
+      var goals = cp ? cp.goals : 'Maintain current functional level';
+      var nextVisit = cp ? cp.nextVisit : 'TBD';
+
+      return ''
+        /* row 1: Contact & Profile + Claimant 360 Summary */
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">'
+
+        /* contact & profile */
+        + '<div style="background:#f8fafc;border-radius:10px;padding:14px;">'
+        + '<div style="font-size:10px;font-weight:800;color:#374151;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;"><i class="fas fa-address-card" style="color:#0891b2;margin-right:5px;"></i>Contact &amp; Profile</div>'
+        + '<div style="font-size:11px;color:#374151;line-height:1.8;">'
+        + '<div><i class="fas fa-envelope" style="width:14px;color:#9ca3af;"></i> margaret.obrien@email.com</div>'
+        + '<div><i class="fas fa-phone" style="width:14px;color:#9ca3af;"></i> (617) 555-0182</div>'
+        + '<div><i class="fas fa-map-marker-alt" style="width:14px;color:#9ca3af;"></i> Boston, MA 02118</div>'
+        + '<div><i class="fas fa-user-nurse" style="width:14px;color:#9ca3af;"></i> Care Setting: ' + c.type + '</div>'
+        + '<div><i class="fas fa-birthday-cake" style="width:14px;color:#9ca3af;"></i> DOB: Mar 14, 1948 (Age ' + c.age + ')</div>'
+        + '<div><i class="fas fa-heart" style="width:14px;color:#9ca3af;"></i> Marital Status: Widowed</div>'
+        + '</div>'
+        + '<div style="margin-top:8px;padding-top:8px;border-top:1px solid #e5e7eb;">'
+        + '<div style="font-size:10px;font-weight:700;color:#6b7280;margin-bottom:4px;">EMERGENCY CONTACT / POA</div>'
+        + '<div style="font-size:11px;color:#374151;"><i class="fas fa-user-friends" style="width:14px;color:#9ca3af;"></i> Patrick O\'Brien (Son) · (617) 555-0391</div>'
+        + '<div style="font-size:11px;color:#374151;"><i class="fas fa-file-signature" style="width:14px;color:#9ca3af;"></i> HIPAA Auth: ✅ · POA: ✅ on File</div>'
+        + '</div>'
+        + '</div>'
+
+        /* claimant 360 summary */
+        + '<div style="background:#f8fafc;border-radius:10px;padding:14px;">'
+        + '<div style="font-size:10px;font-weight:800;color:#374151;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;"><i class="fas fa-th-large" style="color:#dc2626;margin-right:5px;"></i>Claimant 360 Summary</div>'
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">'
+        + _p30summaryBox('1','LTC','#dc2626')
+        + _p30summaryBox('1','Health','#0d9488')
+        + _p30summaryBox('1','Annuity','#0891b2')
+        + _p30summaryBox('1','Life','#003087')
+        + '</div>'
+        + '<div style="font-size:11px;color:#374151;line-height:1.8;">'
+        + '<div><i class="fas fa-dollar-sign" style="width:14px;color:#059669;"></i> Total Benefit Utilized: <strong>' + totalPaid + '</strong></div>'
+        + '<div><i class="fas fa-calendar-check" style="width:14px;color:#0891b2;"></i> Annual Projected Cost: <strong>' + annualCost + '</strong></div>'
+        + '<div><i class="fas fa-user-md" style="width:14px;color:#7c3aed;"></i> Care Manager: <strong>' + careManager + '</strong></div>'
+        + '<div><i class="fas fa-clock" style="width:14px;color:#d97706;"></i> Claim Open: <strong>' + c.daysOpen + ' days</strong></div>'
+        + '</div>'
+        + '</div>'
+        + '</div>'
+
+        /* 4 metric cards */
+        + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;">'
+        + _p30kpi(c.assessScore+'/5','ADL Score','hands-helping',adlColor,adlLabel+' impairment')
+        + _p30kpi(c.cogScore+'/30','MMSE Score','brain',cogColor,cogLabel+' cognition')
+        + _p30kpi('98.2%','Billing Accuracy','shield-alt','#059669','No overbilling flags')
+        + _p30kpi('12/100','Fraud Score','eye','#059669','Clear · No anomalies')
+        + '</div>'
+
+        /* next action banner */
+        + '<div style="background:#fef2f2;border:1.5px solid #fecaca;border-radius:10px;padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;">'
+        + '<div>'
+        + '<div style="font-size:10px;font-weight:800;color:#dc2626;text-transform:uppercase;margin-bottom:2px;"><i class="fas fa-exclamation-triangle" style="margin-right:4px;"></i>Next Required Action</div>'
+        + '<div style="font-size:13px;font-weight:700;color:#7f1d1d;">' + c.nextAction + '</div>'
+        + '<div style="font-size:10px;color:#9ca3af;">Due: ' + c.paymentDue + ' · Assigned: ' + careManager + '</div>'
+        + '</div>'
+        + '<button onclick="_p8run(\'p30-assess\')" style="background:#dc2626;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">'
+        + '<i class="fas fa-calendar-check" style="margin-right:4px;"></i>Schedule Now</button>'
+        + '</div>'
+
+        /* coverage gaps */
+        + '<div style="background:#fffbeb;border:1.5px solid #fde68a;border-radius:10px;padding:11px 14px;margin-bottom:12px;">'
+        + '<div style="font-size:10px;font-weight:800;color:#d97706;text-transform:uppercase;margin-bottom:6px;"><i class="fas fa-exclamation-circle" style="margin-right:4px;"></i>Coverage Gaps &amp; Opportunities</div>'
+        + '<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        + '<span style="background:#d9770622;color:#d97706;border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700;">No Medicare Supplement</span>'
+        + '<span style="background:#0891b222;color:#0891b2;border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700;">No Annuity (income gap)</span>'
+        + '<span style="background:#dc262622;color:#dc2626;border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700;">No Life for estate planning</span>'
+        + '</div>'
+        + '</div>'
+
+        /* product status strips */
+        + _p30sectionHead('layer-group','Product Coverage Status','#003087')
+        + _p30productStrip('file-medical','LTC — '+c.product, c.carrier+' · '+c.dailyBenefit+' · Claim '+c.id,'Active','#dc2626')
+        + _p30productStrip('heartbeat','Health — Medicare Part A/B','CMS Direct Enrollment · Enrolled 2024','Enrolled','#0d9488')
+        + _p30productStrip('chart-line','Annuity','No HAL annuity on file — Coverage gap identified','Pending','#0891b2')
+        + _p30productStrip('shield-alt','Life Insurance','No HAL life policy on file — Estate planning gap','Pending','#003087')
+
+        /* 3rd party benchmark */
+        + _p30sectionHead('globe','What Care Costs — Market Benchmark','#7c3aed')
+        + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;">'
+        + _p30kpi('$185/d','Median SNF Rate','bed','#7c3aed','Boston metro 2026')
+        + _p30kpi(c.dailyBenefit,'Your Benefit','dollar-sign','#059669','vs. $185/d median')
+        + _p30kpi(c.dailyBenefit.replace('/day','')>'185'?'Above':'At/Below','Benefit vs Market','chart-bar','#0891b2','Adequately funded')
+        + '</div>';
+    }
+
+    /* ── CLINICAL TAB ─────────────────────────────────────────────────── */
+    function buildClinical() {
+      var adlList = cp ? cp.adls : ['Bathing','Dressing','Toileting','Mobility'];
+      return ''
+        + _p30sectionHead('heartbeat','ADL Assessment — 1st Party (LTCAS)','#dc2626')
+        + '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:12px;">'
+        + ['Bathing','Dressing','Toileting','Eating','Transfer'].map(function(adl){
+            var impaired = adlList.indexOf(adl) > -1;
+            return '<div style="text-align:center;padding:10px 6px;border-radius:8px;background:'+(impaired?'#fef2f2':'#f0fdf4')+';border:1.5px solid '+(impaired?'#fecaca':'#bbf7d0')+'">'
+              +'<i class="fas fa-'+(impaired?'times-circle':'check-circle')+'" style="color:'+(impaired?'#dc2626':'#059669')+';font-size:16px;"></i>'
+              +'<div style="font-size:10px;font-weight:700;color:#374151;margin-top:4px;">'+adl+'</div>'
+              +'<div style="font-size:9px;color:'+(impaired?'#dc2626':'#059669')+';font-weight:600;">'+(impaired?'Impaired':'Independent')+'</div>'
+              +'</div>';
+          }).join('')
+        + '</div>'
+        + _p30progressBar('ADL Impairment Score',c.assessScore,5,adlColor,'Moderate — '+c.assessScore+' of 5 ADLs impaired')
+
+        + _p30sectionHead('brain','Cognitive Assessment — MMSE','#7c3aed')
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">'
+        + _p30row('MMSE Score', c.cogScore + '/30 — ' + cogLabel + ' Impairment')
+        + _p30row('Clock Draw Test', 'Score 3/5 — Mild executive dysfunction')
+        + _p30row('MoCA Assessment', '18/30 — Administered Jun 28, 2026')
+        + _p30row('Last Cognitive Eval', 'Jul 3, 2026 — Telephonic RN')
+        + _p30row('Dementia Dx', c.cogScore < 18 ? 'Moderate Alzheimer\'s — ICD-10: G30.1' : 'Mild Cognitive Impairment')
+        + _p30row('Memory Care Referral', c.cogScore < 18 ? '✅ Referred — Accepted' : '⚠️ Under Review')
+        + '</div>'
+        + _p30progressBar('MMSE Score',c.cogScore,30,cogColor,cogLabel+' cognition')
+
+        + _p30sectionHead('pills','Medication Profile — 2nd Party (Pharmacy Exchange)','#0891b2')
+        + '<div style="background:#f8fafc;border-radius:10px;padding:13px;margin-bottom:12px;">'
+        + ['Donepezil 10mg — Cognitive (daily)','Metoprolol 50mg — Cardiac (BID)','Lisinopril 10mg — Hypertension (daily)','Aspirin 81mg — Anticoagulant (daily)','Omeprazole 20mg — GI (daily)'].map(function(med, i){
+            return '<div style="display:flex;align-items:center;gap:10px;padding:7px 0;'+(i>0?'border-top:1px solid #e5e7eb;':'')+'">'
+              +'<i class="fas fa-pills" style="color:#0891b2;font-size:12px;"></i>'
+              +'<span style="font-size:11px;color:#374151;">'+med+'</span>'
+              +'<span style="margin-left:auto;font-size:10px;font-weight:700;color:#059669;background:#f0fdf4;border-radius:20px;padding:2px 8px;border:1px solid #bbf7d0;">Refilled</span>'
+              +'</div>';
+          }).join('')
+        + '<div style="margin-top:8px;padding-top:8px;border-top:1px solid #e5e7eb;font-size:10px;color:#9ca3af;">'
+        + '<i class="fas fa-database" style="margin-right:4px;"></i>Source: CVS Caremark Pharmacy Exchange · Last sync: Jul 8, 2026</div>'
+        + '</div>'
+
+        + _p30sectionHead('hospital','Hospital Admissions — 3rd Party (HIE)','#d97706')
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">'
+        + [ ['Mar 2026','St. Elizabeth Medical','3 days · Fall-related hip fx · Dx: S72.001A','#dc2626'],
+            ['Nov 2025','Boston Medical Center','2 days · UTI · Resolved · Discharge to SNF','#0891b2'],
+            ['Jun 2025','Brigham & Women\'s','1 day · Dehydration · Resolved · Home discharge','#059669'],
+            ['Jan 2025','St. Elizabeth Medical','4 days · Pneumonia · Resolved · SNF placement triggered','#d97706'] ].map(function(h){
+              return '<div style="background:#f8fafc;border-radius:8px;padding:10px;border-left:3px solid '+h[3]+'">'
+                +'<div style="font-size:10px;font-weight:700;color:'+h[3]+';margin-bottom:3px;">'+h[0]+' — '+h[1]+'</div>'
+                +'<div style="font-size:10px;color:#374151;">'+h[2]+'</div>'
+                +'</div>';
+            }).join('')
+        + '</div>'
+        + '<div style="font-size:10px;color:#9ca3af;margin-bottom:12px;"><i class="fas fa-database" style="margin-right:4px;"></i>Source: MA Health Information Exchange (HIE) · CMS Admission/Discharge feed</div>'
+
+        + _p30sectionHead('chart-line','Functional Trajectory — AI Trend','#7c3aed')
+        + _p30aiPanel(
+            'ADL trend: score worsened from 1/5 (Jun 2025) → 2/5 (Jan 2026) → 2/5 (Jul 2026). Plateau detected — no further decline in 6 months. '
+            +'Cognitive trend: MMSE 22 (Jan 2025) → 19 (Jun 2025) → 16 (Jan 2026) → 14 (Jul 2026) — progressive decline averaging ~2 pts/6 months. '
+            +'AI projects MMSE below 10 (severe) by Q2 2027. Recommend memory care transition planning now. '
+            +'Fall risk: HIGH (3 ER visits in 18 months). PT/OT evaluation recommended. Care Complexity Score: ' + riskScore + '/100 — ' + (riskScore > 70 ? 'High' : 'Moderate') + '.'
+          )
+        + '<div style="font-size:10px;color:#9ca3af;"><i class="fas fa-database" style="margin-right:4px;"></i>Source: eLTCAS Clinical Intelligence Module · LTCAS Assessment History</div>';
+    }
+
+    /* ── PRODUCTS TAB ─────────────────────────────────────────────────── */
+    function buildProducts() {
+      return ''
+        /* LTC */
+        + _p30sectionHead('file-medical','LTC Policy — 1st Party (LTCAS)','#dc2626')
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">'
+        + _p30row('Claim ID', c.id)
+        + _p30row('Carrier', c.carrier)
+        + _p30row('Product', c.product)
+        + _p30row('Policy Number', 'PRU-LTC-2024-88192')
+        + _p30row('Policy Status', '✅ In Force — No Lapse')
+        + _p30row('Daily Benefit', c.dailyBenefit + ' (inflating 3% compound)')
+        + _p30row('Elimination Period', '90 days — Satisfied as of Claim Open')
+        + _p30row('Benefit Period', 'Lifetime Benefit Rider')
+        + _p30row('Max Lifetime Benefit', '$328,500 · Utilized: ' + totalPaid + ' ('+Math.round((parseInt(totalPaid.replace(/\D/g,''))/328500)*100)+'%)')
+        + _p30row('Claim Status', _p30badge(c.status))
+        + _p30row('Days Open', c.daysOpen + ' days (30-day avg: 28)')
+        + _p30row('TPA Contract', 'illumifin TPA · Exp 2029')
+        + '</div>'
+
+        /* Health */
+        + _p30sectionHead('heartbeat','Health Coverage — 2nd Party (CMS/Carrier Portal)','#0d9488')
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">'
+        + _p30row('Medicare Part A','✅ Enrolled · Hospital coverage active')
+        + _p30row('Medicare Part B','✅ Enrolled · Medical coverage active')
+        + _p30row('Medicare Part D','✅ CVS Caremark PDP · Premium: $48/mo')
+        + _p30row('Medicare Supplement','⚠️ None on file — Coverage gap')
+        + _p30row('Medicaid','Not enrolled — Assets above threshold')
+        + _p30row('Prior Auth Status','SNF stay: ✅ Approved through Sep 2026')
+        + _p30row('Last EOB Date','Jul 1, 2026 · $4,200 billed · $3,780 paid')
+        + _p30row('Source','CMS Medicare Portal · Carrier EDI 835 feed')
+        + '</div>'
+        + '<div style="background:#f0fdfa;border:1px solid #99f6e4;border-radius:8px;padding:10px 13px;margin-bottom:12px;font-size:10px;color:#0d9488;">'
+        + '<i class="fas fa-info-circle" style="margin-right:4px;"></i>'
+        + '<strong>Coordination of Benefits (COB):</strong> Medicare Part A pays first for SNF stays. LTC benefit applies after Medicare 100-day SNF limit. Current LTC benefit day count: ' + c.daysOpen + ' of lifetime benefit.'
+        + '</div>'
+
+        /* Annuity */
+        + _p30sectionHead('chart-line','Annuity — HAL TPA System','#0891b2')
+        + '<div style="background:#f0f9ff;border:1.5px solid #bae6fd;border-radius:10px;padding:13px;margin-bottom:12px;">'
+        + '<div style="font-size:11px;color:#0369a1;margin-bottom:8px;"><i class="fas fa-exclamation-circle" style="margin-right:5px;"></i><strong>No annuity policy on file for this claimant in HAL system.</strong></div>'
+        + '<div style="font-size:11px;color:#374151;">Fixed annuities (Pacific Life, 5-yr) are available through HAL\'s portfolio. Given claimant\'s LTC cost trajectory of <strong>' + annualCost + '/yr</strong>, an income annuity could provide sustainable LTC funding. Referral to financial guardian/POA recommended.</div>'
+        + '<div style="margin-top:8px;"><button onclick="_p8run(\'p30-assess\')" style="background:#0891b2;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:10px;font-weight:700;cursor:pointer;"><i class="fas fa-plus" style="margin-right:4px;"></i>Initiate Annuity Referral</button></div>'
+        + '</div>'
+
+        /* Life */
+        + _p30sectionHead('shield-alt','Life Insurance — HAL TPA System','#003087')
+        + '<div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:10px;padding:13px;margin-bottom:12px;">'
+        + '<div style="font-size:11px;color:#1e40af;margin-bottom:8px;"><i class="fas fa-exclamation-circle" style="margin-right:5px;"></i><strong>No life policy on file for this claimant in HAL system.</strong></div>'
+        + '<div style="font-size:11px;color:#374151;">HAL administers Lincoln National (Group Life) and CUNA Mutual (Whole Life) blocks. Estate planning review recommended — claimant has one dependent (son, POA). Final expense coverage and legacy planning may be relevant for family discussion.</div>'
+        + '<div style="margin-top:8px;"><button onclick="_p8run(\'p30-contact\')" style="background:#003087;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:10px;font-weight:700;cursor:pointer;"><i class="fas fa-user-friends" style="margin-right:4px;"></i>Contact Family/POA</button></div>'
+        + '</div>'
+
+        /* benefit utilization */
+        + _p30sectionHead('percentage','Benefit Utilization Summary','#059669')
+        + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">'
+        + _p30kpi(totalPaid,'Total LTC Paid','dollar-sign','#059669',c.daysOpen+' days × '+c.dailyBenefit)
+        + _p30kpi(annualCost,'Annual Run Rate','calendar','#d97706','Projected LTC cost')
+        + _p30kpi(Math.round((parseInt(totalPaid.replace(/\D/g,''))/328500)*100)+'%','Max Benefit Used','chart-pie','#0891b2','of $328,500 lifetime')
+        + '</div>';
+    }
+
+    /* ── TIMELINE TAB ─────────────────────────────────────────────────── */
+    function buildTimeline() {
+      var openDate = new Date(2026, 5, 9 + 14 - c.daysOpen); // approximate
+      return ''
+        + _p30sectionHead('history','Claim Lifecycle Timeline — 1st Party (LTCAS)','#0891b2')
+        + '<div style="position:relative;padding-left:4px;margin-bottom:14px;">'
+        + _p30timelineItem('Claim Intake & Policy Match','Jun ' + (25) + ', 2026','Policy PRU-LTC-2024-88192 matched · Elimination period (90 days) verified · HIPAA authorization collected · Intake RN assigned','#059669')
+        + _p30timelineItem('Initial Telephonic RN Assessment','Jun 28, 2026','ADL: ' + c.assessScore + '/5 · MMSE equivalent: ' + c.cogScore + '/30 · Care setting: ' + c.type + ' confirmed · Assessment report filed in LTCAS','#0891b2')
+        + _p30timelineItem('Eligibility & Fraud Screening','Jun 30, 2026','AI fraud score: 12/100 (Clear) · Policy in force verified with ' + c.carrier + ' carrier portal · COB with Medicare confirmed · No duplicate claims','#7c3aed')
+        + _p30timelineItem('Benefit Authorization Issued','Jul 2, 2026','$' + dailyAmt + '/day authorized · Provider ' + c.provider + ' network verified · W-9 on file · EVV integration activated','#d97706')
+        + _p30timelineItem('First Payment Processed','Jul 5, 2026','ACH transfer: $' + (dailyAmt * 7).toLocaleString() + ' (7 days) · Payment integrity check: ✅ passed · Provider billing matched care plan','#059669')
+        + _p30timelineItem('Care Plan Review Meeting','Jul 3, 2026','RN Sarah Johnson on-site visit · ADL reassessment: no change · Goals updated · Next visit: ' + (cp ? cp.nextVisit : 'Jul 10, 2026'),'#0891b2')
+        + _p30timelineItem(c.nextAction,'Jul 9, 2026 — TODAY','<span style="color:#dc2626;font-weight:700;">⚠️ Action Required</span> · Assigned to care manager · SLA: 5 business days','#dc2626')
+        + '</div>'
+
+        + _p30sectionHead('hospital','Hospital/Clinical Events — 3rd Party (HIE)','#d97706')
+        + '<div style="position:relative;padding-left:4px;margin-bottom:14px;">'
+        + _p30timelineItem('SNF Placement — St. Elizabeth Medical','Mar 2026','Hip fracture (S72.001A) · 3-day inpatient · Discharge directly to ' + c.provider + ' SNF · Triggered LTC claim','#dc2626')
+        + _p30timelineItem('UTI Hospitalization','Nov 2025','2-day inpatient · Boston Medical Center · Resolved · Return to prior SNF','#d97706')
+        + _p30timelineItem('Medicare Part A SNF Benefit Exhausted','Feb 2026','100 SNF days used · Medicare Part A benefit expired · LTC policy activation triggered · eLTCAS COB automated','#7c3aed')
+        + '</div>'
+
+        + _p30sectionHead('pills','Pharmacy Events — 2nd Party (CVS Caremark)','#0d9488')
+        + '<div style="position:relative;padding-left:4px;">'
+        + _p30timelineItem('Donepezil Initiated','Jan 2026','10mg/day prescribed by Dr. Thompson · Dementia care protocol · Auto-refill enrolled','#059669')
+        + _p30timelineItem('Medication Reconciliation','Jul 1, 2026','All 5 medications reconciled with SNF medication administration record (MAR) · No discrepancies','#059669')
+        + '</div>';
+    }
+
+    /* ── DOCUMENTS TAB ────────────────────────────────────────────────── */
+    function buildDocuments() {
+      return ''
+        + _p30sectionHead('folder-open','Claim Documents — 1st Party (LTCAS Document Store)','#d97706')
+        + _p30docRow('Attending Physician Statement (APS)','Dr. Sarah Thompson, MD','Jun 28, 2026','✅ Received','PDF')
+        + _p30docRow('ADL Assessment Report — Initial','RN Sarah Johnson, LTCAS','Jul 3, 2026','✅ Received','PDF')
+        + _p30docRow('Insurance Policy — PRU-LTC-2024-88192',c.carrier,'Jan 14, 2024','✅ On File','PDF')
+        + _p30docRow('Care Plan (Current Version)','Sarah Johnson, RN · '+c.provider,'Jul 1, 2026','⚠️ Review Required','PDF')
+        + _p30docRow('HIPAA Authorization Form','Margaret O\'Brien (Claimant)','Jun 25, 2026','✅ Received','PDF')
+        + _p30docRow('Power of Attorney — Patrick O\'Brien','Patrick O\'Brien (Son)','Mar 2024','✅ Verified','PDF')
+
+        + _p30sectionHead('file-signature','EVV & Provider Records — 2nd Party (CareExchange)','#0891b2')
+        + _p30docRow('EVV Visit Log — Jun 2026','CareExchange Platform','Jul 1, 2026','✅ GPS Verified','EVV')
+        + _p30docRow('Provider Invoice — Jun 2026',c.provider,'Jul 3, 2026','✅ Matched to Care Plan','PDF')
+        + _p30docRow('Provider License & W-9',c.provider,'Mar 2026','✅ Current · Exp Dec 2027','PDF')
+        + _p30docRow('CMS CASPER Quality Report',c.provider+' · CMS.gov','Jun 30, 2026','✅ 4.5 Stars','PDF')
+
+        + _p30sectionHead('hospital','Clinical Records — 3rd Party (HIE / Hospital)','#7c3aed')
+        + _p30docRow('Hospital Discharge Summary — Mar 2026','St. Elizabeth Medical Center','Mar 28, 2026','✅ On File','PDF')
+        + _p30docRow('MoCA Assessment — Jun 2026','Dr. Thompson (Neurology)','Jun 20, 2026','✅ Received','PDF')
+        + _p30docRow('Radiology Report — Hip X-Ray','St. Elizabeth Radiology','Mar 22, 2026','✅ On File','PDF')
+
+        + '<div style="display:flex;gap:8px;margin-top:14px;">'
+        + '<button onclick="_p8run(\'p30-upload\')" style="background:#d97706;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-upload" style="margin-right:4px;"></i>Upload Document</button>'
+        + '<button onclick="_p8run(\'p30-request\')" style="background:#6b7280;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-envelope" style="margin-right:4px;"></i>Request Missing Docs</button>'
+        + '</div>';
+    }
+
+    /* ── PROVIDER TAB ─────────────────────────────────────────────────── */
+    function buildProvider() {
+      return ''
+        + _p30sectionHead('hospital','Provider Details — 2nd Party (Provider Hub)','#0891b2')
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">'
+        + _p30row('Provider Name', c.provider)
+        + _p30row('Type', c.type === 'Nursing Home' ? 'Skilled Nursing Facility (SNF)' : c.type === 'Home Health' ? 'Home Health Agency (HHA)' : c.type === 'ALF' ? 'Assisted Living Facility' : 'Memory Care Facility')
+        + _p30row('Network Status','✅ In-Network · Preferred Tier')
+        + _p30row('NPI Number','1234567890 · Active · Verified')
+        + _p30row('License Status','✅ Licensed · MA DPH · Current through Dec 2027')
+        + _p30row('W-9 Status','✅ On File · Expires Dec 2027')
+        + _p30row('EVV Integration','✅ CareExchange GPS-backed · Real-time')
+        + _p30row('Average Daily Rate','$218/day (benefit: '+c.dailyBenefit+')')
+        + _p30row('Billing Accuracy','98.2% clean claims over 45-day period')
+        + _p30row('Last Billing Dispute','None in 12 months')
+        + '</div>'
+
+        + _p30sectionHead('star','CMS Star Ratings — 3rd Party (CMS CASPER)','#d97706')
+        + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;">'
+        + _p30kpi('4.5★','Overall Rating','star','#d97706','Above avg (4.1★ network)')
+        + _p30kpi('4★','Health Inspections','clipboard-check','#059669','0 deficiencies YTD')
+        + _p30kpi('5★','Staffing','users','#059669','RN hrs exceed CMS min')
+        + _p30kpi('4★','Quality Measures','chart-bar','#0891b2','Top quartile MA')
+        + '</div>'
+        + '<div style="font-size:10px;color:#9ca3af;margin-bottom:12px;"><i class="fas fa-database" style="margin-right:4px;"></i>Source: CMS CASPER/Five Star Quality Rating System · Last updated Jun 30, 2026</div>'
+
+        + _p30sectionHead('file-invoice-dollar','EVV & Billing Intelligence — 2nd Party','#059669')
+        + _p30aiPanel(
+            'Provider <strong>' + c.provider + '</strong> shows strong performance across all tracked dimensions. '
+            + 'Billing matches care plan with 98.2% accuracy over ' + c.daysOpen + '-day claim period. '
+            + 'EVV GPS data confirms all scheduled visits occurred at correct location and duration. '
+            + 'No anomalies in visit patterns. CMS 4.5-star rating is above network average (4.1★). '
+            + 'Zero billing disputes in 12 months. Recommend continued preferred provider status.'
+          )
+
+        + '<div style="display:flex;gap:8px;margin-top:12px;">'
+        + '<button onclick="_p8run(\'p30-contact\')" style="background:#0891b2;color:#fff;border:none;border-radius:8px;padding:9px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-phone" style="margin-right:4px;"></i>Contact Provider</button>'
+        + '<button onclick="_p8run(\'p30-assess\')" style="background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:9px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-map-marker-alt" style="margin-right:4px;"></i>Schedule Site Visit</button>'
+        + '<button onclick="navigateTo(\'healthcare-provider-360\')" style="background:#003087;color:#fff;border:none;border-radius:8px;padding:9px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-id-badge" style="margin-right:4px;"></i>Full Provider 360</button>'
+        + '</div>';
+    }
+
+    /* ── CARRIER TAB ──────────────────────────────────────────────────── */
+    function buildCarrier() {
+      return ''
+        + _p30sectionHead('building','Carrier Details — 2nd Party (Carrier Portal)','#003087')
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">'
+        + _p30row('Carrier', c.carrier)
+        + _p30row('Product', c.product)
+        + _p30row('Policy Number','PRU-LTC-2024-88192')
+        + _p30row('Policy Status','✅ In Force · No Lapse History')
+        + _p30row('Elimination Period','90 days — Satisfied')
+        + _p30row('Benefit Period','Lifetime Benefit Rider')
+        + _p30row('Daily Benefit',c.dailyBenefit+' · Inflation: 3% Compound')
+        + _p30row('Max Lifetime Benefit','$328,500')
+        + _p30row('Claim Adjudication SLA','5 business days · illumifin TPA')
+        + _p30row('TPA Contract Expiry','2029 — Auto-renewal clause')
+        + _p30row('Carrier SLA Score','97.2% (SLA met on all claims YTD)')
+        + _p30row('EDI Integration','✅ 837/835 live feed · Real-time adjudication')
+        + '</div>'
+
+        + _p30sectionHead('chart-line','Carrier Portal Intelligence — 2nd Party','#003087')
+        + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px;">'
+        + _p30kpi('$48M/mo','Prudential Block','building','#003087','illumifin TPA managed')
+        + _p30kpi('320K','Total Policies','file-alt','#0891b2','Prudential LTC+Life')
+        + _p30kpi('97.2%','SLA Score','check-circle','#059669','Claims adjudication')
+        + '</div>'
+
+        + _p30sectionHead('exchange-alt','COB & Coordination — eLTCAS COB Module','#7c3aed')
+        + '<div style="background:#f5f3ff;border:1.5px solid #ddd6fe;border-radius:10px;padding:13px;margin-bottom:12px;font-size:11px;color:#374151;line-height:1.7;">'
+        + '<strong style="color:#7c3aed;">Coordination of Benefits (COB) — Automated via eLTCAS:</strong><br>'
+        + '• Medicare Part A: Primary payer for SNF stay (days 1–100). Benefit exhausted Feb 2026.<br>'
+        + '• LTC Policy: Secondary payer activates Day 101+. Current LTC benefit days: ' + c.daysOpen + '<br>'
+        + '• Medicare Part B: Covers physician services concurrent with SNF stay.<br>'
+        + '• Medicare Part D: Rx coverage via CVS Caremark. No LTC drug cost.<br>'
+        + '• Medicaid: Claimant asset threshold not met — Medicaid not applicable.<br>'
+        + '<strong style="color:#059669;">No COB conflicts detected. eLTCAS automated COB reconciliation passed.</strong>'
+        + '</div>'
+
+        + _p30aiPanel(
+            'illumifin manages all LTC claims for <strong>' + c.carrier + '</strong> under TPA Agreement expiring 2029. '
+            + 'Policy PRU-LTC-2024-88192 is in force with no lapses. Elimination period satisfied. '
+            + 'Inflation rider (3% compound) increases daily benefit to ~$185/day in 2027. '
+            + 'COB with Medicare automated via eLTCAS. All adjudication is within 5-day SLA. '
+            + 'Carrier contract renewal assessment due Q4 2028. Current risk rating: ✅ Green (SLA 97.2%).'
+          )
+        + '<div style="display:flex;gap:8px;margin-top:12px;">'
+        + '<button onclick="_p8run(\'p30-carrier\')" style="background:#003087;color:#fff;border:none;border-radius:8px;padding:9px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-external-link-alt" style="margin-right:4px;"></i>Carrier Portal</button>'
+        + '<button onclick="navigateTo(\'insurance-carrier-360\')" style="background:#0891b2;color:#fff;border:none;border-radius:8px;padding:9px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-id-badge" style="margin-right:4px;"></i>Full Carrier 360</button>'
+        + '</div>';
+    }
+
+    /* ── AI INSIGHTS TAB ──────────────────────────────────────────────── */
+    function buildAIInsights() {
+      return ''
+        + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;">'
+        + _p30kpi(riskScore+'/100','Urgency Score','exclamation-circle',riskScore>70?'#dc2626':riskScore>50?'#d97706':'#059669','AI composite risk')
+        + _p30kpi('12/100','Fraud Score','shield-alt','#059669','Clear · No anomalies')
+        + _p30kpi(c.daysOpen,'Days Open','clock','#0891b2','vs 28-day network avg')
+        + _p30kpi('A-','SDOH Risk','map-marker-alt','#d97706','Moderate social risk')
+        + '</div>'
+
+        + _p30sectionHead('brain','Clinical AI — eLTCAS Intelligence Module','#7c3aed')
+        + _p30card(
+            '<i class="fas fa-heartbeat" style="margin-right:4px;"></i>Functional & Cognitive Analysis',
+            'ADL score ' + c.assessScore + '/5 indicates <strong>' + adlLabel + '</strong> functional limitation — SNF placement is clinically appropriate. '
+            + 'MMSE ' + c.cogScore + '/30 corresponds to <strong>' + cogLabel + '</strong> cognitive impairment. '
+            + 'Progressive decline trajectory (avg -2 pts MMSE per 6 months) projects MMSE below 10 (severe) by Q2 2027. '
+            + 'Fall risk: HIGH — 3 ER visits in 18 months. Recommend PT/OT evaluation and falls prevention protocol.',
+            '#7c3aed'
+          )
+
+        + _p30sectionHead('dollar-sign','Financial AI — Payment Integrity Engine','#059669')
+        + _p30card(
+            '<i class="fas fa-dollar-sign" style="margin-right:4px;"></i>Financial Analysis',
+            'Daily benefit ' + c.dailyBenefit + ' · ' + c.daysOpen + ' days open · Total paid: <strong>' + totalPaid + '</strong>. '
+            + 'Annual run rate: <strong>' + annualCost + '</strong> vs. What Care Costs Boston SNF median $67,525/yr. '
+            + 'Provider billing 98.2% clean — no overbilling detected. '
+            + 'Inflation rider activates Jan 1, 2027 (+3% compound) → benefit increases to $185.40/day. '
+            + 'Lifetime benefit utilization: ' + Math.round((parseInt(totalPaid.replace(/\D/g,''))/328500)*100) + '% of $328,500 max. Reserve adequacy: ✅.',
+            '#059669'
+          )
+
+        + _p30sectionHead('shield-alt','Fraud & Compliance AI','#0891b2')
+        + _p30card(
+            '<i class="fas fa-shield-alt" style="margin-right:4px;"></i>Payment Integrity & Fraud Detection',
+            'Fraud score: <strong>12/100 — Clear</strong>. No anomalies in billing patterns. '
+            + 'Provider visit frequency matches care plan prescriptions. No duplicate claims detected across LTCAS, CMS, and pharmacy feeds. '
+            + 'HIPAA audit trail: all data access logged and immutable. '
+            + 'Policy outside contestability window (>2 years in force). '
+            + 'Bad-faith risk: Low. SLA status: ' + (c.daysOpen > 30 ? '⚠️ Extended open — review SLA standing' : '✅ Within 5-business-day SLA') + '.',
+            '#0891b2'
+          )
+
+        + _p30sectionHead('map-marker-alt','SDOH Risk Assessment — 3rd Party (SDOH Analytics)','#d97706')
+        + '<div style="background:#fffbeb;border:1.5px solid #fde68a;border-radius:10px;padding:13px;margin-bottom:12px;">'
+        + '<div style="margin-bottom:8px;display:flex;flex-wrap:wrap;gap:6px;">'
+        + _p30sdohTag('Social Isolation Risk: Moderate','#d97706')
+        + _p30sdohTag('Food Security: Stable (SNF provides)','#059669')
+        + _p30sdohTag('Housing: Stable (SNF residence)','#059669')
+        + _p30sdohTag('Transportation: N/A','#9ca3af')
+        + _p30sdohTag('Economic Strain: Moderate (fixed income)','#d97706')
+        + _p30sdohTag('Family Engagement: Active POA','#059669')
+        + _p30sdohTag('Language: English — Primary','#059669')
+        + '</div>'
+        + '<div style="font-size:10px;color:#9ca3af;"><i class="fas fa-database" style="margin-right:4px;"></i>Source: SDOH Analytics Platform · Gravity Project Z-codes · CMS ADI Score</div>'
+        + '</div>'
+
+        + _p30sectionHead('chart-bar','What Care Costs Benchmarks — 3rd Party','#0d9488')
+        + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;">'
+        + _p30kpi('$6,159/mo','Boston SNF Median','bed','#0d9488','What Care Costs 2026')
+        + _p30kpi('$5,400/mo','LTC Benefit','dollar-sign','#059669','$180/day × 30')
+        + _p30kpi('-10%','Benefit Gap','exclamation-triangle','#d97706','$759/mo out-of-pocket')
+        + '</div>'
+        + '<div style="font-size:10px;color:#9ca3af;margin-bottom:12px;"><i class="fas fa-database" style="margin-right:4px;"></i>Source: Genworth What Care Costs 2026 Survey · Boston-Cambridge MSA</div>'
+
+        + '<div style="display:flex;gap:8px;margin-top:14px;">'
+        + '<button onclick="_p8run(\'p30-ai\')" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-file-export" style="margin-right:4px;"></i>Export AI Report</button>'
+        + '<button onclick="_p8run(\'p30-assess\')" style="background:#dc2626;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-flag" style="margin-right:4px;"></i>Flag for Review</button>'
+        + '</div>';
+    }
+
+    /* ── MODAL SHELL ──────────────────────────────────────────────────── */
+    var initialContent = buildOverview();
+
+    _L4overlay('ltc-claim-detail-ov',
+      '<div style="background:#fff;border-radius:16px;width:900px;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 28px 70px rgba(0,0,0,.32);">'
+
+      /* header */
+      + '<div style="background:linear-gradient(135deg,#dc2626,#b91c1c);padding:16px 22px;border-radius:16px 16px 0 0;color:#fff;flex-shrink:0;">'
+      + '<div style="display:flex;align-items:center;gap:12px;">'
+      + '<div style="width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;">' + initials + '</div>'
+      + '<div>'
+      + '<div style="font-size:16px;font-weight:800;">' + c.claimant + '</div>'
+      + '<div style="font-size:11px;opacity:.85;">' + c.id + ' · ' + c.type + ' · ' + c.carrier + ' · ' + c.product + '</div>'
+      + '</div>'
+      + '<div style="margin-left:auto;display:flex;align-items:center;gap:10px;">'
+      + _p30badge(c.status)
+      + '<button onclick="_L4close(\'ltc-claim-detail-ov\')" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:12px;font-weight:700;">✕ Close</button>'
+      + '</div></div>'
+      /* tab bar */
+      + '<div style="display:flex;gap:3px;margin-top:12px;flex-wrap:wrap;">' + tabBarHtml + '</div>'
+      + '</div>'
+
+      /* body: sidebar + content */
+      + '<div style="display:flex;flex:1;overflow:hidden;">'
+
+      /* left sidebar */
+      + '<div style="width:200px;flex-shrink:0;border-right:1px solid #f1f5f9;overflow-y:auto;background:#fafafa;">'
+      + sidebarHtml
+      + '</div>'
+
+      /* right content */
+      + '<div id="lcd-body" style="flex:1;overflow-y:auto;padding:18px 20px;">'
+      + initialContent
+      + '</div>'
+      + '</div>'
+
+      /* action bar */
+      + '<div style="border-top:1px solid #f1f5f9;padding:12px 20px;display:flex;gap:8px;flex-wrap:wrap;background:#fafafa;border-radius:0 0 16px 16px;flex-shrink:0;">'
+      + '<button onclick="_p8run(\'p30-payment\')" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:9px 14px;font-size:11px;font-weight:700;cursor:pointer;flex:1;"><i class="fas fa-dollar-sign" style="margin-right:4px;"></i>Process Payment</button>'
+      + '<button onclick="_p8run(\'p30-assess\')" style="background:#0891b2;color:#fff;border:none;border-radius:8px;padding:9px 14px;font-size:11px;font-weight:700;cursor:pointer;flex:1;"><i class="fas fa-user-check" style="margin-right:4px;"></i>Schedule Assessment</button>'
+      + '<button onclick="_p8run(\'p30-careplan\')" style="background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:9px 14px;font-size:11px;font-weight:700;cursor:pointer;flex:1;"><i class="fas fa-clipboard-list" style="margin-right:4px;"></i>Update Care Plan</button>'
+      + '<button onclick="_p8run(\'p30-provider\')" style="background:#003087;color:#fff;border:none;border-radius:8px;padding:9px 14px;font-size:11px;font-weight:700;cursor:pointer;flex:1;"><i class="fas fa-hospital" style="margin-right:4px;"></i>Provider Hub</button>'
+      + '<button onclick="_p8run(\'p30-ai\')" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:8px;padding:9px 14px;font-size:11px;font-weight:700;cursor:pointer;flex:1;"><i class="fas fa-robot" style="margin-right:4px;"></i>AI Analysis</button>'
+      + '<button onclick="_p8run(\'p30-contact\')" style="background:#d97706;color:#fff;border:none;border-radius:8px;padding:9px 14px;font-size:11px;font-weight:700;cursor:pointer;flex:1;"><i class="fas fa-phone" style="margin-right:4px;"></i>Contact Family</button>'
+      + '</div>'
+
+      + '</div>'
+    );
+
+    window._lcdCurrentClaim = c;
+
+    /* ── TAB HANDLER (rebind ltcClaimTab) ───────────────────────────── */
+    window.ltcClaimTab = function(idx, claimId2) {
+      var cc = window._lcdCurrentClaim;
+      if (!cc) return;
+      /* highlight active tab */
+      for (var ti = 0; ti < 8; ti++) {
+        var tel = document.getElementById('p30-tab-' + ti);
+        if (tel) { tel.style.background = ti === idx ? '#dc2626' : 'transparent'; tel.style.color = ti === idx ? '#fff' : '#6b7280'; }
+      }
+      var body2 = document.getElementById('lcd-body');
+      if (!body2) return;
+      switch (idx) {
+        case 0: body2.innerHTML = buildOverview();   break;
+        case 1: body2.innerHTML = buildClinical();   break;
+        case 2: body2.innerHTML = buildProducts();   break;
+        case 3: body2.innerHTML = buildTimeline();   break;
+        case 4: body2.innerHTML = buildDocuments();  break;
+        case 5: body2.innerHTML = buildProvider();   break;
+        case 6: body2.innerHTML = buildCarrier();    break;
+        case 7: body2.innerHTML = buildAIInsights(); break;
+      }
+    };
+  };
+
+  console.log('[P30] Rich Claimant 360° modal active · 8 tabs · Sidebar + product strips + 1st/2nd/3rd party data · SDOH + What Care Costs + CMS Star + HIE + Pharmacy · Safe _p8run callbacks');
+})();
