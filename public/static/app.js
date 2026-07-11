@@ -64946,14 +64946,13 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
           + '<div style="font-size:12px;color:#6b7280;">120,000+ assessments/yr · MMSE & EMST cognitive tools · 50-state RN network · HIPAA-compliant scheduling</div>'
         + '</div>'
         + '<div style="margin-left:auto;display:flex;gap:8px;">'
-          + '<button onclick="ltcScheduleNew()" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-plus" style="margin-right:5px;"></i>Schedule Assessment</button>'
+          + '<button onclick="ltcScheduleNew()" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-plus" style="margin-right:5px;"></i>AI Powered Assessment</button>'
         + '</div>'
       + '</div>'
-      + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;">'
+      + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px;">'
         + _ltcKpiCard('7','Scheduled This Week','fa-calendar-check','#059669','Across all modalities')
         + _ltcKpiCard('120K+','Annual Volume','fa-chart-line','#0891b2','30-yr benchmark accuracy')
         + _ltcKpiCard('3','Assessment Modes','fa-video','#7c3aed','Phone · Video · In-Person')
-        + _ltcKpiCard('16th Ed.','LTC Underwriting Guidelines','fa-book-medical','#d97706','Proprietary clinical framework')
       + '</div>'
       + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;margin-bottom:20px;">'
         + '<div style="padding:14px 16px;background:#f8fafc;border-bottom:1px solid #e5e7eb;">'
@@ -87282,8 +87281,8 @@ var navigateTo=window.navigateTo;
 /* ═══════════════════════════════════════════════════════════════════════════
    P29 — UI REFINEMENTS
    1. Rename "Eligibility & Assessment" → "Assessments" in nav + page header
-   2. Rename "AI Care Alerts" button label → "AI Powered Assessments"
-      & modal title → "AI Powered Assessments — Real-Time Monitoring"
+   2. Rename "AI Care Alerts" button label → "AI Powered Care Coordination"
+      & modal title → "AI Powered Care Coordination — Real-Time Monitoring"
    3. Fix gibberish buttons in Care Coordination modals (Acknowledge All,
       Create Care Plan, Confirm Schedule) using safe _p8run key callbacks
    4. Remove eLTCAS CQRS Event Store band from Care Coordination page
@@ -87394,12 +87393,12 @@ var navigateTo=window.navigateTo;
     var tpl = document.getElementById('tpl-ltc-care');
     if (!tpl) return;
     tpl.querySelectorAll('button').forEach(function (btn) {
-      if (btn.textContent.indexOf('AI Care Alerts') > -1) {
+      if (btn.textContent.indexOf('AI Care Alerts') > -1 || btn.textContent.indexOf('AI Powered Assessments') > -1) {
         /* keep icon, update label */
         var icon = btn.querySelector('i');
         btn.innerHTML = '';
         if (icon) btn.appendChild(icon);
-        var span = document.createTextNode('\u00a0AI Powered Assessments');
+        var span = document.createTextNode('\u00a0AI Powered Care Coordination');
         btn.appendChild(span);
       }
     });
@@ -87420,7 +87419,7 @@ var navigateTo=window.navigateTo;
      use a keyed _p8run() callback with no inline HTML in the onclick attr.
   ─────────────────────────────────────────────────────────────────────────── */
 
-  /* 3a. AI Powered Assessments modal — "Acknowledge All" button */
+  /* 3a. AI Powered Care Coordination modal — "Acknowledge All" button */
   var _p29origAiAlert = window.ltcRunAiCareAlert;
   window.ltcRunAiCareAlert = function () {
     var ovId = 'ltc-care-ai-ov';
@@ -87446,7 +87445,7 @@ var navigateTo=window.navigateTo;
       '<div style="background:#fff;border-radius:14px;width:620px;max-height:85vh;overflow-y:auto;box-shadow:0 20px 50px rgba(0,0,0,.3);">'
       + '<div style="background:linear-gradient(135deg,#7c3aed,#6d28d9);padding:18px 22px;border-radius:14px 14px 0 0;color:#fff;display:flex;align-items:center;gap:12px;">'
       + '<i class="fas fa-robot" style="font-size:20px;"></i>'
-      + '<div><div style="font-size:15px;font-weight:800;">AI Powered Assessments \u2014 Real-Time Monitoring</div>'
+      + '<div><div style="font-size:15px;font-weight:800;">AI Powered Care Coordination \u2014 Real-Time Monitoring</div>'
       + '<div style="font-size:11px;opacity:.85;">4 active care plans \u00b7 Analyzed across 18 clinical signals</div></div>'
       + '<button onclick="_p29close(\'' + ovId + '\')" style="margin-left:auto;background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:11px;">\u2715</button>'
       + '</div>'
@@ -87557,6 +87556,6 @@ var navigateTo=window.navigateTo;
     );
   };
 
-  console.log('[P29] Eligibility renamed to Assessments \u00b7 AI Care Alerts renamed to AI Powered Assessments \u00b7 3 gibberish buttons fixed \u00b7 eLTCAS CQRS band suppressed');
+  console.log('[P29] Eligibility renamed to Assessments \u00b7 AI Care Alerts renamed to AI Powered Care Coordination \u00b7 Assessments btn renamed to AI Powered Assessment \u00b7 LTC UW Guidelines KPI removed \u00b7 3 gibberish buttons fixed \u00b7 eLTCAS CQRS band suppressed');
 })();
 
