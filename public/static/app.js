@@ -65564,6 +65564,234 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
       avgTime:'Real-time', successRate:'98.3%', runsToday:47,
       steps:['Poll all open claims every 15 minutes','Calculate time remaining to SLA breach for each claim','Send 72h warning to care manager (portal + email)','Send 24h warning + SMS if unacknowledged','Escalate to RN Supervisor at 2h mark if still unresolved'],
       lastRun:'Jul 11 10:14am', tags:['SLA','Monitoring','Alert','Escalation']
+    },
+
+    /* ── GROUP: CARE COORDINATION ── */
+    {
+      id:'AGT-CC-001', group:'Care Coordination', groupColor:'#0891b2', groupIcon:'fa-hands-helping',
+      name:'Care Plan Review Agent',
+      desc:'Automatically triggers a care plan review when a claimant\'s ADL score changes by ≥1 point, or when a plan renewal date falls within 14 days. Pulls the latest clinical notes from LTCAS, pre-populates the updated plan template, and routes to the assigned care manager for approval.',
+      model:'ClinicalBERT + LTCAS Policy API', triggers:['ADL score change (Claim Detail)','Care plan renewal due (14-day window)'], status:'Active',
+      avgTime:'< 3 min', successRate:'97.6%', runsToday:9,
+      steps:['Detect ADL score delta ≥1 or renewal date ≤14 days via LTCAS event subscription','Pull latest clinical assessment notes and current care plan from LTCAS','Run ClinicalBERT analysis to identify care setting changes, new ADL impairments, and goal drift','Pre-populate updated care plan template with recommended changes and clinical justification','Route to assigned RN/MSW care manager for review and approval (SLA: 24h)','Archive finalized plan to LTCAS; notify carrier and provider of plan revision'],
+      lastRun:'Jul 12 08:47am', tags:['Care Plan','ClinicalBERT','LTCAS','RN']
+    },
+    {
+      id:'AGT-CC-002', group:'Care Coordination', groupColor:'#0891b2', groupIcon:'fa-hands-helping',
+      name:'Visit Outcome Documenter Agent',
+      desc:'Triggered when an RN or MSW marks a care visit complete in CellTrak or the CONNECT portal. Extracts structured data from the visit note using NLP, updates the LTCAS care record, and pushes a summary to the carrier within the contractual documentation window.',
+      model:'Clinical NLP + LTCAS Document API', triggers:['Visit marked Complete (CellTrak)','Visit note submitted (CONNECT Portal)'], status:'Active',
+      avgTime:'< 90 sec', successRate:'98.2%', runsToday:14,
+      steps:['Receive CellTrak or CONNECT portal visit-complete event via NServiceBus','Extract structured fields from visit note: ADL scores, vitals, medications, observations, care manager impressions','Classify visit outcome: Stable / Improving / Declining / Escalation Required','Update LTCAS care episode record with structured summary and outcome classification','Generate carrier visit summary (EDI-compatible) and transmit within 48h contractual window','Flag declining trajectory to RN Supervisor if outcome = Escalation Required'],
+      lastRun:'Jul 12 09:03am', tags:['Visit','NLP','CellTrak','LTCAS','Carrier']
+    },
+    {
+      id:'AGT-CC-003', group:'Care Coordination', groupColor:'#0891b2', groupIcon:'fa-hands-helping',
+      name:'EVV Compliance Monitor Agent',
+      desc:'Always-on agent that cross-validates CellTrak GPS check-in/check-out data against scheduled visit windows and claim records every 15 minutes. Flags GPS mismatches, missing check-outs, and duration anomalies for SIU review. Integrates directly with CAID fraud signal FS-007.',
+      model:'CellTrak EVV API + GPS Rules Engine', triggers:['Always-on · 15-min polling cycle','CellTrak GPS mismatch event'], status:'Active',
+      avgTime:'Real-time', successRate:'99.3%', runsToday:96,
+      steps:['Poll CellTrak EVV API every 15 minutes for all active caregiver sessions','Validate GPS coordinates against scheduled visit address (50m geo-fence tolerance)','Check visit duration against authorized hours in LTCAS benefit authorization','Flag anomalies: GPS mismatch > 500m, missing check-out > 30 min past scheduled end, duration > 20% over authorized','Route confirmed anomalies to CAID FS-007 Billing Spike Anomaly signal queue','Generate daily EVV compliance report for carrier and DOI audit trail'],
+      lastRun:'Jul 12 10:15am', tags:['EVV','CellTrak','GPS','Fraud','Compliance']
+    },
+    {
+      id:'AGT-CC-004', group:'Care Coordination', groupColor:'#0891b2', groupIcon:'fa-hands-helping',
+      name:'Care Setting Transition Agent',
+      desc:'Executes the full care setting transition protocol when a claimant moves between care levels — Home Health → ALF → SNF → Memory Care → Hospice. Coordinates benefit recalculation, new provider onboarding, carrier notification, and updated care plan generation in a single orchestrated workflow.',
+      model:'ClinicalBERT + Care Network API + LTCAS Benefit Engine', triggers:['Escalate (Triage Engine — care setting change)','Care manager initiates transition'], status:'Active',
+      avgTime:'< 8 min', successRate:'96.1%', runsToday:2,
+      steps:['Validate transition eligibility: ADL score, physician order, benefit period remaining','Calculate new daily benefit rate for target care setting (SNF vs. Home Health vs. Memory Care)','Identify and onboard new provider from 180K+ provider network (license check, W-9, EVV enrollment)','Generate transition care plan with ClinicalBERT — goals, ADL targets, medication reconciliation','Send carrier transition notification via EDI with updated benefit authorization','Initiate CellTrak EVV configuration for new provider and care setting','Schedule follow-up RN assessment within 5 business days of transition'],
+      lastRun:'Jul 12 08:35am', tags:['Transition','SNF','Hospice','ClinicalBERT','Carrier']
+    },
+
+    /* ── GROUP: BENEFITS & PAYMENT LIFECYCLE ── */
+    {
+      id:'AGT-BP-001', group:'Benefits & Payment Lifecycle', groupColor:'#059669', groupIcon:'fa-dollar-sign',
+      name:'Benefit Period Tracker Agent',
+      desc:'Always-on daily monitoring agent that tracks remaining benefit pool balance, days-of-care consumed, and projected exhaustion date for every active LTC claim. Sends proactive alerts at 25%, 10%, and 5% remaining benefit thresholds to care managers, claimants, and carriers.',
+      model:'LTCAS Policy Engine + Benefit Rules', triggers:['Always-on · Daily 6am run','Benefit pool threshold crossed'], status:'Active',
+      avgTime:'< 2 min', successRate:'100%', runsToday:1,
+      steps:['Query LTCAS for all active claims with benefit pool balances at 6:00 AM daily','Calculate days-of-care consumed, daily burn rate, and projected exhaustion date','Compare remaining balance to policy maximums (lifetime, per-diem, inflation-adjusted)','Trigger alert workflow for thresholds: 25% (info), 10% (warning), 5% (critical)','Send threshold alerts to care manager, claimant, family contact, and carrier via portal + email','Log projection to LTCAS claim record; update carrier benefit balance report'],
+      lastRun:'Jul 12 06:00am', tags:['Benefits','Tracking','LTCAS','Alert','Daily']
+    },
+    {
+      id:'AGT-BP-002', group:'Benefits & Payment Lifecycle', groupColor:'#059669', groupIcon:'fa-dollar-sign',
+      name:'Benefit Suspension Agent',
+      desc:'Automatically suspends LTC benefit payments when a claimant is admitted to a Medicare-covered inpatient facility. Applies CMS Medicare Secondary Payer (MSP) rules to determine suspension period, notifies carrier, and queues reinstatement when the IP episode ends.',
+      model:'eLTCAS Event + Medicare MSP Rules Engine', triggers:['Hospital admission event (eLTCAS)','Medicare Part A claim detected (CMS API)'], status:'Active',
+      avgTime:'< 4 min', successRate:'98.9%', runsToday:3,
+      steps:['Detect inpatient admission via eLTCAS NServiceBus event or CMS Medicare Part A eligibility check','Apply MSP coordination rules: determine LTC benefit suspension start date','Post benefit suspension to LTCAS disbursement queue (halt pending payments)','Notify carrier of suspension via EDI 834 with IP admission dates and diagnosis codes','Notify claimant and family of suspension, expected reinstatement date, and MSP rights','Monitor CMS discharge data; trigger reinstatement when IP episode ends'],
+      lastRun:'Jul 12 09:22am', tags:['Suspension','Medicare','MSP','LTCAS','CMS']
+    },
+    {
+      id:'AGT-BP-003', group:'Benefits & Payment Lifecycle', groupColor:'#059669', groupIcon:'fa-dollar-sign',
+      name:'Inflation Adjustment Agent',
+      desc:'Applies compound inflation protection benefit increases on each policy anniversary date. Calculates the new daily benefit amount, inflation rider percentage, and updated maximum benefit pool, then posts the revised amounts to LTCAS and notifies the carrier and claimant.',
+      model:'LTCAS Policy Engine + CPI Inflation Data', triggers:['Policy anniversary date (annual)'], status:'Active',
+      avgTime:'< 60 sec', successRate:'100%', runsToday:4,
+      steps:['Identify policies with inflation riders due on today\'s anniversary date via LTCAS query','Retrieve inflation rider type: Simple (3% or 5%) or Compound CPI-linked','For CPI-linked riders: fetch current BLS CPI-U index for calculation period','Calculate new daily benefit amount and updated maximum benefit pool','Post revised benefit amounts to LTCAS policy record with effective date','Send annual benefit increase notification to claimant and carrier (regulatory requirement)'],
+      lastRun:'Jul 12 07:30am', tags:['Inflation','Benefits','CPI','LTCAS','Anniversary']
+    },
+    {
+      id:'AGT-BP-004', group:'Benefits & Payment Lifecycle', groupColor:'#059669', groupIcon:'fa-dollar-sign',
+      name:'Lifetime Benefit Exhaustion Agent',
+      desc:'Activates when a claimant\'s remaining benefit pool drops below 10% of the original maximum. Orchestrates the end-of-benefit workflow: final payment calculation, regulatory exhaustion notice, Medicaid planning referral, and case closure in LTCAS — ensuring full compliance and claimant support.',
+      model:'LTCAS Benefit Engine + Regulatory Notice API', triggers:['Benefit pool < 10% remaining (AGT-BP-001 signal)'], status:'Active',
+      avgTime:'< 5 min', successRate:'99.1%', runsToday:1,
+      steps:['Receive AGT-BP-001 threshold alert: benefit pool < 10% of original maximum','Calculate exact exhaustion date based on current daily burn rate','Generate regulatory benefit exhaustion notice (state-mandated content, per-state template)','Transmit exhaustion notice to claimant, carrier, and DOI within required window','Initiate Medicaid spend-down planning referral via social work network','Schedule clinical team review to assess care setting options post-exhaustion','Post case closure workflow to LTCAS upon final payment disbursement'],
+      lastRun:'Jul 12 10:05am', tags:['Exhaustion','Medicaid','Benefits','LTCAS','DOI']
+    },
+
+    /* ── GROUP: COMPLIANCE & REGULATORY ── */
+    {
+      id:'AGT-CR-001', group:'Compliance & Regulatory', groupColor:'#7c3aed', groupIcon:'fa-shield-halved',
+      name:'DOI State Filing Agent',
+      desc:'Monitors all active claims against state-mandated decision windows (acknowledgment, investigation, resolution). When a claim approaches or breaches a statutory deadline, the agent generates the required DOI filing, transmits it to the appropriate state insurance department, and logs the action to the regulatory audit trail.',
+      model:'SMARTS Rule Engine + State Mandate Database', triggers:['Claim approaches state SLA deadline (72h warning)','SLA breach detected'], status:'Active',
+      avgTime:'< 2 min', successRate:'99.7%', runsToday:7,
+      steps:['Monitor all open claims against state-specific decision window rules in SMARTS (50 states + territories)','Calculate time remaining to statutory acknowledgment (10 days), investigation (45 days), and resolution (90 days) deadlines','Generate pre-breach warning at 72h mark: alert to care manager and compliance team','On breach: auto-generate DOI filing document with required statutory language per state template','Transmit to state DOI via NAIC OPTins portal or state-specific EDI channel','Log filing confirmation number, transmission timestamp, and compliance status to regulatory audit trail'],
+      lastRun:'Jul 12 09:48am', tags:['DOI','Compliance','SMARTS','State','Regulatory']
+    },
+    {
+      id:'AGT-CR-002', group:'Compliance & Regulatory', groupColor:'#7c3aed', groupIcon:'fa-shield-halved',
+      name:'HIPAA Audit Trail Agent',
+      desc:'Continuously logs every PHI access event, document transmission, and data-sharing action across LTC Operations. Generates HIPAA-compliant access logs in real-time, detects unauthorized access patterns, and produces audit reports for carrier, DOI, and OCR compliance reviews.',
+      model:'Audit Log API + Microsoft Purview', triggers:['Always-on · Every PHI access event','Document transmission detected'], status:'Active',
+      avgTime:'Real-time', successRate:'100%', runsToday:284,
+      steps:['Intercept and log every PHI access event: who, what record, when, from which system','Classify access purpose: Treatment, Payment, Operations, or Disclosure','Detect anomalous access patterns: off-hours access, bulk record pulls, unauthorized role access','Escalate anomalous patterns to HIPAA Privacy Officer within 15 minutes','Publish structured audit log to Microsoft Purview Information Protection catalog','Generate monthly HIPAA audit report for carrier compliance review and OCR submission'],
+      lastRun:'Jul 12 10:15am', tags:['HIPAA','Audit','Purview','PHI','Compliance']
+    },
+    {
+      id:'AGT-CR-003', group:'Compliance & Regulatory', groupColor:'#7c3aed', groupIcon:'fa-shield-halved',
+      name:'EVV GPS Discrepancy Agent',
+      desc:'Investigates and escalates confirmed GPS discrepancies flagged by AGT-CC-003. Cross-references the mismatch against provider billing records, historical visit patterns, and CAID fraud signals. If confirmed fraudulent, routes to the SIU workbench with a pre-populated case file.',
+      model:'Rules Engine + CellTrak API + CAID FS-007', triggers:['EVV GPS mismatch flagged (AGT-CC-003)','CAID FS-007 billing spike detected'], status:'Active',
+      avgTime:'< 5 min', successRate:'94.3%', runsToday:6,
+      steps:['Receive EVV GPS mismatch event from AGT-CC-003 or CAID FS-007 signal queue','Pull provider billing records for the flagged visit date range from LTCAS','Cross-reference GPS coordinates against provider\'s licensed service area and historical visit locations','Apply pattern analysis: first offense vs. repeat offender vs. organized scheme indicators','Score discrepancy: Administrative Error (low) / Negligence (medium) / Fraud (high)','Route high-score cases to CAID SIU Workbench with pre-populated case file; notify DOI if required','For low/medium: send provider corrective action notice and require re-submission'],
+      lastRun:'Jul 12 09:51am', tags:['EVV','GPS','CAID','SIU','Fraud','Provider']
+    },
+    {
+      id:'AGT-CR-004', group:'Compliance & Regulatory', groupColor:'#7c3aed', groupIcon:'fa-shield-halved',
+      name:'NAIC Complaint Monitor Agent',
+      desc:'Monitors carrier complaint ratios, DOI complaint filings, and internal SLA breach reports in real-time. When complaint activity exceeds NAIC benchmark thresholds or a regulatory inquiry is received, the agent assembles the required response package and routes to the Compliance Officer within 2 hours.',
+      model:'CRM + DOI API + NAIC COMPAS', triggers:['Carrier complaint filed (CRM event)','DOI inquiry received','NAIC complaint ratio threshold breached'], status:'Active',
+      avgTime:'< 10 min', successRate:'97.4%', runsToday:2,
+      steps:['Poll NAIC COMPAS, carrier complaint portals, and internal CRM for new complaint events daily','Classify complaint type: Claim Denial, Delay, Benefit Calculation, Care Plan, Communication','Pull all related claim records, correspondence, and SLA logs for the complaint period','Assemble regulatory response package: chronology, supporting documentation, resolution narrative','Route to Compliance Officer with 2-hour response SLA flag','Track complaint through resolution; update NAIC COMPAS and internal complaint register','Generate quarterly complaint ratio analysis and trend report for executive review'],
+      lastRun:'Jul 12 08:15am', tags:['NAIC','Complaint','DOI','Compliance','CRM']
+    },
+
+    /* ── GROUP: CLAIMANT COMMUNICATION & OUTREACH ── */
+    {
+      id:'AGT-CO-001', group:'Claimant Communication & Outreach', groupColor:'#d97706', groupIcon:'fa-comments',
+      name:'Annual Benefit Statement Agent',
+      desc:'Generates and delivers personalized annual benefit statements to every active LTC claimant on their policy anniversary date. Statements include year-in-review benefit utilization, remaining pool balance, inflation-adjusted daily benefit, and a personalized care summary from the assigned RN.',
+      model:'Template Engine + DocuSign + LTCAS Data', triggers:['Policy anniversary date (annual)'], status:'Active',
+      avgTime:'< 4 min', successRate:'99.5%', runsToday:6,
+      steps:['Query LTCAS for all policies with anniversary dates in the next 7 days','Pull year-to-date benefit data: claims paid, visits completed, care setting, days consumed','Generate personalized statement: benefit utilization chart, remaining balance, adjusted daily rate','Include RN care manager summary note (AI-drafted, RN-approved)','Transmit via DocuSign to claimant + family contact email; SMS link to portal','Archive signed statement to LTCAS document record; log delivery confirmation'],
+      lastRun:'Jul 12 07:00am', tags:['Statement','Annual','DocuSign','LTCAS','Claimant']
+    },
+    {
+      id:'AGT-CO-002', group:'Claimant Communication & Outreach', groupColor:'#d97706', groupIcon:'fa-comments',
+      name:'Lapse Risk Outreach Agent',
+      desc:'Triggered when the P22 Ontology SWRL rule fires a lapse risk score > 50 on an active LTC policy. Executes a multi-channel outreach sequence — personalized email, SMS, and care manager call — to re-engage the claimant, clarify benefit status, and prevent unintended policy lapse.',
+      model:'Lapse Prevention ML + Twilio + P22 SWRL Engine', triggers:['P22 SWRL lapse rule fires (score > 50)','Premium overdue > 30 days'], status:'Active',
+      avgTime:'< 2 min', successRate:'91.8%', runsToday:3,
+      steps:['Receive lapse risk trigger from P22 SWRL rule: Policy(?p) ∧ lapseRiskScore > 50','Pull policy details, premium history, contact preferences, and assigned care manager','Generate personalized outreach message: benefit summary, lapse consequences, reinstatement options','Execute multi-channel sequence: Day 1 Email → Day 3 SMS → Day 5 Care Manager Call','Track open/click/response rates; escalate to retention specialist if no response by Day 5','Log all outreach activity to CRM and LTCAS; update lapse risk score post-engagement'],
+      lastRun:'Jul 12 09:30am', tags:['Lapse','Outreach','Twilio','SWRL','Retention']
+    },
+    {
+      id:'AGT-CO-003', group:'Claimant Communication & Outreach', groupColor:'#d97706', groupIcon:'fa-comments',
+      name:'Care Plan Change Notification Agent',
+      desc:'Sends structured, plain-language notification to the claimant and designated family contacts whenever a care plan is materially updated by an RN or MSW. Summarizes what changed, why, and what the claimant should expect next — delivered via preferred channel (SMS, email, or portal message).',
+      model:'NLP Summarizer + Twilio + Email API', triggers:['Care plan updated (LTCAS event)','Care setting change approved'], status:'Active',
+      avgTime:'< 90 sec', successRate:'99.0%', runsToday:8,
+      steps:['Detect care plan update event in LTCAS via NServiceBus subscription','Diff old and new care plan: identify changed fields (care setting, ADL goals, provider, frequency)','Run NLP summarizer to generate plain-language change summary (8th grade reading level)','Personalize message: claimant name, RN name, effective date, next scheduled contact','Deliver via preferred channel: SMS (Twilio), email, or CONNECT portal secure message','Request read receipt or confirmation reply; escalate if no response within 48h'],
+      lastRun:'Jul 12 09:58am', tags:['Care Plan','Notification','NLP','Twilio','Family']
+    },
+    {
+      id:'AGT-CO-004', group:'Claimant Communication & Outreach', groupColor:'#d97706', groupIcon:'fa-comments',
+      name:'Claim Status Update Agent',
+      desc:'Delivers real-time claim status updates to claimants and family contacts at every major milestone — submission, triage, assessment scheduled, approved, payment issued, and closed. Eliminates inbound status calls to the contact center by proactively pushing updates via the claimant\'s preferred channel.',
+      model:'LTCAS Event + Twilio + CIH Deflection Engine', triggers:['Claim status change (LTCAS event — 8 milestone triggers)'], status:'Active',
+      avgTime:'< 30 sec', successRate:'99.6%', runsToday:31,
+      steps:['Subscribe to LTCAS claim status change events via NServiceBus (8 milestone events)','Map status code to human-readable milestone: Submitted / In Review / Assessment Scheduled / Approved / Payment Issued / Closed','Generate personalized status message with claim ID, milestone description, and expected next step','Deliver via preferred channel (SMS / email / portal) within 60 seconds of status change','Include CIH self-service portal link for claimant to view full claim timeline','Log delivery and deflection credit to CIH contact center analytics (call deflection metric)'],
+      lastRun:'Jul 12 10:12am', tags:['Status','Notification','CIH','LTCAS','Deflection']
+    },
+
+    /* ── GROUP: PROVIDER & CARRIER INTELLIGENCE ── */
+    {
+      id:'AGT-PC-001', group:'Provider & Carrier Intelligence', groupColor:'#dc2626', groupIcon:'fa-hospital',
+      name:'Provider License Monitor Agent',
+      desc:'Nightly agent that validates active provider licenses, NPI registrations, and OIG/SAM exclusion status for every provider in the illumifin 180K+ network. Flags any provider whose license has lapsed, is pending renewal, or appears on a federal/state exclusion list — and suspends payment processing until resolved.',
+      model:'CMS NPI Registry + NPDB + OIG SAM API', triggers:['Always-on · Nightly 2am run','New provider onboarded (AGT-CC-004)'], status:'Active',
+      avgTime:'< 6 min', successRate:'99.8%', runsToday:1,
+      steps:['Query CMS NPPES NPI Registry for all 180K+ active providers nightly at 2:00 AM','Cross-reference each provider against OIG List of Excluded Individuals/Entities (LEIE)','Cross-reference against SAM.gov federal exclusions and state Medicaid exclusion lists','Validate state professional license currency via each state\'s licensing board API','Flag providers with: expired license, OIG/SAM exclusion, malpractice report > threshold','Suspend benefit payment processing for flagged providers pending review','Generate daily provider credential health report; alert network management team to critical flags'],
+      lastRun:'Jul 12 02:00am', tags:['Provider','License','OIG','NPI','Compliance','Nightly']
+    },
+    {
+      id:'AGT-PC-002', group:'Provider & Carrier Intelligence', groupColor:'#dc2626', groupIcon:'fa-hospital',
+      name:'Carrier SLA Monitor Agent',
+      desc:'Tracks carrier response times against contractual SLA obligations across all EDI transaction types — authorization responses, payment confirmations, and dispute resolutions. Issues automated escalation notices when carriers breach SLAs and generates carrier scorecards for quarterly performance reviews.',
+      model:'EDI Status Engine + Alert Rules + Carrier API', triggers:['Always-on · Continuous monitoring','EDI response timeout detected'], status:'Active',
+      avgTime:'Real-time', successRate:'98.1%', runsToday:52,
+      steps:['Monitor all outbound EDI transactions (270/271 eligibility, 837 claims, 835 payments) for carrier response','Track response time against carrier-specific SLA: Eligibility < 2s, Claim Ack < 24h, Payment EFT < 3 days','Issue T-warning at 80% of SLA window; escalate at 100% breach','Generate automated carrier SLA breach notice with transaction ID, elapsed time, and contractual reference','Escalate unresolved breaches to carrier account manager via portal + email after 2nd breach in 30 days','Compile carrier SLA scorecard monthly: response time distribution, breach rate, penalty calculations'],
+      lastRun:'Jul 12 10:15am', tags:['Carrier','SLA','EDI','Performance','Escalation']
+    },
+    {
+      id:'AGT-PC-003', group:'Provider & Carrier Intelligence', groupColor:'#dc2626', groupIcon:'fa-hospital',
+      name:'EDI Reconciliation Agent',
+      desc:'Runs a full reconciliation cycle after every LTCAS payment disbursement batch. Matches 835 Electronic Remittance Advice records against LTCAS payment postings, identifies discrepancies (underpayments, overpayments, missing remits), and opens automated dispute workflows for unresolved variances.',
+      model:'EDI 835 Parser + LTCAS Reconcile API', triggers:['Payment batch posted (LTCAS disbursement)','EDI 835 remittance received'], status:'Active',
+      avgTime:'< 8 min', successRate:'97.3%', runsToday:4,
+      steps:['Receive trigger when LTCAS disbursement batch is posted (typically 2x daily)','Parse incoming EDI 835 Electronic Remittance Advice from each carrier','Match 835 claim-level payment amounts against LTCAS expected payment records','Classify variances: Full Match / Underpayment / Overpayment / Denied / Missing Remit','Auto-post matched payments; queue variances for dispute workflow','Generate automated carrier dispute letter for underpayments > $50 with remit reference numbers','Publish daily reconciliation summary: total posted, variances, pending disputes, recovery rate'],
+      lastRun:'Jul 12 09:00am', tags:['EDI','835','Reconciliation','LTCAS','Payment','Dispute']
+    },
+    {
+      id:'AGT-PC-004', group:'Provider & Carrier Intelligence', groupColor:'#dc2626', groupIcon:'fa-hospital',
+      name:'Provider Fraud Flag Agent',
+      desc:'Aggregates fraud signals from CAID (FS-002 Upcoding, FS-003 Kickback, FS-007 Billing Spike) and EVV compliance data to build a composite provider fraud risk score. Providers crossing a risk threshold of 60 are automatically escalated to the CAID SIU Workbench with a pre-built provider fraud investigation dossier.',
+      model:'IsoForest + CAID Multi-Signal Aggregator', triggers:['CAID FS-002 / FS-003 / FS-007 signal fires (Provider)','EVV GPS discrepancy score >= 3 (AGT-CR-003)'], status:'Active',
+      avgTime:'< 4 min', successRate:'93.6%', runsToday:11,
+      steps:['Aggregate active fraud signals from CAID: FS-002 (Upcoding), FS-003 (Kickback), FS-007 (Billing Spike)','Combine with EVV GPS discrepancy score from AGT-CR-003 and historical provider billing pattern','Run IsoForest anomaly model on provider\'s billing trajectory vs. peer network baseline','Calculate composite provider fraud risk score (0-100): Signal intensity x Pattern persistence x Network centrality','Providers scoring >= 60: auto-generate SIU investigation dossier (billing history, KG relationships, EVV records)','Route dossier to CAID SIU Workbench (P28) with recommended investigation steps','Notify carrier and consider payment hold pending SIU review result'],
+      lastRun:'Jul 12 09:44am', tags:['Provider','Fraud','CAID','SIU','IsoForest','GNN']
+    },
+
+    /* ── GROUP: WORKFORCE & CAPACITY ── */
+    {
+      id:'AGT-WF-001', group:'Workforce & Capacity', groupColor:'#92400e', groupIcon:'fa-users-gear',
+      name:'Burnout Risk Alert Agent',
+      desc:'Monitors the WFA burnout composite score for all 7 active adjusters in real-time. When an adjuster\'s burnout score crosses 75 (High) or 85 (Critical), the agent immediately alerts the Operations Director, recommends caseload relief actions, and creates a support check-in workflow with the adjuster\'s supervisor.',
+      model:'WFA Burnout Scoring Engine + Alert Rules', triggers:['Adjuster burnout score > 75 (WFA P32)','Score increases >= 10 points in 7 days'], status:'Active',
+      avgTime:'< 60 sec', successRate:'100%', runsToday:3,
+      steps:['Read current burnout composite scores for all 7 adjusters from WFA P32 module','Detect threshold crossings: score > 75 (High) or > 85 (Critical) or 7-day delta > 10pts','Generate burnout alert: adjuster name, current score, contributing factors (caseload, OT hours, SLA stress)','Alert Operations Director and HR via portal + email with recommended relief actions','Create supervisor check-in task: 1:1 within 24h (High) or same-day (Critical)','Recommend caseload relief: transfer N cases to lowest-burnout adjuster via AGT-WF-002','Log burnout event and response actions to WFA audit trail for HR and compliance'],
+      lastRun:'Jul 12 10:10am', tags:['Burnout','WFA','Adjuster','Alert','HR']
+    },
+    {
+      id:'AGT-WF-002', group:'Workforce & Capacity', groupColor:'#92400e', groupIcon:'fa-users-gear',
+      name:'Caseload Rebalancer Agent',
+      desc:'Triggered when any adjuster\'s caseload utilization exceeds 95% of their authorized maximum, or when AGT-WF-001 recommends caseload relief for a high-burnout adjuster. Identifies optimal transfer cases based on claim complexity, adjuster specialty, and recipient capacity — and executes the reassignment in LTCAS.',
+      model:'Load Balancer + WFA Roster API + LTCAS', triggers:['Adjuster capacity > 95% (WFA P32)','AGT-WF-001 caseload relief recommendation'], status:'Active',
+      avgTime:'< 3 min', successRate:'99.2%', runsToday:2,
+      steps:['Identify over-capacity adjuster (> 95% utilization) from WFA P32 real-time roster','Calculate transfer volume needed to bring adjuster to 80% utilization target','Score eligible recipient adjusters: available capacity x specialty match x geographic proximity','Select transfer cases: prioritize claims with lowest complexity and longest time-to-next-action','Execute reassignment in LTCAS: update assigned adjuster, notify new adjuster via portal + email','Notify claimant of adjuster change with introduction message from new adjuster','Log rebalancing event to WFA audit trail; update burnout score estimate for both adjusters'],
+      lastRun:'Jul 12 09:05am', tags:['Caseload','Rebalance','WFA','LTCAS','Capacity']
+    },
+    {
+      id:'AGT-WF-003', group:'Workforce & Capacity', groupColor:'#92400e', groupIcon:'fa-users-gear',
+      name:'Training Gap Escalator Agent',
+      desc:'Monitors the WFA P32 training gap register for all 7 adjusters. Critical training gaps unresolved for more than 30 days trigger an automatic escalation to the Training Director and Operations VP — with a pre-scheduled training session, LMS module assignment, and compliance deadline tracker.',
+      model:'WFA Training DB + LMS API + Alert Rules', triggers:['Critical training gap > 30 days unresolved (WFA P32)','New Critical gap identified'], status:'Active',
+      avgTime:'< 2 min', successRate:'98.4%', runsToday:2,
+      steps:['Scan WFA P32 training gap register for all 6 identified gaps across 7 adjusters','Classify gap age: < 14 days (monitor), 14-30 days (warning), > 30 days (escalate)','For Critical gaps > 30 days: escalate to Training Director + Operations VP via portal + email','Auto-assign LMS module for the training gap: HAL Platform Navigation, EP Phase Documentation, SMARTS Rules, etc.','Schedule mandatory training session within 7 calendar days of escalation','Set compliance deadline tracker: completion required within 30 days of assignment','Update WFA training gap register with escalation date, LMS module ID, and target completion date'],
+      lastRun:'Jul 12 08:45am', tags:['Training','WFA','LMS','Compliance','Escalation']
+    },
+    {
+      id:'AGT-WF-004', group:'Workforce & Capacity', groupColor:'#92400e', groupIcon:'fa-users-gear',
+      name:'Staffing Demand Forecast Agent',
+      desc:'Runs every Monday at 6:00 AM using an ARIMA time-series model to forecast LTC claim volume for the coming 4 weeks. Compares forecast demand to available adjuster capacity (accounting for PTO, training days, and burnout scores) and generates a staffing recommendation report for Operations leadership.',
+      model:'ARIMA Demand Model + WFA Roster + LTCAS Volume API', triggers:['Weekly · Monday 6:00 AM','Inbound claim volume spike > 15% WoW'], status:'Active',
+      avgTime:'< 5 min', successRate:'94.7%', runsToday:1,
+      steps:['Pull prior 90 days of claim submission volume from LTCAS by care type and carrier','Run ARIMA(2,1,2) demand forecast for the next 4 weeks with 90% confidence intervals','Cross-reference with carrier pipeline signals: open authorizations, EP assessment queue, seasonal patterns','Calculate net capacity gap: forecast demand vs. available adjuster hours (WFA P32 roster minus PTO/training/burnout adjustment)','Generate staffing recommendation: overtime authorization, temp adjuster engagement, caseload cap adjustment','Publish 4-week forecast and staffing recommendation to Operations VP dashboard by 7:00 AM Monday','Alert Operations Director if forecast demand exceeds capacity by > 20% in any week'],
+      lastRun:'Jul 12 06:00am', tags:['Forecast','ARIMA','WFA','Staffing','Operations']
     }
   ];
 
@@ -65587,7 +65815,7 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
       +'<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;text-align:center;">'
       +'<div style="font-size:28px;font-weight:900;color:#7c3aed;">'+_ltcAgentCatalog.length+'</div>'
       +'<div style="font-size:11px;font-weight:700;color:#374151;margin-top:4px;">Total AI Agents</div>'
-      +'<div style="font-size:10px;color:#9ca3af;margin-top:2px;">4 functional domains</div></div>'
+      +'<div style="font-size:10px;color:#9ca3af;margin-top:2px;">10 functional groups</div></div>'
       +'<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;text-align:center;">'
       +'<div style="font-size:28px;font-weight:900;color:#059669;">'+activeCount+'</div>'
       +'<div style="font-size:11px;font-weight:700;color:#374151;margin-top:4px;">Active Agents</div>'
