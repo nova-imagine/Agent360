@@ -91476,3 +91476,402 @@ var navigateTo=window.navigateTo;
 
   console.log('[P34] LTC AI Agent Expansion loaded — 24 new agents across 6 new groups · Care Coordination (4) · Benefits & Payment Lifecycle (4) · Compliance & Regulatory (4) · Claimant Communication & Outreach (4) · Provider & Carrier Intelligence (4) · Workforce & Capacity (4) · Total catalog: 41 agents');
 })();
+
+/* ════════════════════════════════════════════════════════════════════════════
+   P35 — LTC CLAIM REVIEW MODAL
+   Creates window.ltcReviewClaim(claimId): focused, action-oriented review
+   modal for the "Review" button in the LTC Claims Queue.
+   Separate from ltcOpenClaimDetail() which is used by Claimant 360
+   "Open Full Claim" and renders the full 10-tab Claimant 360 view.
+
+   Tabs: Overview · Documents (+ IDP) · Actions
+   Patches Review button in initLtcClaimsPage to call ltcReviewClaim().
+════════════════════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  /* ── helpers ─────────────────────────────────────────────────────────────── */
+  function _rvRow(lbl, val) {
+    return '<div style="background:#f8fafc;border-radius:8px;padding:10px 12px;">'
+      + '<div style="font-size:10px;color:#9ca3af;font-weight:700;text-transform:uppercase;margin-bottom:2px;">' + lbl + '</div>'
+      + '<div style="font-size:13px;font-weight:700;color:#111827;">' + val + '</div>'
+      + '</div>';
+  }
+
+  function _rvDocRow(name, source, date, statusTxt, type) {
+    var isDone    = statusTxt.indexOf('✅') === 0;
+    var isWarn    = statusTxt.indexOf('⚠️') === 0;
+    var dotColor  = isDone ? '#059669' : isWarn ? '#d97706' : '#dc2626';
+    return '<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid #f3f4f6;">'
+      + '<i class="fas fa-file-pdf" style="color:#dc2626;font-size:14px;flex-shrink:0;"></i>'
+      + '<div style="flex:1;min-width:0;">'
+        + '<div style="font-size:12px;font-weight:700;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + name + '</div>'
+        + '<div style="font-size:10px;color:#6b7280;">' + source + ' · ' + date + '</div>'
+      + '</div>'
+      + '<span style="background:' + dotColor + '18;color:' + dotColor + ';border:1px solid ' + dotColor + '44;border-radius:20px;padding:2px 9px;font-size:10px;font-weight:700;white-space:nowrap;">' + statusTxt + '</span>'
+      + '<span style="background:#f3f4f6;color:#6b7280;border-radius:5px;padding:2px 7px;font-size:10px;font-weight:600;">' + type + '</span>'
+      + '</div>';
+  }
+
+  /* ── IDP data for LTC claims (keyed by claim ID) ─────────────────────────── */
+  var _ltcIdpData = {
+    'LTC-2026-0101': {
+      docs: [
+        { name: 'Attending Physician Statement (APS)',    status: 'verified',   confidence: 97, extracted: ['Physician: Dr. Sarah Thompson, MD', 'ADL Impairments: 2/5', 'Diagnosis: Moderate Dementia + Mobility Deficit', 'Care Setting: SNF/Nursing Home', 'Date: Jun 28, 2026'] },
+        { name: 'ADL Assessment Report — Initial',        status: 'verified',   confidence: 95, extracted: ['Assessor: RN Sarah Johnson, LTCAS', 'ADL Score: 2/5 Moderate', 'Bathing: Impaired', 'Dressing: Impaired', 'Date: Jul 3, 2026'] },
+        { name: 'Insurance Policy — PRU-LTC-2024-88192', status: 'verified',   confidence: 99, extracted: ['Carrier: Prudential', 'Daily Benefit: $180/day', 'Elimination Period: 90 days', 'Benefit Period: 3 years'] },
+        { name: 'Care Plan (Current Version)',            status: 'extracting', confidence: null, extracted: ['Care Manager: Sarah Johnson, RN', 'Review required — edits pending'] },
+        { name: 'HIPAA Authorization Form',               status: 'verified',   confidence: 99, extracted: ['Signed by: Margaret O\'Brien', 'Date: Jun 25, 2026', 'Scope: Full treatment records'] },
+        { name: 'Power of Attorney — Patrick O\'Brien',   status: 'verified',   confidence: 98, extracted: ['POA: Patrick O\'Brien (Son)', 'Date: Mar 2024', 'Authority: Financial + Healthcare'] },
+      ]
+    }
+  };
+
+  function _getIdpData(claimId) {
+    return _ltcIdpData[claimId] || {
+      docs: [
+        { name: 'Attending Physician Statement',   status: 'verified',   confidence: 96, extracted: ['Physician: Attending MD on file', 'ADL assessment complete', 'Claim eligibility confirmed'] },
+        { name: 'ADL Assessment Report',           status: 'verified',   confidence: 94, extracted: ['ADL Score documented', 'Care setting appropriate', 'RN assessment on file'] },
+        { name: 'Insurance Policy Documentation', status: 'verified',   confidence: 99, extracted: ['Policy active', 'Daily benefit verified', 'Elimination period met'] },
+        { name: 'Care Plan',                       status: 'extracting', confidence: null, extracted: ['AI extraction in progress…'] },
+        { name: 'HIPAA Authorization',             status: 'verified',   confidence: 99, extracted: ['Signed authorization on file'] },
+        { name: 'POA / Authorization',             status: 'pending',    confidence: null, extracted: [] },
+      ]
+    };
+  }
+
+  /* ── Tab renderers ───────────────────────────────────────────────────────── */
+  function _rvBuildOverview(c) {
+    var priorityColor = c.priority === 'urgent' ? '#dc2626' : c.priority === 'high' ? '#d97706' : '#059669';
+    var statusColor   = { 'Active': '#059669', 'Pending': '#d97706', 'Review': '#d97706', 'Escalated': '#dc2626' }[c.status] || '#6b7280';
+    return '<div style="padding:20px;">'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">'
+        + _rvRow('Claimant', c.claimant + ' (Age ' + c.age + ')')
+        + _rvRow('Claim ID', c.id)
+        + _rvRow('Carrier / Product', c.carrier + ' · ' + (c.product || 'LTC Standalone'))
+        + _rvRow('Daily Benefit', c.dailyBenefit)
+        + _rvRow('Care Setting', c.type)
+        + _rvRow('Provider', c.provider || '—')
+        + _rvRow('Days Open', c.daysOpen + ' days')
+        + _rvRow('Next Payment Due', c.paymentDue || '—')
+        + '<div style="background:#f8fafc;border-radius:8px;padding:10px 12px;">'
+          + '<div style="font-size:10px;color:#9ca3af;font-weight:700;text-transform:uppercase;margin-bottom:2px;">Status</div>'
+          + '<span style="background:' + statusColor + '18;color:' + statusColor + ';border-radius:20px;padding:2px 10px;font-size:12px;font-weight:700;">' + c.status + '</span>'
+          + '</div>'
+        + '<div style="background:#f8fafc;border-radius:8px;padding:10px 12px;">'
+          + '<div style="font-size:10px;color:#9ca3af;font-weight:700;text-transform:uppercase;margin-bottom:2px;">Priority</div>'
+          + '<span style="color:' + priorityColor + ';font-size:12px;font-weight:700;text-transform:uppercase;">' + c.priority + '</span>'
+          + '</div>'
+      + '</div>'
+      + '<div style="background:#fef2f2;border:1.5px solid #fecaca;border-radius:10px;padding:14px;margin-bottom:12px;">'
+        + '<div style="font-size:11px;font-weight:700;color:#dc2626;margin-bottom:5px;"><i class="fas fa-exclamation-triangle" style="margin-right:5px;"></i>Next Required Action</div>'
+        + '<div style="font-size:13px;color:#7f1d1d;font-weight:600;">' + (c.nextAction || '—') + '</div>'
+      + '</div>'
+      + '<div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:14px;">'
+        + '<div style="font-size:11px;font-weight:700;color:#059669;margin-bottom:5px;"><i class="fas fa-robot" style="margin-right:5px;"></i>WealthAI Clinical Insight</div>'
+        + '<div style="font-size:12px;color:#166534;line-height:1.6;">Based on ' + c.claimant + '\'s ADL profile (' + (c.assessScore||'—') + '/5) and cognitive score (' + (c.cogScore||'—') + '/30), AI projects continued ' + c.type + ' care for 6–12 months. Review benefit utilization and coordinate with ' + (c.provider||'provider') + ' for updated care plan documentation before next payment cycle.</div>'
+      + '</div>'
+    + '</div>';
+  }
+
+  function _rvBuildDocuments(c) {
+    var idp = _getIdpData(c.id);
+    var verified   = idp.docs.filter(function(d){ return d.status === 'verified'; }).length;
+    var extracting = idp.docs.filter(function(d){ return d.status === 'extracting'; }).length;
+    var pending    = idp.docs.filter(function(d){ return d.status === 'pending'; }).length;
+    var pct        = Math.round(verified / idp.docs.length * 100);
+
+    var docCardsHtml = idp.docs.map(function(doc, i) {
+      var stIcon  = doc.status === 'verified' ? 'fa-check-circle' : doc.status === 'extracting' ? 'fa-cog fa-spin' : 'fa-clock';
+      var stColor = doc.status === 'verified' ? '#059669' : doc.status === 'extracting' ? '#7c3aed' : '#d97706';
+      var stLabel = doc.status === 'verified' ? 'Verified' : doc.status === 'extracting' ? 'AI Extracting…' : 'Pending Upload';
+      var fieldsHtml = (doc.extracted && doc.extracted.length > 0)
+        ? '<div style="background:#f5f3ff;border-radius:6px;padding:8px 10px;margin-top:6px;">'
+            + '<div style="font-size:10px;font-weight:700;color:#7c3aed;margin-bottom:4px;"><i class="fas fa-magic" style="margin-right:4px;"></i>Auto-extracted Fields</div>'
+            + doc.extracted.map(function(f){ return '<div style="font-size:11px;color:#4c1d95;padding:1px 0;"><i class="fas fa-angle-right" style="color:#7c3aed;margin-right:4px;"></i>' + f + '</div>'; }).join('')
+            + '</div>'
+        : (doc.status === 'pending' ? '<div style="font-size:11px;color:#d97706;margin-top:6px;"><i class="fas fa-upload" style="margin-right:4px;"></i>Awaiting document upload to begin extraction</div>' : '');
+      return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;margin-bottom:8px;">'
+        + '<div style="display:flex;align-items:center;gap:8px;">'
+          + '<div style="width:22px;height:22px;background:#e5e7eb;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#374151;flex-shrink:0;">' + (i+1) + '</div>'
+          + '<div style="flex:1;">'
+            + '<div style="font-size:12px;font-weight:700;color:#111827;">' + doc.name + '</div>'
+            + (doc.confidence ? '<div style="font-size:10px;color:#6b7280;">AI Confidence: <strong style="color:#059669;">' + doc.confidence + '%</strong></div>' : '')
+          + '</div>'
+          + '<div style="background:' + stColor + '15;color:' + stColor + ';border:1px solid ' + stColor + '30;border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700;white-space:nowrap;flex-shrink:0;">'
+            + '<i class="fas ' + stIcon + '" style="margin-right:3px;"></i>' + stLabel
+          + '</div>'
+        + '</div>'
+        + fieldsHtml
+      + '</div>';
+    }).join('');
+
+    return '<div style="padding:16px 20px;">'
+      + '<!-- KPI strip -->'
+      + '<div style="display:flex;gap:8px;margin-bottom:12px;">'
+        + '<div style="flex:1;background:#f0fdf4;border-radius:8px;padding:10px;text-align:center;">'
+          + '<div style="font-size:18px;font-weight:800;color:#059669;">' + verified + '</div>'
+          + '<div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase;">Verified</div>'
+        + '</div>'
+        + '<div style="flex:1;background:#f5f3ff;border-radius:8px;padding:10px;text-align:center;">'
+          + '<div style="font-size:18px;font-weight:800;color:#7c3aed;">' + extracting + '</div>'
+          + '<div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase;">Extracting</div>'
+        + '</div>'
+        + '<div style="flex:1;background:#fffbeb;border-radius:8px;padding:10px;text-align:center;">'
+          + '<div style="font-size:18px;font-weight:800;color:#d97706;">' + pending + '</div>'
+          + '<div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase;">Pending</div>'
+        + '</div>'
+        + '<div style="flex:1;background:#eff6ff;border-radius:8px;padding:10px;text-align:center;">'
+          + '<div style="font-size:18px;font-weight:800;color:#1d4ed8;">' + pct + '%</div>'
+          + '<div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase;">Complete</div>'
+        + '</div>'
+      + '</div>'
+      + '<!-- Progress bar -->'
+      + '<div style="height:6px;background:#e5e7eb;border-radius:3px;margin-bottom:14px;overflow:hidden;">'
+        + '<div style="height:100%;width:' + pct + '%;background:' + (pct === 100 ? '#059669' : pct >= 60 ? '#7c3aed' : '#d97706') + ';border-radius:3px;transition:width .4s;"></div>'
+      + '</div>'
+      + '<!-- Section: 1st Party -->'
+      + '<div style="font-size:11px;font-weight:700;color:#d97706;text-transform:uppercase;margin-bottom:6px;padding-left:2px;"><i class="fas fa-folder-open" style="margin-right:5px;"></i>1st Party — LTCAS Document Store</div>'
+      + docCardsHtml
+      + '<!-- Section: 2nd Party -->'
+      + '<div style="font-size:11px;font-weight:700;color:#0891b2;text-transform:uppercase;margin:10px 0 6px;padding-left:2px;"><i class="fas fa-file-signature" style="margin-right:5px;"></i>EVV &amp; Provider Records — CareExchange</div>'
+      + _rvDocRow('EVV Visit Log — Jun 2026', 'CareExchange Platform', 'Jul 1, 2026', '✅ GPS Verified', 'EVV')
+      + _rvDocRow('Provider Invoice — Jun 2026', c.provider || 'Provider', 'Jul 3, 2026', '✅ Matched to Care Plan', 'PDF')
+      + _rvDocRow('Care Manager Visit Notes', 'Sarah Johnson, RN', 'Jul 2, 2026', '✅ Received', 'PDF')
+      + '<!-- Section: 3rd Party -->'
+      + '<div style="font-size:11px;font-weight:700;color:#7c3aed;text-transform:uppercase;margin:10px 0 6px;padding-left:2px;"><i class="fas fa-hospital" style="margin-right:5px;"></i>3rd Party — External Verification</div>'
+      + _rvDocRow('State License Verification', 'Dept. of Health', 'Jun 2026', '✅ Active License', 'Cert')
+      + _rvDocRow('Medicare Part A Eligibility', 'CMS Portal', 'Jul 2026', '✅ Verified', 'PDF')
+      + _rvDocRow('Lab Results — Cognitive Eval', 'Neuropsych Associates', 'Jun 30, 2026', '⚠️ Review Required', 'PDF')
+      + '<!-- IDP Action bar -->'
+      + '<div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;">'
+        + '<button onclick="_ltcRvRunIDPScan(\'' + c.id + '\')" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-search" style="margin-right:5px;"></i>Run IDP Scan</button>'
+        + '<button onclick="_ltcRvOpenIDPModal(\'' + c.id + '\')" style="background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-external-link-alt" style="margin-right:5px;"></i>Full IDP View</button>'
+        + '<button onclick="_ltcRvUploadDoc()" style="background:#f0fdf4;color:#059669;border:1px solid #bbf7d0;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-upload" style="margin-right:5px;"></i>Upload Document</button>'
+        + '<button onclick="_ltcRvRequestMissing(\'' + c.id + '\')" style="background:#fffbeb;color:#d97706;border:1px solid #fde68a;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-paper-plane" style="margin-right:5px;"></i>Request Missing Docs</button>'
+      + '</div>'
+    + '</div>';
+  }
+
+  function _rvBuildActions(c) {
+    return '<div style="padding:20px;">'
+      + '<div style="font-size:12px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:12px;">Claim Actions</div>'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">'
+        + '<button onclick="_ltcRvAction(\'payment\',\'' + c.id + '\')" style="background:#059669;color:#fff;border:none;border-radius:10px;padding:14px 16px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;">'
+          + '<i class="fas fa-dollar-sign" style="font-size:16px;"></i><div style="text-align:left;"><div>Process Payment</div><div style="font-size:10px;font-weight:400;opacity:.85;">Approve next payment cycle</div></div></button>'
+        + '<button onclick="_ltcRvAction(\'assessment\',\'' + c.id + '\')" style="background:#0891b2;color:#fff;border:none;border-radius:10px;padding:14px 16px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;">'
+          + '<i class="fas fa-user-check" style="font-size:16px;"></i><div style="text-align:left;"><div>Schedule Assessment</div><div style="font-size:10px;font-weight:400;opacity:.85;">RN/MSW clinical evaluation</div></div></button>'
+        + '<button onclick="_ltcRvAction(\'careplan\',\'' + c.id + '\')" style="background:#7c3aed;color:#fff;border:none;border-radius:10px;padding:14px 16px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;">'
+          + '<i class="fas fa-hands-helping" style="font-size:16px;"></i><div style="text-align:left;"><div>Update Care Plan</div><div style="font-size:10px;font-weight:400;opacity:.85;">Modify current care plan</div></div></button>'
+        + '<button onclick="_ltcRvAction(\'family\',\'' + c.id + '\')" style="background:#d97706;color:#fff;border:none;border-radius:10px;padding:14px 16px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;">'
+          + '<i class="fas fa-phone" style="font-size:16px;"></i><div style="text-align:left;"><div>Contact Family / POA</div><div style="font-size:10px;font-weight:400;opacity:.85;">Notify authorized contact</div></div></button>'
+        + '<button onclick="_ltcRvAction(\'provider\',\'' + c.id + '\')" style="background:#0f172a;color:#fff;border:none;border-radius:10px;padding:14px 16px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;">'
+          + '<i class="fas fa-hospital" style="font-size:16px;"></i><div style="text-align:left;"><div>Provider Hub</div><div style="font-size:10px;font-weight:400;opacity:.85;">Contact / verify provider</div></div></button>'
+        + '<button onclick="_ltcRvAction(\'escalate\',\'' + c.id + '\')" style="background:#dc2626;color:#fff;border:none;border-radius:10px;padding:14px 16px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;">'
+          + '<i class="fas fa-exclamation-triangle" style="font-size:16px;"></i><div style="text-align:left;"><div>Escalate Claim</div><div style="font-size:10px;font-weight:400;opacity:.85;">Flag for supervisor review</div></div></button>'
+      + '</div>'
+      + '<div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:14px;">'
+        + '<div style="font-size:11px;font-weight:700;color:#1d4ed8;margin-bottom:8px;"><i class="fas fa-robot" style="margin-right:5px;"></i>AI Recommended Next Steps</div>'
+        + '<div style="font-size:12px;color:#1e40af;line-height:1.7;">'
+          + '<div style="margin-bottom:4px;"><i class="fas fa-angle-right" style="margin-right:5px;color:#3b82f6;"></i>Review updated care plan from ' + (c.provider || 'provider') + ' before next billing cycle</div>'
+          + '<div style="margin-bottom:4px;"><i class="fas fa-angle-right" style="margin-right:5px;color:#3b82f6;"></i>Confirm ADL re-assessment is scheduled — last score: ' + (c.assessScore||'N/A') + '/5</div>'
+          + '<div><i class="fas fa-angle-right" style="margin-right:5px;color:#3b82f6;"></i>Ensure all 3rd-party documents received before approving ' + (c.paymentDue ? 'payment due ' + c.paymentDue : 'next payment') + '</div>'
+        + '</div>'
+      + '</div>'
+    + '</div>';
+  }
+
+  /* ── Tab switcher (stored on window for onclick access) ──────────────────── */
+  window._ltcRvTab = function(idx, claimId) {
+    var panels = document.querySelectorAll('[data-rv-panel]');
+    panels.forEach(function(p, i) {
+      p.style.display = i === idx ? 'block' : 'none';
+    });
+    var tabs = document.querySelectorAll('[data-rv-tab]');
+    tabs.forEach(function(t, i) {
+      t.style.fontWeight  = i === idx ? '700' : '500';
+      t.style.color       = i === idx ? '#dc2626' : '#6b7280';
+      t.style.borderBottom = i === idx ? '2.5px solid #dc2626' : '2.5px solid transparent';
+      t.style.background  = i === idx ? '#fef2f2' : 'transparent';
+    });
+  };
+
+  /* ── IDP actions ─────────────────────────────────────────────────────────── */
+  window._ltcRvRunIDPScan = function(claimId) {
+    var btn = document.querySelector('[onclick*="_ltcRvRunIDPScan"]');
+    if (btn) { btn.innerHTML = '<i class="fas fa-cog fa-spin" style="margin-right:5px;"></i>Scanning…'; btn.disabled = true; }
+    setTimeout(function() {
+      if (btn) { btn.innerHTML = '<i class="fas fa-search" style="margin-right:5px;"></i>Run IDP Scan'; btn.disabled = false; }
+      openIDPScanResultsModal();
+    }, 2200);
+  };
+
+  window._ltcRvOpenIDPModal = function(claimId) {
+    // Try the keyed IDP modal first; fall back to scan results
+    if (typeof _orig_openIDPModal === 'function' && (window.idpData || {})[claimId]) {
+      _orig_openIDPModal(claimId);
+    } else if (typeof openIDPScanResultsModal === 'function') {
+      openIDPScanResultsModal();
+    } else {
+      if (typeof _raToast === 'function') _raToast('<i class="fas fa-file-import"></i> Opening Full IDP Document View for ' + claimId, 3000);
+    }
+  };
+
+  window._ltcRvUploadDoc = function() {
+    if (typeof _raToast === 'function') _raToast('<i class="fas fa-upload"></i> Document upload dialog opened — HIPAA-secure upload in progress', 3000);
+  };
+
+  window._ltcRvRequestMissing = function(claimId) {
+    if (typeof _raToast === 'function') _raToast('<i class="fas fa-paper-plane"></i> Document requests sent to all parties for ' + claimId, 3500);
+  };
+
+  /* ── Action dispatcher ───────────────────────────────────────────────────── */
+  window._ltcRvAction = function(type, claimId) {
+    document.getElementById('ltc-rv-overlay') && document.getElementById('ltc-rv-overlay').remove();
+    var msgs = {
+      payment:    '<i class="fas fa-dollar-sign"></i> Payment processed for ' + claimId + ' · Next cycle queued automatically',
+      assessment: '<i class="fas fa-user-check"></i> RN Assessment scheduled for ' + claimId + ' · Client notified via SMS',
+      careplan:   '<i class="fas fa-hands-helping"></i> Care Plan updated for ' + claimId + ' · Care manager notified',
+      family:     '<i class="fas fa-phone"></i> Family / POA contact initiated for ' + claimId + ' · CallTrak log opened',
+      provider:   '<i class="fas fa-hospital"></i> Provider Hub opened for ' + claimId + ' · Billing verification started',
+      escalate:   '<i class="fas fa-exclamation-triangle"></i> ' + claimId + ' escalated to supervisor queue · Priority set to URGENT'
+    };
+    if (typeof _raToast === 'function') _raToast(msgs[type] || 'Action completed', 3500);
+  };
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     MAIN: window.ltcReviewClaim(claimId)
+  ══════════════════════════════════════════════════════════════════════════ */
+  window.ltcReviewClaim = function(claimId) {
+    // Remove any existing review overlay
+    var existing = document.getElementById('ltc-rv-overlay');
+    if (existing) existing.remove();
+
+    var c = (window.ltcClaimsData || []).find(function(x){ return x.id === claimId; });
+    if (!c) {
+      if (typeof _raToast === 'function') _raToast('<i class="fas fa-exclamation-circle"></i> Claim ' + claimId + ' not found', 2500);
+      return;
+    }
+
+    var priorityColor = c.priority === 'urgent' ? '#dc2626' : c.priority === 'high' ? '#d97706' : '#059669';
+    var statusColor   = { 'Active': '#059669', 'Pending': '#d97706', 'Review': '#d97706', 'Escalated': '#dc2626' }[c.status] || '#6b7280';
+
+    // Tab bar HTML
+    var tabBarHtml = ['<i class="fas fa-th-large" style="margin-right:5px;"></i>Overview',
+                      '<i class="fas fa-folder-open" style="margin-right:5px;"></i>Documents',
+                      '<i class="fas fa-bolt" style="margin-right:5px;"></i>Actions'].map(function(label, i) {
+      return '<button data-rv-tab="' + i + '" onclick="window._ltcRvTab(' + i + ',\'' + claimId + '\')" '
+        + 'style="border:none;background:' + (i===0?'#fef2f2':'transparent') + ';color:' + (i===0?'#dc2626':'#6b7280') + ';font-size:12px;font-weight:' + (i===0?'700':'500') + ';padding:10px 16px;cursor:pointer;border-bottom:' + (i===0?'2.5px solid #dc2626':'2.5px solid transparent') + ';border-radius:0;transition:all .15s;">'
+        + label + '</button>';
+    }).join('');
+
+    var html = '<div id="ltc-rv-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;" onclick="if(event.target===this)this.remove()">'
+      + '<div style="background:#fff;border-radius:16px;width:740px;max-width:96vw;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 28px 70px rgba(0,0,0,.28);overflow:hidden;" onclick="event.stopPropagation()">'
+
+        // ── Header ──
+        + '<div style="background:linear-gradient(135deg,#dc2626,#b91c1c);padding:18px 22px;flex-shrink:0;">'
+          + '<div style="display:flex;align-items:center;gap:12px;">'
+            + '<div style="width:42px;height:42px;background:rgba(255,255,255,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
+              + '<i class="fas fa-file-medical-alt" style="color:#fff;font-size:18px;"></i></div>'
+            + '<div style="flex:1;min-width:0;">'
+              + '<div style="font-size:16px;font-weight:800;color:#fff;">' + c.id + ' — ' + c.claimant + '</div>'
+              + '<div style="font-size:11px;color:rgba(255,255,255,.8);margin-top:1px;">' + c.type + ' · ' + c.carrier + ' · '
+                + '<span style="background:' + statusColor + ';color:#fff;border-radius:20px;padding:1px 8px;font-size:10px;font-weight:700;">' + c.status + '</span>'
+                + ' · <span style="color:' + priorityColor + ';background:#fff;border-radius:20px;padding:1px 8px;font-size:10px;font-weight:700;text-transform:uppercase;">' + c.priority + '</span>'
+              + '</div>'
+            + '</div>'
+            + '<div style="display:flex;gap:8px;flex-shrink:0;">'
+              + '<button onclick="document.getElementById(\'ltc-rv-overlay\').remove();ltcOpenClaimDetail(\'' + claimId + '\')" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:8px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer;" title="Open full Claimant 360 view">'
+                + '<i class="fas fa-expand-alt" style="margin-right:4px;"></i>Full View</button>'
+              + '<button onclick="document.getElementById(\'ltc-rv-overlay\').remove()" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:12px;">✕ Close</button>'
+            + '</div>'
+          + '</div>'
+        + '</div>'
+
+        // ── Tab bar ──
+        + '<div style="display:flex;border-bottom:1px solid #e5e7eb;background:#fafafa;flex-shrink:0;">' + tabBarHtml + '</div>'
+
+        // ── Body (scrollable) ──
+        + '<div style="overflow-y:auto;flex:1;">'
+          + '<div data-rv-panel="0" style="display:block;">' + _rvBuildOverview(c) + '</div>'
+          + '<div data-rv-panel="1" style="display:none;">' + _rvBuildDocuments(c) + '</div>'
+          + '<div data-rv-panel="2" style="display:none;">' + _rvBuildActions(c) + '</div>'
+        + '</div>'
+
+      + '</div>'
+    + '</div>';
+
+    document.body.insertAdjacentHTML('beforeend', html);
+  };
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     PATCH: initLtcClaimsPage — redirect Review button → ltcReviewClaim
+     Override the P9 version so the Review button calls ltcReviewClaim()
+     while row click (ltcOpenClaimDetail) stays unchanged.
+  ══════════════════════════════════════════════════════════════════════════ */
+  var _p35_prevInit = window.initLtcClaimsPage;
+  window.initLtcClaimsPage = function() {
+    // Run the existing init first
+    if (typeof _p35_prevInit === 'function') _p35_prevInit.apply(this, arguments);
+
+    // Then patch the Review buttons in the rendered table
+    setTimeout(function() {
+      var tbody = document.querySelector('.ltc-claims-tbody');
+      if (!tbody) {
+        // Try generic table body fallback
+        var tables = document.querySelectorAll('table');
+        for (var t = 0; t < tables.length; t++) {
+          var tb = tables[t].querySelector('tbody');
+          if (tb && tb.innerHTML.indexOf('ltcOpenClaimDetail') !== -1) { tbody = tb; break; }
+        }
+      }
+      if (!tbody) return;
+
+      // Replace all Review button onclick handlers
+      var reviewBtns = tbody.querySelectorAll('button');
+      reviewBtns.forEach(function(btn) {
+        if (btn.textContent.trim() === 'Review') {
+          // Extract claimId from existing onclick
+          var existing = btn.getAttribute('onclick') || '';
+          var match = existing.match(/ltcOpenClaimDetail\(['"]([^'"]+)['"]\)/);
+          if (match) {
+            var cid = match[1];
+            btn.setAttribute('onclick', "event.stopPropagation();ltcReviewClaim('" + cid + "')");
+          }
+        }
+      });
+
+      // Also patch row-level onclick to open the review, not the full detail
+      // (rows currently call ltcOpenClaimDetail — leave those as-is per spec;
+      //  only the explicit Review button changes to ltcReviewClaim)
+    }, 80);
+  };
+
+  /* ── Also patch any already-rendered Review buttons on first load ────────── */
+  (function _patchExistingReviewButtons() {
+    function _doPatch() {
+      var allBtns = document.querySelectorAll('button');
+      var patched = 0;
+      allBtns.forEach(function(btn) {
+        if (btn.textContent.trim() === 'Review') {
+          var oc = btn.getAttribute('onclick') || '';
+          if (oc.indexOf('ltcOpenClaimDetail') !== -1) {
+            var match = oc.match(/ltcOpenClaimDetail\(['"]([^'"]+)['"]\)/);
+            if (match) {
+              btn.setAttribute('onclick', "event.stopPropagation();ltcReviewClaim('" + match[1] + "')");
+              patched++;
+            }
+          }
+        }
+      });
+      return patched;
+    }
+    // Try immediately and again after the page renders
+    var p1 = _doPatch();
+    if (!p1) setTimeout(_doPatch, 600);
+    setTimeout(_doPatch, 1500);
+    setTimeout(_doPatch, 3000);
+  })();
+
+  console.log('[P35] ltcReviewClaim loaded — focused Review modal with Overview · Documents (IDP) · Actions tabs. Review button redirected from ltcOpenClaimDetail → ltcReviewClaim. ltcOpenClaimDetail unchanged for Claimant 360 "Open Full Claim".');
+})();
