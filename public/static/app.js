@@ -91875,3 +91875,41 @@ var navigateTo=window.navigateTo;
 
   console.log('[P35] ltcReviewClaim loaded — focused Review modal with Overview · Documents (IDP) · Actions tabs. Review button redirected from ltcOpenClaimDetail → ltcReviewClaim. ltcOpenClaimDetail unchanged for Claimant 360 "Open Full Claim".');
 })();
+
+/* ════════════════════════════════════════════════════════════════════════════
+   P35b — REVERT Review button back to ltcOpenClaimDetail (full 10-tab view)
+   Undoes P35's redirect so Review button opens the full Claimant 360 modal,
+   matching the behaviour the user expects from the screenshot.
+════════════════════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  /* Restore initLtcClaimsPage to the P35's _p35_prevInit (which is P9's version),
+     so Review buttons render calling ltcOpenClaimDetail again. */
+  if (typeof window._p35_prevInit === 'function') {
+    window.initLtcClaimsPage = window._p35_prevInit;
+  }
+
+  /* Patch any already-rendered Review buttons back to ltcOpenClaimDetail */
+  function _revertReviewBtns() {
+    var allBtns = document.querySelectorAll('button');
+    allBtns.forEach(function(btn) {
+      if (btn.textContent.trim() === 'Review') {
+        var oc = btn.getAttribute('onclick') || '';
+        if (oc.indexOf('ltcReviewClaim') !== -1) {
+          var match = oc.match(/ltcReviewClaim\(['"]([^'"]+)['"]\)/);
+          if (match) {
+            btn.setAttribute('onclick', "event.stopPropagation();ltcOpenClaimDetail('" + match[1] + "')");
+          }
+        }
+      }
+    });
+  }
+
+  _revertReviewBtns();
+  setTimeout(_revertReviewBtns, 400);
+  setTimeout(_revertReviewBtns, 1200);
+  setTimeout(_revertReviewBtns, 3000);
+
+  console.log('[P35b] Review button reverted → ltcOpenClaimDetail (full 10-tab Claimant 360 view).');
+})();
