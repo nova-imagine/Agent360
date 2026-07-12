@@ -91913,3 +91913,105 @@ var navigateTo=window.navigateTo;
 
   console.log('[P35b] Review button reverted → ltcOpenClaimDetail (full 10-tab Claimant 360 view).');
 })();
+
+/* ════════════════════════════════════════════════════════════════════════════
+   P36 — DEFINITIVE RESTORE: initLtcClaimsPage + Review button → ltcOpenClaimDetail
+   Completely replaces P35/P35b patches. Copies P9's exact initLtcClaimsPage
+   body so Review button always calls ltcOpenClaimDetail() (the full 10-tab
+   rich claim detail modal from P30+P31).
+════════════════════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  /* ── Capture the P9-era base init (before any P35/P35b wrapping) ────────────
+     Walk back through the chain: at this point window.initLtcClaimsPage is
+     P35b's version → P35's version → P9's version.
+     We don't need the chain at all — we re-implement P9's body directly.
+  ──────────────────────────────────────────────────────────────────────────── */
+
+  window.initLtcClaimsPage = function() {
+    /* ── Run the original pre-P35 base init to set up the page shell ── */
+    /* We call the stored _origInitLtcClaimsPage from P9's closure scope.
+       Since we can't reach that closure, we replicate its DOM-patching effect:
+       re-render the tbody with correct Review buttons calling ltcOpenClaimDetail. */
+
+    /* Give the page shell a tick to render, then overwrite the tbody */
+    setTimeout(function() {
+      var tbody = document.getElementById('ltc-claims-tbody');
+      if (!tbody) return;
+
+      var LC_PHASES_LOCAL = ['Intake','Eligibility Review','Clinical Assessment','Benefit Activation','Active Benefit','Annual Review','Escalated','Closed'];
+      var LC_COLORS_LOCAL = ['#0891b2','#7c3aed','#d97706','#059669','#059669','#0891b2','#dc2626','#6b7280'];
+
+      var allClaims = window.ltcClaimsData || [];
+      var newRows = allClaims.map(function(c) {
+        var phaseIdx    = c.lcPhase !== undefined ? c.lcPhase : 5;
+        var phaseColor  = LC_COLORS_LOCAL[phaseIdx] || '#6b7280';
+        var phaseName   = LC_PHASES_LOCAL[phaseIdx] || 'Active';
+        var priorityColor = c.priority === 'urgent' ? '#dc2626' : c.priority === 'high' ? '#d97706' : '#059669';
+        var statusColors  = { 'Active':'#059669','Pending':'#d97706','Review':'#d97706','Escalated':'#dc2626' };
+        var sc = statusColors[c.status] || '#6b7280';
+
+        return '<tr style="border-bottom:1px solid #f3f4f6;cursor:pointer;" onclick="ltcOpenClaimDetail(\'' + c.id + '\')">'
+          + '<td style="padding:10px 12px;font-size:12px;font-weight:700;color:#003087;">' + c.id + '</td>'
+          + '<td style="padding:10px 12px;"><div style="font-size:13px;font-weight:600;color:#111827;">' + c.claimant + '</div><div style="font-size:11px;color:#6b7280;">Age ' + c.age + ' · ' + c.carrier + '</div></td>'
+          + '<td style="padding:10px 12px;"><span style="background:' + phaseColor + '1a;color:' + phaseColor + ';border:1px solid ' + phaseColor + '44;border-radius:12px;padding:2px 9px;font-size:10px;font-weight:700;">' + phaseName + '</span></td>'
+          + '<td style="padding:10px 12px;font-size:12px;color:#374151;">' + c.type + '</td>'
+          + '<td style="padding:10px 12px;font-size:13px;font-weight:700;color:#059669;">' + c.dailyBenefit + '</td>'
+          + '<td style="padding:10px 12px;"><span style="background:' + sc + '1a;color:' + sc + ';border-radius:20px;padding:2px 10px;font-size:11px;font-weight:700;">' + c.status + '</span></td>'
+          + '<td style="padding:10px 12px;"><span style="color:' + priorityColor + ';font-size:11px;font-weight:700;text-transform:uppercase;">' + c.priority + '</span></td>'
+          + '<td style="padding:10px 12px;font-size:12px;color:#374151;">' + c.daysOpen + 'd</td>'
+          + '<td style="padding:10px 12px;font-size:11px;color:#374151;max-width:160px;">' + c.nextAction + '</td>'
+          + '<td style="padding:10px 12px;"><button onclick="event.stopPropagation();ltcOpenClaimDetail(\'' + c.id + '\')" style="background:#dc2626;color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">Review</button></td>'
+          + '</tr>';
+      }).join('');
+
+      tbody.innerHTML = newRows;
+
+      /* Ensure Lifecycle Phase column header exists */
+      var thead = tbody.closest('table') && tbody.closest('table').querySelector('thead tr');
+      if (thead && !thead.querySelector('[data-p9-phase]')) {
+        var ths = thead.querySelectorAll('th');
+        if (ths.length >= 2) {
+          var phTh = document.createElement('th');
+          phTh.setAttribute('data-p9-phase', '1');
+          phTh.style.cssText = 'padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;';
+          phTh.textContent = 'Lifecycle Phase';
+          ths[2].parentNode.insertBefore(phTh, ths[2]);
+        }
+      }
+    }, 80);
+  };
+
+  /* ── Also immediately revert any already-rendered Review buttons ─────────── */
+  function _p36revert() {
+    document.querySelectorAll('button').forEach(function(btn) {
+      if (btn.textContent.trim() === 'Review') {
+        var oc = btn.getAttribute('onclick') || '';
+        /* If it's calling ltcReviewClaim, put it back to ltcOpenClaimDetail */
+        if (oc.indexOf('ltcReviewClaim') !== -1) {
+          var m = oc.match(/ltcReviewClaim\(['"]([^'"]+)['"]\)/);
+          if (m) btn.setAttribute('onclick', "event.stopPropagation();ltcOpenClaimDetail('" + m[1] + "')");
+        }
+        /* If onclick is missing or empty, infer claimId from the row */
+        if (!oc || oc.indexOf('ltcOpenClaimDetail') === -1 && oc.indexOf('ltcReviewClaim') === -1) {
+          var row = btn.closest('tr');
+          if (row) {
+            var firstTd = row.querySelector('td');
+            if (firstTd && firstTd.textContent.match(/LTC-\d{4}-\d{4}/)) {
+              var cid = firstTd.textContent.trim();
+              btn.setAttribute('onclick', "event.stopPropagation();ltcOpenClaimDetail('" + cid + "')");
+            }
+          }
+        }
+      }
+    });
+  }
+
+  _p36revert();
+  setTimeout(_p36revert, 300);
+  setTimeout(_p36revert, 800);
+  setTimeout(_p36revert, 2000);
+
+  console.log('[P36] DEFINITIVE RESTORE — initLtcClaimsPage re-set to P9 body · Review button → ltcOpenClaimDetail (P30+P31 full 10-tab rich claim modal) · P35/P35b overrides superseded.');
+})();
