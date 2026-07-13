@@ -92928,3 +92928,150 @@ var navigateTo=window.navigateTo;
 
   console.log('[P37] ltcReviewClaim loaded — 6-tab Claim Review modal: Claimant Info · Policy Info · Provider Info · Documents+IDP · Clinical · Actions. Review button + row click → ltcReviewClaim. ltcOpenClaimDetail unchanged.');
 })();
+
+/* ════════════════════════════════════════════════════════════════════════════
+   P38 — PERMANENT FIX: Review button → ltcReviewClaim (FINAL, DOMINANT)
+   Problem: P35b's setTimeout(_revertReviewBtns, 3000) fires after P37's
+   sweeps and re-wires Review buttons back to ltcOpenClaimDetail.
+   P36's initLtcClaimsPage also renders rows with ltcOpenClaimDetail.
+
+   Solution:
+   1. Re-override initLtcClaimsPage (copies P37's version exactly)
+   2. Run immediate + repeated sweeps to flip all Review buttons
+   3. Install a MutationObserver that watches the entire document body
+      and re-flips ANY Review button the instant it appears or changes
+   4. Expose window._p38Observer so the observer can be inspected
+════════════════════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  /* ── 1. OVERRIDE initLtcClaimsPage (same as P37 — renders rows → ltcReviewClaim) ── */
+  window.initLtcClaimsPage = function () {
+    setTimeout(function () {
+      var tbody = document.getElementById('ltc-claims-tbody');
+      if (!tbody) return;
+
+      var allClaims = window.ltcClaimsData || [];
+      var rows = allClaims.map(function (c) {
+        var priorityColor = c.priority === 'urgent' ? '#dc2626'
+                          : c.priority === 'high'   ? '#d97706' : '#059669';
+        var statusColors = { 'Active':'#059669','Pending':'#d97706','Review':'#d97706','Escalated':'#dc2626' };
+        var sc = statusColors[c.status] || '#6b7280';
+        var typeLabel = (c.type || 'LTC').replace('Long-Term Care','LTC');
+        var daysOpen  = c.daysOpen || '—';
+        var nextAct   = c.nextAction || '—';
+
+        return '<tr style="border-bottom:1px solid #f3f4f6;cursor:pointer;" onclick="ltcReviewClaim(\'' + c.id + '\')">'
+          + '<td style="padding:10px 12px;font-size:12px;font-weight:700;color:#003087;">' + c.id + '</td>'
+          + '<td style="padding:10px 12px;">'
+            + '<div style="font-size:13px;font-weight:600;color:#111827;">' + c.claimant + '</div>'
+            + '<div style="font-size:11px;color:#6b7280;">Age ' + (c.age||'') + ' · ' + (c.carrier||'') + '</div>'
+          + '</td>'
+          + '<td style="padding:10px 12px;">'
+            + '<span style="background:#1e40af1a;color:#1e40af;border:1px solid #1e40af44;border-radius:12px;padding:2px 9px;font-size:10px;font-weight:700;">'
+            + typeLabel + '</span>'
+          + '</td>'
+          + '<td style="padding:10px 12px;font-size:13px;font-weight:700;color:#059669;">' + (c.dailyBenefit||'—') + '</td>'
+          + '<td style="padding:10px 12px;">'
+            + '<span style="background:' + sc + '1a;color:' + sc + ';border:1px solid ' + sc + '44;border-radius:12px;padding:2px 8px;font-size:11px;font-weight:600;">'
+            + (c.status||'—') + '</span>'
+          + '</td>'
+          + '<td style="padding:10px 12px;font-size:12px;font-weight:700;color:' + priorityColor + ';text-transform:uppercase;">'
+            + (c.priority||'—') + '</td>'
+          + '<td style="padding:10px 12px;font-size:12px;color:#374151;">' + daysOpen + ' days</td>'
+          + '<td style="padding:10px 12px;font-size:11px;color:#6b7280;">' + nextAct + '</td>'
+          + '<td style="padding:10px 12px;">'
+            + '<button onclick="event.stopPropagation();ltcReviewClaim(\'' + c.id + '\')" '
+            + 'style="background:#1e3a8a;color:#fff;border:none;border-radius:6px;padding:5px 14px;font-size:11px;font-weight:700;cursor:pointer;">Review</button>'
+          + '</td>'
+          + '</tr>';
+      });
+      tbody.innerHTML = rows.join('');
+    }, 80);
+  };
+
+  /* ── 2. SWEEP: flip all rendered Review buttons → ltcReviewClaim ── */
+  function _p38Sweep() {
+    document.querySelectorAll('button').forEach(function (btn) {
+      if (btn.textContent.trim() !== 'Review') return;
+      var oc = btn.getAttribute('onclick') || '';
+      if (oc.indexOf('ltcReviewClaim') !== -1) return; // already correct
+      /* Extract claim ID from ltcOpenClaimDetail('...') or any variant */
+      var m = oc.match(/ltcOpenClaimDetail\(['"]([^'"]+)['"]\)/)
+           || oc.match(/ltcReviewClaim\(['"]([^'"]+)['"]\)/);
+      if (m) {
+        btn.setAttribute('onclick', "event.stopPropagation();ltcReviewClaim('" + m[1] + "')");
+      }
+    });
+
+    /* Also fix table-row onclick that calls ltcOpenClaimDetail */
+    document.querySelectorAll('#ltc-claims-tbody tr').forEach(function (tr) {
+      var oc = tr.getAttribute('onclick') || '';
+      if (oc.indexOf('ltcOpenClaimDetail') !== -1) {
+        tr.setAttribute('onclick', oc.replace(/ltcOpenClaimDetail/g, 'ltcReviewClaim'));
+      }
+    });
+  }
+
+  /* Run immediately and at several intervals to beat P35b's 3000ms timer */
+  _p38Sweep();
+  setTimeout(_p38Sweep, 200);
+  setTimeout(_p38Sweep, 600);
+  setTimeout(_p38Sweep, 1500);
+  setTimeout(_p38Sweep, 3500);  /* fires AFTER P35b's 3000ms revert */
+  setTimeout(_p38Sweep, 5000);
+  setTimeout(_p38Sweep, 8000);
+
+  /* ── 3. MUTATIONOBSERVER — permanently locks Review buttons as DOM changes ── */
+  function _p38InstallObserver() {
+    if (window._p38Observer) {
+      try { window._p38Observer.disconnect(); } catch(e) {}
+    }
+    var observer = new MutationObserver(function (mutations) {
+      var needsSweep = false;
+      for (var i = 0; i < mutations.length; i++) {
+        var m = mutations[i];
+        if (m.type === 'childList' && m.addedNodes.length) {
+          needsSweep = true; break;
+        }
+        if (m.type === 'attributes' && m.target.tagName === 'BUTTON') {
+          needsSweep = true; break;
+        }
+      }
+      if (needsSweep) {
+        /* Debounce — run sweep 50ms after last mutation batch */
+        clearTimeout(window._p38SweepTimer);
+        window._p38SweepTimer = setTimeout(_p38Sweep, 50);
+      }
+    });
+
+    var target = document.getElementById('ltc-claims-tbody') || document.body;
+    observer.observe(target, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['onclick']
+    });
+    window._p38Observer = observer;
+  }
+
+  /* Install observer now, and re-install if tbody is replaced */
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _p38InstallObserver);
+  } else {
+    _p38InstallObserver();
+  }
+
+  /* Re-install observer whenever the LTC Claims section is navigated to */
+  var _p38NavTimer = setInterval(function () {
+    var tbody = document.getElementById('ltc-claims-tbody');
+    if (tbody && (!window._p38Observer || !window._p38ObserverTarget || window._p38ObserverTarget !== tbody)) {
+      window._p38ObserverTarget = tbody;
+      _p38InstallObserver();
+      _p38Sweep();
+    }
+  }, 1000);
+  window._p38NavTimer = _p38NavTimer;
+
+  console.log('[P38] PERMANENT FIX: Review → ltcReviewClaim. MutationObserver installed. initLtcClaimsPage overridden. P35b revert neutralized.');
+})();
