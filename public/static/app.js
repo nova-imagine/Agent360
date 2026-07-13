@@ -41381,7 +41381,7 @@ function toggleHeatmapExpand(btn) {
 }
 
 /* ── Intelligence: Refresh AI Insights ── */
-function refreshAIInsights(btn) {
+function refreshAIInsightsClaims(btn) {
   var orig = btn.innerHTML;
   btn.disabled = true;
   btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analysing…';

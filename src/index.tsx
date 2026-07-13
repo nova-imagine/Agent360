@@ -18,7 +18,7 @@ app.use(
         </head>
         <body>
           {children}
-          <script src="/static/app.js?v=p31"></script>
+          <script src="/static/app.js?v=p40"></script>
         </body>
       </html>
     )
