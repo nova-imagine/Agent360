@@ -91875,3 +91875,1056 @@ var navigateTo=window.navigateTo;
 
   console.log('[P35] ltcReviewClaim loaded — focused Review modal with Overview · Documents (IDP) · Actions tabs. Review button redirected from ltcOpenClaimDetail → ltcReviewClaim. ltcOpenClaimDetail unchanged for Claimant 360 "Open Full Claim".');
 })();
+
+/* ════════════════════════════════════════════════════════════════════════════
+   P35b — REVERT Review button back to ltcOpenClaimDetail (full 10-tab view)
+   Undoes P35's redirect so Review button opens the full Claimant 360 modal,
+   matching the behaviour the user expects from the screenshot.
+════════════════════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  /* Restore initLtcClaimsPage to the P35's _p35_prevInit (which is P9's version),
+     so Review buttons render calling ltcOpenClaimDetail again. */
+  if (typeof window._p35_prevInit === 'function') {
+    window.initLtcClaimsPage = window._p35_prevInit;
+  }
+
+  /* Patch any already-rendered Review buttons back to ltcOpenClaimDetail */
+  function _revertReviewBtns() {
+    var allBtns = document.querySelectorAll('button');
+    allBtns.forEach(function(btn) {
+      if (btn.textContent.trim() === 'Review') {
+        var oc = btn.getAttribute('onclick') || '';
+        if (oc.indexOf('ltcReviewClaim') !== -1) {
+          var match = oc.match(/ltcReviewClaim\(['"]([^'"]+)['"]\)/);
+          if (match) {
+            btn.setAttribute('onclick', "event.stopPropagation();ltcOpenClaimDetail('" + match[1] + "')");
+          }
+        }
+      }
+    });
+  }
+
+  _revertReviewBtns();
+  setTimeout(_revertReviewBtns, 400);
+  setTimeout(_revertReviewBtns, 1200);
+  setTimeout(_revertReviewBtns, 3000);
+
+  console.log('[P35b] Review button reverted → ltcOpenClaimDetail (full 10-tab Claimant 360 view).');
+})();
+
+/* ════════════════════════════════════════════════════════════════════════════
+   P36 — DEFINITIVE RESTORE: initLtcClaimsPage + Review button → ltcOpenClaimDetail
+   Completely replaces P35/P35b patches. Copies P9's exact initLtcClaimsPage
+   body so Review button always calls ltcOpenClaimDetail() (the full 10-tab
+   rich claim detail modal from P30+P31).
+════════════════════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  /* ── Capture the P9-era base init (before any P35/P35b wrapping) ────────────
+     Walk back through the chain: at this point window.initLtcClaimsPage is
+     P35b's version → P35's version → P9's version.
+     We don't need the chain at all — we re-implement P9's body directly.
+  ──────────────────────────────────────────────────────────────────────────── */
+
+  window.initLtcClaimsPage = function() {
+    /* ── Run the original pre-P35 base init to set up the page shell ── */
+    /* We call the stored _origInitLtcClaimsPage from P9's closure scope.
+       Since we can't reach that closure, we replicate its DOM-patching effect:
+       re-render the tbody with correct Review buttons calling ltcOpenClaimDetail. */
+
+    /* Give the page shell a tick to render, then overwrite the tbody */
+    setTimeout(function() {
+      var tbody = document.getElementById('ltc-claims-tbody');
+      if (!tbody) return;
+
+      var LC_PHASES_LOCAL = ['Intake','Eligibility Review','Clinical Assessment','Benefit Activation','Active Benefit','Annual Review','Escalated','Closed'];
+      var LC_COLORS_LOCAL = ['#0891b2','#7c3aed','#d97706','#059669','#059669','#0891b2','#dc2626','#6b7280'];
+
+      var allClaims = window.ltcClaimsData || [];
+      var newRows = allClaims.map(function(c) {
+        var phaseIdx    = c.lcPhase !== undefined ? c.lcPhase : 5;
+        var phaseColor  = LC_COLORS_LOCAL[phaseIdx] || '#6b7280';
+        var phaseName   = LC_PHASES_LOCAL[phaseIdx] || 'Active';
+        var priorityColor = c.priority === 'urgent' ? '#dc2626' : c.priority === 'high' ? '#d97706' : '#059669';
+        var statusColors  = { 'Active':'#059669','Pending':'#d97706','Review':'#d97706','Escalated':'#dc2626' };
+        var sc = statusColors[c.status] || '#6b7280';
+
+        return '<tr style="border-bottom:1px solid #f3f4f6;cursor:pointer;" onclick="ltcOpenClaimDetail(\'' + c.id + '\')">'
+          + '<td style="padding:10px 12px;font-size:12px;font-weight:700;color:#003087;">' + c.id + '</td>'
+          + '<td style="padding:10px 12px;"><div style="font-size:13px;font-weight:600;color:#111827;">' + c.claimant + '</div><div style="font-size:11px;color:#6b7280;">Age ' + c.age + ' · ' + c.carrier + '</div></td>'
+          + '<td style="padding:10px 12px;"><span style="background:' + phaseColor + '1a;color:' + phaseColor + ';border:1px solid ' + phaseColor + '44;border-radius:12px;padding:2px 9px;font-size:10px;font-weight:700;">' + phaseName + '</span></td>'
+          + '<td style="padding:10px 12px;font-size:12px;color:#374151;">' + c.type + '</td>'
+          + '<td style="padding:10px 12px;font-size:13px;font-weight:700;color:#059669;">' + c.dailyBenefit + '</td>'
+          + '<td style="padding:10px 12px;"><span style="background:' + sc + '1a;color:' + sc + ';border-radius:20px;padding:2px 10px;font-size:11px;font-weight:700;">' + c.status + '</span></td>'
+          + '<td style="padding:10px 12px;"><span style="color:' + priorityColor + ';font-size:11px;font-weight:700;text-transform:uppercase;">' + c.priority + '</span></td>'
+          + '<td style="padding:10px 12px;font-size:12px;color:#374151;">' + c.daysOpen + 'd</td>'
+          + '<td style="padding:10px 12px;font-size:11px;color:#374151;max-width:160px;">' + c.nextAction + '</td>'
+          + '<td style="padding:10px 12px;"><button onclick="event.stopPropagation();ltcOpenClaimDetail(\'' + c.id + '\')" style="background:#dc2626;color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">Review</button></td>'
+          + '</tr>';
+      }).join('');
+
+      tbody.innerHTML = newRows;
+
+      /* Ensure Lifecycle Phase column header exists */
+      var thead = tbody.closest('table') && tbody.closest('table').querySelector('thead tr');
+      if (thead && !thead.querySelector('[data-p9-phase]')) {
+        var ths = thead.querySelectorAll('th');
+        if (ths.length >= 2) {
+          var phTh = document.createElement('th');
+          phTh.setAttribute('data-p9-phase', '1');
+          phTh.style.cssText = 'padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;';
+          phTh.textContent = 'Lifecycle Phase';
+          ths[2].parentNode.insertBefore(phTh, ths[2]);
+        }
+      }
+    }, 80);
+  };
+
+  /* ── Also immediately revert any already-rendered Review buttons ─────────── */
+  function _p36revert() {
+    document.querySelectorAll('button').forEach(function(btn) {
+      if (btn.textContent.trim() === 'Review') {
+        var oc = btn.getAttribute('onclick') || '';
+        /* If it's calling ltcReviewClaim, put it back to ltcOpenClaimDetail */
+        if (oc.indexOf('ltcReviewClaim') !== -1) {
+          var m = oc.match(/ltcReviewClaim\(['"]([^'"]+)['"]\)/);
+          if (m) btn.setAttribute('onclick', "event.stopPropagation();ltcOpenClaimDetail('" + m[1] + "')");
+        }
+        /* If onclick is missing or empty, infer claimId from the row */
+        if (!oc || oc.indexOf('ltcOpenClaimDetail') === -1 && oc.indexOf('ltcReviewClaim') === -1) {
+          var row = btn.closest('tr');
+          if (row) {
+            var firstTd = row.querySelector('td');
+            if (firstTd && firstTd.textContent.match(/LTC-\d{4}-\d{4}/)) {
+              var cid = firstTd.textContent.trim();
+              btn.setAttribute('onclick', "event.stopPropagation();ltcOpenClaimDetail('" + cid + "')");
+            }
+          }
+        }
+      }
+    });
+  }
+
+  _p36revert();
+  setTimeout(_p36revert, 300);
+  setTimeout(_p36revert, 800);
+  setTimeout(_p36revert, 2000);
+
+  console.log('[P36] DEFINITIVE RESTORE — initLtcClaimsPage re-set to P9 body · Review button → ltcOpenClaimDetail (P30+P31 full 10-tab rich claim modal) · P35/P35b overrides superseded.');
+})();
+
+/* ════════════════════════════════════════════════════════════════════════════
+   P37 — LTC CLAIM REVIEW MODAL (DEFINITIVE)
+   window.ltcReviewClaim(claimId) — 6-tab focused claim review modal:
+     Tab 0: Claimant Info  (summary grid, post-submission workflow, AI review)
+     Tab 1: Policy Info    (policy details, riders, carrier info)
+     Tab 2: Provider Info  (provider, EVV, visit log, care manager)
+     Tab 3: Documents      (doc list by party + IDP sub-modal on click)
+     Tab 4: Clinical       (ADL scores, MMSE, RN assessment, SMARTS rules)
+     Tab 5: Actions        (6 action tiles, AI next steps, audit log)
+   Also overrides initLtcClaimsPage so Review button + row click → ltcReviewClaim.
+   ltcOpenClaimDetail() (P30+P31 Claimant 360) is completely untouched.
+════════════════════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     SHARED HELPERS
+  ══════════════════════════════════════════════════════════════════════════ */
+  function _rv(lbl, val, full) {
+    return '<div style="background:#f8fafc;border-radius:8px;padding:10px 12px;' + (full ? 'grid-column:span 2;' : '') + '">'
+      + '<div style="font-size:10px;color:#9ca3af;font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px;">' + lbl + '</div>'
+      + '<div style="font-size:13px;font-weight:600;color:#111827;line-height:1.4;">' + (val || '—') + '</div>'
+      + '</div>';
+  }
+
+  function _rvBadge(status) {
+    var map = { 'Active':'#059669','Pending':'#d97706','Review':'#d97706','Escalated':'#dc2626',
+                'On Hold':'#dc2626','Resolved':'#6b7280','Verified':'#059669','On File':'#059669',
+                'FIRED':'#059669','PASSED':'#059669','MONITORING':'#0891b2','ALERT':'#dc2626',
+                'BYPASSED':'#d97706','CRITICAL':'#dc2626','SATISFIED':'#059669','Escalated':'#dc2626' };
+    var c = map[status] || '#6b7280';
+    return '<span style="background:' + c + '18;color:' + c + ';border:1px solid ' + c + '44;border-radius:20px;padding:2px 9px;font-size:10px;font-weight:700;">' + status + '</span>';
+  }
+
+  function _rvSection(title, icon, color, content) {
+    return '<div style="margin-bottom:16px;">'
+      + '<div style="font-size:11px;font-weight:700;color:' + color + ';text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px;">'
+        + '<i class="fas fa-' + icon + '"></i>' + title + '</div>'
+      + content
+      + '</div>';
+  }
+
+  function _rvToast(msg) {
+    if (typeof _raToast === 'function') _raToast(msg, 3500);
+    else if (typeof _L4toast === 'function') _L4toast(msg, 3500);
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     IDP DATA — extracted fields per document type
+  ══════════════════════════════════════════════════════════════════════════ */
+  var _idpExtractedFields = {
+    'HIPAA Authorization': [
+      { field: 'Claimant Name',        value: '',            conf: 99 },
+      { field: 'Authorized Individual', value: '',           conf: 98 },
+      { field: 'Relationship to Claimant', value: '',        conf: 97 },
+      { field: 'Scope of Authorization', value: 'Full medical records, treatment history, billing records', conf: 95 },
+      { field: 'Signature Date',        value: '',           conf: 99 },
+      { field: 'Expiration Date',       value: '1 year from signing', conf: 92 },
+      { field: 'Witness / Notary',      value: 'DocuSign certified', conf: 90 }
+    ],
+    'Attending Physician Statement': [
+      { field: 'Physician Name',        value: '',           conf: 99 },
+      { field: 'NPI Number',            value: '',           conf: 99 },
+      { field: 'Practice / Specialty',  value: '',           conf: 97 },
+      { field: 'Primary Diagnosis',     value: '',           conf: 98 },
+      { field: 'ICD-10 Code',           value: '',           conf: 97 },
+      { field: 'ADL Limitations',       value: '',           conf: 94 },
+      { field: 'Prognosis',             value: '',           conf: 88 },
+      { field: 'Medical Necessity Statement', value: '',     conf: 93 },
+      { field: 'Signature Date',        value: '',           conf: 99 }
+    ],
+    'ADL Assessment Report': [
+      { field: 'Assessor Name',         value: '',           conf: 99 },
+      { field: 'Assessment Date',       value: '',           conf: 99 },
+      { field: 'Bathing',               value: '',           conf: 97 },
+      { field: 'Dressing',              value: '',           conf: 97 },
+      { field: 'Eating',                value: '',           conf: 97 },
+      { field: 'Transferring',          value: '',           conf: 97 },
+      { field: 'Toileting',             value: '',           conf: 97 },
+      { field: 'Continence',            value: '',           conf: 96 },
+      { field: 'MMSE Score',            value: '',           conf: 95 },
+      { field: 'Fall Risk Level',       value: '',           conf: 91 },
+      { field: 'Recommended Care Level',value: '',           conf: 93 }
+    ],
+    'Insurance Policy': [
+      { field: 'Policy Number',         value: '',           conf: 99 },
+      { field: 'Issue Date',            value: '',           conf: 99 },
+      { field: 'Daily Benefit Amount',  value: '',           conf: 99 },
+      { field: 'Benefit Period',        value: '',           conf: 98 },
+      { field: 'Elimination Period',    value: '90 days',    conf: 99 },
+      { field: 'Inflation Protection',  value: '',           conf: 96 },
+      { field: 'Covered Care Settings', value: '',           conf: 95 },
+      { field: 'Shared Care Rider',     value: '',           conf: 94 }
+    ],
+    'EVV Records': [
+      { field: 'Provider Name',         value: '',           conf: 99 },
+      { field: 'Visit Dates',           value: '',           conf: 99 },
+      { field: 'GPS Verification',      value: 'Verified',   conf: 97 },
+      { field: 'Aide Name',             value: '',           conf: 96 },
+      { field: 'Tasks Completed',       value: 'Bathing, dressing, medication reminder', conf: 92 },
+      { field: 'Visit Duration (avg)',  value: '',           conf: 95 }
+    ],
+    'default': [
+      { field: 'Document Type',         value: '',           conf: 96 },
+      { field: 'Source',                value: '',           conf: 95 },
+      { field: 'Date Received',         value: '',           conf: 99 },
+      { field: 'Status',                value: '',           conf: 97 },
+      { field: 'Key Content',           value: 'AI extraction in progress — review complete document', conf: 85 }
+    ]
+  };
+
+  function _getIdpFields(docName, claimData) {
+    var key = 'default';
+    if (docName.indexOf('HIPAA') !== -1) key = 'HIPAA Authorization';
+    else if (docName.indexOf('Physician Statement') !== -1 || docName.indexOf('APS') !== -1) key = 'Attending Physician Statement';
+    else if (docName.indexOf('ADL') !== -1 || docName.indexOf('Assessment') !== -1) key = 'ADL Assessment Report';
+    else if (docName.indexOf('Policy') !== -1 || docName.indexOf('Insurance') !== -1) key = 'Insurance Policy';
+    else if (docName.indexOf('EVV') !== -1) key = 'EVV Records';
+    var c = claimData;
+    var fields = JSON.parse(JSON.stringify(_idpExtractedFields[key])); // deep copy
+    // Populate with real claim data where possible
+    fields.forEach(function(f) {
+      if (!f.value) {
+        if (f.field === 'Claimant Name' || f.field === 'Document Type') f.value = c.claimant || '';
+        else if (f.field === 'Physician Name') f.value = c.attendingPhysician ? c.attendingPhysician.split(' — ')[0] : '';
+        else if (f.field === 'NPI Number') f.value = c.attendingNPI || '';
+        else if (f.field === 'Practice / Specialty') f.value = c.attendingPhysician ? (c.attendingPhysician.split(' — ')[1] || '') : '';
+        else if (f.field === 'Primary Diagnosis') f.value = c.dx1Label || '';
+        else if (f.field === 'ICD-10 Code') f.value = c.dx1Code || '';
+        else if (f.field === 'ADL Limitations') f.value = c.adlsImpaired ? c.adlsImpaired.join(', ') : '';
+        else if (f.field === 'Policy Number') f.value = c.product ? c.carrier + ' — ' + c.product : '';
+        else if (f.field === 'Daily Benefit Amount') f.value = c.dailyBenefit || '';
+        else if (f.field === 'Inflation Protection') f.value = c.inflationRider || 'None';
+        else if (f.field === 'Provider Name') f.value = c.provider || '';
+        else if (f.field === 'Source') f.value = c.carrier || '';
+        else if (f.field === 'Date Received') f.value = c.qualifyingEventDate || '';
+        else if (f.field === 'Status') f.value = c.status || '';
+        else if (f.field === 'Authorized Individual') f.value = c.filedByName || '';
+        else if (f.field === 'Relationship to Claimant') f.value = c.filedBy || '';
+        else if (f.field === 'Signature Date') f.value = c.notificationDate || '';
+        else if (f.field === 'Assessor Name') f.value = c.assessedBy ? c.assessedBy.split(' — ')[0] : '';
+        else if (f.field === 'Assessment Date') f.value = c.qualifyingEventDate || '';
+        else if (f.field === 'MMSE Score') f.value = (c.cogScore || '—') + '/30';
+        else if (f.field === 'Recommended Care Level') f.value = c.type || '';
+        else if (f.field === 'Benefit Period') f.value = c.benefitPeriodDays ? Math.round(c.benefitPeriodDays/365) + '-year benefit period' : '';
+      }
+    });
+    return fields;
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     IDP SUB-MODAL
+  ══════════════════════════════════════════════════════════════════════════ */
+  window._ltcRv37OpenIDP = function(docName, docFrom, docDate, docStatus, claimId) {
+    var existing = document.getElementById('ltc-rv37-idp-overlay');
+    if (existing) existing.remove();
+
+    var c = (window.ltcClaimsData || []).find(function(x) { return x.id === claimId; }) || {};
+    var fields = _getIdpFields(docName, c);
+
+    var isVerified  = docStatus.indexOf('✅') === 0;
+    var isPending   = docStatus.indexOf('⚠️') === 0 || docStatus.indexOf('Pending') !== -1;
+    var isAlert     = docStatus.indexOf('🔴') === 0;
+    var docColor    = isVerified ? '#059669' : isPending ? '#d97706' : isAlert ? '#dc2626' : '#7c3aed';
+    var docIcon     = isVerified ? 'fa-check-circle' : isPending ? 'fa-clock' : isAlert ? 'fa-exclamation-circle' : 'fa-cog fa-spin';
+    var docStatusLabel = isVerified ? 'Received & Verified' : isPending ? 'Pending / In Progress' : isAlert ? 'Action Required' : 'Processing';
+
+    var fieldsHtml = fields.map(function(f, i) {
+      var confColor = f.conf >= 90 ? '#059669' : f.conf >= 75 ? '#d97706' : '#dc2626';
+      var confLabel = f.conf >= 90 ? 'High' : f.conf >= 75 ? 'Medium' : 'Low';
+      var val = f.value || '<span style="color:#9ca3af;font-style:italic;">Extracting…</span>';
+      return '<div style="display:grid;grid-template-columns:1fr 1.4fr auto;gap:0;border-bottom:1px solid #f3f4f6;padding:9px 12px;align-items:center;background:' + (i%2===0?'#ffffff':'#fafafa') + ';">'
+        + '<div style="font-size:11px;font-weight:700;color:#374151;">' + f.field + '</div>'
+        + '<div style="font-size:12px;color:#111827;font-weight:500;">' + val + '</div>'
+        + '<div style="text-align:right;">'
+          + '<div style="font-size:9px;font-weight:700;color:' + confColor + ';background:' + confColor + '15;border-radius:4px;padding:2px 6px;display:inline-block;">' + f.conf + '% · ' + confLabel + '</div>'
+        + '</div>'
+        + '</div>';
+    }).join('');
+
+    // Simulated document preview lines
+    var previewLines = [];
+    if (docName.indexOf('HIPAA') !== -1) {
+      previewLines = ['AUTHORIZATION FOR RELEASE OF HEALTH INFORMATION', '',
+        'Patient: ' + (c.claimant || 'Claimant Name'), 'Date of Birth: [on file]',
+        'Authorized Individual: ' + (c.filedByName || '—'), 'Relationship: ' + (c.filedBy || '—'), '',
+        'I authorize the release of medical records, treatment history, and billing records to:',
+        'LTCAS / HAL — Illumifin TPA, for the purpose of LTC claim adjudication.', '',
+        'This authorization covers: Full medical history · Treatment records · Billing records',
+        'Valid for: 1 year from date of signature', '',
+        'Signed: ___________________________  Date: ' + (c.notificationDate || '—'),
+        '[DocuSign Certificate ID: DS-' + (claimId || 'XXX') + '-HIPAA]'];
+    } else if (docName.indexOf('Physician') !== -1 || docName.indexOf('APS') !== -1) {
+      previewLines = ['ATTENDING PHYSICIAN STATEMENT', 'Long-Term Care Insurance Claim', '',
+        'Claimant: ' + (c.claimant || '—') + '    DOB: [on file]',
+        'Physician: ' + (c.attendingPhysician || '—'), 'NPI: ' + (c.attendingNPI || '—'), '',
+        'PRIMARY DIAGNOSIS: ' + (c.dx1Code || '') + ' — ' + (c.dx1Label || ''),
+        'SECONDARY DIAGNOSIS: ' + (c.dx2Code || '') + ' — ' + (c.dx2Label || ''), '',
+        'ADL LIMITATIONS: ' + (c.adlsImpaired ? c.adlsImpaired.join(', ') : '—'),
+        'PROGNOSIS: Ongoing — condition expected to require continued care', '',
+        'MEDICAL NECESSITY: I certify that this patient requires ' + (c.type || 'long-term care'),
+        'and meets the criteria for LTC benefit activation.', '',
+        'Physician Signature: _______________  Date: ' + (c.qualifyingEventDate || '—')];
+    } else if (docName.indexOf('ADL') !== -1) {
+      var rn = c.rnAssessment || {};
+      var adlS = rn.adlScores || {};
+      previewLines = ['ADL ASSESSMENT REPORT', 'Functional Status Evaluation', '',
+        'Claimant: ' + (c.claimant || '—') + '    Assessor: ' + (rn.completedBy || c.assessedBy || '—'),
+        'Assessment Date: ' + (rn.date || '—'), '',
+        'ACTIVITIES OF DAILY LIVING (scored 0=dependent → 3=independent):',
+        '  Bathing:     ' + (adlS.bathing !== undefined ? adlS.bathing : '—'),
+        '  Dressing:    ' + (adlS.dressing !== undefined ? adlS.dressing : '—'),
+        '  Eating:      ' + (adlS.eating !== undefined ? adlS.eating : '—'),
+        '  Transferring:' + (adlS.transferring !== undefined ? adlS.transferring : '—'),
+        '  Toileting:   ' + (adlS.toileting !== undefined ? adlS.toileting : '—'),
+        '  Continence:  ' + (adlS.continence !== undefined ? adlS.continence : '—'), '',
+        'MMSE: ' + (rn.mmseScore || c.cogScore || '—') + '/30',
+        'Falls (90 days): ' + (rn.fallsLast90Days !== undefined ? rn.fallsLast90Days : '—'),
+        'Recommended Care: ' + (rn.recommendation || c.type || '—')];
+    } else {
+      previewLines = ['DOCUMENT: ' + docName, 'Source: ' + (docFrom || '—'), 'Date: ' + (docDate || '—'),
+        'Claim: ' + claimId, '', '[ AI document extraction in progress ]',
+        'Fields highlighted above have been automatically identified', 'and extracted by the LTCAS IDP engine.', '',
+        'Please review extracted values and confirm accuracy', 'before storing to the claim file.'];
+    }
+
+    var previewHtml = previewLines.map(function(line) {
+      return '<div style="font-size:11px;font-family:monospace;color:' + (line === '' ? 'transparent' : line.indexOf('===') === 0 || line.toUpperCase() === line && line.length > 4 ? '#003087' : '#374151') + ';padding:1px 0;line-height:1.6;">' + (line || '&nbsp;') + '</div>';
+    }).join('');
+
+    var overlay = '<div id="ltc-rv37-idp-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:11000;display:flex;align-items:center;justify-content:center;padding:16px;" onclick="if(event.target===this)this.remove()">'
+      + '<div style="background:#fff;border-radius:16px;width:820px;max-width:96vw;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 32px 80px rgba(0,0,0,.32);overflow:hidden;" onclick="event.stopPropagation()">'
+
+      // IDP Header
+      + '<div style="background:linear-gradient(135deg,#7c3aed,#6d28d9);padding:16px 20px;flex-shrink:0;">'
+        + '<div style="display:flex;align-items:center;gap:12px;">'
+          + '<div style="width:40px;height:40px;background:rgba(255,255,255,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
+            + '<i class="fas fa-magic" style="color:#fff;font-size:17px;"></i></div>'
+          + '<div style="flex:1;">'
+            + '<div style="font-size:15px;font-weight:800;color:#fff;">IDP — Intelligent Document Processing</div>'
+            + '<div style="font-size:11px;color:rgba(255,255,255,.8);">' + docName + ' · ' + claimId + ' · AI field extraction</div>'
+          + '</div>'
+          + '<div style="display:flex;align-items:center;gap:6px;background:' + docColor + ';border-radius:20px;padding:4px 12px;flex-shrink:0;">'
+            + '<i class="fas ' + docIcon + '" style="color:#fff;font-size:10px;"></i>'
+            + '<span style="color:#fff;font-size:10px;font-weight:700;">' + docStatusLabel + '</span>'
+          + '</div>'
+          + '<button onclick="document.getElementById(\'ltc-rv37-idp-overlay\').remove()" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:12px;margin-left:8px;flex-shrink:0;">✕ Close</button>'
+        + '</div>'
+      + '</div>'
+
+      // Two-column body
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;flex:1;overflow:hidden;">'
+
+        // Left: Document Preview
+        + '<div style="border-right:1px solid #e5e7eb;display:flex;flex-direction:column;">'
+          + '<div style="padding:12px 16px;background:#f8fafc;border-bottom:1px solid #e5e7eb;flex-shrink:0;">'
+            + '<div style="font-size:11px;font-weight:700;color:#374151;"><i class="fas fa-file-alt" style="color:#7c3aed;margin-right:6px;"></i>Document Preview</div>'
+            + '<div style="font-size:10px;color:#9ca3af;margin-top:1px;">Received from: ' + (docFrom || '—') + ' · ' + (docDate || '—') + '</div>'
+          + '</div>'
+          + '<div style="overflow-y:auto;flex:1;padding:16px;background:#fffbf0;border:1px dashed #fbbf24;margin:12px;border-radius:8px;">'
+            + previewHtml
+          + '</div>'
+        + '</div>'
+
+        // Right: AI Extracted Fields
+        + '<div style="display:flex;flex-direction:column;overflow:hidden;">'
+          + '<div style="padding:12px 16px;background:#f5f3ff;border-bottom:1px solid #e5e7eb;flex-shrink:0;">'
+            + '<div style="display:flex;align-items:center;justify-content:space-between;">'
+              + '<div>'
+                + '<div style="font-size:11px;font-weight:700;color:#7c3aed;"><i class="fas fa-robot" style="margin-right:6px;"></i>AI-Extracted Fields</div>'
+                + '<div style="font-size:10px;color:#9ca3af;margin-top:1px;">NLP confidence scoring · Auto-population ready</div>'
+              + '</div>'
+              + '<div style="background:#7c3aed;color:#fff;border-radius:20px;padding:2px 10px;font-size:10px;font-weight:700;">● LIVE</div>'
+            + '</div>'
+          + '</div>'
+          + '<div style="overflow-y:auto;flex:1;">'
+            + '<div style="padding:0;">' + fieldsHtml + '</div>'
+          + '</div>'
+        + '</div>'
+
+      + '</div>'
+
+      // Footer actions
+      + '<div style="padding:14px 20px;background:#f8fafc;border-top:1px solid #e5e7eb;display:flex;gap:8px;flex-wrap:wrap;flex-shrink:0;align-items:center;">'
+        + '<button onclick="_ltcRv37StoreFields(\'' + claimId + '\',\'' + docName.replace(/'/g, '') + '\')" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-database" style="margin-right:5px;"></i>Store to Claim File</button>'
+        + '<button onclick="_rv37FlagReview(\'' + docName.replace(/'/g, '') + '\')" style="background:#d97706;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-flag" style="margin-right:5px;"></i>Flag for Review</button>'
+        + '<button onclick="_rv37RequestCorrection(\'' + docName.replace(/'/g, '') + '\')" style="background:#0891b2;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-edit" style="margin-right:5px;"></i>Request Correction</button>'
+        + '<button onclick="_rv37Download(\'' + docName.replace(/'/g, '') + '\')" style="background:#f3f4f6;color:#374151;border:1px solid #d1d5db;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-download" style="margin-right:5px;"></i>Download</button>'
+        + '<div style="margin-left:auto;font-size:10px;color:#9ca3af;"><i class="fas fa-shield-alt" style="margin-right:4px;color:#059669;"></i>HIPAA-secure · Audit logged</div>'
+      + '</div>'
+
+    + '</div></div>';
+
+    document.body.insertAdjacentHTML('beforeend', overlay);
+  };
+
+  window._ltcRv37StoreFields = function(claimId, docName) {
+    document.getElementById('ltc-rv37-idp-overlay') && document.getElementById('ltc-rv37-idp-overlay').remove();
+    _rvToast('<i class="fas fa-database"></i> ' + docName + ' fields stored to claim file · ' + claimId + ' · Audit log updated · Auto-populated into claim record');
+  };
+  window._rv37FlagReview = function(docName) {
+    document.getElementById('ltc-rv37-idp-overlay') && document.getElementById('ltc-rv37-idp-overlay').remove();
+    _rvToast('<i class="fas fa-flag"></i> ' + docName + ' flagged for supervisor review · Case manager notified');
+  };
+  window._rv37RequestCorrection = function(docName) {
+    document.getElementById('ltc-rv37-idp-overlay') && document.getElementById('ltc-rv37-idp-overlay').remove();
+    _rvToast('<i class="fas fa-edit"></i> Correction request sent for ' + docName + ' · Source notified with specific field discrepancies');
+  };
+  window._rv37Download = function(docName) {
+    _rvToast('<i class="fas fa-download"></i> Downloading ' + docName + ' · HIPAA-encrypted secure transfer initiated');
+  };
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     TAB BUILDERS
+  ══════════════════════════════════════════════════════════════════════════ */
+
+  /* ── TAB 0: CLAIMANT INFO ─────────────────────────────────────────────── */
+  function _rv37TabClaimant(c) {
+    var rn = c.rnAssessment || {};
+    // Workflow steps based on claim data
+    var workflowSteps = [
+      { done: !!(c.notificationDate), text: 'HIPAA Authorization form sent to ' + (c.filedByName || c.claimant) + ' via DocuSign.' },
+      { done: !!(c.attendingPhysician), text: 'APS (Attending Physician Statement) request faxed to ' + (c.attendingPhysician ? c.attendingPhysician.split(' — ')[0] : 'attending physician') + (c.attendingNPI ? ' (NPI: ' + c.attendingNPI + ')' : '') + '.' },
+      { done: !!(rn.completedBy), text: 'RN Assessment scheduled — assigned care manager will contact within 2 business days.' },
+      { done: !!(c.carrier), text: 'Acknowledgment letter sent to ' + (c.carrier || 'carrier') + ' (carrier) within 24 hours (statutory requirement).' },
+      { done: !!(c.smartsRules), text: 'SMARTS SR-004 fraud pre-screen runs automatically.' }
+    ];
+    var workflowHtml = workflowSteps.map(function(s, i) {
+      return '<div style="display:flex;gap:10px;padding:7px 0;border-bottom:' + (i < workflowSteps.length - 1 ? '1px solid #fef3c7' : 'none') + ';">'
+        + '<div style="width:20px;height:20px;border-radius:50%;background:' + (s.done ? '#059669' : '#d97706') + ';display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">'
+          + '<i class="fas ' + (s.done ? 'fa-check' : 'fa-clock') + '" style="color:#fff;font-size:9px;"></i></div>'
+        + '<div style="font-size:12px;color:#374151;line-height:1.5;">' + (i+1) + '. ' + s.text + '</div>'
+      + '</div>';
+    }).join('');
+
+    var smartsHtml = (c.smartsRules || []).map(function(r) {
+      var rc = r.status === 'FIRED' || r.status === 'PASSED' || r.status === 'SATISFIED' ? '#059669'
+             : r.status === 'MONITORING' ? '#0891b2'
+             : r.status === 'ALERT' || r.status === 'CRITICAL' ? '#dc2626' : '#d97706';
+      return '<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:7px;background:' + rc + '10;border:1px solid ' + rc + '25;margin-bottom:5px;">'
+        + '<span style="font-size:10px;font-weight:800;color:' + rc + ';min-width:48px;">' + r.id + '</span>'
+        + '<span style="font-size:11px;font-weight:600;color:#111827;flex:1;">' + r.name + '</span>'
+        + '<span style="font-size:10px;font-weight:700;color:' + rc + ';background:' + rc + '18;border-radius:20px;padding:1px 8px;">' + r.result + '</span>'
+      + '</div>';
+    }).join('');
+
+    var aiText = 'All required fields complete. Policy in force. ICD-10 diagnoses captured: '
+      + (c.dx1Code || '') + ' (' + (c.dx1Label || '') + '). COB documented ('
+      + (c.medicare || 'Medicare status on file') + '). Attending physician NPI on record. '
+      + 'SMARTS pre-screen complete. RN Assessment ' + (rn.completedBy ? 'completed by ' + rn.completedBy.split(' — ')[0] : 'queued') + '. '
+      + 'Carrier (' + (c.carrier || '—') + ') notified per statutory obligation. '
+      + 'AI projects ' + (c.type === 'Nursing Home' ? '8–18 month' : c.type === 'Memory Care' ? '18–36 month' : '6–12 month') + ' claim duration at current care level.';
+
+    return '<div style="padding:20px;">'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;">'
+        + _rv('Claimant', c.claimant + ' — Age ' + c.age)
+        + _rv('Filed By', c.filedByName || c.filedBy || '—')
+        + _rv('Policy', (c.carrier || '—') + ' — ' + (c.product || '—'))
+        + _rv('Qualifying Event Date', c.qualifyingEventDate || '—')
+        + _rv('Notification Date', c.notificationDate || '—')
+        + _rv('Elimination Period End', c.eliminationEndDate || '—')
+        + _rv('First Benefit Date', c.firstBenefitDate || '—')
+        + _rv('Daily Benefit', c.dailyBenefit + (c.benefitPeriodDays ? ' · ' + Math.round(c.benefitPeriodDays/365) + '-year benefit' : ''))
+        + _rv('Primary DX', (c.dx1Code ? c.dx1Code + ' — ' : '') + (c.dx1Label || '—'))
+        + _rv('Secondary DX', (c.dx2Code ? c.dx2Code + ' — ' : '') + (c.dx2Label || '—'))
+        + _rv('Medicare / COB', c.medicare || '—')
+        + _rv('POA on File', c.poaOnFile ? '✅ ' + (c.poaName || 'On File') : 'No POA — ' + (c.filedBy || 'claimant self-filed'))
+      + '</div>'
+
+      // SMARTS
+      + (c.smartsRules && c.smartsRules.length ? _rvSection('SMARTS Pre-Screen Results', 'shield-alt', '#7c3aed',
+          '<div>' + smartsHtml + '</div>') : '')
+
+      // Post-submission workflow
+      + '<div style="background:#fffbeb;border:1.5px solid #fde68a;border-radius:10px;padding:14px;margin-bottom:14px;">'
+        + '<div style="font-size:11px;font-weight:700;color:#d97706;margin-bottom:10px;"><i class="fas fa-list-check" style="margin-right:6px;"></i>Post-Submission Workflow (Auto-Triggered)</div>'
+        + workflowHtml
+      + '</div>'
+
+      // AI Submission Review
+      + '<div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:14px;">'
+        + '<div style="font-size:11px;font-weight:700;color:#059669;margin-bottom:6px;"><i class="fas fa-robot" style="margin-right:6px;"></i>AI Submission Review</div>'
+        + '<div style="font-size:12px;color:#166534;line-height:1.7;">' + aiText + '</div>'
+      + '</div>'
+    + '</div>';
+  }
+
+  /* ── TAB 1: POLICY INFO ────────────────────────────────────────────────── */
+  function _rv37TabPolicy(c) {
+    var carrierData = (window.tpaCarrierData || []).find(function(cr) { return cr.carrier === c.carrier; }) || {};
+    var slaColor = carrierData.status === 'Green' ? '#059669' : carrierData.status === 'Yellow' ? '#d97706' : '#dc2626';
+    var pctUsed = c.benefitPeriodDays ? Math.round((c.benefitUsedDays || 0) / c.benefitPeriodDays * 100) : 0;
+
+    return '<div style="padding:20px;">'
+      + _rvSection('Policy Details', 'file-contract', '#003087',
+          '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'
+            + _rv('Carrier', c.carrier || '—')
+            + _rv('Product', c.product || '—')
+            + _rv('Policy Number', c.carrier ? c.carrier.substring(0,3).toUpperCase() + '-LTC-' + (c.qualifyingEventDate ? c.qualifyingEventDate.slice(-4) : '2024') + '-' + (c.id ? c.id.slice(-4) : '0000') : '—')
+            + _rv('Daily Benefit', c.dailyBenefit || '—')
+            + _rv('Benefit Period', c.benefitPeriodDays ? Math.round(c.benefitPeriodDays/365) + ' years (' + c.benefitPeriodDays + ' days)' : '—')
+            + _rv('Elimination Period', '90 days')
+            + _rv('Inflation Rider', c.inflationRider || 'None')
+            + _rv('Shared Care Rider', c.sharedCare ? '✅ Yes — ' + (c.sharedCareSpouse || 'Spouse enrolled') : 'No')
+            + _rv('Policy Status', c.status === 'Escalated' ? '⚠️ On Hold' : '✅ In Force')
+            + _rv('Days Open', (c.daysOpen || '—') + ' days')
+          + '</div>')
+
+      // Benefit utilization bar
+      + '<div style="margin-bottom:16px;">'
+        + '<div style="display:flex;justify-content:space-between;font-size:11px;font-weight:700;color:#374151;margin-bottom:6px;">'
+          + '<span><i class="fas fa-chart-bar" style="color:#003087;margin-right:5px;"></i>Benefit Utilization</span>'
+          + '<span>' + (c.benefitUsedDays || 0) + ' of ' + (c.benefitPeriodDays || '—') + ' days used (' + pctUsed + '%)</span>'
+        + '</div>'
+        + '<div style="height:10px;background:#e5e7eb;border-radius:5px;overflow:hidden;">'
+          + '<div style="height:100%;width:' + pctUsed + '%;background:' + (pctUsed > 90 ? '#dc2626' : pctUsed > 70 ? '#d97706' : '#059669') + ';border-radius:5px;transition:width .4s;"></div>'
+        + '</div>'
+      + '</div>'
+
+      + _rvSection('Carrier Information', 'building', '#0891b2',
+          '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'
+            + _rv('Carrier', c.carrier || '—')
+            + _rv('SLA Score', carrierData.slaScore ? carrierData.slaScore + '%' : '—')
+            + _rv('Active Claims (Carrier)', carrierData.claimsActive ? carrierData.claimsActive.toLocaleString() : '—')
+            + _rv('Contract Expires', carrierData.contractExp ? carrierData.contractExp : '—')
+            + _rv('Carrier Status', carrierData.status || '—')
+            + _rv('Staff Assigned', carrierData.staff ? carrierData.staff + ' claims staff' : '—')
+          + '</div>'
+          + '<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">'
+            + '<button onclick="_rvToast37(\'<i class=\\\'fas fa-external-link-alt\\\'></i> ' + (c.carrier||'Carrier') + ' portal authenticating…\')" style="background:#003087;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-external-link-alt" style="margin-right:5px;"></i>Carrier Portal</button>'
+            + '<button onclick="_rvToast37(\'<i class=\\\'fas fa-file-export\\\'></i> Carrier report generated for ' + (c.carrier||'carrier') + '\')" style="background:#f3f4f6;color:#374151;border:1px solid #d1d5db;border-radius:8px;padding:8px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-file-export" style="margin-right:5px;"></i>Generate Report</button>'
+          + '</div>')
+    + '</div>';
+  }
+
+  /* ── TAB 2: PROVIDER INFO ──────────────────────────────────────────────── */
+  function _rv37TabProvider(c) {
+    var rn = c.rnAssessment || {};
+    var cpData = (window.ltcCarePlanData || []).find(function(p) { return p.claimant === c.claimant; }) || {};
+
+    var visitLog = [
+      { date: 'Jul 5, 2026', type: 'Aide Visit', duration: '4 hrs', gps: '✅ Verified', aide: 'Maria R.' },
+      { date: 'Jul 3, 2026', type: 'Skilled Nursing', duration: '1.5 hrs', gps: '✅ Verified', aide: 'RN on duty' },
+      { date: 'Jul 1, 2026', type: 'Aide Visit', duration: '4 hrs', gps: '✅ Verified', aide: 'Maria R.' }
+    ];
+
+    var visitHtml = visitLog.map(function(v) {
+      return '<div style="display:grid;grid-template-columns:90px 120px 70px 90px 1fr;gap:8px;padding:8px 12px;border-bottom:1px solid #f3f4f6;font-size:11px;color:#374151;">'
+        + '<span style="font-weight:600;">' + v.date + '</span>'
+        + '<span>' + v.type + '</span>'
+        + '<span>' + v.duration + '</span>'
+        + '<span style="color:#059669;font-weight:700;">' + v.gps + '</span>'
+        + '<span style="color:#6b7280;">' + v.aide + '</span>'
+      + '</div>';
+    }).join('');
+
+    return '<div style="padding:20px;">'
+      + _rvSection('Provider Details', 'hospital', '#0891b2',
+          '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'
+            + _rv('Provider Name', c.provider || '—')
+            + _rv('Care Setting', c.type || '—')
+            + _rv('Network Status', '✅ In-Network')
+            + _rv('EVV Platform', 'CellTrak / CareExchange')
+            + _rv('Provider Contact', c.providerContact || '—')
+            + _rv('Medicare Star Rating', '4.5 ★★★★½')
+            + _rv('License / Cert', '✅ State Licensed · Active')
+            + _rv('W-9 on File', '✅ Verified')
+          + '</div>'
+          + '<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">'
+            + '<button onclick="_rvToast37(\'<i class=\\\'fas fa-hospital\\\'></i> Provider Hub opened · ' + (c.provider||'Provider') + ' · EVV dashboard loading\')" style="background:#0891b2;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-hospital" style="margin-right:5px;"></i>Provider Hub</button>'
+            + '<button onclick="_rvToast37(\'<i class=\\\'fas fa-phone\\\'></i> Contacting ' + (c.provider||'provider') + '…\')" style="background:#f3f4f6;color:#374151;border:1px solid #d1d5db;border-radius:8px;padding:8px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-phone" style="margin-right:5px;"></i>Contact Provider</button>'
+            + '<button onclick="_rvToast37(\'<i class=\\\'fas fa-map-marker-alt\\\'></i> Site visit scheduled at ' + (c.provider||'provider') + '\')" style="background:#f3f4f6;color:#374151;border:1px solid #d1d5db;border-radius:8px;padding:8px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-map-marker-alt" style="margin-right:5px;"></i>Schedule Visit</button>'
+          + '</div>')
+
+      + _rvSection('Care Manager', 'user-nurse', '#7c3aed',
+          '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'
+            + _rv('Care Manager', cpData.careManager || c.careManager || c.assessedBy || '—')
+            + _rv('Care Setting', cpData.setting || c.type || '—')
+            + _rv('Visit Frequency', cpData.frequency || 'Weekly')
+            + _rv('Last Visit', cpData.lastVisit || '—')
+            + _rv('Next Visit', cpData.nextVisit || '—')
+            + _rv('Care Plan Status', cpData.status || c.status || '—')
+          + '</div>')
+
+      + _rvSection('Recent EVV Visit Log (CellTrak)', 'map-marker-alt', '#059669',
+          '<div style="background:#f8fafc;border-radius:8px;overflow:hidden;border:1px solid #e5e7eb;">'
+            + '<div style="display:grid;grid-template-columns:90px 120px 70px 90px 1fr;gap:8px;padding:8px 12px;background:#f1f5f9;border-bottom:1px solid #e5e7eb;">'
+              + '<div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;">Date</div>'
+              + '<div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;">Visit Type</div>'
+              + '<div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;">Duration</div>'
+              + '<div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;">GPS</div>'
+              + '<div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;">Aide</div>'
+            + '</div>'
+            + visitHtml
+          + '</div>')
+    + '</div>';
+  }
+
+  /* ── TAB 3: DOCUMENTS ──────────────────────────────────────────────────── */
+  function _rv37TabDocuments(c) {
+    var docs = c.docs || [
+      { name: 'HIPAA Authorization',          from: c.filedByName || c.claimant, date: c.notificationDate || '—', status: '⚠️ Pending DocuSign',   type: 'PDF' },
+      { name: 'Attending Physician Statement', from: c.attendingPhysician ? c.attendingPhysician.split(' — ')[0] : 'Physician', date: '—', status: '⚠️ Pending Fax', type: 'PDF' },
+      { name: 'Insurance Policy',              from: c.carrier || '—',           date: '—', status: '✅ On File',              type: 'PDF' },
+      { name: 'ADL Assessment Report',         from: c.assessedBy || '—',        date: '—', status: '⚠️ Pending',              type: 'PDF' },
+      { name: 'EVV Records',                   from: c.provider || '—',           date: 'Ongoing', status: '✅ Active',          type: 'EVV' }
+    ];
+
+    // Group by party
+    var firstParty  = docs.filter(function(d) { return d.status.indexOf('⚠️') === 0 || d.status.indexOf('✅') === 0 || d.status.indexOf('🔄') === 0; }).slice(0, Math.ceil(docs.length * 0.6));
+    var secondParty = docs.filter(function(d, i) { return i >= Math.ceil(docs.length * 0.6) && d.name.indexOf('EVV') === -1 && d.name.indexOf('Invoice') === -1; });
+    var thirdParty  = docs.filter(function(d) { return d.name.indexOf('EVV') !== -1 || d.name.indexOf('Invoice') !== -1; });
+
+    // If categorisation empty, just show all as first party
+    if (!firstParty.length) firstParty = docs;
+
+    var verified   = docs.filter(function(d) { return d.status.indexOf('✅') === 0; }).length;
+    var pending    = docs.filter(function(d) { return d.status.indexOf('⚠️') === 0 || d.status.toLowerCase().indexOf('pending') !== -1; }).length;
+    var alert      = docs.filter(function(d) { return d.status.indexOf('🔴') === 0; }).length;
+    var pct = docs.length ? Math.round(verified / docs.length * 100) : 0;
+
+    function _docRow(d, claimId) {
+      var isOK   = d.status.indexOf('✅') === 0;
+      var isWarn = d.status.indexOf('⚠️') === 0;
+      var isAlert = d.status.indexOf('🔴') === 0;
+      var sc = isOK ? '#059669' : isWarn ? '#d97706' : isAlert ? '#dc2626' : '#7c3aed';
+      var escaped = d.name.replace(/'/g, '').replace(/"/g, '');
+      var escapedFrom = (d.from || '').replace(/'/g, '').replace(/"/g, '');
+      return '<div onclick="_ltcRv37OpenIDP(\'' + escaped + '\',\'' + escapedFrom + '\',\'' + (d.date||'').replace(/'/g,'') + '\',\'' + (d.status||'').replace(/[✅⚠️🔴🔄]/g,'').trim().replace(/'/g,'') + '\',\'' + claimId + '\')" '
+        + 'style="display:grid;grid-template-columns:1fr auto auto;gap:12px;padding:10px 14px;border-bottom:1px solid #f3f4f6;cursor:pointer;align-items:center;transition:background .15s;" '
+        + 'onmouseover="this.style.background=\'#f5f3ff\'" onmouseout="this.style.background=\'\'">'
+        + '<div>'
+          + '<div style="display:flex;align-items:center;gap:7px;">'
+            + '<i class="fas fa-file-pdf" style="color:#dc2626;font-size:13px;"></i>'
+            + '<span style="font-size:12px;font-weight:700;color:#111827;">' + d.name + '</span>'
+            + '<span style="font-size:10px;background:#f3f4f6;color:#6b7280;border-radius:4px;padding:1px 6px;">' + (d.type || 'PDF') + '</span>'
+          + '</div>'
+          + '<div style="font-size:10px;color:#9ca3af;margin-top:2px;padding-left:20px;">' + (d.from || '—') + ' · ' + (d.date || '—') + '</div>'
+        + '</div>'
+        + '<span style="background:' + sc + '18;color:' + sc + ';border:1px solid ' + sc + '44;border-radius:20px;padding:2px 9px;font-size:10px;font-weight:700;white-space:nowrap;">' + d.status + '</span>'
+        + '<div style="color:#7c3aed;font-size:11px;font-weight:700;white-space:nowrap;"><i class="fas fa-magic" style="margin-right:3px;"></i>IDP</div>'
+      + '</div>';
+    }
+
+    function _sectionHdr(label, icon, color) {
+      return '<div style="font-size:11px;font-weight:700;color:' + color + ';text-transform:uppercase;padding:8px 14px;background:' + color + '0d;border-bottom:1px solid ' + color + '22;display:flex;align-items:center;gap:6px;">'
+        + '<i class="fas fa-' + icon + '"></i>' + label + '</div>';
+    }
+
+    return '<div style="padding:16px 20px;">'
+      // KPI strip
+      + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;">'
+        + '<div style="background:#f0fdf4;border-radius:8px;padding:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:#059669;">' + verified + '</div><div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase;">Received</div></div>'
+        + '<div style="background:#fffbeb;border-radius:8px;padding:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:#d97706;">' + pending + '</div><div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase;">Pending</div></div>'
+        + '<div style="background:#fef2f2;border-radius:8px;padding:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:#dc2626;">' + alert + '</div><div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase;">Action Req.</div></div>'
+        + '<div style="background:#eff6ff;border-radius:8px;padding:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:#1d4ed8;">' + pct + '%</div><div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase;">Complete</div></div>'
+      + '</div>'
+      // Progress bar
+      + '<div style="height:7px;background:#e5e7eb;border-radius:4px;margin-bottom:14px;overflow:hidden;">'
+        + '<div style="height:100%;width:' + pct + '%;background:' + (pct >= 90 ? '#059669' : pct >= 60 ? '#7c3aed' : '#d97706') + ';border-radius:4px;"></div>'
+      + '</div>'
+      // Hint
+      + '<div style="font-size:11px;color:#7c3aed;margin-bottom:10px;"><i class="fas fa-magic" style="margin-right:5px;"></i>Click any document row to open AI-powered IDP extraction view</div>'
+      // All docs in one list
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;margin-bottom:12px;">'
+        + _sectionHdr('1st Party — LTCAS Document Store', 'folder-open', '#d97706')
+        + docs.slice(0, Math.ceil(docs.length * 0.65)).map(function(d) { return _docRow(d, c.id); }).join('')
+        + (docs.length > 3 ? _sectionHdr('2nd Party — Provider & EVV Records', 'file-signature', '#0891b2')
+          + docs.slice(Math.ceil(docs.length * 0.65)).map(function(d) { return _docRow(d, c.id); }).join('') : '')
+      + '</div>'
+      // Actions
+      + '<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        + '<button onclick="_rvToast37(\'<i class=\\\'fas fa-search\\\'></i> IDP scan running across all documents — NLP extraction in progress…\')" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-search" style="margin-right:5px;"></i>Run IDP Scan</button>'
+        + '<button onclick="_rvToast37(\'<i class=\\\'fas fa-upload\\\'></i> Secure document upload opened — HIPAA-encrypted storage\')" style="background:#f0fdf4;color:#059669;border:1px solid #bbf7d0;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-upload" style="margin-right:5px;"></i>Upload Document</button>'
+        + '<button onclick="_rvToast37(\'<i class=\\\'fas fa-paper-plane\\\'></i> Document requests sent to all pending parties\')" style="background:#fffbeb;color:#d97706;border:1px solid #fde68a;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-paper-plane" style="margin-right:5px;"></i>Request All Missing</button>'
+      + '</div>'
+    + '</div>';
+  }
+
+  /* ── TAB 4: CLINICAL ────────────────────────────────────────────────────── */
+  function _rv37TabClinical(c) {
+    var rn = c.rnAssessment || {};
+    var adlNames = ['Bathing','Dressing','Eating','Transferring','Toileting','Continence'];
+    var adlKeys  = ['bathing','dressing','eating','transferring','toileting','continence'];
+    var adlColors = ['#dc2626','#d97706','#059669'];
+
+    var adlHtml = adlKeys.map(function(k, i) {
+      var score = rn.adlScores ? rn.adlScores[k] : null;
+      var label = score === 0 ? 'Dependent' : score === 1 ? 'Max Assist' : score === 2 ? 'Mod Assist' : score === 3 ? 'Independent' : '—';
+      var barColor = score === 0 ? '#dc2626' : score === 1 ? '#d97706' : score === 2 ? '#f59e0b' : '#059669';
+      var pct = score !== null ? Math.round((score/3)*100) : 0;
+      return '<div style="margin-bottom:8px;">'
+        + '<div style="display:flex;justify-content:space-between;font-size:11px;font-weight:600;color:#374151;margin-bottom:3px;">'
+          + '<span>' + adlNames[i] + '</span>'
+          + '<span style="color:' + barColor + ';">' + label + ' (' + (score !== null ? score : '—') + '/3)</span>'
+        + '</div>'
+        + '<div style="height:7px;background:#e5e7eb;border-radius:4px;overflow:hidden;">'
+          + '<div style="height:100%;width:' + pct + '%;background:' + barColor + ';border-radius:4px;"></div>'
+        + '</div>'
+      + '</div>';
+    }).join('');
+
+    var smartsHtml = (c.smartsRules || []).map(function(r) {
+      var rc = r.status === 'FIRED' || r.status === 'PASSED' || r.status === 'SATISFIED' ? '#059669'
+             : r.status === 'MONITORING' ? '#0891b2'
+             : r.status === 'ALERT' || r.status === 'CRITICAL' ? '#dc2626' : '#d97706';
+      return '<div style="display:grid;grid-template-columns:55px 1fr 100px;gap:8px;padding:8px 12px;border-bottom:1px solid #f3f4f6;align-items:start;">'
+        + '<span style="font-size:10px;font-weight:800;color:' + rc + ';">' + r.id + '</span>'
+        + '<div>'
+          + '<div style="font-size:11px;font-weight:700;color:#111827;">' + r.name + '</div>'
+          + '<div style="font-size:10px;color:#6b7280;">' + r.detail + '</div>'
+        + '</div>'
+        + '<span style="font-size:10px;font-weight:700;color:' + rc + ';background:' + rc + '18;border-radius:20px;padding:2px 8px;text-align:center;">' + r.result + '</span>'
+      + '</div>';
+    }).join('');
+
+    var meds = rn.medications || [];
+
+    return '<div style="padding:20px;">'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;">'
+        // ADL scores
+        + '<div>'
+          + '<div style="font-size:11px;font-weight:700;color:#dc2626;text-transform:uppercase;margin-bottom:10px;"><i class="fas fa-heartbeat" style="margin-right:6px;"></i>ADL Assessment</div>'
+          + adlHtml
+        + '</div>'
+        // Clinical summary
+        + '<div>'
+          + '<div style="font-size:11px;font-weight:700;color:#7c3aed;text-transform:uppercase;margin-bottom:10px;"><i class="fas fa-brain" style="margin-right:6px;"></i>Clinical Summary</div>'
+          + '<div style="display:grid;gap:8px;">'
+            + _rv('MMSE Score', (rn.mmseScore || c.cogScore || '—') + '/30 — ' + (rn.mmseScore < 10 ? 'Severe' : rn.mmseScore < 20 ? 'Moderate' : rn.mmseScore < 26 ? 'Mild' : 'Normal'))
+            + _rv('Fall Risk', rn.fallRisk || '—')
+            + _rv('Falls (90 days)', rn.fallsLast90Days !== undefined ? rn.fallsLast90Days : '—')
+            + _rv('Assessed By', rn.completedBy || c.assessedBy || '—')
+            + _rv('Assessment Date', rn.date || '—')
+            + _rv('Attending Physician', c.attendingPhysician || '—')
+          + '</div>'
+        + '</div>'
+      + '</div>'
+
+      // RN Narrative
+      + (rn.clinicalNarrative ? '<div style="background:#f5f3ff;border:1.5px solid #ddd6fe;border-radius:10px;padding:14px;margin-bottom:16px;">'
+          + '<div style="font-size:11px;font-weight:700;color:#7c3aed;margin-bottom:6px;"><i class="fas fa-user-nurse" style="margin-right:6px;"></i>RN Clinical Narrative</div>'
+          + '<div style="font-size:12px;color:#4c1d95;line-height:1.7;">' + rn.clinicalNarrative + '</div>'
+        + '</div>' : '')
+
+      // Medications
+      + (meds.length ? _rvSection('Current Medications', 'pills', '#0891b2',
+          '<div style="display:flex;flex-wrap:wrap;gap:6px;">'
+            + meds.map(function(m) { return '<span style="background:#eff6ff;color:#1d4ed8;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;">' + m + '</span>'; }).join('')
+          + '</div>') : '')
+
+      // SMARTS
+      + (c.smartsRules && c.smartsRules.length ? _rvSection('SMARTS Rules Engine', 'shield-alt', '#7c3aed',
+          '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;">' + smartsHtml + '</div>') : '')
+
+      // AI Insight
+      + '<div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:14px;">'
+        + '<div style="font-size:11px;font-weight:700;color:#059669;margin-bottom:6px;"><i class="fas fa-robot" style="margin-right:6px;"></i>WealthAI Clinical Insight</div>'
+        + '<div style="font-size:12px;color:#166534;line-height:1.7;">'
+          + 'Based on ' + c.claimant + '\'s ADL profile (' + (c.assessScore||'—') + '/5) and cognitive score (' + (rn.mmseScore||c.cogScore||'—') + '/30), '
+          + 'AI projects continued ' + (c.type||'LTC') + ' care for '
+          + (c.type === 'Nursing Home' ? '8–18 months' : c.type === 'Memory Care' ? '18–36 months' : '6–12 months') + '. '
+          + 'Care manager should review benefit period utilization and coordinate with ' + (c.provider||'provider') + ' for updated care plan documentation before next payment cycle.'
+        + '</div>'
+      + '</div>'
+    + '</div>';
+  }
+
+  /* ── TAB 5: ACTIONS ─────────────────────────────────────────────────────── */
+  function _rv37TabActions(c) {
+    var auditLog = [
+      { time: 'Jul 9, 2026 09:14', action: 'Claim opened for review', user: 'Claims Intake', icon: 'fa-folder-open', color: '#003087' },
+      { time: 'Jul 8, 2026 14:32', action: 'SMARTS pre-screen completed — rules executed', user: 'System (SMARTS)', icon: 'fa-shield-alt', color: '#7c3aed' },
+      { time: 'Jul 7, 2026 11:05', action: 'Documents received and indexed', user: c.docSpecialist || 'Document Specialist', icon: 'fa-file-import', color: '#0891b2' }
+    ];
+
+    return '<div style="padding:20px;">'
+      + '<div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:12px;">Claim Actions</div>'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;">'
+        + _rvActionTile('dollar-sign',   '#059669', 'Process Payment',       'Approve next payment cycle',          'payment',   c.id)
+        + _rvActionTile('user-check',    '#0891b2', 'Schedule Assessment',   'RN / MSW clinical evaluation',        'assessment',c.id)
+        + _rvActionTile('hands-helping', '#7c3aed', 'Update Care Plan',      'Modify current care plan',            'careplan',  c.id)
+        + _rvActionTile('phone',         '#d97706', 'Contact Family / POA',  'Notify ' + (c.poaName || 'authorized contact'), 'family', c.id)
+        + _rvActionTile('hospital',      '#0f172a', 'Provider Hub',          'Contact / verify ' + (c.provider||'provider'),  'provider',c.id)
+        + _rvActionTile('exclamation-triangle','#dc2626','Escalate Claim',   'Flag for supervisor review',          'escalate',  c.id)
+      + '</div>'
+
+      + '<div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:14px;margin-bottom:16px;">'
+        + '<div style="font-size:11px;font-weight:700;color:#1d4ed8;margin-bottom:8px;"><i class="fas fa-robot" style="margin-right:6px;"></i>AI Recommended Next Steps</div>'
+        + '<div style="font-size:12px;color:#1e40af;line-height:1.8;">'
+          + '<div><i class="fas fa-angle-right" style="color:#3b82f6;margin-right:6px;"></i>' + (c.nextAction || 'Review claim status and confirm next action') + '</div>'
+          + '<div><i class="fas fa-angle-right" style="color:#3b82f6;margin-right:6px;"></i>Confirm ADL re-assessment is scheduled — last score: ' + (c.assessScore||'N/A') + '/5 ADLs impaired</div>'
+          + '<div><i class="fas fa-angle-right" style="color:#3b82f6;margin-right:6px;"></i>Ensure all documents received before approving ' + (c.paymentDue && c.paymentDue !== 'TBD' ? 'payment due ' + c.paymentDue : 'next payment cycle') + '</div>'
+        + '</div>'
+      + '</div>'
+
+      + _rvSection('Recent Audit Log', 'history', '#6b7280',
+          '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;">'
+            + auditLog.map(function(e, i) {
+                return '<div style="display:flex;gap:10px;padding:10px 14px;border-bottom:' + (i < auditLog.length-1 ? '1px solid #f3f4f6' : 'none') + ';align-items:flex-start;">'
+                  + '<div style="width:28px;height:28px;background:' + e.color + '15;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
+                    + '<i class="fas ' + e.icon + '" style="color:' + e.color + ';font-size:11px;"></i></div>'
+                  + '<div>'
+                    + '<div style="font-size:11px;font-weight:700;color:#111827;">' + e.action + '</div>'
+                    + '<div style="font-size:10px;color:#9ca3af;">' + e.time + ' · ' + e.user + '</div>'
+                  + '</div>'
+                + '</div>';
+              }).join('')
+          + '</div>')
+    + '</div>';
+  }
+
+  function _rvActionTile(icon, bg, title, sub, type, claimId) {
+    return '<button onclick="_ltcRv37Action(\'' + type + '\',\'' + claimId + '\')" '
+      + 'style="background:' + bg + ';color:#fff;border:none;border-radius:10px;padding:14px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:10px;text-align:left;">'
+      + '<i class="fas fa-' + icon + '" style="font-size:18px;flex-shrink:0;"></i>'
+      + '<div><div>' + title + '</div><div style="font-size:10px;font-weight:400;opacity:.85;margin-top:1px;">' + sub + '</div></div>'
+    + '</button>';
+  }
+
+  window._ltcRv37Action = function(type, claimId) {
+    document.getElementById('ltc-rv37-overlay') && document.getElementById('ltc-rv37-overlay').remove();
+    var msgs = {
+      payment:    '<i class="fas fa-dollar-sign"></i> Payment processed for ' + claimId + ' · ACH queued · Next cycle scheduled',
+      assessment: '<i class="fas fa-user-check"></i> RN Assessment scheduled for ' + claimId + ' · Client notified via SMS',
+      careplan:   '<i class="fas fa-hands-helping"></i> Care Plan editor opened · Pre-populated from last visit notes for ' + claimId,
+      family:     '<i class="fas fa-phone"></i> Family / POA contact initiated for ' + claimId + ' · HIPAA call logging active',
+      provider:   '<i class="fas fa-hospital"></i> Provider Hub opened · Billing verification started for ' + claimId,
+      escalate:   '<i class="fas fa-exclamation-triangle"></i> ' + claimId + ' escalated to supervisor queue · Priority set to URGENT'
+    };
+    _rvToast(msgs[type] || 'Action completed');
+  };
+
+  window._rvToast37 = function(msg) { _rvToast(msg); };
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     TAB SWITCHER
+  ══════════════════════════════════════════════════════════════════════════ */
+  window._ltcRv37Tab = function(idx) {
+    var panels = document.querySelectorAll('#ltc-rv37-overlay [data-rv37-panel]');
+    var tabs   = document.querySelectorAll('#ltc-rv37-overlay [data-rv37-tab]');
+    panels.forEach(function(p, i) { p.style.display = i === idx ? 'block' : 'none'; });
+    tabs.forEach(function(t, i) {
+      var active = i === idx;
+      t.style.fontWeight   = active ? '700' : '500';
+      t.style.color        = active ? '#dc2626' : '#6b7280';
+      t.style.borderBottom = active ? '2.5px solid #dc2626' : '2.5px solid transparent';
+      t.style.background   = active ? '#fef2f2' : 'transparent';
+    });
+  };
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     MAIN: window.ltcReviewClaim(claimId)
+  ══════════════════════════════════════════════════════════════════════════ */
+  window.ltcReviewClaim = function(claimId) {
+    var existing = document.getElementById('ltc-rv37-overlay');
+    if (existing) existing.remove();
+
+    var c = (window.ltcClaimsData || []).find(function(x) { return x.id === claimId; });
+    if (!c) {
+      _rvToast('<i class="fas fa-exclamation-circle"></i> Claim ' + claimId + ' not found');
+      return;
+    }
+
+    var statusColor   = { Active:'#059669', Pending:'#d97706', Review:'#d97706', Escalated:'#dc2626' }[c.status] || '#6b7280';
+    var priorityColor = c.priority === 'urgent' ? '#dc2626' : c.priority === 'high' ? '#d97706' : '#059669';
+
+    var tabDefs = [
+      { label:'Claimant Info',  icon:'id-card'       },
+      { label:'Policy Info',    icon:'file-contract'  },
+      { label:'Provider Info',  icon:'hospital'       },
+      { label:'Documents',      icon:'folder-open'    },
+      { label:'Clinical',       icon:'heartbeat'      },
+      { label:'Actions',        icon:'bolt'           }
+    ];
+
+    var tabBarHtml = tabDefs.map(function(t, i) {
+      return '<button data-rv37-tab="' + i + '" onclick="window._ltcRv37Tab(' + i + ')" '
+        + 'style="display:flex;align-items:center;gap:5px;border:none;background:' + (i===0?'#fef2f2':'transparent') + ';color:' + (i===0?'#dc2626':'#6b7280') + ';'
+        + 'font-size:11px;font-weight:' + (i===0?'700':'500') + ';padding:10px 14px;cursor:pointer;'
+        + 'border-bottom:' + (i===0?'2.5px solid #dc2626':'2.5px solid transparent') + ';border-radius:0;white-space:nowrap;transition:all .15s;">'
+        + '<i class="fas fa-' + t.icon + '" style="font-size:10px;"></i>' + t.label
+        + '</button>';
+    }).join('');
+
+    var panelsHtml = [
+      _rv37TabClaimant(c),
+      _rv37TabPolicy(c),
+      _rv37TabProvider(c),
+      _rv37TabDocuments(c),
+      _rv37TabClinical(c),
+      _rv37TabActions(c)
+    ].map(function(html, i) {
+      return '<div data-rv37-panel="' + i + '" style="display:' + (i===0?'block':'none') + ';">' + html + '</div>';
+    }).join('');
+
+    var modal = '<div id="ltc-rv37-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;" onclick="if(event.target===this)this.remove()">'
+      + '<div style="background:#fff;border-radius:16px;width:860px;max-width:96vw;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 28px 70px rgba(0,0,0,.3);overflow:hidden;" onclick="event.stopPropagation()">'
+
+      // Header
+      + '<div style="background:linear-gradient(135deg,#dc2626,#b91c1c);padding:18px 22px;flex-shrink:0;">'
+        + '<div style="display:flex;align-items:center;gap:12px;">'
+          + '<div style="width:44px;height:44px;background:rgba(255,255,255,.2);border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
+            + '<i class="fas fa-file-medical-alt" style="color:#fff;font-size:20px;"></i></div>'
+          + '<div style="flex:1;min-width:0;">'
+            + '<div style="font-size:17px;font-weight:800;color:#fff;">' + c.id + ' — ' + c.claimant + '</div>'
+            + '<div style="font-size:11px;color:rgba(255,255,255,.8);margin-top:2px;">'
+              + c.type + ' · ' + c.carrier
+              + ' · <span style="background:' + statusColor + ';color:#fff;border-radius:20px;padding:1px 9px;font-size:10px;font-weight:700;">' + c.status + '</span>'
+              + ' · <span style="background:#fff;color:' + priorityColor + ';border-radius:20px;padding:1px 9px;font-size:10px;font-weight:700;text-transform:uppercase;">' + c.priority + '</span>'
+            + '</div>'
+          + '</div>'
+          + '<div style="display:flex;gap:8px;flex-shrink:0;align-items:center;">'
+            + '<button onclick="document.getElementById(\'ltc-rv37-overlay\').remove();ltcOpenClaimDetail(\'' + c.id + '\')" '
+              + 'style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:8px;padding:7px 13px;font-size:11px;font-weight:600;cursor:pointer;" title="Open full Claimant 360">'
+              + '<i class="fas fa-expand-alt" style="margin-right:4px;"></i>Claimant 360</button>'
+            + '<button onclick="document.getElementById(\'ltc-rv37-overlay\').remove()" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:8px;padding:7px 13px;cursor:pointer;font-size:13px;font-weight:700;">✕</button>'
+          + '</div>'
+        + '</div>'
+      + '</div>'
+
+      // Progress bar (step indicators matching the New Claim wizard style)
+      + '<div style="background:#b91c1c;padding:10px 22px;display:flex;gap:0;flex-shrink:0;">'
+        + ['Claimant Info','Policy Info','Provider Info','Documents','Clinical','Actions'].map(function(s, i) {
+            var done = i < 3;
+            return '<div style="display:flex;align-items:center;gap:5px;flex:1;">'
+              + (i > 0 ? '<div style="height:1px;background:rgba(255,255,255,.3);flex:1;"></div>' : '')
+              + '<div style="display:flex;align-items:center;gap:4px;white-space:nowrap;">'
+                + '<div style="width:16px;height:16px;border-radius:50%;background:' + (done ? '#fff' : 'rgba(255,255,255,.3)') + ';display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:' + (done ? '#dc2626' : '#fff') + ';">' + (done ? '✓' : (i+1)) + '</div>'
+                + '<span style="font-size:9px;color:rgba(255,255,255,' + (done ? '1' : '.6') + ');font-weight:' + (done ? '700' : '400') + ';">' + s + '</span>'
+              + '</div>'
+            + '</div>';
+          }).join('')
+      + '</div>'
+
+      // Tab bar
+      + '<div style="display:flex;border-bottom:1px solid #e5e7eb;background:#fafafa;flex-shrink:0;overflow-x:auto;">' + tabBarHtml + '</div>'
+
+      // Scrollable body
+      + '<div style="overflow-y:auto;flex:1;">' + panelsHtml + '</div>'
+
+    + '</div></div>';
+
+    document.body.insertAdjacentHTML('beforeend', modal);
+  };
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     OVERRIDE initLtcClaimsPage — Review button + row → ltcReviewClaim
+  ══════════════════════════════════════════════════════════════════════════ */
+  window.initLtcClaimsPage = function() {
+    setTimeout(function() {
+      var tbody = document.getElementById('ltc-claims-tbody');
+      if (!tbody) return;
+
+      var LC_PHASES_L = ['Intake','Eligibility Review','Clinical Assessment','Benefit Activation','Active Benefit','Annual Review','Escalated','Closed'];
+      var LC_COLORS_L = ['#0891b2','#7c3aed','#d97706','#059669','#059669','#0891b2','#dc2626','#6b7280'];
+
+      var allClaims = window.ltcClaimsData || [];
+      tbody.innerHTML = allClaims.map(function(c) {
+        var phaseIdx   = c.lcPhase !== undefined ? c.lcPhase : 5;
+        var phaseColor = LC_COLORS_L[phaseIdx] || '#6b7280';
+        var phaseName  = LC_PHASES_L[phaseIdx] || 'Active';
+        var pc = c.priority === 'urgent' ? '#dc2626' : c.priority === 'high' ? '#d97706' : '#059669';
+        var sc = { Active:'#059669',Pending:'#d97706',Review:'#d97706',Escalated:'#dc2626' }[c.status] || '#6b7280';
+        return '<tr style="border-bottom:1px solid #f3f4f6;cursor:pointer;" onclick="ltcReviewClaim(\'' + c.id + '\')">'
+          + '<td style="padding:10px 12px;font-size:12px;font-weight:700;color:#003087;">' + c.id + '</td>'
+          + '<td style="padding:10px 12px;"><div style="font-size:13px;font-weight:600;color:#111827;">' + c.claimant + '</div><div style="font-size:11px;color:#6b7280;">Age ' + c.age + ' · ' + c.carrier + '</div></td>'
+          + '<td style="padding:10px 12px;"><span style="background:' + phaseColor + '1a;color:' + phaseColor + ';border:1px solid ' + phaseColor + '44;border-radius:12px;padding:2px 9px;font-size:10px;font-weight:700;">' + phaseName + '</span></td>'
+          + '<td style="padding:10px 12px;font-size:12px;color:#374151;">' + c.type + '</td>'
+          + '<td style="padding:10px 12px;font-size:13px;font-weight:700;color:#059669;">' + c.dailyBenefit + '</td>'
+          + '<td style="padding:10px 12px;"><span style="background:' + sc + '1a;color:' + sc + ';border-radius:20px;padding:2px 10px;font-size:11px;font-weight:700;">' + c.status + '</span></td>'
+          + '<td style="padding:10px 12px;"><span style="color:' + pc + ';font-size:11px;font-weight:700;text-transform:uppercase;">' + c.priority + '</span></td>'
+          + '<td style="padding:10px 12px;font-size:12px;color:#374151;">' + c.daysOpen + 'd</td>'
+          + '<td style="padding:10px 12px;font-size:11px;color:#374151;max-width:160px;">' + c.nextAction + '</td>'
+          + '<td style="padding:10px 12px;"><button onclick="event.stopPropagation();ltcReviewClaim(\'' + c.id + '\')" style="background:#dc2626;color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">Review</button></td>'
+          + '</tr>';
+      }).join('');
+
+      // Ensure Lifecycle Phase column header
+      var thead = tbody.closest('table') && tbody.closest('table').querySelector('thead tr');
+      if (thead && !thead.querySelector('[data-p9-phase]')) {
+        var ths = thead.querySelectorAll('th');
+        if (ths.length >= 3) {
+          var phTh = document.createElement('th');
+          phTh.setAttribute('data-p9-phase', '1');
+          phTh.style.cssText = 'padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;';
+          phTh.textContent = 'Lifecycle Phase';
+          ths[2].parentNode.insertBefore(phTh, ths[2]);
+        }
+      }
+    }, 80);
+  };
+
+  /* DOM sweeps for already-rendered buttons */
+  function _p37sweep() {
+    document.querySelectorAll('button').forEach(function(btn) {
+      if (btn.textContent.trim() === 'Review') {
+        var oc = btn.getAttribute('onclick') || '';
+        if (oc.indexOf('ltcReviewClaim') === -1) {
+          var m = oc.match(/ltcOpenClaimDetail\(['"]([^'"]+)['"]\)/) || oc.match(/ltcReviewClaim\(['"]([^'"]+)['"]\)/);
+          if (m) btn.setAttribute('onclick', "event.stopPropagation();ltcReviewClaim('" + m[1] + "')");
+        }
+      }
+    });
+  }
+  _p37sweep();
+  setTimeout(_p37sweep, 400);
+  setTimeout(_p37sweep, 1200);
+  setTimeout(_p37sweep, 3000);
+
+  console.log('[P37] ltcReviewClaim loaded — 6-tab Claim Review modal: Claimant Info · Policy Info · Provider Info · Documents+IDP · Clinical · Actions. Review button + row click → ltcReviewClaim. ltcOpenClaimDetail unchanged.');
+})();
