@@ -93075,3 +93075,885 @@ var navigateTo=window.navigateTo;
 
   console.log('[P38] PERMANENT FIX: Review → ltcReviewClaim. MutationObserver installed. initLtcClaimsPage overridden. P35b revert neutralized.');
 })();
+
+/* ════════════════════════════════════════════════════════════════════════════
+   P39 — RICH DATA ENRICHMENT + IDP SIMULATION + AI PAYMENT PROCESSING
+   1. Enriches window.ltcClaimsData with full field data for ALL 8 claims
+      so every tab shows populated, real-looking values (no "—" blanks)
+   2. For LTC-2026-0101 (Margaret O'Brien): all docs shown as received + IDP
+      already completed; "Re-run IDP" button available; IDP execution animation
+   3. Process Payment → full AI Agents simulation modal (5 agents, live steps)
+   4. Patches ltcReviewClaim to use enriched data
+════════════════════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  /* ══════════════════════════════════════════════════════════════════════
+     1. RICH ENRICHMENT DATA — keyed by claim ID
+  ══════════════════════════════════════════════════════════════════════ */
+  var _enrichMap = {
+    'LTC-2026-0101': {
+      claimant:'Margaret O\'Brien',    age:78,
+      carrier:'Prudential',            product:'LTC Standalone',
+      dailyBenefit:'$180/day',         status:'Active',   priority:'urgent',
+      type:'Nursing Home',             assessScore:4,     cogScore:16,
+      daysOpen:14,                     lcPhase:5,
+      nextAction:'Care Plan Review — Monthly Billing Due Jul 15, 2026',
+      provider:'Sunrise Manor SNF',    paymentDue:'Jul 15, 2026',
+      qualifyingEventDate:'Jun 17, 2026',
+      notificationDate:'Jun 19, 2026',
+      eliminationEndDate:'Sep 14, 2026',
+      firstBenefitDate:'Sep 15, 2026',
+      filedBy:'Family Member',         filedByName:'Patrick O\'Brien (Son)',
+      poaOnFile:true,                  poaName:'Patrick O\'Brien',
+      preferredLanguage:'English',
+      medicare:'Medicare Part A + B',  medicaid:'Not enrolled',
+      cobNotes:'Medicare pays Days 1–20 at 100%; Days 21–100 at coinsurance ($194.50/day). LTC policy supplements from Day 101 onward.',
+      dx1Code:'F01.51', dx1Label:'Vascular Dementia',
+      dx2Code:'S72.001',dx2Label:'Hip Fracture / Recovery',
+      adlsImpaired:['bathing','dressing','transferring','toileting'],
+      attendingPhysician:'Dr. Anna Kessler, MD — Geriatrics',
+      attendingNPI:'1234567890',
+      benefitPeriodDays:1825, benefitUsedDays:14,
+      inflationRider:'5% Compound',
+      sharedCare:false,
+      intakeBy:'Maria Santos — Claims Intake Specialist',
+      docSpecialist:'Kevin O\'Brien — Document Specialist',
+      assessedBy:'Sarah Johnson, RN — Telephonic Assessment',
+      benefitsAnalyst:'James Park — Senior Benefits Analyst',
+      careManager:'Angela Moore, RN — Care Manager',
+      providerContact:'Sunrise Manor SNF — Admissions: (214) 555-0192',
+      docs:[
+        { name:'HIPAA Authorization',          from:'Patrick O\'Brien (POA)',           date:'Jun 19, 2026', status:'✅ IDP Complete',    type:'PDF', idpDone:true  },
+        { name:'Attending Physician Statement', from:'Dr. Anna Kessler, MD',            date:'Jun 25, 2026', status:'✅ IDP Complete',    type:'PDF', idpDone:true  },
+        { name:'Hospital Discharge Summary',    from:'UT Southwestern Medical Center',  date:'Jun 17, 2026', status:'✅ IDP Complete',    type:'PDF', idpDone:true  },
+        { name:'ADL Assessment Report',         from:'Sarah Johnson, RN',              date:'Jun 26, 2026', status:'✅ IDP Complete',    type:'PDF', idpDone:true  },
+        { name:'Insurance Policy — PRU-LTC',    from:'Prudential',                     date:'Jan 2024',     status:'✅ On File',         type:'PDF', idpDone:true  },
+        { name:'Care Plan (Current)',            from:'Sunrise Manor SNF',              date:'Jul 1, 2026',  status:'✅ IDP Complete',    type:'PDF', idpDone:true  },
+        { name:'Provider W-9 & License',        from:'Sunrise Manor SNF',              date:'Mar 2026',     status:'✅ Verified',        type:'PDF', idpDone:true  },
+        { name:'Medicare Coordination Form',    from:'CMS / Medicare',                 date:'Jun 20, 2026', status:'✅ IDP Complete',    type:'PDF', idpDone:true  },
+        { name:'EVV Visit Records — June',      from:'CellTrak / Sunrise Manor SNF',   date:'Jun 30, 2026', status:'✅ IDP Complete',    type:'EVV', idpDone:true  }
+      ],
+      rnAssessment:{
+        completedBy:'Sarah Johnson, RN', date:'Jun 26, 2026',
+        adlScores:{ bathing:0, dressing:1, eating:3, transferring:1, toileting:1, continence:3 },
+        mmseScore:16, mmseDate:'Jun 26, 2026',
+        fallsLast90Days:2, fallRisk:'High',
+        medications:['Aricept 10mg','Lisinopril 10mg','Metoprolol 25mg','Aspirin 81mg','Warfarin 2.5mg'],
+        environmentSafe:true, environmentNotes:'Now in SNF — controlled environment. Stair lift, hospital bed, fall prevention rails installed.',
+        recommendation:'Skilled Nursing Facility (SNF) — 24hr care required. Memory care unit preferred.',
+        clinicalNarrative:'Margaret presents with moderate vascular dementia and post-surgical hip fracture recovery. 4/6 ADLs impaired. MMSE 16/30 consistent with moderate cognitive impairment. High fall risk (2 falls in 90 days). Requires full-time skilled nursing supervision. Son Patrick O\'Brien (POA) is engaged and participates in all care decisions. Condition expected to require continued SNF care for 8–18 months minimum.'
+      },
+      smartsRules:[
+        { id:'SR-001', name:'ADL Trigger',          status:'FIRED',      result:'ELIGIBLE',     detail:'4/6 ADLs impaired — threshold of 2/6 met' },
+        { id:'SR-002', name:'Cognitive Route',       status:'FIRED',      result:'SNF/Memory',   detail:'MMSE 16/30 → SNF or Memory Care pathway triggered' },
+        { id:'SR-003', name:'Elimination Period',    status:'MONITORING', result:'Day 14/90',    detail:'Began Jun 17 — ends Sep 14, 2026' },
+        { id:'SR-004', name:'Fraud Pre-Screen',      status:'PASSED',     result:'CLEAR',        detail:'Score: 8/100 — no anomalies, no suspicious patterns' },
+        { id:'SR-005', name:'STP Eligibility',       status:'BYPASSED',   result:'ANALYST',      detail:'COB complexity (Medicare coordination) → manual review required' },
+        { id:'SR-008', name:'Provider Network',      status:'PASSED',     result:'IN-NETWORK',   detail:'Sunrise Manor SNF — CMS 4.5★, EVV active via CellTrak' },
+        { id:'SR-012', name:'Benefit Period Monitor',status:'MONITORING', result:'14/1825 days', detail:'5-year benefit period — 99.2% remaining ($317,650 available)' }
+      ]
+    },
+    'LTC-2026-0102': {
+      claimant:'Harold Simmons',       age:82,
+      carrier:'MassMutual',            product:'Hybrid LTC/Life',
+      dailyBenefit:'$220/day',         status:'Active',   priority:'high',
+      type:'Home Health',              assessScore:3,     cogScore:24,
+      daysOpen:31,                     lcPhase:5,
+      nextAction:'30-Day Reassessment Due — Schedule RN Visit',
+      provider:'ComfortCare Home Health', paymentDue:'Jul 10, 2026',
+      qualifyingEventDate:'Jun 8, 2026',
+      notificationDate:'Jun 9, 2026',
+      eliminationEndDate:'Sep 5, 2026',
+      firstBenefitDate:'Sep 6, 2026',
+      filedBy:'Insurance Agent',       filedByName:'David Reyes — MassMutual Agent',
+      poaOnFile:false,                 poaName:'N/A — claimant cognitively intact',
+      preferredLanguage:'English',
+      medicare:'Medicare Part B only', medicaid:'Not enrolled',
+      cobNotes:'Medicare Part B covers skilled nursing visits (100% if homebound). LTC policy supplements custodial care Medicare does NOT cover.',
+      dx1Code:'J44.9', dx1Label:'COPD — Severe',
+      dx2Code:'I50.9', dx2Label:'Congestive Heart Failure (CHF)',
+      adlsImpaired:['bathing','dressing','transferring'],
+      attendingPhysician:'Dr. Robert Patel, MD — Pulmonology',
+      attendingNPI:'9876543210',
+      benefitPeriodDays:1095, benefitUsedDays:31,
+      inflationRider:'CPI-Linked',
+      sharedCare:true,                 sharedCareSpouse:'Dorothy Simmons (shared care pool)',
+      intakeBy:'David Reyes — Licensed MassMutual Agent',
+      docSpecialist:'Priya Nair — Document Specialist',
+      assessedBy:'Maria Castillo, MSW — Field Assessment',
+      benefitsAnalyst:'Tom Wheeler — Benefits Analyst',
+      careManager:'Maria Castillo, MSW — Care Manager',
+      providerContact:'ComfortCare Home Health — Coordinator: (512) 555-0384',
+      docs:[
+        { name:'HIPAA Authorization',          from:'Harold Simmons (self)',            date:'Jun 9, 2026',  status:'✅ Received',  type:'PDF', idpDone:true  },
+        { name:'Attending Physician Statement', from:'Dr. Robert Patel, MD',            date:'Jun 14, 2026', status:'✅ Received',  type:'PDF', idpDone:true  },
+        { name:'Home Health Plan of Care',      from:'Dr. Patel / ComfortCare',         date:'Jun 18, 2026', status:'✅ Received',  type:'PDF', idpDone:true  },
+        { name:'ADL Assessment Report',         from:'Maria Castillo, MSW',            date:'Jun 20, 2026', status:'✅ Received',  type:'PDF', idpDone:true  },
+        { name:'Insurance Policy — MM-LTC',     from:'MassMutual',                     date:'Feb 2021',     status:'✅ On File',   type:'PDF', idpDone:true  },
+        { name:'Shared Care Rider Addendum',    from:'MassMutual',                     date:'Feb 2021',     status:'✅ On File',   type:'PDF', idpDone:true  },
+        { name:'EVV Enrollment — CellTrak',     from:'ComfortCare Home Health',         date:'Jun 16, 2026', status:'✅ Active',    type:'EVV', idpDone:true  },
+        { name:'30-Day Reassessment Form',      from:'Pending — Maria Castillo, MSW',  date:'Due Jul 10',   status:'⚠️ Pending',  type:'PDF', idpDone:false }
+      ],
+      rnAssessment:{
+        completedBy:'Maria Castillo, MSW', date:'Jun 20, 2026',
+        adlScores:{ bathing:0, dressing:1, eating:3, transferring:1, toileting:3, continence:3 },
+        mmseScore:24, mmseDate:'Jun 20, 2026',
+        fallsLast90Days:1, fallRisk:'Moderate',
+        medications:['Spiriva','Albuterol inhaler','Furosemide 40mg','Carvedilol 6.25mg','Warfarin 5mg'],
+        environmentSafe:true, environmentNotes:'Home modified: stair lift, grab bars, O2 concentrator, hospital bed in place.',
+        recommendation:'Home Health Care — 3 aide visits/week + 1 skilled nursing visit. Re-evaluate in 30 days.',
+        clinicalNarrative:'Harold is cognitively intact (MMSE 24/30) but physically limited by severe COPD and CHF. 3/6 ADLs impaired. Home environment well-adapted. Motivated claimant — wants to remain home. Shared care rider active — spouse Dorothy enrolled separately under same benefit pool. Monitoring O2 saturation weekly via telehealth.'
+      },
+      smartsRules:[
+        { id:'SR-001', name:'ADL Trigger',           status:'FIRED',      result:'ELIGIBLE',    detail:'3/6 ADLs impaired (Bathing, Dressing, Transferring)' },
+        { id:'SR-002', name:'Cognitive Route',        status:'PASSED',     result:'FUNCTIONAL',  detail:'MMSE 24/30 — no cognitive pathway triggered' },
+        { id:'SR-003', name:'Elimination Period',     status:'MONITORING', result:'Day 31/90',   detail:'Began Jun 8 — ends Sep 5, 2026' },
+        { id:'SR-004', name:'Fraud Pre-Screen',       status:'PASSED',     result:'CLEAR',       detail:'Score: 14/100 — agent-filed, no suspicious patterns' },
+        { id:'SR-005', name:'STP Eligibility',        status:'FIRED',      result:'STP APPROVED',detail:'Straight-Through Processing — auto-approved Jun 21' },
+        { id:'SR-008', name:'Provider Network',       status:'PASSED',     result:'IN-NETWORK',  detail:'ComfortCare Home Health — EVV active via CellTrak' },
+        { id:'SR-012', name:'Benefit Period Monitor', status:'MONITORING', result:'31/1095 days',detail:'3-year benefit period — 97.2% remaining ($217,030 available)' }
+      ]
+    },
+    'LTC-2026-0103': {
+      claimant:'Dorothy Feldstein',    age:74,
+      carrier:'NY Life',               product:'LTC Standalone',
+      dailyBenefit:'$150/day',         status:'Review',   priority:'high',
+      type:'Assisted Living (ALF)',     assessScore:2,     cogScore:22,
+      daysOpen:7,                      lcPhase:3,
+      nextAction:'Policy Language Dispute — ALF Coverage Pending Carrier Review',
+      provider:'Sunrise Gardens ALF',  paymentDue:'On Hold',
+      qualifyingEventDate:'Jun 30, 2026',
+      notificationDate:'Jul 2, 2026',
+      eliminationEndDate:'Sep 27, 2026',
+      firstBenefitDate:'Sep 28, 2026',
+      filedBy:'Claimant',              filedByName:'Dorothy Feldstein (self)',
+      poaOnFile:false,                 poaName:'N/A — claimant cognitively intact',
+      preferredLanguage:'English',
+      medicare:'Medicare Part A + B',  medicaid:'Not enrolled',
+      cobNotes:'Medicare does NOT cover custodial ALF care. LTC policy is sole payer — benefit determination pending.',
+      dx1Code:'G35',    dx1Label:'Multiple Sclerosis',
+      dx2Code:'R26.89', dx2Label:'Gait Disturbance / Fall Risk',
+      adlsImpaired:['bathing','dressing'],
+      attendingPhysician:'Dr. Lisa Monroe, MD — Neurology',
+      attendingNPI:'5554441234',
+      benefitPeriodDays:730, benefitUsedDays:7,
+      inflationRider:'None',           sharedCare:false,
+      intakeBy:'James Park — Claims Intake Specialist',
+      docSpecialist:'Lisa Chen — Document Specialist',
+      assessedBy:'Robert Hughes, RN — Telephonic Assessment',
+      benefitsAnalyst:'Karen White — Senior Benefits Analyst (DISPUTE)',
+      careManager:'Pending — disputed claim',
+      providerContact:'Sunrise Gardens ALF — (469) 555-0771',
+      docs:[
+        { name:'HIPAA Authorization',          from:'Dorothy Feldstein (self)',         date:'Jul 2, 2026',  status:'✅ Received',         type:'PDF', idpDone:true  },
+        { name:'Attending Physician Statement', from:'Dr. Lisa Monroe, MD',             date:'Jul 5, 2026',  status:'✅ Received',         type:'PDF', idpDone:true  },
+        { name:'ADL Assessment Report',         from:'Robert Hughes, RN',              date:'Jul 6, 2026',  status:'✅ Received',         type:'PDF', idpDone:true  },
+        { name:'Insurance Policy — NYL-LTC',    from:'NY Life',                        date:'Nov 2019',     status:'✅ On File',          type:'PDF', idpDone:true  },
+        { name:'Policy ALF Definition Rider',   from:'NY Life (2019 policy language)', date:'Nov 2019',     status:'⚠️ Under Review',    type:'PDF', idpDone:true  },
+        { name:'ALF State Licensure',           from:'Sunrise Gardens ALF',            date:'Jan 2026',     status:'✅ Verified',         type:'PDF', idpDone:true  },
+        { name:'Carrier Dispute Letter',        from:'NY Life — Carrier Review Team',  date:'Jul 7, 2026',  status:'🔴 Awaiting Response',type:'PDF', idpDone:false }
+      ],
+      rnAssessment:{
+        completedBy:'Robert Hughes, RN', date:'Jul 6, 2026',
+        adlScores:{ bathing:1, dressing:1, eating:3, transferring:3, toileting:3, continence:3 },
+        mmseScore:22, mmseDate:'Jul 6, 2026',
+        fallsLast90Days:3, fallRisk:'High',
+        medications:['Tecfidera 240mg','Baclofen 10mg','Vitamin D3','Ampyra 10mg'],
+        environmentSafe:false, environmentNotes:'Prior home has steps — 3 falls in 90 days. ALF environment is clinically appropriate.',
+        recommendation:'Assisted Living Facility — 2/6 ADLs impaired, high fall risk. ALF is appropriate level of care.',
+        clinicalNarrative:'Dorothy is cognitively functional (MMSE 22/30) with progressive MS causing physical ADL limitations. 2/6 ADLs impaired. High fall risk — 3 falls in 90 days. ALF is the clinically appropriate setting. Policy language ambiguity (2019 contract) is the sole barrier to approval. Recommend carrier clarification and preparation of appeal citing state insurance dept guidance on ALF coverage.'
+      },
+      smartsRules:[
+        { id:'SR-001', name:'ADL Trigger',          status:'FIRED',      result:'ELIGIBLE',    detail:'2/6 ADLs impaired (Bathing, Dressing) — threshold met' },
+        { id:'SR-002', name:'Cognitive Route',       status:'PASSED',     result:'FUNCTIONAL',  detail:'MMSE 22/30 — functional cognitive level' },
+        { id:'SR-003', name:'Elimination Period',    status:'MONITORING', result:'Day 7/90',    detail:'Began Jun 30 — ends Sep 27, 2026' },
+        { id:'SR-008', name:'Provider Network',      status:'MONITORING', result:'OUT-OF-NETWORK',detail:'Sunrise Gardens ALF — not in preferred network, review required' },
+        { id:'SR-010', name:'Policy Language Review',status:'ALERT',      result:'DISPUTE',     detail:'2019 ALF definition ambiguity — carrier legal team reviewing' }
+      ]
+    },
+    'LTC-2026-0104': {
+      claimant:'Arthur Kowalski',      age:86,
+      carrier:'Genworth',              product:'LTC Standalone',
+      dailyBenefit:'$200/day',         status:'Active',   priority:'medium',
+      type:'Memory Care',              assessScore:5,     cogScore:11,
+      daysOpen:62,                     lcPhase:5,
+      nextAction:'Monthly Billing Review — Provider Invoice Pending',
+      provider:'Sunrise Pines Memory Care', paymentDue:'Jul 12, 2026',
+      qualifyingEventDate:'Apr 15, 2026',
+      notificationDate:'Apr 17, 2026',
+      eliminationEndDate:'Jul 13, 2026',
+      firstBenefitDate:'Jul 14, 2026',
+      filedBy:'Family Member',         filedByName:'Susan Kowalski (Daughter)',
+      poaOnFile:true,                  poaName:'Susan Kowalski',
+      preferredLanguage:'English',
+      medicare:'Medicare Part A + B',  medicaid:'Not enrolled',
+      cobNotes:'Medicare does not cover custodial memory care. LTC policy is primary payer. Elimination period ends Jul 13, 2026.',
+      dx1Code:'G30.9',  dx1Label:"Alzheimer's Disease",
+      dx2Code:'F02.80', dx2Label:'Dementia in Other Diseases',
+      adlsImpaired:['bathing','dressing','eating','transferring','toileting'],
+      attendingPhysician:'Dr. Michael Torres, MD — Geriatric Psychiatry',
+      attendingNPI:'7771234567',
+      benefitPeriodDays:1825, benefitUsedDays:62,
+      inflationRider:'3% Simple',      sharedCare:false,
+      intakeBy:'Angela Moore — Claims Intake',
+      docSpecialist:'Kevin O\'Brien — Document Specialist',
+      assessedBy:'Dr. Patricia Lee, NP — Geriatric Assessment',
+      benefitsAnalyst:'Jennifer Adams — Benefits Analyst',
+      careManager:'Rebecca Chen, RN — Care Manager',
+      providerContact:'Sunrise Pines Memory Care — Director: (773) 555-0441',
+      docs:[
+        { name:'HIPAA Authorization',          from:'Susan Kowalski (POA)',             date:'Apr 17, 2026', status:'✅ IDP Complete',  type:'PDF', idpDone:true  },
+        { name:'Attending Physician Statement', from:'Dr. Michael Torres, MD',          date:'Apr 22, 2026', status:'✅ IDP Complete',  type:'PDF', idpDone:true  },
+        { name:'Neuropsychological Evaluation', from:'Dr. Patricia Lee, NP',            date:'Apr 28, 2026', status:'✅ IDP Complete',  type:'PDF', idpDone:true  },
+        { name:'ADL Assessment Report',         from:'Dr. Patricia Lee, NP',           date:'Apr 29, 2026', status:'✅ IDP Complete',  type:'PDF', idpDone:true  },
+        { name:'Insurance Policy — GNW-LTC',    from:'Genworth',                       date:'Jun 2018',     status:'✅ On File',       type:'PDF', idpDone:true  },
+        { name:'Memory Care Admission Records', from:'Sunrise Pines Memory Care',       date:'Apr 30, 2026', status:'✅ IDP Complete',  type:'PDF', idpDone:true  },
+        { name:'EVV Records — April–June',      from:'CellTrak / Sunrise Pines',        date:'Jun 30, 2026', status:'✅ Active',        type:'EVV', idpDone:true  },
+        { name:'July Invoice',                  from:'Sunrise Pines Memory Care',       date:'Jul 1, 2026',  status:'⚠️ Pending Review',type:'PDF', idpDone:false }
+      ],
+      rnAssessment:{
+        completedBy:'Dr. Patricia Lee, NP', date:'Apr 28, 2026',
+        adlScores:{ bathing:0, dressing:0, eating:1, transferring:0, toileting:0, continence:1 },
+        mmseScore:11, mmseDate:'Apr 28, 2026',
+        fallsLast90Days:4, fallRisk:'Very High',
+        medications:['Namenda 10mg','Aricept 23mg','Seroquel 25mg','Aspirin 81mg','Vitamin B12'],
+        environmentSafe:true, environmentNotes:'Memory care unit — secured environment, wandering prevention, 24hr supervision.',
+        recommendation:'Memory Care Facility — 5/6 ADLs impaired, severe cognitive decline. 24hr supervision required.',
+        clinicalNarrative:'Arthur presents with severe Alzheimer\'s disease — MMSE 11/30 indicates severe dementia. 5/6 ADLs impaired requiring full assistance. Very high fall risk (4 falls in 90 days). Memory care facility is the only appropriate level of care. POA Susan Kowalski is actively engaged. Elimination period ends Jul 13 — first benefit payment due Jul 14. Projected claim duration: 18–36 months at current trajectory.'
+      },
+      smartsRules:[
+        { id:'SR-001', name:'ADL Trigger',           status:'FIRED',      result:'ELIGIBLE',     detail:'5/6 ADLs impaired — severe functional limitation' },
+        { id:'SR-002', name:'Cognitive Route',        status:'FIRED',      result:'MEMORY CARE',  detail:'MMSE 11/30 → Memory Care pathway — severe dementia' },
+        { id:'SR-003', name:'Elimination Period',     status:'MONITORING', result:'Day 62/90',    detail:'Ends Jul 13, 2026 — 28 days remaining' },
+        { id:'SR-004', name:'Fraud Pre-Screen',       status:'PASSED',     result:'CLEAR',        detail:'Score: 5/100 — clean record, verified POA' },
+        { id:'SR-008', name:'Provider Network',       status:'PASSED',     result:'IN-NETWORK',   detail:'Sunrise Pines Memory Care — licensed, EVV active' },
+        { id:'SR-012', name:'Benefit Period Monitor', status:'MONITORING', result:'62/1825 days', detail:'5-year benefit period — 96.6% remaining ($330,600 available)' }
+      ]
+    },
+    'LTC-2026-0105': {
+      claimant:'Evelyn Marchetti',     age:71,
+      carrier:'Transamerica',          product:'LTC Standalone',
+      dailyBenefit:'$130/day',         status:'Pending',  priority:'medium',
+      type:'Adult Day Care',           assessScore:2,     cogScore:25,
+      daysOpen:3,                      lcPhase:1,
+      nextAction:'Initial Assessment — RN Visit to Be Scheduled',
+      provider:'SunBridge Adult Day Services', paymentDue:'TBD',
+      qualifyingEventDate:'Jul 5, 2026',
+      notificationDate:'Jul 7, 2026',
+      eliminationEndDate:'Oct 4, 2026',
+      firstBenefitDate:'Oct 5, 2026',
+      filedBy:'Claimant',              filedByName:'Evelyn Marchetti (self)',
+      poaOnFile:false,                 poaName:'N/A — claimant independent',
+      preferredLanguage:'English',
+      medicare:'Medicare Part B',      medicaid:'Not enrolled',
+      cobNotes:'Medicare does not cover custodial adult day care. LTC policy is sole payer. Claim in document collection phase.',
+      dx1Code:'G20',    dx1Label:"Parkinson's Disease",
+      dx2Code:'R26.89', dx2Label:'Gait Disturbance / Fall Risk',
+      adlsImpaired:['bathing','dressing'],
+      attendingPhysician:'Dr. James Nguyen, MD — Neurology',
+      attendingNPI:'3334445556',
+      benefitPeriodDays:1095, benefitUsedDays:3,
+      inflationRider:'CPI-Linked',     sharedCare:false,
+      intakeBy:'Carlos Rivera — Claims Intake Specialist',
+      docSpecialist:'Priya Nair — Document Specialist',
+      assessedBy:'Pending — RN Assessment Not Yet Scheduled',
+      benefitsAnalyst:'Tom Wheeler — Benefits Analyst (assigned)',
+      careManager:'Pending Assignment',
+      providerContact:'SunBridge Adult Day Services — (305) 555-0293',
+      docs:[
+        { name:'HIPAA Authorization',          from:'Evelyn Marchetti (self)',          date:'Jul 7, 2026',  status:'✅ Received',   type:'PDF', idpDone:true  },
+        { name:'Attending Physician Statement', from:'Dr. James Nguyen, MD',            date:'Pending',      status:'⚠️ Requested', type:'PDF', idpDone:false },
+        { name:'ADL Assessment Report',         from:'Pending — RN not yet assigned',   date:'Pending',      status:'⚠️ Pending',   type:'PDF', idpDone:false },
+        { name:'Insurance Policy — TAM-LTC',    from:'Transamerica',                    date:'Mar 2020',     status:'✅ On File',    type:'PDF', idpDone:true  },
+        { name:'Adult Day Care Enrollment Form',from:'SunBridge Adult Day Services',    date:'Pending',      status:'⚠️ Pending',   type:'PDF', idpDone:false }
+      ],
+      rnAssessment:{ completedBy:'', date:'',
+        adlScores:{ bathing:1, dressing:1, eating:3, transferring:3, toileting:3, continence:3 },
+        mmseScore:25, mmseDate:'',
+        fallsLast90Days:2, fallRisk:'Moderate',
+        medications:['Levodopa/Carbidopa 25/100mg','Ropinirole 2mg','Vitamin D3'],
+        environmentSafe:true, environmentNotes:'Home is single-level, well-organized.',
+        recommendation:'Adult Day Care — 2/6 ADLs impaired, Parkinson\'s progression. Socialization and structured care during day hours appropriate.',
+        clinicalNarrative:'Evelyn is cognitively intact (MMSE 25/30) with early-stage Parkinson\'s causing ADL limitations. 2/6 ADLs impaired. Moderate fall risk (2 falls in 90 days). Adult Day Care is an appropriate and cost-effective care setting. Assessment pending RN assignment.'
+      },
+      smartsRules:[
+        { id:'SR-001', name:'ADL Trigger',          status:'MONITORING', result:'PENDING',      detail:'2/6 ADLs reported — awaiting RN confirmation' },
+        { id:'SR-003', name:'Elimination Period',    status:'MONITORING', result:'Day 3/90',     detail:'Began Jul 5 — ends Oct 4, 2026' },
+        { id:'SR-004', name:'Fraud Pre-Screen',      status:'PASSED',     result:'CLEAR',        detail:'Score: 4/100 — clean record, self-filed' },
+        { id:'SR-006', name:'Document Completeness', status:'ALERT',      result:'INCOMPLETE',   detail:'APS and ADL Assessment pending — cannot approve yet' }
+      ]
+    },
+    'LTC-2026-0106': {
+      claimant:'Francis Delacroix',    age:80,
+      carrier:'TIAA',                  product:'LTC Standalone',
+      dailyBenefit:'$175/day',         status:'Active',   priority:'low',
+      type:'Home Health',              assessScore:3,     cogScore:23,
+      daysOpen:120,                    lcPhase:5,
+      nextAction:'Annual Care Review — Update Care Plan & Reassess ADLs',
+      provider:'BrightCare Home Health', paymentDue:'Jul 20, 2026',
+      qualifyingEventDate:'Mar 2, 2026',
+      notificationDate:'Mar 4, 2026',
+      eliminationEndDate:'May 31, 2026',
+      firstBenefitDate:'Jun 1, 2026',
+      filedBy:'Insurance Agent',       filedByName:'Carol Washington — TIAA Agent',
+      poaOnFile:false,                 poaName:'N/A',
+      preferredLanguage:'English',
+      medicare:'Medicare Part B',      medicaid:'Not enrolled',
+      cobNotes:'Medicare Part B covers some home health. LTC policy supplements custodial care. COB well-documented — no overlap issues.',
+      dx1Code:'I63.9',  dx1Label:'Stroke / Cerebrovascular Accident',
+      dx2Code:'Z87.39', dx2Label:'History of Stroke (residual deficits)',
+      adlsImpaired:['bathing','dressing','transferring'],
+      attendingPhysician:'Dr. Priya Sharma, MD — Neurology',
+      attendingNPI:'2223334445',
+      benefitPeriodDays:1460, benefitUsedDays:120,
+      inflationRider:'3% Compound',    sharedCare:false,
+      intakeBy:'Carol Washington — TIAA Agent',
+      docSpecialist:'Monica Lee — Document Specialist',
+      assessedBy:'David Kim, RN — Field Assessment',
+      benefitsAnalyst:'Sarah O\'Connor — Benefits Analyst',
+      careManager:'David Kim, RN — Care Manager',
+      providerContact:'BrightCare Home Health — (617) 555-0822',
+      docs:[
+        { name:'HIPAA Authorization',          from:'Francis Delacroix (self)',         date:'Mar 4, 2026',  status:'✅ IDP Complete',  type:'PDF', idpDone:true },
+        { name:'Attending Physician Statement', from:'Dr. Priya Sharma, MD',            date:'Mar 10, 2026', status:'✅ IDP Complete',  type:'PDF', idpDone:true },
+        { name:'ADL Assessment Report',         from:'David Kim, RN',                  date:'Mar 15, 2026', status:'✅ IDP Complete',  type:'PDF', idpDone:true },
+        { name:'Insurance Policy — TIAA-LTC',   from:'TIAA',                           date:'Sep 2019',     status:'✅ On File',       type:'PDF', idpDone:true },
+        { name:'Annual Care Plan Update',       from:'BrightCare Home Health',          date:'Jun 1, 2026',  status:'⚠️ Due for Update',type:'PDF', idpDone:false },
+        { name:'EVV Records — Mar–Jun',         from:'CellTrak / BrightCare',           date:'Jun 30, 2026', status:'✅ Active',        type:'EVV', idpDone:true },
+        { name:'Annual Re-assessment Form',     from:'Pending — David Kim, RN',         date:'Due Jul 20',   status:'⚠️ Pending',      type:'PDF', idpDone:false }
+      ],
+      rnAssessment:{
+        completedBy:'David Kim, RN', date:'Mar 15, 2026',
+        adlScores:{ bathing:0, dressing:1, eating:3, transferring:1, toileting:3, continence:3 },
+        mmseScore:23, mmseDate:'Mar 15, 2026',
+        fallsLast90Days:1, fallRisk:'Moderate',
+        medications:['Clopidogrel 75mg','Lisinopril 10mg','Atorvastatin 40mg','Aspirin 81mg'],
+        environmentSafe:true, environmentNotes:'Home modified: grab bars in bathroom, non-slip mats, stair rail reinforced.',
+        recommendation:'Home Health Care — 3/6 ADLs impaired post-stroke. Ongoing PT/OT plus aide assistance. Annual reassessment due.',
+        clinicalNarrative:'Francis is recovering well post-stroke with 3/6 ADLs impaired. Cognitively intact (MMSE 23/30). Consistent with long-term home health requirement. BrightCare has maintained excellent EVV compliance (97% GPS-verified). Annual reassessment due July 20 — care manager David Kim scheduled. No concerns identified. Projected continued home health care 12–24 additional months.'
+      },
+      smartsRules:[
+        { id:'SR-001', name:'ADL Trigger',           status:'FIRED',      result:'ELIGIBLE',    detail:'3/6 ADLs impaired (Bathing, Dressing, Transferring)' },
+        { id:'SR-003', name:'Elimination Period',     status:'PASSED',     result:'SATISFIED',   detail:'90 days complete May 31, 2026 — benefits active' },
+        { id:'SR-004', name:'Fraud Pre-Screen',       status:'PASSED',     result:'CLEAR',       detail:'Score: 7/100 — agent-filed, no anomalies' },
+        { id:'SR-008', name:'Provider Network',       status:'PASSED',     result:'IN-NETWORK',  detail:'BrightCare Home Health — EVV 97% GPS-verified' },
+        { id:'SR-012', name:'Benefit Period Monitor', status:'MONITORING', result:'120/1460 days',detail:'4-year benefit period — 91.8% remaining' }
+      ]
+    },
+    'LTC-2026-0107': {
+      claimant:'Ruth Blackwood',       age:71,
+      carrier:'Lincoln National',      product:'LTC Standalone',
+      dailyBenefit:'$240/day',         status:'Escalated', priority:'urgent',
+      type:'Nursing Home',             assessScore:4,      cogScore:14,
+      daysOpen:9,                      lcPhase:3,
+      nextAction:'Clinical Review by RN — Escalated for Supervisor Action',
+      provider:'Lakeside Care Center SNF', paymentDue:'TBD',
+      qualifyingEventDate:'Jun 28, 2026',
+      notificationDate:'Jun 30, 2026',
+      eliminationEndDate:'Sep 25, 2026',
+      firstBenefitDate:'Sep 26, 2026',
+      filedBy:'Family Member',         filedByName:'Thomas Blackwood (Husband)',
+      poaOnFile:true,                  poaName:'Thomas Blackwood',
+      preferredLanguage:'English',
+      medicare:'Medicare Part A + B',  medicaid:'Not enrolled',
+      cobNotes:'Medicare covers Days 1–100 at SNF. LTC policy supplements Day 101+. Complex COB — analyst review required.',
+      dx1Code:'F01.51', dx1Label:'Vascular Dementia',
+      dx2Code:'I63.9',  dx2Label:'Stroke / Cerebrovascular Accident',
+      adlsImpaired:['bathing','dressing','eating','transferring'],
+      attendingPhysician:'Dr. Karen Walsh, MD — Geriatric Neurology',
+      attendingNPI:'6667778889',
+      benefitPeriodDays:2190, benefitUsedDays:9,
+      inflationRider:'5% Compound',    sharedCare:false,
+      intakeBy:'Sandra Brown — Claims Intake Specialist',
+      docSpecialist:'Monica Lee — Document Specialist',
+      assessedBy:'Patricia Mills, RN — Clinical Supervisor (ESCALATED)',
+      benefitsAnalyst:'Robert Singh — Senior Benefits Analyst',
+      careManager:'Patricia Mills, RN — Clinical Supervisor',
+      providerContact:'Lakeside Care Center SNF — (312) 555-0667',
+      docs:[
+        { name:'HIPAA Authorization',          from:'Thomas Blackwood (POA)',           date:'Jun 30, 2026', status:'✅ Received',         type:'PDF', idpDone:true  },
+        { name:'Attending Physician Statement', from:'Dr. Karen Walsh, MD',             date:'Pending',      status:'⚠️ Expedited Fax',  type:'PDF', idpDone:false },
+        { name:'Hospital Records — Emergency',  from:'Rush University Medical Center',  date:'Jun 28, 2026', status:'✅ Received',         type:'PDF', idpDone:true  },
+        { name:'ADL Assessment Report',         from:'Patricia Mills, RN',             date:'Jul 3, 2026',  status:'✅ Received',         type:'PDF', idpDone:true  },
+        { name:'Insurance Policy — LNC-LTC',    from:'Lincoln National',               date:'Aug 2017',     status:'✅ On File',          type:'PDF', idpDone:true  },
+        { name:'Escalation Notice',             from:'Robert Singh — Benefits Analyst', date:'Jul 5, 2026',  status:'🔴 Action Required', type:'PDF', idpDone:false }
+      ],
+      rnAssessment:{
+        completedBy:'Patricia Mills, RN', date:'Jul 3, 2026',
+        adlScores:{ bathing:0, dressing:0, eating:1, transferring:0, toileting:2, continence:2 },
+        mmseScore:14, mmseDate:'Jul 3, 2026',
+        fallsLast90Days:3, fallRisk:'Very High',
+        medications:['Aricept 10mg','Clopidogrel 75mg','Lisinopril 20mg','Furosemide 40mg','Haldol 0.5mg'],
+        environmentSafe:true, environmentNotes:'Now at Lakeside Care Center SNF — secure unit.',
+        recommendation:'Skilled Nursing Facility — 4/6 ADLs severely impaired, moderate-severe dementia. 24hr skilled nursing required.',
+        clinicalNarrative:'Ruth presents with rapidly progressing vascular dementia post-stroke. MMSE 14/30 — moderate-severe cognitive impairment. 4/6 ADLs impaired. Very high fall risk. Escalated due to clinical complexity and need for expedited APS from Dr. Walsh. COB coordination with Medicare requires analyst review. Recommend immediate SNF benefit activation pending APS receipt.'
+      },
+      smartsRules:[
+        { id:'SR-001', name:'ADL Trigger',          status:'FIRED',      result:'ELIGIBLE',    detail:'4/6 ADLs impaired — threshold exceeded' },
+        { id:'SR-002', name:'Cognitive Route',       status:'FIRED',      result:'SNF/Memory',  detail:'MMSE 14/30 → SNF pathway triggered' },
+        { id:'SR-003', name:'Elimination Period',    status:'MONITORING', result:'Day 9/90',    detail:'Began Jun 28 — ends Sep 25, 2026' },
+        { id:'SR-005', name:'STP Eligibility',       status:'BYPASSED',   result:'ESCALATED',   detail:'Clinical complexity + APS pending → supervisor review' },
+        { id:'SR-009', name:'Escalation Flag',       status:'ALERT',      result:'ESCALATED',   detail:'Multi-factor complexity — assigned to supervisor Patricia Mills, RN' }
+      ]
+    },
+    'LTC-2026-0108': {
+      claimant:'George Nakamura',      age:77,
+      carrier:'Pacific Life',          product:'LTC Standalone',
+      dailyBenefit:'$160/day',         status:'Active',   priority:'medium',
+      type:'Home Health',              assessScore:3,     cogScore:21,
+      daysOpen:45,                     lcPhase:5,
+      nextAction:'Quarterly Care Check — Schedule RN Visit',
+      provider:'Pacific Home Care Solutions', paymentDue:'Jul 18, 2026',
+      qualifyingEventDate:'May 23, 2026',
+      notificationDate:'May 25, 2026',
+      eliminationEndDate:'Aug 20, 2026',
+      firstBenefitDate:'Aug 21, 2026',
+      filedBy:'Claimant',              filedByName:'George Nakamura (self)',
+      poaOnFile:false,                 poaName:'N/A',
+      preferredLanguage:'English / Japanese',
+      medicare:'Medicare Part A + B',  medicaid:'Not enrolled',
+      cobNotes:'Medicare Part A + B — limited home health coverage. LTC policy covers custodial care gap. No COB complexity.',
+      dx1Code:'G20',    dx1Label:"Parkinson's Disease",
+      dx2Code:'M81.0',  dx2Label:'Osteoporosis with Fracture',
+      adlsImpaired:['bathing','dressing','transferring'],
+      attendingPhysician:'Dr. Helen Cho, MD — Neurology',
+      attendingNPI:'9990001112',
+      benefitPeriodDays:1460, benefitUsedDays:45,
+      inflationRider:'CPI-Linked',     sharedCare:false,
+      intakeBy:'George Nakamura (self-filed online)',
+      docSpecialist:'Priya Nair — Document Specialist',
+      assessedBy:'James Park, RN — Telephonic Assessment',
+      benefitsAnalyst:'Jennifer Adams — Benefits Analyst',
+      careManager:'James Park, RN — Care Manager',
+      providerContact:'Pacific Home Care Solutions — (310) 555-0938',
+      docs:[
+        { name:'HIPAA Authorization',          from:'George Nakamura (self)',           date:'May 25, 2026', status:'✅ IDP Complete',  type:'PDF', idpDone:true },
+        { name:'Attending Physician Statement', from:'Dr. Helen Cho, MD',               date:'Jun 1, 2026',  status:'✅ IDP Complete',  type:'PDF', idpDone:true },
+        { name:'ADL Assessment Report',         from:'James Park, RN',                 date:'Jun 5, 2026',  status:'✅ IDP Complete',  type:'PDF', idpDone:true },
+        { name:'Insurance Policy — PAC-LTC',    from:'Pacific Life',                   date:'Nov 2018',     status:'✅ On File',       type:'PDF', idpDone:true },
+        { name:'Osteoporosis Specialist Report',from:'Dr. Cho / UCLA Health',           date:'Jun 8, 2026',  status:'✅ IDP Complete',  type:'PDF', idpDone:true },
+        { name:'EVV Records — May–Jun',         from:'CellTrak / Pacific Home Care',    date:'Jun 30, 2026', status:'✅ Active',        type:'EVV', idpDone:true },
+        { name:'Quarterly Reassessment Form',   from:'Pending — James Park, RN',        date:'Due Jul 18',   status:'⚠️ Pending',      type:'PDF', idpDone:false }
+      ],
+      rnAssessment:{
+        completedBy:'James Park, RN', date:'Jun 5, 2026',
+        adlScores:{ bathing:0, dressing:1, eating:3, transferring:1, toileting:3, continence:3 },
+        mmseScore:21, mmseDate:'Jun 5, 2026',
+        fallsLast90Days:2, fallRisk:'Moderate',
+        medications:['Levodopa/Carbidopa 50/200mg','Rasagiline 1mg','Calcium + D3','Alendronate 70mg'],
+        environmentSafe:true, environmentNotes:'Home modified: grab bars, elevated toilet seat, stair railing. Wife assists with morning routine.',
+        recommendation:'Home Health Care — 3/6 ADLs impaired. Parkinson\'s + osteoporosis requiring daily aide. Quarterly reassessment schedule.',
+        clinicalNarrative:'George is mildly cognitively impaired (MMSE 21/30) with Parkinson\'s-related ADL limitations and osteoporosis-related fall risk. 3/6 ADLs impaired. Wife provides informal support; professional aide required for bathing and transfers. Pacific Home Care Solutions performing well — EVV 100% GPS-verified. Quarterly reassessment due July 18.'
+      },
+      smartsRules:[
+        { id:'SR-001', name:'ADL Trigger',           status:'FIRED',      result:'ELIGIBLE',    detail:'3/6 ADLs impaired (Bathing, Dressing, Transferring)' },
+        { id:'SR-003', name:'Elimination Period',     status:'MONITORING', result:'Day 45/90',   detail:'Began May 23 — ends Aug 20, 2026' },
+        { id:'SR-004', name:'Fraud Pre-Screen',       status:'PASSED',     result:'CLEAR',       detail:'Score: 3/100 — self-filed, clean record' },
+        { id:'SR-008', name:'Provider Network',       status:'PASSED',     result:'IN-NETWORK',  detail:'Pacific Home Care Solutions — EVV 100% GPS-verified' },
+        { id:'SR-012', name:'Benefit Period Monitor', status:'MONITORING', result:'45/1460 days',detail:'4-year benefit period — 96.9% remaining' }
+      ]
+    }
+  };
+
+  /* ══════════════════════════════════════════════════════════════════════
+     2. MERGE ENRICHMENT INTO window.ltcClaimsData
+  ══════════════════════════════════════════════════════════════════════ */
+  function _mergeEnrichment() {
+    var claims = window.ltcClaimsData;
+    if (!claims) return;
+    claims.forEach(function(c) {
+      var enrich = _enrichMap[c.id];
+      if (enrich) {
+        Object.keys(enrich).forEach(function(k) {
+          if (c[k] === undefined || c[k] === null || c[k] === '' || c[k] === '—') {
+            c[k] = enrich[k];
+          } else if (k === 'docs' || k === 'rnAssessment' || k === 'smartsRules') {
+            c[k] = enrich[k]; // always use rich version
+          }
+        });
+        // Force-populate critical empty fields
+        ['qualifyingEventDate','notificationDate','eliminationEndDate','firstBenefitDate',
+         'filedBy','filedByName','poaOnFile','poaName','medicare','cobNotes',
+         'dx1Code','dx1Label','dx2Code','dx2Label','adlsImpaired',
+         'attendingPhysician','attendingNPI','benefitPeriodDays','benefitUsedDays',
+         'inflationRider','intakeBy','docSpecialist','assessedBy','benefitsAnalyst',
+         'careManager','providerContact','smartsRules','rnAssessment'].forEach(function(k) {
+          if (enrich[k] !== undefined) c[k] = enrich[k];
+        });
+      }
+    });
+    console.log('[P39] Enriched', claims.length, 'claims with full field data');
+  }
+  _mergeEnrichment();
+  setTimeout(_mergeEnrichment, 500); // re-merge after p9Claims merge
+
+  /* ══════════════════════════════════════════════════════════════════════
+     3. ENHANCED DOCUMENTS TAB — IDP Already Done + Re-run IDP option
+  ══════════════════════════════════════════════════════════════════════ */
+  window._rv39TabDocuments = function(c) {
+    var docs = c.docs || [];
+    var isFirstClaim = (c.id === 'LTC-2026-0101');
+
+    var verified = docs.filter(function(d) { return d.status.indexOf('✅') === 0; }).length;
+    var pending  = docs.filter(function(d) { return d.status.indexOf('⚠️') === 0; }).length;
+    var alert    = docs.filter(function(d) { return d.status.indexOf('🔴') === 0; }).length;
+    var idpDone  = docs.filter(function(d) { return d.idpDone; }).length;
+    var pct = docs.length ? Math.round(verified / docs.length * 100) : 0;
+
+    function _docRow(d) {
+      var isOK    = d.status.indexOf('✅') === 0;
+      var isWarn  = d.status.indexOf('⚠️') === 0;
+      var isAlrt  = d.status.indexOf('🔴') === 0;
+      var sc = isOK ? '#059669' : isWarn ? '#d97706' : isAlrt ? '#dc2626' : '#7c3aed';
+      var escaped = d.name.replace(/'/g,'').replace(/"/g,'');
+      var escapedFrom = (d.from||'').replace(/'/g,'').replace(/"/g,'');
+      var idpBadge = d.idpDone
+        ? '<span style="background:#7c3aed18;color:#7c3aed;border:1px solid #7c3aed44;border-radius:20px;padding:2px 8px;font-size:9px;font-weight:700;">✓ IDP Done</span>'
+        : '<span style="background:#6b728018;color:#6b7280;border:1px solid #6b728044;border-radius:20px;padding:2px 8px;font-size:9px;font-weight:700;">IDP Pending</span>';
+
+      return '<div onclick="_ltcRv37OpenIDP(\'' + escaped + '\',\'' + escapedFrom + '\',\'' +
+          (d.date||'').replace(/'/g,'') + '\',\'' + (d.status||'').replace(/[✅⚠️🔴🔄]/g,'').trim().replace(/'/g,'') + '\',\'' + c.id + '\')" '
+        + 'style="display:grid;grid-template-columns:1fr auto auto auto;gap:10px;padding:10px 14px;border-bottom:1px solid #f3f4f6;cursor:pointer;align-items:center;transition:background .15s;" '
+        + 'onmouseover="this.style.background=\'#f5f3ff\'" onmouseout="this.style.background=\'\'">'
+        + '<div>'
+          + '<div style="display:flex;align-items:center;gap:7px;">'
+            + '<i class="fas fa-file-' + (d.type === 'EVV' ? 'alt' : 'pdf') + '" style="color:' + (d.type === 'EVV' ? '#0891b2' : '#dc2626') + ';font-size:13px;"></i>'
+            + '<span style="font-size:12px;font-weight:700;color:#111827;">' + d.name + '</span>'
+            + '<span style="font-size:10px;background:#f3f4f6;color:#6b7280;border-radius:4px;padding:1px 6px;">' + (d.type||'PDF') + '</span>'
+          + '</div>'
+          + '<div style="font-size:10px;color:#9ca3af;margin-top:2px;padding-left:20px;">' + (d.from||'—') + ' · ' + (d.date||'—') + '</div>'
+        + '</div>'
+        + '<span style="background:' + sc + '18;color:' + sc + ';border:1px solid ' + sc + '44;border-radius:20px;padding:2px 9px;font-size:10px;font-weight:700;white-space:nowrap;">' + d.status + '</span>'
+        + idpBadge
+        + '<div style="color:#7c3aed;font-size:11px;font-weight:700;white-space:nowrap;"><i class="fas fa-magic" style="margin-right:3px;"></i>View IDP</div>'
+      + '</div>';
+    }
+
+    // Split by party
+    var firstPartyDocs  = docs.filter(function(d) {
+      return d.from && (d.from.indexOf('POA') !== -1 || d.from.indexOf('self') !== -1 ||
+             d.from.indexOf('Prudential') !== -1 || d.from.indexOf('MassMutual') !== -1 ||
+             d.from.indexOf('NY Life') !== -1 || d.from.indexOf('Genworth') !== -1 ||
+             d.from.indexOf('TIAA') !== -1 || d.from.indexOf('Lincoln') !== -1 ||
+             d.from.indexOf('Pacific Life') !== -1 || d.from.indexOf('Transamerica') !== -1 ||
+             d.from.indexOf('CMS') !== -1 || d.from.indexOf('Medicare') !== -1 ||
+             d.from.indexOf('Blackwood') !== -1 || d.from.indexOf('Kowalski') !== -1 ||
+             d.from.indexOf('O\'Brien') !== -1 || d.from.indexOf('Marchetti') !== -1 ||
+             d.from.indexOf('Nakamura') !== -1 || d.name.indexOf('Insurance Policy') !== -1 ||
+             d.name.indexOf('HIPAA') !== -1);
+    });
+    var secondPartyDocs = docs.filter(function(d) {
+      return firstPartyDocs.indexOf(d) === -1 &&
+             (d.from && (d.from.indexOf('Dr.') !== -1 || d.from.indexOf('RN') !== -1 ||
+              d.from.indexOf('MSW') !== -1 || d.from.indexOf('NP') !== -1 ||
+              d.from.indexOf('Analyst') !== -1 || d.from.indexOf('Specialist') !== -1 ||
+              d.from.indexOf('Specialist') !== -1 || d.name.indexOf('Escalation') !== -1 ||
+              d.name.indexOf('Dispute') !== -1));
+    });
+    var thirdPartyDocs  = docs.filter(function(d) {
+      return firstPartyDocs.indexOf(d) === -1 && secondPartyDocs.indexOf(d) === -1;
+    });
+
+    var idpStatusBanner = isFirstClaim
+      ? '<div style="background:linear-gradient(135deg,#7c3aed18,#6d28d910);border:1.5px solid #7c3aed44;border-radius:10px;padding:14px;margin-bottom:12px;">'
+          + '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">'
+            + '<div>'
+              + '<div style="font-size:12px;font-weight:800;color:#7c3aed;margin-bottom:3px;"><i class="fas fa-magic" style="margin-right:6px;"></i>IDP Processing Complete — All Documents Extracted</div>'
+              + '<div style="font-size:11px;color:#6d28d9;">' + idpDone + ' of ' + docs.length + ' documents fully processed · Average confidence: 96.8% · All fields stored to claim file</div>'
+            + '</div>'
+            + '<button onclick="window._rv39RunIDPAnimation(\'' + c.id + '\')" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;"><i class="fas fa-redo" style="margin-right:5px;"></i>Re-run IDP Scan</button>'
+          + '</div>'
+        + '</div>'
+      : '<div style="font-size:11px;color:#7c3aed;margin-bottom:10px;"><i class="fas fa-magic" style="margin-right:5px;"></i>Click any document row to open AI-powered IDP extraction · ' + idpDone + '/' + docs.length + ' documents processed</div>';
+
+    function _sectionHdr(label, icon, color) {
+      return '<div style="font-size:11px;font-weight:700;color:' + color + ';text-transform:uppercase;padding:8px 14px;background:' + color + '0d;border-bottom:1px solid ' + color + '22;display:flex;align-items:center;gap:6px;">'
+        + '<i class="fas fa-' + icon + '"></i>' + label + '</div>';
+    }
+
+    return '<div style="padding:16px 20px;">'
+      // KPI strip
+      + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;">'
+        + '<div style="background:#f0fdf4;border-radius:8px;padding:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:#059669;">' + verified + '</div><div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase;">Received</div></div>'
+        + '<div style="background:#fffbeb;border-radius:8px;padding:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:#d97706;">' + pending + '</div><div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase;">Pending</div></div>'
+        + '<div style="background:#fef2f2;border-radius:8px;padding:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:#dc2626;">' + alert + '</div><div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase;">Action Req.</div></div>'
+        + '<div style="background:#f5f3ff;border-radius:8px;padding:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:#7c3aed;">' + idpDone + '</div><div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase;">IDP Done</div></div>'
+      + '</div>'
+      // Progress bar
+      + '<div style="height:7px;background:#e5e7eb;border-radius:4px;margin-bottom:14px;overflow:hidden;">'
+        + '<div style="height:100%;width:' + pct + '%;background:' + (pct >= 90 ? '#059669' : pct >= 60 ? '#7c3aed' : '#d97706') + ';border-radius:4px;"></div>'
+      + '</div>'
+      + idpStatusBanner
+      // Doc list
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;margin-bottom:12px;">'
+        + (firstPartyDocs.length ? _sectionHdr('1st Party — Claimant / Carrier / Medicare', 'user', '#003087') + firstPartyDocs.map(_docRow).join('') : '')
+        + (secondPartyDocs.length ? _sectionHdr('2nd Party — Physicians / Assessors', 'stethoscope', '#0891b2') + secondPartyDocs.map(_docRow).join('') : '')
+        + (thirdPartyDocs.length  ? _sectionHdr('3rd Party — Provider / EVV / Carrier', 'hospital', '#7c3aed') + thirdPartyDocs.map(_docRow).join('') : '')
+      + '</div>'
+      // Actions
+      + '<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        + '<button onclick="window._rv39RunIDPAnimation(\'' + c.id + '\')" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-' + (isFirstClaim ? 'redo' : 'search') + '" style="margin-right:5px;"></i>' + (isFirstClaim ? 'Re-run IDP Scan' : 'Run IDP Scan') + '</button>'
+        + '<button onclick="_rvToast37(\'<i class=\\\'fas fa-upload\\\'></i> Secure document upload opened — HIPAA-encrypted storage\')" style="background:#f0fdf4;color:#059669;border:1px solid #bbf7d0;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-upload" style="margin-right:5px;"></i>Upload Document</button>'
+        + (pending > 0 ? '<button onclick="_rvToast37(\'<i class=\\\'fas fa-paper-plane\\\'></i> Document requests sent to all pending parties · ' + pending + ' requests queued\')" style="background:#fffbeb;color:#d97706;border:1px solid #fde68a;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-paper-plane" style="margin-right:5px;"></i>Request All Missing</button>' : '')
+      + '</div>'
+    + '</div>';
+  };
+
+  /* ══════════════════════════════════════════════════════════════════════
+     4. IDP RE-RUN ANIMATION MODAL
+  ══════════════════════════════════════════════════════════════════════ */
+  window._rv39RunIDPAnimation = function(claimId) {
+    var existing = document.getElementById('ltc-rv39-idp-scan');
+    if (existing) existing.remove();
+
+    var c = (window.ltcClaimsData||[]).find(function(x){ return x.id === claimId; }) || {};
+    var docs = c.docs || [];
+    var docNames = docs.map(function(d){ return d.name; });
+
+    var overlay = '<div id="ltc-rv39-idp-scan" style="position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:12000;display:flex;align-items:center;justify-content:center;" onclick="if(event.target===this)this.remove()">'
+      + '<div style="background:#0f0f1a;border-radius:16px;width:680px;max-width:95vw;padding:28px 32px;box-shadow:0 32px 80px rgba(0,0,0,.6);color:#fff;font-family:monospace;" onclick="event.stopPropagation()">'
+        + '<div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">'
+          + '<div style="width:44px;height:44px;background:linear-gradient(135deg,#7c3aed,#6d28d9);border-radius:10px;display:flex;align-items:center;justify-content:center;">'
+            + '<i class="fas fa-robot" style="font-size:20px;color:#fff;"></i></div>'
+          + '<div>'
+            + '<div style="font-size:16px;font-weight:800;color:#e9d5ff;">LTCAS IDP Engine — Re-Running Scan</div>'
+            + '<div style="font-size:11px;color:#a78bfa;">' + claimId + ' · ' + docs.length + ' documents · NLP + OCR extraction</div>'
+          + '</div>'
+          + '<button onclick="document.getElementById(\'ltc-rv39-idp-scan\').remove()" style="margin-left:auto;background:rgba(255,255,255,.1);border:none;color:#fff;border-radius:8px;padding:6px 12px;cursor:pointer;">✕</button>'
+        + '</div>'
+        + '<div id="rv39-idp-log" style="background:#070714;border-radius:8px;padding:16px;height:300px;overflow-y:auto;font-size:12px;line-height:2;border:1px solid #7c3aed44;"></div>'
+        + '<div style="margin-top:16px;">'
+          + '<div style="display:flex;justify-content:space-between;font-size:11px;color:#a78bfa;margin-bottom:6px;"><span>Overall Progress</span><span id="rv39-pct">0%</span></div>'
+          + '<div style="background:#1e1b4b;border-radius:4px;height:8px;overflow:hidden;">'
+            + '<div id="rv39-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#7c3aed,#a78bfa);border-radius:4px;transition:width .3s;"></div>'
+          + '</div>'
+        + '</div>'
+        + '<div id="rv39-complete" style="display:none;margin-top:16px;background:#059669;border-radius:8px;padding:12px 16px;text-align:center;font-weight:700;font-size:13px;">'
+          + '<i class="fas fa-check-circle" style="margin-right:8px;"></i>IDP Re-scan Complete — All fields verified · 96.8% average confidence · Stored to claim file'
+        + '</div>'
+      + '</div>'
+    + '</div>';
+
+    document.body.insertAdjacentHTML('beforeend', overlay);
+
+    // Animated log lines
+    var logEl  = document.getElementById('rv39-idp-log');
+    var barEl  = document.getElementById('rv39-bar');
+    var pctEl  = document.getElementById('rv39-pct');
+    var doneEl = document.getElementById('rv39-complete');
+
+    var allLines = [
+      { t:0,    color:'#a78bfa', text:'[IDP-ENGINE] Initializing NLP + OCR pipeline for ' + claimId + '…' },
+      { t:400,  color:'#fbbf24', text:'[OCR]        Loading ' + docs.length + ' documents from LTCAS secure vault…' },
+    ];
+    docNames.forEach(function(name, i) {
+      var base = 800 + i * 600;
+      var conf = (94 + Math.floor(Math.random()*6));
+      allLines.push({ t:base,       color:'#60a5fa', text:'[SCAN ' + (i+1) + '/' + docs.length + ']  Processing: ' + name });
+      allLines.push({ t:base+180,   color:'#34d399', text:'[OCR]        Text extracted — ' + (120 + Math.floor(Math.random()*200)) + ' tokens identified' });
+      allLines.push({ t:base+360,   color:'#a78bfa', text:'[NLP]        Field classification complete — confidence: ' + conf + '%' });
+    });
+    var totalDocs = docs.length;
+    allLines.push({ t:800 + totalDocs*600 + 100, color:'#fbbf24', text:'[VALIDATE]   Cross-referencing extracted fields against LTCAS claim record…' });
+    allLines.push({ t:800 + totalDocs*600 + 400, color:'#34d399', text:'[STORE]      ' + totalDocs + ' documents → claim file updated · Audit log entry created' });
+    allLines.push({ t:800 + totalDocs*600 + 700, color:'#34d399', text:'[COMPLETE]   IDP re-scan finished · Avg confidence: 96.8% · Zero anomalies detected' });
+
+    var totalDuration = 800 + totalDocs*600 + 700;
+
+    allLines.forEach(function(line) {
+      setTimeout(function() {
+        var div = document.createElement('div');
+        div.innerHTML = '<span style="color:' + line.color + ';">' + line.text + '</span>';
+        logEl.appendChild(div);
+        logEl.scrollTop = logEl.scrollHeight;
+        var pct = Math.round(line.t / totalDuration * 100);
+        barEl.style.width = pct + '%';
+        pctEl.textContent = pct + '%';
+      }, line.t);
+    });
+
+    setTimeout(function() {
+      barEl.style.width = '100%';
+      pctEl.textContent = '100%';
+      doneEl.style.display = 'block';
+    }, totalDuration + 200);
+  };
+
+  /* ══════════════════════════════════════════════════════════════════════
+     5. AI PAYMENT PROCESSING MODAL
+  ══════════════════════════════════════════════════════════════════════ */
+  window._rv39ProcessPayment = function(claimId) {
+    var c = (window.ltcClaimsData||[]).find(function(x){ return x.id === claimId; }) || {};
+    var existing = document.getElementById('ltc-rv39-payment');
+    if (existing) existing.remove();
+
+    var dailyAmt = parseFloat((c.dailyBenefit||'$0').replace(/[$,]/g,'')) || 180;
+    var days     = 15;
+    var total    = (dailyAmt * days).toLocaleString('en-US', { minimumFractionDigits:2 });
+    var provider = c.provider || 'Provider';
+    var payDate  = c.paymentDue || 'Jul 15, 2026';
+
+    var overlay = '<div id="ltc-rv39-payment" style="position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:12000;display:flex;align-items:center;justify-content:center;padding:16px;" onclick="if(event.target===this)this.remove()">'
+      + '<div style="background:#fff;border-radius:16px;width:700px;max-width:95vw;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 32px 80px rgba(0,0,0,.4);overflow:hidden;" onclick="event.stopPropagation()">'
+
+        // Header
+        + '<div style="background:linear-gradient(135deg,#059669,#047857);padding:18px 22px;flex-shrink:0;">'
+          + '<div style="display:flex;align-items:center;gap:12px;">'
+            + '<div style="width:44px;height:44px;background:rgba(255,255,255,.2);border-radius:11px;display:flex;align-items:center;justify-content:center;">'
+              + '<i class="fas fa-dollar-sign" style="color:#fff;font-size:22px;"></i></div>'
+            + '<div style="flex:1;">'
+              + '<div style="font-size:17px;font-weight:800;color:#fff;">AI-Powered Payment Processing</div>'
+              + '<div style="font-size:11px;color:rgba(255,255,255,.85);">' + claimId + ' · ' + (c.claimant||'Claimant') + ' · ' + provider + '</div>'
+            + '</div>'
+            + '<button onclick="document.getElementById(\'ltc-rv39-payment\').remove()" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:8px;padding:7px 13px;cursor:pointer;font-size:13px;font-weight:700;">✕</button>'
+          + '</div>'
+        + '</div>'
+
+        // Payment summary card
+        + '<div style="padding:18px 22px;background:#f0fdf4;border-bottom:1px solid #bbf7d0;flex-shrink:0;">'
+          + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">'
+            + '<div style="text-align:center;"><div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase;margin-bottom:4px;">Daily Benefit</div><div style="font-size:18px;font-weight:800;color:#059669;">' + c.dailyBenefit + '</div></div>'
+            + '<div style="text-align:center;"><div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase;margin-bottom:4px;">Days This Cycle</div><div style="font-size:18px;font-weight:800;color:#059669;">' + days + '</div></div>'
+            + '<div style="text-align:center;"><div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase;margin-bottom:4px;">Total Payment</div><div style="font-size:18px;font-weight:800;color:#059669;">$' + total + '</div></div>'
+            + '<div style="text-align:center;"><div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase;margin-bottom:4px;">Pay Date</div><div style="font-size:18px;font-weight:800;color:#059669;">' + payDate + '</div></div>'
+          + '</div>'
+        + '</div>'
+
+        // Agent pipeline
+        + '<div style="flex:1;overflow-y:auto;padding:18px 22px;">'
+          + '<div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:12px;"><i class="fas fa-robot" style="color:#059669;margin-right:6px;"></i>AI Agent Processing Pipeline — 5 Agents Active</div>'
+          + '<div id="rv39-pay-agents" style="display:flex;flex-direction:column;gap:8px;"></div>'
+          + '<div id="rv39-pay-log" style="background:#0f0f1a;border-radius:8px;padding:14px;height:160px;overflow-y:auto;font-size:11px;line-height:1.9;font-family:monospace;margin-top:14px;border:1px solid #059669aa;"></div>'
+        + '</div>'
+
+        // Footer
+        + '<div style="padding:14px 22px;background:#f8fafc;border-top:1px solid #e5e7eb;display:flex;gap:8px;align-items:center;flex-shrink:0;">'
+          + '<div id="rv39-pay-status" style="flex:1;font-size:12px;font-weight:700;color:#6b7280;"><i class="fas fa-spinner fa-spin" style="margin-right:6px;"></i>Initializing AI payment agents…</div>'
+          + '<button onclick="document.getElementById(\'ltc-rv39-payment\').remove()" id="rv39-pay-close" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:12px;font-weight:700;cursor:pointer;display:none;"><i class="fas fa-check" style="margin-right:5px;"></i>Payment Confirmed — Close</button>'
+        + '</div>'
+      + '</div>'
+    + '</div>';
+
+    document.body.insertAdjacentHTML('beforeend', overlay);
+
+    // Agent definitions
+    var agents = [
+      { name:'Agent 1 — Document Verification',    icon:'fa-file-check',   color:'#0891b2', task:'Verifying all required documents on file' },
+      { name:'Agent 2 — EVV Validation',           icon:'fa-map-marker-alt',color:'#7c3aed', task:'Confirming GPS-verified visits via CellTrak' },
+      { name:'Agent 3 — SMARTS Compliance Check',  icon:'fa-shield-alt',   color:'#d97706', task:'Running payment eligibility rules SR-001, SR-003, SR-008' },
+      { name:'Agent 4 — COB & Medicare Audit',     icon:'fa-search-dollar', color:'#dc2626', task:'Confirming Medicare coordination — no overlap' },
+      { name:'Agent 5 — ACH Payment Execution',    icon:'fa-university',   color:'#059669', task:'Initiating ACH transfer to ' + provider }
+    ];
+
+    var agentsEl = document.getElementById('rv39-pay-agents');
+    var logEl    = document.getElementById('rv39-pay-log');
+    var statusEl = document.getElementById('rv39-pay-status');
+    var closeBtn = document.getElementById('rv39-pay-close');
+
+    // Render agent cards (all pending)
+    agents.forEach(function(ag, i) {
+      var card = document.createElement('div');
+      card.id = 'rv39-ag-' + i;
+      card.style.cssText = 'background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:12px;';
+      card.innerHTML = '<div style="width:36px;height:36px;background:' + ag.color + '18;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
+        + '<i class="fas ' + ag.icon + '" style="color:' + ag.color + ';font-size:15px;"></i></div>'
+        + '<div style="flex:1;">'
+          + '<div style="font-size:12px;font-weight:700;color:#374151;">' + ag.name + '</div>'
+          + '<div style="font-size:11px;color:#9ca3af;" id="rv39-ag-sub-' + i + '">' + ag.task + '</div>'
+        + '</div>'
+        + '<div id="rv39-ag-badge-' + i + '" style="font-size:10px;font-weight:700;background:#f3f4f6;color:#6b7280;border-radius:20px;padding:3px 10px;">Waiting</div>';
+      agentsEl.appendChild(card);
+    });
+
+    function _log(color, text) {
+      var d = document.createElement('div');
+      d.innerHTML = '<span style="color:' + color + ';">' + text + '</span>';
+      logEl.appendChild(d);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function _setAgent(i, status, subtext) {
+      var badge = document.getElementById('rv39-ag-badge-' + i);
+      var sub   = document.getElementById('rv39-ag-sub-' + i);
+      var card  = document.getElementById('rv39-ag-' + i);
+      var colors = { Running:'#d97706', Done:'#059669', Error:'#dc2626', Waiting:'#6b7280' };
+      var bgs    = { Running:'#fef3c7', Done:'#d1fae5', Error:'#fee2e2', Waiting:'#f3f4f6' };
+      if (badge) { badge.textContent = status; badge.style.color = colors[status]; badge.style.background = bgs[status]; }
+      if (sub && subtext) sub.textContent = subtext;
+      if (card && status === 'Running') card.style.background = '#fffbeb';
+      if (card && status === 'Done')    card.style.background = '#f0fdf4';
+    }
+
+    // Agent simulation timeline
+    var steps = [
+      { t:200,  fn: function(){ _setAgent(0,'Running','Scanning HIPAA, APS, ADL Assessment, Care Plan…'); _log('#60a5fa','[AGENT-1]  Document verification started — 9 documents in scope'); } },
+      { t:900,  fn: function(){ _setAgent(0,'Done','✅ All 9 documents received — HIPAA, APS, ADL, Care Plan on file'); _log('#34d399','[AGENT-1]  PASS — All documents verified. No missing items.'); } },
+      { t:1100, fn: function(){ _setAgent(1,'Running','Pulling EVV records from CellTrak…'); _log('#a78bfa','[AGENT-2]  EVV validation initiated — checking GPS visit logs'); } },
+      { t:1900, fn: function(){ _setAgent(1,'Done','✅ 15 EVV-verified visits · 100% GPS match · ' + days + ' days confirmed'); _log('#34d399','[AGENT-2]  PASS — ' + days + ' care days confirmed, GPS-verified. No discrepancies.'); } },
+      { t:2100, fn: function(){ _setAgent(2,'Running','Running SR-001 ADL trigger, SR-003 elimination, SR-008 provider…'); _log('#fbbf24','[AGENT-3]  SMARTS payment rules executing…'); } },
+      { t:2900, fn: function(){ _setAgent(2,'Done','✅ SR-001 FIRED · SR-003 MONITORING (Day 14/90) · SR-008 IN-NETWORK'); _log('#34d399','[AGENT-3]  PASS — All payment eligibility rules satisfied.'); } },
+      { t:3100, fn: function(){ _setAgent(3,'Running','Checking Medicare Part A/B coordination for claim period…'); _log('#f87171','[AGENT-4]  COB audit — Medicare Days 1–20 (100%), Days 21–100 (coinsurance)'); } },
+      { t:3900, fn: function(){ _setAgent(3,'Done','✅ Medicare coordination confirmed · No duplicate billing · LTC gap: $' + total); _log('#34d399','[AGENT-4]  PASS — COB validated. LTC net payment: $' + total + '. Zero overlap.'); } },
+      { t:4100, fn: function(){
+        _setAgent(4,'Running','Preparing ACH transfer to ' + provider + '…');
+        _log('#a78bfa','[AGENT-5]  ACH payment engine — routing number verified, amount confirmed');
+        statusEl.innerHTML = '<i class="fas fa-spinner fa-spin" style="color:#059669;margin-right:6px;"></i><span style="color:#059669;font-weight:700;">Processing ACH transfer — DO NOT CLOSE</span>';
+      } },
+      { t:5200, fn: function(){
+        _setAgent(4,'Done','✅ ACH $' + total + ' queued → ' + provider + ' · Confirmation: ACH-' + claimId + '-' + Date.now().toString().slice(-6));
+        _log('#34d399','[AGENT-5]  SUCCESS — ACH transfer confirmed. Ref: ACH-' + claimId + '-' + Date.now().toString().slice(-6));
+        _log('#34d399','[SYSTEM]   Audit log updated · Prudential notified · Care manager Angela Moore notified');
+        _log('#fbbf24','[COMPLETE] Payment cycle closed — $' + total + ' paid · Next cycle due: Aug 15, 2026');
+        statusEl.innerHTML = '<i class="fas fa-check-circle" style="color:#059669;margin-right:6px;"></i><span style="color:#059669;font-weight:800;">Payment Complete — $' + total + ' ACH confirmed · ' + provider + ' notified</span>';
+        closeBtn.style.display = 'block';
+      } }
+    ];
+
+    steps.forEach(function(s) { setTimeout(s.fn, s.t); });
+  };
+
+  /* ══════════════════════════════════════════════════════════════════════
+     6. PATCH ltcReviewClaim to use enriched Documents tab + Payment
+  ══════════════════════════════════════════════════════════════════════ */
+  var _p37_origReviewClaim = window.ltcReviewClaim;
+  window.ltcReviewClaim = function(claimId) {
+    // Ensure enrichment is applied before opening
+    _mergeEnrichment();
+
+    // Call original P37 modal builder
+    if (typeof _p37_origReviewClaim === 'function') {
+      _p37_origReviewClaim(claimId);
+    }
+
+    // After modal is in DOM, swap Documents panel and wire payment button
+    setTimeout(function() {
+      var overlay = document.getElementById('ltc-rv37-overlay');
+      if (!overlay) return;
+      var c = (window.ltcClaimsData||[]).find(function(x){ return x.id === claimId; });
+      if (!c) return;
+
+      // Replace Documents panel (index 3) with enriched version
+      var panels = overlay.querySelectorAll('[data-rv37-panel]');
+      if (panels[3]) {
+        panels[3].innerHTML = window._rv39TabDocuments(c);
+      }
+
+      // Wire Process Payment button → AI payment modal
+      overlay.querySelectorAll('button').forEach(function(btn) {
+        var txt = btn.textContent.trim();
+        if (txt === 'Process Payment' || txt.indexOf('Process Payment') !== -1) {
+          var origOnclick = btn.getAttribute('onclick') || '';
+          // Only override if it calls _ltcRv37Action with 'payment'
+          if (origOnclick.indexOf('payment') !== -1 || txt === 'Process Payment') {
+            btn.setAttribute('onclick', "event.stopPropagation();window._rv39ProcessPayment('" + claimId + "')");
+            btn.style.background = '#059669';
+            btn.style.boxShadow  = '0 2px 8px rgba(5,150,105,.4)';
+          }
+        }
+      });
+    }, 100);
+  };
+
+  console.log('[P39] Rich data enrichment complete. ' + Object.keys(_enrichMap).length + ' claims enriched. IDP simulation + AI Payment processing active.');
+})();
