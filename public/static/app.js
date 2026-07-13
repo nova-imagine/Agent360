@@ -93957,3 +93957,441 @@ var navigateTo=window.navigateTo;
 
   console.log('[P39] Rich data enrichment complete. ' + Object.keys(_enrichMap).length + ' claims enriched. IDP simulation + AI Payment processing active.');
 })();
+/* ═══════════════════════════════════════════════════════════════════════════
+   P40 — BRANDING & UI UPDATES
+   1. Sidebar logo: "WIPRO / WEALTHAI / Agent 360" → "Insurance AI — helping Carriers and TPAs"
+   2. TPA nav divider: "TPA / ILLUMIFIN" → "TPA" (remove ILLUMIFIN text)
+   3. Nav section label: "ILLUMIFIN PLATFORM" → "LTC TPA PLATFORM"
+   4. P26 persona chip: 'TPA / Illumifin' → 'TPA Platform'
+   5. Claimant 360 modal: "Open Full Claim" button → "View Claimant"
+   6. Life Operations: Add "AI Triage" button to Policy Lifecycle tab action bar
+   ═══════════════════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  /* ── helpers ─────────────────────────────────────────────────────────────── */
+  function _p40toast(msg, dur) {
+    var t = document.createElement('div');
+    t.style.cssText = 'position:fixed;bottom:28px;right:28px;background:#1f2937;color:#fff;padding:14px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:99999;box-shadow:0 4px 24px rgba(0,0,0,.35);max-width:480px;line-height:1.5;';
+    t.innerHTML = msg;
+    document.body.appendChild(t);
+    setTimeout(function () { if (t.parentNode) t.parentNode.removeChild(t); }, dur || 3500);
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════
+     CHANGE 1 — Sidebar brand text DOM sweep
+     Targets: .brand-nova (WIPRO) · .brand-analytics (WEALTHAI) · .brand-tagline (Agent 360)
+     Replace with a two-line Insurance AI brand block.
+  ══════════════════════════════════════════════════════════════════════ */
+  function _p40fixSidebarBrand() {
+    var brandText = document.querySelector('.sidebar-brand .brand-text');
+    if (!brandText) return false;
+
+    /* Replace inner text spans */
+    brandText.innerHTML =
+      '<span class="brand-nova" style="font-size:13px;font-weight:900;letter-spacing:.04em;line-height:1.1;">Insurance AI</span>' +
+      '<span class="brand-analytics" style="font-size:9.5px;font-weight:600;opacity:.82;letter-spacing:.05em;line-height:1.2;">helping Carriers and TPAs</span>';
+
+    /* Also update the shield icon color to a neutral blue to fit new brand */
+    var logoIcon = document.querySelector('.sidebar-brand .brand-logo i');
+    if (logoIcon) {
+      logoIcon.style.color = '#0891b2';
+    }
+
+    return true;
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════
+     CHANGE 2 — TPA nav divider label: remove "ILLUMIFIN"
+     Targets: #tpa-divider .nav-persona-divider-label
+     "TPA / ILLUMIFIN" → "TPA"
+  ══════════════════════════════════════════════════════════════════════ */
+  function _p40fixTpaDivider() {
+    /* Target the divider label directly */
+    var divider = document.getElementById('tpa-divider');
+    if (divider) {
+      var label = divider.querySelector('.nav-persona-divider-label');
+      if (label) {
+        label.innerHTML = '<i class="fas fa-hospital-user"></i> TPA';
+      }
+      var sub = divider.querySelector('.nav-persona-divider-sub');
+      if (sub) {
+        sub.textContent = 'LTC · Health · Annuity · Life';
+      }
+      return true;
+    }
+
+    /* Fallback: scan all persona divider labels */
+    var labels = document.querySelectorAll('.nav-persona-divider-label');
+    var found = false;
+    labels.forEach(function (el) {
+      if (el.textContent.indexOf('ILLUMIFIN') > -1 || el.textContent.indexOf('TPA / ILLUMIFIN') > -1) {
+        el.innerHTML = '<i class="fas fa-hospital-user"></i> TPA';
+        found = true;
+      }
+    });
+    return found;
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════
+     CHANGE 2b — Nav section label: "ILLUMIFIN PLATFORM" → "LTC TPA PLATFORM"
+     Targets: .nav-section-label elements whose text is "ILLUMIFIN PLATFORM"
+  ══════════════════════════════════════════════════════════════════════ */
+  function _p40fixPlatformLabel() {
+    var labels = document.querySelectorAll('.nav-section-label');
+    var found = false;
+    labels.forEach(function (el) {
+      if (el.textContent.trim() === 'ILLUMIFIN PLATFORM') {
+        el.textContent = 'LTC TPA PLATFORM';
+        found = true;
+      }
+    });
+    return found;
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════
+     CHANGE 2c — P26 persona chip: 'TPA / Illumifin' → 'TPA Platform'
+     The _p26updateChip function builds: label = 'TPA / Illumifin'
+     We patch that string after the chip renders.
+  ══════════════════════════════════════════════════════════════════════ */
+  function _p40fixPersonaChip() {
+    var chip = document.getElementById('persona-topbar-chip');
+    if (chip && chip.className.indexOf('tpa') > -1) {
+      /* Re-render chip content without ILLUMIFIN */
+      chip.innerHTML = '<i class="fas fa-hospital-user" style="font-size:9px"></i>TPA Platform';
+    }
+  }
+
+  /* Monkey-patch _p26updateChip so future calls also use new label */
+  (function () {
+    var _origSetPersonaMode = window.setPersonaMode;
+    if (typeof _origSetPersonaMode !== 'function') return;
+
+    window.setPersonaMode = function (mode) {
+      _origSetPersonaMode(mode);
+      /* After original runs, fix any rendered chip text */
+      setTimeout(function () {
+        var chip = document.getElementById('persona-topbar-chip');
+        if (chip && chip.className.indexOf('tpa') > -1) {
+          chip.innerHTML = '<i class="fas fa-hospital-user" style="font-size:9px"></i>TPA Platform';
+        }
+      }, 20);
+    };
+  }());
+
+  /* ══════════════════════════════════════════════════════════════════════
+     CHANGE 3 — Claimant 360 "Open Full Claim" → "View Claimant"
+     The button lives in ltcOpenClaimDetail sidebar (line ~65021 app.js).
+     We patch ltcOpenClaimDetail to rewrite button text after render,
+     AND we use a MutationObserver to catch future instances.
+  ══════════════════════════════════════════════════════════════════════ */
+  function _p40renameOpenFullClaim() {
+    /* Scan all visible buttons */
+    var btns = document.querySelectorAll('button');
+    var count = 0;
+    btns.forEach(function (btn) {
+      var txt = btn.textContent.trim();
+      if (txt.indexOf('Open Full Claim') > -1) {
+        btn.innerHTML = btn.innerHTML.replace(/Open Full Claim/g, 'View Claimant');
+        /* swap icon to fa-user */
+        var ico = btn.querySelector('i');
+        if (ico) {
+          ico.className = ico.className.replace('fa-file-medical-alt', 'fa-user');
+        }
+        count++;
+      }
+    });
+    return count;
+  }
+
+  /* Wrap ltcOpenClaimDetail to inject button rename 150ms after it builds the modal */
+  (function () {
+    var _orig = window.ltcOpenClaimDetail;
+    if (typeof _orig !== 'function') return;
+    window.ltcOpenClaimDetail = function () {
+      _orig.apply(this, arguments);
+      setTimeout(function () {
+        _p40renameOpenFullClaim();
+        /* Also hide the button if it was explicitly hidden by P31 but still has the text */
+      }, 150);
+      setTimeout(function () { _p40renameOpenFullClaim(); }, 600);
+    };
+  }());
+
+  /* ══════════════════════════════════════════════════════════════════════
+     CHANGE 4 — Life Operations: Add "AI Triage" button to Policy Lifecycle
+     Strategy: Patch window.initLifeOpsPage + window._p16buildLifePage + 
+     _p18buildLifePage to inject an AI Triage button next to the existing
+     New Application / Term Conversion / Reinstate Lapsed buttons.
+     Then trigger a DOM sweep to inject into already-rendered page.
+  ══════════════════════════════════════════════════════════════════════ */
+
+  /* AI Triage modal for Life Operations — shows life policy triage analysis */
+  window._p40LifeAiTriage = function () {
+    var COLOR = '#059669';
+    var PURPLE = '#7c3aed';
+
+    /* Life-specific triage data */
+    var triageItems = [
+      {
+        id: 'LIF-5507',
+        insured: 'Charles Bennett',
+        priority: 'CRITICAL',
+        pc: '#dc2626',
+        product: 'Term Life — 20yr',
+        carrier: 'New York Life',
+        age: 58,
+        flag: 'Policy lapsed Jun 2026 — reinstatement window open (5 years). Evidence of insurability required. Premium arrears: $0.',
+        aiRec: 'AI recommends immediate outreach. Reinstatement probability: 82% based on client health profile and payment history. Generate EOI form.',
+        score: 91,
+        actions: ['Reinstate', 'Contact Client', 'Generate EOI']
+      },
+      {
+        id: 'LIF-5503',
+        insured: 'George Martinez',
+        priority: 'HIGH',
+        pc: '#d97706',
+        product: 'IUL — Indexed Universal Life',
+        carrier: 'New York Life',
+        age: 62,
+        flag: 'Chronic illness ABR rider not utilized — claimant eligible for LTC crossover benefit. $180/day acceleration available.',
+        aiRec: 'AI flagged LTC crossover opportunity. Coordinate with LTC TPA team. Estimated benefit: $65,700 annually. Schedule assessment.',
+        score: 78,
+        actions: ['Schedule Assessment', 'LTC Crossover', 'Notify Carrier']
+      },
+      {
+        id: 'LIF-5501',
+        insured: 'Edward Kowalski',
+        priority: 'HIGH',
+        pc: '#d97706',
+        product: 'Term Life — 30yr',
+        carrier: 'New York Life',
+        age: 54,
+        flag: 'Term expiration: Jul 2029. Conversion window active — no new underwriting required. Permanent coverage gap risk at expiry.',
+        aiRec: 'AI recommends term conversion illustration. WL option: $284/mo. UL: $198/mo. IUL: $221/mo. Client profile favors IUL (equity exposure desire).',
+        score: 72,
+        actions: ['Generate Illustration', 'Schedule Review', 'Send Proposal']
+      },
+      {
+        id: 'LIF-5502',
+        insured: 'Patricia Lang',
+        priority: 'MEDIUM',
+        pc: '#0891b2',
+        product: 'Whole Life — Paid-Up',
+        carrier: 'New York Life',
+        age: 67,
+        flag: 'CSV of $187,000 not optimized — policy loan strategy could fund retirement income supplement. No 1035 exchange filed.',
+        aiRec: 'AI identifies policy loan income strategy: $1,600/mo tax-free withdrawal potential. Coordinate with wealth advisor. Annual review overdue 4 months.',
+        score: 55,
+        actions: ['Policy Loan Review', 'Income Illustration', 'Schedule Meeting']
+      },
+      {
+        id: 'LIF-5505',
+        insured: 'Dorothy Wilson',
+        priority: 'LOW',
+        pc: '#059669',
+        product: 'Whole Life — Participating',
+        carrier: 'New York Life',
+        age: 61,
+        flag: 'Dividend election unchanged 12 years — paid-up additions may not align with current estate plan objectives.',
+        aiRec: 'AI suggests dividend election review. Current: paid-up additions ($8,400/yr). Alternatives: cash dividend ($6,200/yr) or premium offset. Estate impact: +$23K face amount.',
+        score: 34,
+        actions: ['Dividend Review', 'Estate Analysis', 'Annual Review']
+      }
+    ];
+
+    function _actionBtn(label, color) {
+      return '<button onclick="_p40toast(\'<i class=\\\"fas fa-check-circle\\\"></i> ' + label + ' action initiated for this policy · AI workflow triggered · Agent notified\', 3000)" '
+        + 'style="background:' + color + ';color:#fff;border:none;border-radius:6px;padding:5px 11px;font-size:10px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:4px;">'
+        + label + '</button>';
+    }
+
+    var rows = triageItems.map(function (t, i) {
+      var scoreBar = '<div style="height:5px;background:#f3f4f6;border-radius:3px;width:100px;display:inline-block;vertical-align:middle;">'
+        + '<div style="height:5px;background:' + t.pc + ';border-radius:3px;width:' + t.score + '%;"></div></div>';
+
+      var actionBtns = t.actions.map(function (a, idx) {
+        var colors = [COLOR, '#d97706', '#0891b2', PURPLE];
+        return _actionBtn(a, colors[idx % colors.length]);
+      }).join(' ');
+
+      return '<div style="background:#fff;border:1px solid #e5e7eb;border-left:3px solid ' + t.pc + ';border-radius:10px;padding:14px;margin-bottom:10px;">'
+        + '<div style="display:flex;align-items:flex-start;gap:12px;">'
+        + '<div style="width:36px;height:36px;background:' + t.pc + '1a;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;font-weight:800;color:' + t.pc + ';">' + (i + 1) + '</div>'
+        + '<div style="flex:1;">'
+        + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:wrap;">'
+        + '<span style="font-size:14px;font-weight:800;color:#111827;">' + t.insured + '</span>'
+        + '<span style="font-size:10px;font-weight:700;background:' + t.pc + '22;color:' + t.pc + ';border:1px solid ' + t.pc + '44;border-radius:20px;padding:2px 8px;">' + t.priority + '</span>'
+        + '<span style="font-size:10px;color:#9ca3af;margin-left:auto;">Score: ' + t.score + '/100 ' + scoreBar + '</span>'
+        + '</div>'
+        + '<div style="font-size:11px;color:#6b7280;margin-bottom:6px;">' + t.id + ' · ' + t.carrier + ' · ' + t.product + ' · Age ' + t.age + '</div>'
+        + '<div style="background:#fef2f2;border-radius:7px;padding:8px 10px;font-size:11px;color:#7f1d1d;margin-bottom:6px;"><i class="fas fa-flag" style="margin-right:5px;color:#dc2626;"></i>' + t.flag + '</div>'
+        + '<div style="background:#f0fdf4;border-radius:7px;padding:8px 10px;font-size:11px;color:#166534;margin-bottom:8px;"><i class="fas fa-robot" style="margin-right:5px;color:#059669;"></i>' + t.aiRec + '</div>'
+        + '<div style="display:flex;gap:6px;flex-wrap:wrap;">' + actionBtns + '</div>'
+        + '</div></div></div>';
+    }).join('');
+
+    var summaryHtml = '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;">'
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px;text-align:center;">'
+      + '<div style="font-size:22px;font-weight:800;color:#dc2626;">1</div><div style="font-size:11px;color:#6b7280;margin-top:2px;">Critical</div></div>'
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px;text-align:center;">'
+      + '<div style="font-size:22px;font-weight:800;color:#d97706;">2</div><div style="font-size:11px;color:#6b7280;margin-top:2px;">High Priority</div></div>'
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px;text-align:center;">'
+      + '<div style="font-size:22px;font-weight:800;color:' + PURPLE + ';">88%</div><div style="font-size:11px;color:#6b7280;margin-top:2px;">AI Accuracy</div></div>'
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px;text-align:center;">'
+      + '<div style="font-size:22px;font-weight:800;color:' + COLOR + ';">53K</div><div style="font-size:11px;color:#6b7280;margin-top:2px;">Policies Scanned</div></div>'
+      + '</div>';
+
+    /* Use _L4overlay if available, otherwise build our own overlay */
+    var overlayId = 'p40-life-triage-overlay';
+    var existing = document.getElementById(overlayId);
+    if (existing) existing.parentNode.removeChild(existing);
+
+    var overlayHtml = '<div style="background:#fff;border-radius:16px;width:900px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.3);">'
+      + '<div style="background:linear-gradient(135deg,' + COLOR + ',#047857);padding:20px 24px;border-radius:16px 16px 0 0;color:#fff;position:sticky;top:0;z-index:10;">'
+      + '<div style="display:flex;align-items:center;gap:12px;">'
+      + '<i class="fas fa-robot" style="font-size:22px;"></i>'
+      + '<div><div style="font-size:17px;font-weight:800;">Life Operations — AI Triage Engine</div>'
+      + '<div style="font-size:12px;opacity:.85;">53,000 policies analyzed · 5 flagged for action · Last run: Jul 13, 2026 08:30am</div></div>'
+      + '<button onclick="document.getElementById(\'' + overlayId + '\').remove()" '
+      + 'style="margin-left:auto;background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:8px;padding:6px 14px;cursor:pointer;font-size:12px;">✕ Close</button>'
+      + '</div></div>'
+      + '<div style="padding:22px;">'
+      + summaryHtml
+      + '<div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:12px;color:#1e40af;">'
+      + '<i class="fas fa-info-circle" style="margin-right:6px;"></i>'
+      + 'AI scanned all active life policies using 38 signals: lapse risk, conversion eligibility, benefit rider utilization, CSV optimization, and beneficiary alignment. '
+      + 'Priority scores updated every 6 hours. Click any action to trigger the AI-guided workflow.'
+      + '</div>'
+      + rows
+      + '</div></div>';
+
+    var overlay = document.createElement('div');
+    overlay.id = overlayId;
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:88888;display:flex;align-items:center;justify-content:center;padding:20px;';
+    overlay.innerHTML = overlayHtml;
+    overlay.addEventListener('click', function (e) {
+      if (e.target === overlay) overlay.remove();
+    });
+    document.body.appendChild(overlay);
+  };
+
+  /* Inject AI Triage button into the Life Operations Policy Lifecycle action bar */
+  function _p40injectLifeTriageBtn() {
+    /* Find button bars containing "New Application" + "Term Conversion" + "Reinstate Lapsed" */
+    var allBtns = document.querySelectorAll('button');
+    var triageInjected = false;
+
+    allBtns.forEach(function (btn) {
+      if (btn.textContent.trim() === 'Reinstate Lapsed' && !triageInjected) {
+        /* Check we haven't already injected */
+        var bar = btn.parentNode;
+        if (!bar) return;
+
+        /* Look for existing AI Triage button in this bar */
+        var existing = false;
+        var barBtns = bar.querySelectorAll('button');
+        barBtns.forEach(function (b) {
+          if (b.textContent.indexOf('AI Triage') > -1) existing = true;
+        });
+        if (existing) return;
+
+        /* Create AI Triage button */
+        var triageBtn = document.createElement('button');
+        triageBtn.onclick = function () { window._p40LifeAiTriage(); };
+        triageBtn.style.cssText = 'background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px;';
+        triageBtn.innerHTML = '<i class="fas fa-robot" style="font-size:11px;"></i>AI Triage';
+
+        /* Insert after Reinstate Lapsed */
+        if (btn.nextSibling) {
+          bar.insertBefore(triageBtn, btn.nextSibling);
+        } else {
+          bar.appendChild(triageBtn);
+        }
+        triageInjected = true;
+      }
+    });
+
+    return triageInjected;
+  }
+
+  /* Patch initLifeOpsPage to also inject button after page renders */
+  (function () {
+    var _origInit = window.initLifeOpsPage;
+    window.initLifeOpsPage = function () {
+      if (typeof _origInit === 'function') _origInit.apply(this, arguments);
+      setTimeout(function () { _p40injectLifeTriageBtn(); }, 200);
+      setTimeout(function () { _p40injectLifeTriageBtn(); }, 600);
+    };
+  }());
+
+  /* Patch _p16navLifeTab as well */
+  (function () {
+    var _origNav = window._p16navLifeTab;
+    if (typeof _origNav === 'function') {
+      window._p16navLifeTab = function () {
+        _origNav.apply(this, arguments);
+        setTimeout(function () { _p40injectLifeTriageBtn(); }, 200);
+        setTimeout(function () { _p40injectLifeTriageBtn(); }, 600);
+      };
+    }
+  }());
+
+  /* ══════════════════════════════════════════════════════════════════════
+     DOM SWEEP — Run all fixes on an escalating schedule
+  ══════════════════════════════════════════════════════════════════════ */
+  var _p40sweepDone = { brand: false, divider: false, platform: false, openFullClaim: false, lifeBtn: false };
+
+  function _p40sweep() {
+    if (!_p40sweepDone.brand)       _p40sweepDone.brand       = _p40fixSidebarBrand();
+    if (!_p40sweepDone.divider)     _p40sweepDone.divider     = _p40fixTpaDivider();
+    if (!_p40sweepDone.platform)    _p40sweepDone.platform    = _p40fixPlatformLabel();
+    _p40fixPersonaChip();
+    _p40renameOpenFullClaim();
+    _p40injectLifeTriageBtn();
+  }
+
+  [100, 300, 600, 1000, 1500, 2200, 3200, 4500].forEach(function (ms) {
+    setTimeout(_p40sweep, ms);
+  });
+
+  /* MutationObserver for dynamically rendered content (modal opens, page nav) */
+  var _p40obs = new MutationObserver(function (mutations) {
+    var relevant = mutations.some(function (m) {
+      return m.type === 'childList' && m.addedNodes.length > 0;
+    });
+    if (relevant) {
+      _p40fixSidebarBrand();
+      _p40fixTpaDivider();
+      _p40fixPlatformLabel();
+      _p40fixPersonaChip();
+      _p40renameOpenFullClaim();
+      _p40injectLifeTriageBtn();
+    }
+  });
+
+  if (document.body) {
+    _p40obs.observe(document.body, { childList: true, subtree: true });
+  } else {
+    document.addEventListener('DOMContentLoaded', function () {
+      _p40obs.observe(document.body, { childList: true, subtree: true });
+    });
+  }
+
+  /* Page title update — rename "TPA / Illumifin" in page breadcrumbs if present */
+  (function () {
+    var _origNavigateTo = window.navigateTo;
+    if (typeof _origNavigateTo !== 'function') return;
+    window.navigateTo = function () {
+      _origNavigateTo.apply(this, arguments);
+      setTimeout(function () {
+        _p40fixSidebarBrand();
+        _p40fixTpaDivider();
+        _p40fixPlatformLabel();
+        _p40injectLifeTriageBtn();
+      }, 150);
+    };
+  }());
+
+  console.log('[P40] Branding & UI updates loaded — Insurance AI sidebar · TPA badge (no ILLUMIFIN) · LTC TPA PLATFORM label · View Claimant button · Life Ops AI Triage button');
+})();
