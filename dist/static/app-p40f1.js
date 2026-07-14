@@ -98382,3 +98382,918 @@ var navigateTo=window.navigateTo;
   console.log('[P44b] Fix applied — tab injection now targets #page-content directly');
 
 }());
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   P45 — EXPANDED Regulatory Tracker
+   Replaces QW4's 3-tab LTC-only view with a full 7-tab, 4-LOB intelligence hub:
+   Tab 1: LOB Overview (LTC · Health · Annuity · Life) — coverage matrix
+   Tab 2: DOI Bulletin Feed (expanded — all 4 LOBs, 18 bulletins)
+   Tab 3: NAIC Model Laws (12 models, all 4 LOBs)
+   Tab 4: Claims Regulatory Requirements (per-LOB deep dive)
+   Tab 5: AI Agent Compliance Layer (Human-in-the-loop framework)
+   Tab 6: Platform Coverage Map (how our solutions address each mandate)
+   Tab 7: Filing Calendar (all 4 LOBs)
+   ============================================================ */
+(function () {
+  'use strict';
+
+  /* ── Color palette ── */
+  var C = {
+    ltc:     '#0891b2',   /* cyan */
+    health:  '#059669',   /* emerald */
+    annuity: '#7c3aed',   /* violet */
+    life:    '#dc2626',   /* red */
+    slate:   '#475569',
+    dark:    '#0f172a',
+    ai:      '#f59e0b'    /* amber — AI agent lane */
+  };
+
+  /* ══════════════════════════════════════════════════
+     DATA — 18 bulletins across all 4 LOBs
+  ══════════════════════════════════════════════════ */
+  var _p45bulletins = [
+    /* ── LTC (5) ── */
+    { id:'DOI-FL-2026-041', lob:'LTC', state:'FL', date:'2026-07-02', category:'Rate Filing',
+      title:'Mandatory LTC Rate Stabilization Disclosure',
+      summary:'Carriers must provide policyholders standardized rate-stabilization disclosure 90 days before any rate increase filing. Form LTC-1147 required.',
+      impact:'High', status:'Action Required', deadline:'2026-09-01',
+      naicRef:'NAIC LTC Model Reg §19', affectedProducts:['LTC Standalone','LTC/HAL Hybrid'],
+      aiAgent:'Rate Impact Bot scans policy universe, segments affected cohort, auto-drafts disclosure notices — adjuster reviews before transmit.' },
+    { id:'DOI-CA-2026-029', lob:'LTC', state:'CA', date:'2026-06-28', category:'Market Conduct',
+      title:'AB 2094 — AI-Assisted Claims Decision Explainability Mandate',
+      summary:'Effective Jan 1 2027, all AI/ML-assisted adverse claims decisions must include plain-language explanation citing specific MMSE/ADL thresholds used.',
+      impact:'Critical', status:'In Progress', deadline:'2027-01-01',
+      naicRef:'NAIC AI Model Bulletin §7(c)', affectedProducts:['All Products'],
+      aiAgent:'AI Explainability Agent generates SHAP-based plain-language rationale for each denial; human adjuster certifies before issuance.' },
+    { id:'DOI-NY-2026-018', lob:'LTC', state:'NY', date:'2026-06-15', category:'Consumer Protection',
+      title:'DFS Circular 2026-7: Elimination Period Tolling for Hospitalization',
+      summary:'Elimination period must be tolled (paused) for any insured hospitalization exceeding 3 days. Retroactive adjustment for policies issued after 2018.',
+      impact:'High', status:'Compliant', deadline:'2026-08-15',
+      naicRef:'NY Ins §3221(n)', affectedProducts:['LTC Standalone','HAL Platform'],
+      aiAgent:'EP Tolling Bot monitors hospitalization feeds (EHR integration), auto-pauses EP clock, flags for adjuster sign-off within 24h.' },
+    { id:'NAIC-2026-003', lob:'LTC', state:'NAIC', date:'2026-07-01', category:'Model Law',
+      title:'NAIC LTC Model Reg §29 Revision — ADL Trigger Clarity',
+      summary:'Revised ADL trigger language clarifies 2-of-6 standard applies at each monthly benefit determination, not solely at initial claim.',
+      impact:'High', status:'Monitoring', deadline:'2027-01-01',
+      naicRef:'NAIC Model Reg #640', affectedProducts:['All LTC Products'],
+      aiAgent:'ADL Assessment Bot processes care coordinator notes monthly, re-validates trigger status, surfaces exceptions for clinical review.' },
+    { id:'DOI-WA-2026-009', lob:'LTC', state:'WA', date:'2026-05-30', category:'Benefits',
+      title:'WA Cares Fund — LTC Private Benefit Coordination Update',
+      summary:'Updated coordination guidance between private LTC and WA Cares Fund. Carriers must document method; secondary-payer integration required.',
+      impact:'Medium', status:'In Progress', deadline:'2026-07-30',
+      naicRef:'RCW 50B.04.080', affectedProducts:['LTC Standalone'],
+      aiAgent:'COB Bot identifies dual-benefit claimants, calculates offset, auto-posts coordination to LTCAS record for adjuster approval.' },
+
+    /* ── HEALTH (5) ── */
+    { id:'CMS-2026-FC-114', lob:'Health', state:'Federal', date:'2026-06-01', category:'Claims Processing',
+      title:'CMS Final Rule: 90-Day Prompt Payment for Non-Contracted Providers',
+      summary:'CMS mandates group health plans process clean claims from non-contracted providers within 90 days. Interest at 1% per month for late payment.',
+      impact:'High', status:'Action Required', deadline:'2026-09-01',
+      naicRef:'29 CFR §2560.503-1', affectedProducts:['Group Health','Stop-Loss'],
+      aiAgent:'Claims Velocity Bot tracks clean-claim timer per provider, auto-escalates at day 80, drafts interest penalty calc for ops review.' },
+    { id:'DOL-2026-MHPAEA-07', lob:'Health', state:'Federal', date:'2026-05-15', category:'Mental Health Parity',
+      title:'MHPAEA Final Rules — Non-Quantitative Treatment Limitation Analysis',
+      summary:'Plans must perform and document Comparative NQTL Analysis for all mental health/SUD benefits. Annual filing to DOL required. New enforcement: $100/day/member penalty.',
+      impact:'Critical', status:'In Progress', deadline:'2026-12-31',
+      naicRef:'29 CFR §2590.712', affectedProducts:['All Health Plans'],
+      aiAgent:'NQTL Analysis Bot ingests utilization data, generates comparative analysis draft; compliance counsel reviews before submission.' },
+    { id:'ACA-2026-TRANS-15', lob:'Health', state:'Federal', date:'2026-04-10', category:'Transparency',
+      title:'ACA §1557 Section 1557 Nondiscrimination Final Rule Implementation',
+      summary:'Final rule implementing nondiscrimination requirements: AI tools used in coverage/payment decisions must be tested for disparate impact by race, sex, disability.',
+      impact:'Critical', status:'Monitoring', deadline:'2026-07-05',
+      naicRef:'ACA §1557 / 45 CFR §92', affectedProducts:['All Health Products'],
+      aiAgent:'Fairness Audit Bot runs quarterly disparate-impact regression on AI decision outputs; flags bias signals for model governance team review.' },
+    { id:'DOI-CA-2026-HLT-33', lob:'Health', state:'CA', date:'2026-06-20', category:'Claims Denial',
+      title:'CA SB 1120 — Mandatory Human Review for Algorithm-Driven Denials',
+      summary:'Any health insurance denial based on algorithmic or AI recommendation must include human physician review before issuance. Effective Jan 2027.',
+      impact:'Critical', status:'In Progress', deadline:'2027-01-01',
+      naicRef:'CA Ins Code §10169.3', affectedProducts:['All Health Products in CA'],
+      aiAgent:'AI Decision Audit Agent flags AI-assisted denials; routes to licensed physician queue in Claims Oversight Console before letter generation.' },
+    { id:'CMS-2026-STAR-22', lob:'Health', state:'Federal', date:'2026-03-01', category:'Quality',
+      title:'CMS Star Ratings — Claims Data Accuracy Requirements Update',
+      summary:'CMS updated Star Rating methodology: claims data accuracy and appeals rate are now weighted at 15% of overall score. Data submission quarterly.',
+      impact:'Medium', status:'Compliant', deadline:'2026-10-01',
+      naicRef:'42 CFR §423.750', affectedProducts:['Medicare Advantage','Part D'],
+      aiAgent:'Data Quality Bot validates claims records before quarterly CMS submission, auto-corrects formatting errors, flags anomalies for analyst review.' },
+
+    /* ── ANNUITY (4) ── */
+    { id:'DOL-2026-FID-09', lob:'Annuity', state:'Federal', date:'2026-04-25', category:'Fiduciary',
+      title:'DOL Retirement Security Rule — Annuity Recommendation Fiduciary Standard',
+      summary:'Expanded fiduciary definition covers all annuity rollover recommendations. Carriers must document best-interest analysis; compensation disclosure mandatory.',
+      impact:'Critical', status:'In Progress', deadline:'2026-09-23',
+      naicRef:'ERISA §3(21) / PTE 2020-02', affectedProducts:['Fixed Annuity','FIA','Variable Annuity'],
+      aiAgent:'Suitability AI Agent generates best-interest documentation with compensation disclosure; human advisor must certify before submission.' },
+    { id:'SEC-2026-RBI-18', lob:'Annuity', state:'Federal', date:'2026-03-15', category:'Suitability',
+      title:'SEC Reg BI — Variable Annuity Best-Interest Documentation Enhancement',
+      summary:'SEC exam priorities for 2026 include AI-assisted annuity recommendation systems. All AI-generated recommendations must include explainability layer.',
+      impact:'High', status:'Action Required', deadline:'2026-08-15',
+      naicRef:'SEC Reg BI / 17 CFR §240.15l-1', affectedProducts:['Variable Annuity','RILA'],
+      aiAgent:'Reg BI Compliance Bot auto-generates Form CRS alignment memo and explainability report; compliance officer reviews before client delivery.' },
+    { id:'NAIC-2026-SUITABILITY', lob:'Annuity', state:'NAIC', date:'2026-02-01', category:'Model Law',
+      title:'NAIC Suitability in Annuity Transactions Model Regulation (#275) Update',
+      summary:'Revised model requires insurers to maintain AI model inventories for all annuity recommendation systems. Annual third-party audit required by 2027.',
+      impact:'High', status:'Monitoring', deadline:'2027-01-01',
+      naicRef:'NAIC Model Reg #275', affectedProducts:['All Annuity Products'],
+      aiAgent:'Model Inventory Bot maintains live registry of all AI models in annuity workflow, version-tracks updates, generates audit-ready report for compliance sign-off.' },
+    { id:'DOI-NY-2026-ANN-12', lob:'Annuity', state:'NY', date:'2026-05-01', category:'Market Conduct',
+      title:'NY DFS Reg 60 — Annuity Replacement Transaction Disclosure Update',
+      summary:'Enhanced replacement disclosure requirements: side-by-side comparison of surrender charges, benefits, and AI-generated suitability rationale required.',
+      impact:'Medium', status:'Compliant', deadline:'2026-09-01',
+      naicRef:'11 NYCRR Part 51', affectedProducts:['Fixed Annuity','FIA','VA in NY'],
+      aiAgent:'Replacement Analysis Bot generates automated side-by-side comparison and suitability rationale; agent reviews and certifies accuracy.' },
+
+    /* ── LIFE (4) ── */
+    { id:'DOI-NY-2026-LIFE-08', lob:'Life', state:'NY', date:'2026-06-01', category:'Prompt Payment',
+      title:'NY §3420 — 15-Day Clean Claim Payment Rule (Life Benefits)',
+      summary:'New DFS enforcement guidance: death benefit claims classified as "clean" must be paid within 15 business days. AI-assisted triage for clean-claim determination.',
+      impact:'High', status:'Action Required', deadline:'2026-08-01',
+      naicRef:'NY Ins Law §3420', affectedProducts:['Term Life','Whole Life','UL'],
+      aiAgent:'Clean Claim Classifier Bot reviews completeness checklist, classifies claim status, routes clean claims to STP lane; adjuster approves. 15-day clock auto-tracked.' },
+    { id:'NAIC-2026-UNCLAIMED', lob:'Life', state:'NAIC', date:'2026-01-15', category:'Unclaimed Property',
+      title:'NAIC Unclaimed Life Insurance Benefits Model Act Compliance',
+      summary:'24 states now require annual death master file matching. Insurers must proactively contact beneficiaries. Penalties up to $10K per violation.',
+      impact:'High', status:'In Progress', deadline:'2026-12-31',
+      naicRef:'NAIC Model Act #695', affectedProducts:['All Life Products'],
+      aiAgent:'Death Master File Bot runs nightly DMF match against in-force policy universe, auto-generates beneficiary outreach letters — compliance officer reviews before send.' },
+    { id:'DOI-CA-2026-LIFE-21', lob:'Life', state:'CA', date:'2026-05-10', category:'Contestability',
+      title:'CA AB 1128 — AI-Assisted Contestability Investigation Guardrails',
+      summary:'CA prohibits insurers from using AI alone to deny claims within the 2-year contestability window. Human underwriter review mandatory for all AI-flagged contestability holds.',
+      impact:'Critical', status:'Monitoring', deadline:'2027-01-01',
+      naicRef:'CA Ins Code §10113.5', affectedProducts:['All Life Products in CA'],
+      aiAgent:'Contestability Review Bot flags anomalies, prepares investigation summary; licensed underwriter makes final denial/approval — AI cannot act unilaterally.' },
+    { id:'NAIC-2026-AI-LIFE', lob:'Life', state:'NAIC', date:'2026-07-01', category:'AI Governance',
+      title:'NAIC Model Bulletin — AI in Life Insurance Underwriting & Claims (2026 Update)',
+      summary:'Updated bulletin requires all AI systems used in life claims processing to be (a) inventoried, (b) bias-tested, (c) explainable on adverse actions, and (d) subject to human override at every decision point.',
+      impact:'Critical', status:'Monitoring', deadline:'2027-01-01',
+      naicRef:'NAIC AI Model Bulletin (2026)', affectedProducts:['All Life Products'],
+      aiAgent:'Full AI Governance Suite: Inventory Agent, Bias Audit Agent, Explainability Agent, and Override Console — all requiring human certification before regulatory submission.' }
+  ];
+
+  /* ══════════════════════════════════════════════════
+     DATA — NAIC Model Laws (12 models, all 4 LOBs)
+  ══════════════════════════════════════════════════ */
+  var _p45naicModels = [
+    { lob:'LTC', model:'LTC Insurance Model Regulation (#640)', topic:'Core LTC Standards — ADL triggers, EP, benefit structure',
+      adoptedCount:40, pendingCount:7, notAdoptedCount:3, relevance:'Critical', lastUpdate:'2026-03 §29 ADL revision pending',
+      platformCoverage:'HAL LTCAS — ADL trigger engine, EP calculator, benefit pool tracker' },
+    { lob:'LTC', model:'LTC Insurance Model Act (#641)', topic:'LTC Policy Standards — guaranteed renewability, inflation riders',
+      adoptedCount:44, pendingCount:4, notAdoptedCount:2, relevance:'Critical', lastUpdate:'Stable — last amended 2020',
+      platformCoverage:'Policy Administration Module — automatic inflation adjustments, renewal guardrails' },
+    { lob:'Health', model:'Health Claims Payment Model Act', topic:'Clean claim payment timelines, interest penalties',
+      adoptedCount:38, pendingCount:8, notAdoptedCount:4, relevance:'High', lastUpdate:'2025 — interest rate updated',
+      platformCoverage:'Claims Velocity Engine — automated SLA tracking, interest penalty calculator' },
+    { lob:'Health', model:'Mental Health Parity Act Model Regulation', topic:'MHPAEA compliance, NQTL analysis requirements',
+      adoptedCount:46, pendingCount:2, notAdoptedCount:2, relevance:'Critical', lastUpdate:'2026 — federal enforcement enhanced',
+      platformCoverage:'NQTL Analysis Bot — automated comparative analysis report generation' },
+    { lob:'Health', model:'Managed Care Plan Network Adequacy Model Act (#74)', topic:'Network adequacy, access standards for managed care',
+      adoptedCount:35, pendingCount:10, notAdoptedCount:5, relevance:'High', lastUpdate:'2024 — telehealth standards added',
+      platformCoverage:'Provider Network Intelligence — geo-access mapping, adequacy dashboards' },
+    { lob:'Annuity', model:'Suitability in Annuity Transactions Model Reg (#275)', topic:'Best-interest standard, recommendation suitability',
+      adoptedCount:42, pendingCount:5, notAdoptedCount:3, relevance:'Critical', lastUpdate:'2023 — AI model inventory added 2026',
+      platformCoverage:'Suitability AI Agent — best-interest documentation, Form CRS alignment, AI model registry' },
+    { lob:'Annuity', model:'Annuity Disclosure Model Regulation (#245)', topic:'Replacement disclosures, side-by-side comparisons',
+      adoptedCount:40, pendingCount:6, notAdoptedCount:4, relevance:'High', lastUpdate:'2024 — AI rationale disclosure added',
+      platformCoverage:'Replacement Analysis Bot — auto-generated disclosure packages with AI rationale' },
+    { lob:'Annuity', model:'Variable Annuity Model Regulation', topic:'Free-look, surrender charges, prospectus delivery',
+      adoptedCount:45, pendingCount:3, notAdoptedCount:2, relevance:'Medium', lastUpdate:'Stable — 2022',
+      platformCoverage:'Variable Annuity Administration — free-look tracking, surrender schedule engine' },
+    { lob:'Life', model:'Life Insurance Illustrations Model Regulation (#582)', topic:'Policy illustration standards, non-guaranteed elements',
+      adoptedCount:43, pendingCount:4, notAdoptedCount:3, relevance:'High', lastUpdate:'2023 — IUL illustration guardrails',
+      platformCoverage:'Illustration Engine — compliant projections, non-guaranteed element flagging' },
+    { lob:'Life', model:'Unclaimed Life Insurance Benefits Model Act (#695)', topic:'DMF matching, proactive beneficiary outreach',
+      adoptedCount:24, pendingCount:18, notAdoptedCount:8, relevance:'High', lastUpdate:'2026 — 6 new state adoptions',
+      platformCoverage:'DMF Match Bot — nightly matching, automated beneficiary outreach queue' },
+    { lob:'Life', model:'Life/Health Insurance Guaranty Association Model Act', topic:'Guaranty fund assessments, policyholder protections',
+      adoptedCount:50, pendingCount:0, notAdoptedCount:0, relevance:'Medium', lastUpdate:'All 50 states — stable',
+      platformCoverage:'Financial Risk Module — guaranty assessment calculator, solvency monitoring' },
+    { lob:'All', model:'NAIC AI Model Bulletin (Use of AI by Insurers)', topic:'AI governance, explainability, bias testing, human oversight',
+      adoptedCount:27, pendingCount:15, notAdoptedCount:8, relevance:'Critical', lastUpdate:'2026 — 27 states adopted, expanding',
+      platformCoverage:'AI Governance Suite: Inventory Agent + Bias Audit Agent + Explainability Agent + Human Override Console' }
+  ];
+
+  /* ══════════════════════════════════════════════════
+     DATA — Claims Regulatory Requirements (per LOB)
+  ══════════════════════════════════════════════════ */
+  var _p45claimsReqs = {
+    LTC: [
+      { req:'ADL / Cognitive Impairment Trigger Validation', mandate:'NAIC Model Reg #640 §6; State-specific ADL standards (NY §3221, CA §10232.8)',
+        requirement:'Benefits must activate upon certification of 2-of-6 ADL deficits OR severe cognitive impairment. Assessment every 90 days. Third-party assessor required in most states.',
+        platformSolution:'ADL Assessment Engine — processes care coordinator reports, validates trigger, flags for clinical review. Monthly re-validation automated.',
+        agentRole:'ADL Certification Bot validates assessments; clinical reviewer certifies; auto-schedules 90-day re-assessment.',
+        status:'Full Coverage', risk:'Low' },
+      { req:'Elimination Period Calculation & Tolling', mandate:'NAIC Model Reg #640 §7; NY DFS Circular 2026-7',
+        requirement:'EP must be calculated per policy terms (30/60/90 day). Tolling required for hospitalization >3 days (NY). Service days vs. calendar days rules vary by state.',
+        platformSolution:'EP Calculator Engine — handles service/calendar day variants, automatic tolling triggers integrated with hospitalization feeds.',
+        agentRole:'EP Tolling Bot monitors EHR feeds, auto-pauses EP clock on hospitalization, alerts adjuster for approval.',
+        status:'Full Coverage', risk:'Low' },
+      { req:'Benefit Payment Timeliness (45-Day Rule)', mandate:'Most states (NY §3221, CA §10232.8): adjudication within 45 days of complete claim.',
+        requirement:'Claim acknowledged within 15 days. Benefits determined within 45 days. Extensions require written notice with reason.',
+        platformSolution:'SLA Cascade Engine — tracks claim age, doc completeness, flags at day 35 for action. Extension notices auto-drafted.',
+        agentRole:'SLA Monitor Bot fires escalation at day 35; Extension Notice Bot drafts regulatory-compliant extension letter for adjuster approval.',
+        status:'Full Coverage', risk:'Low' },
+      { req:'Care Plan Coordination & Provider Certification', mandate:'NAIC Model Reg #640 §8; state care coordinator regulations',
+        requirement:'Licensed care coordinator must certify care plan. Plan must be updated at each re-assessment. Carrier must offer care coordination services.',
+        platformSolution:'Care Plan Manager — integrates with CellTrak, tracks care plan currency, coordinator certification status.',
+        agentRole:'Care Coordination Bot flags expired care plans, auto-generates update request to coordinator for adjuster review.',
+        status:'Full Coverage', risk:'Low' },
+      { req:'Rate Increase Regulatory Filing & Policyholder Notice', mandate:'All states — NAIC LTC Rate Stabilization principles; FL DOI-FL-2026-041',
+        requirement:'Rate increases require state DOI prior approval. Policyholders must be notified 45-90 days in advance (varies by state). Actuarial justification required.',
+        platformSolution:'Rate Filing Module — actuarial documentation templates, multi-state filing calendar, notice generation.',
+        agentRole:'Rate Notice Bot segments affected cohort, auto-personalizes notices; Compliance Officer reviews and approves batch before mailing.',
+        status:'Partial Coverage', risk:'Medium' },
+      { req:'Inflation Protection Benefit Adjustments', mandate:'Most states require annual adjustment notification; CA mandate for 5% compound offers',
+        requirement:'Carriers must offer inflation protection. Annual benefit increase notifications required. CPI-linked riders require current BLS data.',
+        platformSolution:'Inflation Rider Engine — auto-calculates annual benefit increases, integrates BLS CPI feeds, posts to policy records.',
+        agentRole:'Inflation Adjustment Bot calculates new daily benefit, drafts policyholder notification; adjuster reviews before posting.',
+        status:'Full Coverage', risk:'Low' }
+    ],
+    Health: [
+      { req:'Clean Claim Prompt Payment (90-Day Rule)', mandate:'29 CFR §2560.503-1; CMS Final Rule CMS-2026-FC-114; State prompt payment laws',
+        requirement:'Electronic clean claims: 30 days (most states). Paper: 45 days. Non-contracted: 90 days (federal). Interest at 1-1.5%/month for late payment.',
+        platformSolution:'Claims Velocity Engine — real-time clean-claim timer by claim and provider type. Interest penalty auto-calculated on day of breach.',
+        agentRole:'Payment Timer Bot tracks each clean claim; auto-escalates at 85% of deadline; Interest Penalty Bot calculates and posts to claim record for ops approval.',
+        status:'Full Coverage', risk:'Low' },
+      { req:'Prior Authorization & Utilization Management Transparency', mandate:'CMS Interoperability Rule 2026; No Surprises Act §112',
+        requirement:'UM decisions must be made by licensed clinicians. Prior auth denials require peer-to-peer review offer. AI UM tools require human physician oversight.',
+        platformSolution:'UM Intelligence Dashboard — PA queue, peer-to-peer scheduler, AI recommendation with human physician approval workflow.',
+        agentRole:'UM Review Bot prepares clinical summary for physician; physician approves/modifies denial before notice. Human override mandatory.',
+        status:'Full Coverage', risk:'Low' },
+      { req:'MHPAEA Non-Quantitative Treatment Limitation Analysis', mandate:'29 CFR §2590.712; DOL-2026-MHPAEA-07',
+        requirement:'Annual comparative NQTL analysis documenting that MH/SUD benefit limits are no more restrictive than med/surg. $100/day/member penalty for non-compliance.',
+        platformSolution:'NQTL Analysis Module — automated comparative analysis using claims utilization data, maps limits across benefit categories.',
+        agentRole:'NQTL Audit Bot ingests utilization data, runs comparative analysis, generates draft report; compliance counsel reviews and certifies.',
+        status:'Partial Coverage', risk:'High' },
+      { req:'No Surprises Act — Out-of-Network Billing Protection', mandate:'No Surprises Act (2022); CMS Final Rules 2023-2024',
+        requirement:'Good Faith Estimates required. Independent Dispute Resolution (IDR) process for disputed bills. 3-day/10-day disclosure requirements.',
+        platformSolution:'NSA Compliance Module — GFE generation, IDR tracking, provider disclosure management.',
+        agentRole:'NSA Compliance Bot monitors GFE issuance timelines, flags missing disclosures for ops review within 24h.',
+        status:'Full Coverage', risk:'Low' },
+      { req:'ACA §1557 Nondiscrimination & AI Fairness Testing', mandate:'45 CFR §92; ACA-2026-TRANS-15',
+        requirement:'AI tools in coverage/payment decisions must be tested for disparate impact by race, sex, disability. Documentation required for each AI system deployed.',
+        platformSolution:'Fairness Audit Engine — quarterly disparate-impact regression testing, documented AI system inventory with bias scores.',
+        agentRole:'Fairness Audit Bot runs disparate-impact analysis quarterly; Model Governance Team reviews bias report and signs off before regulatory submission.',
+        status:'Partial Coverage', risk:'High' },
+      { req:'Surprise Billing & Balance Billing Transparency', mandate:'No Surprises Act; State balance billing laws (TX, CA, NY)',
+        requirement:'Insurers must provide EOBs with balance billing protections clearly noted. Dispute resolution rights communicated at EOB issuance.',
+        platformSolution:'EOB Enhancement Module — balance billing protection language auto-inserted, IDR rights notification integrated.',
+        agentRole:'EOB Compliance Bot validates balance-billing language before EOB generation; flags non-compliant EOBs for adjuster correction.',
+        status:'Full Coverage', risk:'Low' }
+    ],
+    Annuity: [
+      { req:'DOL Fiduciary Best-Interest Documentation', mandate:'ERISA §3(21); DOL Retirement Security Rule (2026); PTE 2020-02',
+        requirement:'All annuity rollover recommendations must satisfy best-interest standard. Written documentation of analysis. Compensation disclosure required. Annual review.',
+        platformSolution:'Suitability AI Agent — generates best-interest analysis documentation, compensation disclosure, client rationale memo.',
+        agentRole:'Suitability Bot prepares complete best-interest package; human advisor reviews, certifies, and signs before any transaction.',
+        status:'Full Coverage', risk:'Low' },
+      { req:'SEC Reg BI — Variable Annuity Recommendation Standards', mandate:'17 CFR §240.15l-1; SEC-2026-RBI-18',
+        requirement:'VA recommendations require best-interest standard, Form CRS delivery, AI explainability layer for AI-assisted recommendations. SEC exam focus 2026.',
+        platformSolution:'Reg BI Compliance Suite — Form CRS auto-generation, explainability report for AI recommendations, documentation archive.',
+        agentRole:'Reg BI Compliance Bot generates Form CRS alignment memo and explainability report; compliance officer reviews before client delivery.',
+        status:'Full Coverage', risk:'Low' },
+      { req:'Free-Look Period Administration', mandate:'All states (10-30 day free-look); NAIC Annuity Disclosure Reg',
+        requirement:'Free-look period begins upon policy delivery. Full premium refund. Delivery confirmation required. Broker-dealers: 10-day minimum.',
+        platformSolution:'Free-Look Tracker — delivery confirmation integration, refund calculation engine, automatic expiry alerts.',
+        agentRole:'Free-Look Bot tracks delivery date, sends confirmation request, alerts ops team on day 8 if no confirmation received.',
+        status:'Full Coverage', risk:'Low' },
+      { req:'Surrender Charge Disclosure & Calculation', mandate:'NAIC Model Reg #245; State suitability laws',
+        requirement:'Surrender schedule must be prominently disclosed. AI-assisted suitability tools must model surrender risk. Replacement transactions require surrender comparison.',
+        platformSolution:'Surrender Analysis Engine — surrender schedule calculator, comparison tool for replacement transactions.',
+        agentRole:'Surrender Analysis Bot calculates comparative surrender impact for replacement; agent certifies suitability analysis before submission.',
+        status:'Full Coverage', risk:'Low' },
+      { req:'1099-R / Tax Withholding Compliance', mandate:'IRC §72; IRS Rev. Proc. 2023-3; Qualified plan distribution rules',
+        requirement:'Accurate 1099-R generation for all distributions. RMD calculation and withholding. 60-day rollover tracking. State withholding variability.',
+        platformSolution:'Tax Compliance Module — 1099-R auto-generation, RMD calculator, rollover tracking, state withholding matrix.',
+        agentRole:'Tax Compliance Bot validates 1099-R accuracy against distribution records; Tax Ops team reviews exceptions before IRS filing.',
+        status:'Full Coverage', risk:'Low' },
+      { req:'Annuity Suitability Re-Evaluation (Post-Sale)', mandate:'NAIC Model Reg #275; DOL Fiduciary ongoing obligation',
+        requirement:'Material changes in client circumstances (health, financial, beneficiary) trigger suitability re-evaluation obligation. Documentation must be updated.',
+        platformSolution:'Client Profile Monitor — tracks life events, triggers suitability re-evaluation workflow, documents rationale updates.',
+        agentRole:'Life Events Bot detects triggering changes (divorce, health event, large withdrawal), flags advisor for re-evaluation within 30 days.',
+        status:'Partial Coverage', risk:'Medium' }
+    ],
+    Life: [
+      { req:'Death Benefit Prompt Payment (15-30 Day Rules)', mandate:'NY §3420 (15 days); CA §10172.5 (30 days); TX Ins Code §542.057',
+        requirement:'Clean death benefit claims paid within 15-30 days depending on state. Interest accrues on late payment. Denial letter must cite specific contractual basis.',
+        platformSolution:'Death Benefit STP Engine — automated completeness check, clean claim classification, payment orchestration. SLA clock per state.',
+        agentRole:'Clean Claim Bot validates completeness; STP Approval Agent routes clean claims through; adjuster reviews edge cases. Interest Timer auto-activates on breach.',
+        status:'Full Coverage', risk:'Low' },
+      { req:'Contestability Investigation & Human Oversight', mandate:'Most states: 2-year contestability period; CA AB 1128 (AI guardrail)',
+        requirement:'AI may flag contestability risks, but human underwriter must make final determination. CA prohibits AI-only contestability denials. Investigation within 45-60 days.',
+        platformSolution:'Contestability Review Console — AI risk scoring plus mandatory human underwriter review workflow. No auto-denial permitted.',
+        agentRole:'Contestability Flag Bot identifies risk indicators, assembles investigation file; licensed underwriter makes final determination — AI cannot deny unilaterally.',
+        status:'Full Coverage', risk:'Low' },
+      { req:'Death Master File Matching & Proactive Outreach', mandate:'NAIC Model Act #695; 24 state mandates; ERISA §404',
+        requirement:'Nightly DMF matching against in-force policies. Proactive contact with beneficiaries within 90 days of match. Penalty: up to $10K per violation.',
+        platformSolution:'DMF Match Engine — nightly Social Security Administration DMF integration, auto-triggers beneficiary outreach workflow.',
+        agentRole:'DMF Match Bot runs nightly, generates matched policy list; Outreach Bot drafts beneficiary contact letters; Compliance Officer approves before dispatch.',
+        status:'Full Coverage', risk:'Low' },
+      { req:'Accelerated Death Benefit (ADB) Processing', mandate:'Most states: 30-day processing for terminal illness ADB; NAIC Life Insurance Guaranty',
+        requirement:'ADB claim for terminal illness (≤24 months prognosis) must be processed within 30 days of complete submission. Physician certification required.',
+        platformSolution:'ADB Processing Queue — expedited workflow, physician certification tracker, APS coordination, 30-day SLA timer.',
+        agentRole:'ADB Expedite Bot flags terminal illness claims for priority queue; APS Coordinator Bot tracks physician submission; adjuster approves within 48h of complete file.',
+        status:'Full Coverage', risk:'Low' },
+      { req:'Beneficiary Designation Integrity & Dispute Resolution', mandate:'Interpleader statutes; ERISA §514; SLAT / ILIT trust provisions',
+        requirement:'Conflicting beneficiary claims must go to interpleader. Trust beneficiary documentation review. Minor beneficiary guardianship verification.',
+        platformSolution:'Beneficiary Intelligence Module — designation conflict detector, trust document analyzer, guardianship verification workflow.',
+        agentRole:'Beneficiary Conflict Bot flags designation discrepancies; Legal Review Bot assembles interpleader documentation; attorney reviews before court filing.',
+        status:'Partial Coverage', risk:'Medium' },
+      { req:'AI Governance — Life Claims (NAIC 2026 Bulletin)', mandate:'NAIC AI Model Bulletin (2026); State AI regulations (CO, CA, IL)',
+        requirement:'All AI systems in life claims: (a) inventoried, (b) bias-tested, (c) explainable on adverse actions, (d) human override at every decision point. Annual audit.',
+        platformSolution:'AI Governance Suite — model inventory, bias testing dashboard, explainability engine, human override console. Annual compliance report.',
+        agentRole:'AI Inventory Bot maintains live model registry; Bias Audit Bot runs quarterly; Explainability Bot generates adverse-action rationale; all require human certification.',
+        status:'Full Coverage', risk:'Low' }
+    ]
+  };
+
+  /* ══════════════════════════════════════════════════
+     DATA — AI Agent Compliance Framework
+  ══════════════════════════════════════════════════ */
+  var _p45aiAgents = [
+    { lob:'LTC', agent:'ADL Certification Bot', role:'Clinical trigger validation',
+      action:'Processes care coordinator assessments, validates 2-of-6 ADL or cognitive impairment standard against NAIC #640',
+      humanOversight:'Licensed nurse/clinical reviewer certifies ADL findings before benefit activation',
+      regulatoryBasis:'NAIC Model Reg #640 §6; State ADL standards',
+      override:'Any ADL determination flagged as borderline (score 1.5-2.5 of 6) escalates to clinical review board. Human decision is final.',
+      status:'Deployed', auditFreq:'Monthly' },
+    { lob:'LTC', agent:'EP Tolling Bot', role:'Elimination period management',
+      action:'Monitors EHR/hospitalization feeds, auto-pauses elimination period clock on qualifying hospitalization per NY DFS Circular 2026-7',
+      humanOversight:'Adjuster approves tolling action and reviews hospitalization documentation within 24h',
+      regulatoryBasis:'NY Ins §3221(n); DFS Circular 2026-7',
+      override:'Tolling applied optimistically (in claimant\'s favor); adjuster can reverse with documented basis only.',
+      status:'Deployed', auditFreq:'Weekly' },
+    { lob:'LTC', agent:'Rate Notice Bot', role:'Rate increase policyholder communication',
+      action:'Segments affected policy cohort, personalizes rate increase notice with state-required disclosures (FL Form LTC-1147)',
+      humanOversight:'Compliance Officer reviews and approves batch notice run before mailing',
+      regulatoryBasis:'NAIC Rate Stabilization; DOI-FL-2026-041',
+      override:'Human approval required before any batch dispatch. Compliance can modify individual notices.',
+      status:'In Development', auditFreq:'Per Filing' },
+    { lob:'Health', agent:'Claims Velocity Bot', role:'Prompt payment SLA enforcement',
+      action:'Tracks clean-claim timer per provider and payer type, auto-escalates at 85% of deadline, calculates interest penalty on breach',
+      humanOversight:'Operations manager reviews escalation queue daily; authorizes interest penalty application',
+      regulatoryBasis:'29 CFR §2560.503-1; CMS-2026-FC-114; State prompt payment laws',
+      override:'Interest penalty posting requires ops manager sign-off. Dispute flag pauses clock pending human review.',
+      status:'Deployed', auditFreq:'Daily' },
+    { lob:'Health', agent:'NQTL Analysis Bot', role:'MHPAEA comparative analysis',
+      action:'Ingests utilization data, maps MH/SUD benefit limits against med/surg equivalents, generates draft comparative analysis report',
+      humanOversight:'Compliance counsel reviews draft analysis and certifies accuracy before DOL submission',
+      regulatoryBasis:'29 CFR §2590.712; DOL-2026-MHPAEA-07',
+      override:'Human attorney certification mandatory. Bot cannot submit to DOL — generates draft only.',
+      status:'In Development', auditFreq:'Annual' },
+    { lob:'Health', agent:'Fairness Audit Bot', role:'AI disparate impact testing',
+      action:'Runs quarterly regression analysis of AI decision outputs by race, sex, disability; flags statistically significant disparities (p<0.05)',
+      humanOversight:'Model Governance Team reviews bias report and signs off; Compliance Officer reviews before regulatory submission',
+      regulatoryBasis:'ACA §1557; 45 CFR §92; ACA-2026-TRANS-15',
+      override:'Any detected bias with p<0.01 triggers mandatory model suspension pending human investigation. No override permitted for flagged bias.',
+      status:'Deployed', auditFreq:'Quarterly' },
+    { lob:'Health', agent:'Physician Review Router', role:'AI denial human-in-loop (CA SB 1120)',
+      action:'Identifies AI-assisted denial decisions, routes to licensed physician review queue, prevents letter generation until physician approval',
+      humanOversight:'Licensed physician must approve every denial that involved AI recommendation. Physician can overturn AI recommendation.',
+      regulatoryBasis:'CA SB 1120 (eff. 2027); CA Ins Code §10169.3',
+      override:'Physician can approve, modify, or reject AI recommendation entirely. AI recommendation is advisory only.',
+      status:'In Development', auditFreq:'Per Denial' },
+    { lob:'Annuity', agent:'Suitability Documentation Bot', role:'Best-interest analysis generation',
+      action:'Generates comprehensive best-interest analysis documentation — client profile, product comparison, compensation disclosure, rationale memo',
+      humanOversight:'Human advisor reviews complete package, certifies accuracy, and signs before any annuity transaction is executed',
+      regulatoryBasis:'DOL Retirement Security Rule; ERISA §3(21); PTE 2020-02',
+      override:'Advisor can reject AI recommendation and proceed with documented alternative. Advisor signature is mandatory.',
+      status:'Deployed', auditFreq:'Per Transaction' },
+    { lob:'Annuity', agent:'Reg BI Compliance Bot', role:'SEC best-interest explainability',
+      action:'Auto-generates Form CRS alignment memo and AI explainability report for every AI-assisted variable annuity recommendation',
+      humanOversight:'Compliance officer reviews explainability report before client delivery; client receives both recommendation and AI rationale',
+      regulatoryBasis:'SEC Reg BI; 17 CFR §240.15l-1; SEC-2026-RBI-18',
+      override:'Compliance officer can flag recommendation for escalated review. No recommendation proceeds without explainability documentation.',
+      status:'Deployed', auditFreq:'Per Transaction' },
+    { lob:'Annuity', agent:'Model Inventory Bot', role:'AI system governance & audit',
+      action:'Maintains live registry of all AI/ML models in annuity recommendation workflow — version, purpose, training data, last bias test, approval status',
+      humanOversight:'Chief Compliance Officer reviews model registry quarterly; third-party audit team performs annual review',
+      regulatoryBasis:'NAIC Model Reg #275; NAIC AI Model Bulletin',
+      override:'CCO can suspend any model pending investigation. No model enters production without CCO sign-off.',
+      status:'Deployed', auditFreq:'Quarterly' },
+    { lob:'Life', agent:'Clean Claim Classifier Bot', role:'Death benefit STP adjudication',
+      action:'Validates 12-point completeness checklist, classifies claim as clean/complex, routes clean claims through STP lane, tracks 15-30 day SLA per state',
+      humanOversight:'Adjuster reviews every STP approval — auto-payment only after adjuster approval. Complex claims go to full adjudicator review.',
+      regulatoryBasis:'NY §3420; CA §10172.5; TX §542.057',
+      override:'Adjuster can pull any claim from STP lane for manual review. Interest timer continues during manual review.',
+      status:'Deployed', auditFreq:'Daily' },
+    { lob:'Life', agent:'Contestability Flag Bot', role:'Contestability investigation preparation',
+      action:'Identifies risk indicators (recent policy changes, beneficiary changes, coverage amount changes), assembles investigation file, identifies required records',
+      humanOversight:'Licensed underwriter makes final contestability determination — bot cannot deny, approve, or hold claim unilaterally',
+      regulatoryBasis:'State contestability statutes; CA AB 1128; NAIC AI Model Bulletin',
+      override:'Underwriter makes ALL contestability determinations. Bot provides investigation brief only — decision is human-only.',
+      status:'Deployed', auditFreq:'Per Claim' },
+    { lob:'Life', agent:'DMF Match & Outreach Bot', role:'Unclaimed benefit proactive discovery',
+      action:'Nightly Social Security DMF match against 1.2M+ in-force policies; generates beneficiary outreach letter queue with personalised contact information',
+      humanOversight:'Compliance Officer reviews matched policy list and approves outreach batch before letters are dispatched',
+      regulatoryBasis:'NAIC Model Act #695; 24-state mandates; NAIC-2026-UNCLAIMED',
+      override:'Compliance Officer must approve each batch. Individual matches flagged as uncertain (>1 SSN match) go to manual research.',
+      status:'Deployed', auditFreq:'Nightly' },
+    { lob:'All', agent:'AI Governance Suite — Master Oversight Console', role:'Cross-LOB AI compliance governance',
+      action:'Unified dashboard: (a) model inventory across all LOBs, (b) bias audit results, (c) explainability coverage %, (d) human override log, (e) regulatory submission status',
+      humanOversight:'Chief Compliance Officer + AI Model Governance Board reviews suite monthly; annual third-party audit required (NAIC 2026 Bulletin)',
+      regulatoryBasis:'NAIC AI Model Bulletin (2026); State AI regulations (CO, CA, IL, WA); NAIC-2026-AI-LIFE',
+      override:'CCO can suspend any AI system at any time. All regulatory filings require CCO certification. No AI system has unsupervised decision authority.',
+      status:'Deployed', auditFreq:'Monthly + Annual' }
+  ];
+
+  /* ══════════════════════════════════════════════════
+     DATA — Platform Coverage Map
+  ══════════════════════════════════════════════════ */
+  var _p45coverageMap = [
+    { category:'LTC Claims Administration', platform:'HAL LTCAS (LTC Admin System)',
+      regulations:['NAIC Model Reg #640','NY §3221','CA §10232.8','NAIC Model Act #641'],
+      capabilities:['ADL trigger engine (2-of-6 standard)','Elimination period calculator (service/calendar day)','EP tolling for hospitalization','45-day adjudication SLA tracker','Care plan currency monitor','Inflation rider auto-calculation','CPI-linked benefit adjustment'],
+      coverage:97, gaps:'Rate increase filing workflow requires state-by-state customization' },
+    { category:'Health Claims Processing', platform:'HAL Health Claims Engine',
+      regulations:['29 CFR §2560.503-1','No Surprises Act','MHPAEA','ACA §1557'],
+      capabilities:['Clean claim timer by provider/payer type','Prior auth with physician oversight workflow','NQTL analysis report generation (in dev)','NSA Good Faith Estimate issuance','EOB balance billing language enforcement','Interest penalty auto-calculation'],
+      coverage:84, gaps:'NQTL full automation (in development); ACA §1557 AI bias testing documentation' },
+    { category:'Annuity Compliance Suite', platform:'HAL Annuity Operations Platform',
+      regulations:['DOL Retirement Security Rule','SEC Reg BI','NAIC Model Reg #275','NAIC Model Reg #245'],
+      capabilities:['Best-interest analysis documentation generator','Form CRS alignment checker','AI recommendation explainability report','Free-look period tracker','Surrender schedule calculator','Replacement transaction disclosure','Model inventory registry','Suitability re-evaluation triggers'],
+      coverage:91, gaps:'Post-sale suitability re-evaluation automation (partial)' },
+    { category:'Life Claims Administration', platform:'HAL Life Claims Console',
+      regulations:['NY §3420','CA §10172.5','NAIC Model Act #695','NAIC AI Bulletin'],
+      capabilities:['12-point clean claim completeness validator','Death benefit STP lane with adjuster approval','15/30-day SLA tracker per state','Contestability investigation console (human-only decision)','DMF nightly match engine','ADB expedited processing queue','Beneficiary conflict detector'],
+      coverage:93, gaps:'Beneficiary dispute / interpleader automation (partial)' },
+    { category:'AI Governance & Compliance', platform:'HAL AI Governance Suite',
+      regulations:['NAIC AI Model Bulletin (2026)','ACA §1557','CA AB 1128','CA AB 2094','CO SB 21-169'],
+      capabilities:['Unified AI model inventory (all LOBs)','Quarterly bias/disparate-impact testing','SHAP-based explainability for adverse actions','Human override console (mandatory — no AI auto-denial)','Regulatory submission status tracker','Annual third-party audit support package'],
+      coverage:89, gaps:'Full automation of NQTL analysis; post-sale suitability bot (in development)' },
+    { category:'Regulatory Filing & Calendar', platform:'HAL Regulatory Operations Module',
+      regulations:['NAIC MCAS','State DOI filing systems','CMS submission portals'],
+      capabilities:['Multi-state filing deadline calendar','Rate filing actuarial documentation templates','DOI bulletin monitoring feed (18 active)','NAIC model law adoption tracker (50 states)','Market conduct report preparation','AI model disclosure to DOIs'],
+      coverage:78, gaps:'Direct EDI integration with all state DOI portals (13 states complete, 37 in progress)' }
+  ];
+
+  /* ══════════════════════════════════════════════════
+     DATA — Filing Calendar (all 4 LOBs)
+  ══════════════════════════════════════════════════ */
+  var _p45filings = [
+    { lob:'Health', state:'Federal', product:'All Health Plans', type:'MHPAEA NQTL Analysis', due:'2026-12-31', status:'In Progress', notes:'DOL comparative analysis documentation — penalty $100/day/member' },
+    { lob:'Health', state:'Federal', product:'All Health Plans', type:'ACA §1557 AI Fairness Filing', due:'2026-07-05', status:'Action Required', notes:'AI disparate-impact documentation due to HHS' },
+    { lob:'LTC', state:'FL', product:'LTC Standalone', type:'Rate Increase Filing (7.2%)', due:'2026-09-01', status:'In Progress', notes:'DOI-FL-2026-041 — Form LTC-1147 disclosure + actuarial support' },
+    { lob:'Annuity', state:'Federal', product:'Fixed/FIA/VA', type:'DOL Fiduciary Compliance Certification', due:'2026-09-23', status:'Action Required', notes:'DOL Retirement Security Rule — best-interest documentation program due' },
+    { lob:'Annuity', state:'Federal', product:'Variable Annuity/RILA', type:'SEC Reg BI Explainability Documentation', due:'2026-08-15', status:'Action Required', notes:'SEC exam focus — AI recommendation explainability reports required' },
+    { lob:'LTC', state:'TX', product:'HAL Platform', type:'Rate Notification (5.2% Approved)', due:'2026-08-10', status:'Action Required', notes:'Policyholder letters must be mailed 60 days post-approval' },
+    { lob:'Life', state:'NAIC/All', product:'All Life Products', type:'DMF Match Annual Compliance Report', due:'2026-12-31', status:'In Progress', notes:'NAIC Model Act #695 — 24 states with active mandate' },
+    { lob:'LTC', state:'WA', product:'LTC Standalone/Hybrid', type:'WA Cares Fund Coordination Docs', due:'2026-07-30', status:'Action Required', notes:'Policy file documentation required per RCW 50B.04.080' },
+    { lob:'Health', state:'CA', product:'All CA Health Products', type:'SB 1120 Implementation Plan', due:'2026-12-31', status:'Monitoring', notes:'Physician review workflow must be operational by Jan 2027' },
+    { lob:'All', state:'NAIC (all states)', product:'All AI-Assisted Products', type:'NAIC AI Model Disclosure', due:'2026-10-01', status:'In Progress', notes:'Annual AI model inventory disclosure to all adopted-state DOIs (27 states)' },
+    { lob:'LTC', state:'NY', product:'LTC Standalone/HAL', type:'EP Tolling Compliance Report', due:'2026-08-15', status:'Compliant', notes:'DFS Circular 2026-7 — retroactive adjustments complete' },
+    { lob:'Life', state:'CA', product:'All Life Products in CA', type:'AB 1128 Implementation Plan', due:'2026-12-31', status:'Monitoring', notes:'Human-only contestability determination workflow operational by Jan 2027' }
+  ];
+
+  /* ══════════════════════════════════════════════════
+     HELPERS
+  ══════════════════════════════════════════════════ */
+  var _p45activeTab = 'overview';
+
+  function _lobPill(lob) {
+    var map = { LTC:C.ltc, Health:C.health, Annuity:C.annuity, Life:C.life, All:'#374151' };
+    var col = map[lob] || '#6b7280';
+    return '<span style="background:'+col+';color:#fff;padding:2px 8px;border-radius:9px;font-size:10px;font-weight:700;margin-right:4px">'+lob+'</span>';
+  }
+  function _impactBadge(i) {
+    var c = {Critical:['#dc2626','#fee2e2'],High:['#d97706','#fef3c7'],Medium:['#7c3aed','#ede9fe'],Low:['#059669','#d1fae5']};
+    var cv = c[i]||['#6b7280','#f3f4f6'];
+    return '<span style="background:'+cv[1]+';color:'+cv[0]+';padding:2px 8px;border-radius:9px;font-size:11px;font-weight:600">'+i+'</span>';
+  }
+  function _statusBadge(s) {
+    var c = {'Action Required':['#dc2626','#fee2e2'],'In Progress':['#d97706','#fef3c7'],Compliant:['#059669','#d1fae5'],Monitoring:['#7c3aed','#ede9fe'],Pending:['#6b7280','#f3f4f6'],Deployed:['#059669','#d1fae5'],'In Development':['#d97706','#fef3c7']};
+    var cv = c[s]||['#6b7280','#f3f4f6'];
+    return '<span style="background:'+cv[1]+';color:'+cv[0]+';padding:2px 8px;border-radius:9px;font-size:11px;font-weight:600">'+s+'</span>';
+  }
+  function _urgColor(d) { return d < '2026-08-01' ? '#dc2626' : d < '2026-09-15' ? '#d97706' : '#374151'; }
+
+  /* ══════════════════════════════════════════════════
+     TAB 1 — LOB OVERVIEW (Coverage Matrix)
+  ══════════════════════════════════════════════════ */
+  function _p45tabOverview() {
+    var lobs = [
+      { key:'LTC', label:'Long-Term Care', color:C.ltc, icon:'fa-wheelchair',
+        regs:18, mandates:'NAIC #640/641, NY §3221, CA §10232.8, WA RCW 50B, FL DOI-FL-2026-041',
+        keyRisks:['ADL trigger validation (monthly)','45-day adjudication SLA','EP tolling (NY hospitalization)','Rate stabilization filings','AI explainability (CA AB 2094)'],
+        platformCoverage:97, agents:3, bulletins:5 },
+      { key:'Health', label:'Health Insurance', color:C.health, icon:'fa-heartbeat',
+        regs:22, mandates:'ERISA §503, ACA §1557, MHPAEA, No Surprises Act, CMS Star Ratings',
+        keyRisks:['Clean claim prompt payment (30-90 days)','MHPAEA NQTL analysis ($100/day/member)','AI decision explainability (CA SB 1120)','ACA §1557 AI fairness testing','Prior auth physician oversight'],
+        platformCoverage:84, agents:4, bulletins:5 },
+      { key:'Annuity', label:'Annuity', color:C.annuity, icon:'fa-chart-line',
+        regs:15, mandates:'DOL Retirement Security Rule, SEC Reg BI, NAIC #275/#245, ERISA',
+        keyRisks:['DOL fiduciary best-interest documentation','SEC Reg BI AI explainability (2026 exam)','NAIC suitability model AI inventory','Free-look & surrender disclosure','Post-sale suitability re-evaluation'],
+        platformCoverage:91, agents:3, bulletins:4 },
+      { key:'Life', label:'Life Insurance', color:C.life, icon:'fa-shield-alt',
+        regs:20, mandates:'NY §3420, CA §10172.5, NAIC #695, NAIC AI Bulletin 2026',
+        keyRisks:['15-day clean claim payment (NY)','Contestability human-only determination (CA)','DMF nightly match (24 states)','ADB 30-day processing','NAIC 2026 AI governance mandate'],
+        platformCoverage:93, agents:4, bulletins:4 }
+    ];
+
+    var kpiBar = '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px">';
+    lobs.forEach(function(l) {
+      kpiBar += '<div style="background:#fff;border-radius:12px;padding:20px;border-top:4px solid '+l.color+';box-shadow:0 1px 6px rgba(0,0,0,.08);cursor:pointer" onclick="window._p45switchTab(\'bulletins\')">'
+        +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">'
+        +'<div style="background:'+l.color+';color:#fff;width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center"><i class="fas '+l.icon+'"></i></div>'
+        +'<div><div style="font-weight:800;font-size:14px;color:#0f172a">'+l.label+'</div>'
+        +'<div style="font-size:11px;color:#6b7280">'+l.regs+' active mandates</div></div></div>'
+        +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px">'
+        +'<div style="text-align:center;background:#f8fafc;border-radius:8px;padding:8px">'
+        +'<div style="font-size:18px;font-weight:800;color:'+l.color+'">'+l.bulletins+'</div>'
+        +'<div style="font-size:10px;color:#6b7280;font-weight:600">BULLETINS</div></div>'
+        +'<div style="text-align:center;background:#f8fafc;border-radius:8px;padding:8px">'
+        +'<div style="font-size:18px;font-weight:800;color:'+C.ai+'">'+l.agents+'</div>'
+        +'<div style="font-size:10px;color:#6b7280;font-weight:600">AI AGENTS</div></div>'
+        +'<div style="text-align:center;background:#f8fafc;border-radius:8px;padding:8px">'
+        +'<div style="font-size:18px;font-weight:800;color:#059669">'+l.platformCoverage+'%</div>'
+        +'<div style="font-size:10px;color:#6b7280;font-weight:600">COVERED</div></div></div>'
+        +'<div style="margin-bottom:8px">'
+        +'<div style="background:#e5e7eb;border-radius:9px;height:8px;overflow:hidden">'
+        +'<div style="background:'+l.color+';height:8px;border-radius:9px;width:'+l.platformCoverage+'%;transition:width .8s"></div></div>'
+        +'<div style="font-size:10px;color:#6b7280;margin-top:3px">Platform Coverage</div></div>'
+        +'<div style="font-size:11px;color:#374151;margin-bottom:8px"><strong>Key Mandates:</strong> '+l.mandates+'</div>'
+        +'<ul style="margin:0;padding-left:16px;font-size:11px;color:#dc2626">'
+        + l.keyRisks.map(function(r){ return '<li style="margin-bottom:2px">'+r+'</li>'; }).join('')
+        +'</ul></div>';
+    });
+    kpiBar += '</div>';
+
+    /* AI Agent Framework summary band */
+    var aiBand = '<div style="background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 100%);border-radius:14px;padding:24px;margin-bottom:24px;color:#fff">'
+      +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">'
+      +'<div style="background:'+C.ai+';color:#0f172a;border-radius:9px;padding:8px 14px;font-weight:800;font-size:14px"><i class="fas fa-robot" style="margin-right:6px"></i>AI Agent Framework — Human-in-the-Loop</div>'
+      +'<div style="font-size:13px;opacity:.85">14 specialized compliance agents across all 4 LOBs · Zero unsupervised AI decisions</div></div>'
+      +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px">'
+      + [
+          {label:'Principle 1',icon:'fa-eye',title:'Full Transparency',desc:'Every AI recommendation includes explainability rationale (SHAP values or plain-language summary) visible to adjuster and claimant.'},
+          {label:'Principle 2',icon:'fa-user-check',title:'Mandatory Human Override',desc:'No AI agent has authority to approve, deny, or hold any claim/transaction without human sign-off. Override is always available.'},
+          {label:'Principle 3',icon:'fa-balance-scale',title:'Bias-Free Testing',desc:'All AI models undergo quarterly disparate-impact regression. Any bias at p<0.01 triggers automatic model suspension.'},
+          {label:'Principle 4',icon:'fa-clipboard-list',title:'Audit-Ready Logging',desc:'Every AI action is immutably logged with model version, confidence score, human approver ID, and regulatory checkpoint.'}
+        ].map(function(p){
+          return '<div style="background:rgba(255,255,255,.1);border-radius:10px;padding:14px">'
+            +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">'
+            +'<div style="background:'+C.ai+';color:#0f172a;border-radius:6px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:12px"><i class="fas '+p.icon+'"></i></div>'
+            +'<div><div style="font-size:10px;color:rgba(255,255,255,.6)">'+p.label+'</div>'
+            +'<div style="font-weight:700;font-size:13px">'+p.title+'</div></div></div>'
+            +'<div style="font-size:11px;opacity:.85">'+p.desc+'</div></div>';
+        }).join('')
+      +'</div></div>';
+
+    /* Summary table */
+    var summaryTable = '<div style="background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.08);overflow:hidden">'
+      +'<div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;font-weight:700;font-size:15px;color:#0f172a">'
+      +'<i class="fas fa-table" style="color:'+C.slate+';margin-right:8px"></i>Regulatory Coverage Summary — All Lines of Business</div>'
+      +'<table style="width:100%;border-collapse:collapse"><thead><tr style="background:#f9fafb">'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">LOB</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Primary Federal Mandates</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Key State Mandates</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">AI Agent Role</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Platform Coverage</th>'
+      +'</tr></thead><tbody>'
+      +'<tr style="border-bottom:1px solid #f3f4f6"><td style="padding:10px 14px">'+_lobPill('LTC')+'</td><td style="padding:10px 14px;font-size:12px">NAIC #640/641, HIPAA privacy, Rate Stabilization Principles</td><td style="padding:10px 14px;font-size:12px">NY §3221, CA §10232.8, WA RCW 50B, FL LTC-1147</td><td style="padding:10px 14px;font-size:12px">ADL Bot, EP Tolling Bot, Rate Notice Bot</td><td style="padding:10px 14px"><span style="color:#059669;font-weight:700">97%</span></td></tr>'
+      +'<tr style="border-bottom:1px solid #f3f4f6"><td style="padding:10px 14px">'+_lobPill('Health')+'</td><td style="padding:10px 14px;font-size:12px">ERISA §503, ACA §1557, MHPAEA, No Surprises Act, CMS</td><td style="padding:10px 14px;font-size:12px">CA SB 1120, NY §3224-a, TX §542, State prompt pay laws</td><td style="padding:10px 14px;font-size:12px">Velocity Bot, NQTL Bot, Fairness Bot, Physician Router</td><td style="padding:10px 14px"><span style="color:#d97706;font-weight:700">84%</span></td></tr>'
+      +'<tr style="border-bottom:1px solid #f3f4f6"><td style="padding:10px 14px">'+_lobPill('Annuity')+'</td><td style="padding:10px 14px;font-size:12px">DOL Retirement Security Rule, SEC Reg BI, ERISA §3(21)</td><td style="padding:10px 14px;font-size:12px">NY Reg 60, State suitability laws, DOI market conduct exams</td><td style="padding:10px 14px;font-size:12px">Suitability Bot, Reg BI Bot, Model Inventory Bot</td><td style="padding:10px 14px"><span style="color:#059669;font-weight:700">91%</span></td></tr>'
+      +'<tr><td style="padding:10px 14px">'+_lobPill('Life')+'</td><td style="padding:10px 14px;font-size:12px">NAIC #695 DMF, NAIC AI Bulletin 2026, ERISA §514</td><td style="padding:10px 14px;font-size:12px">NY §3420, CA AB 1128, TX §542.057, 24-state DMF mandates</td><td style="padding:10px 14px;font-size:12px">Clean Claim Bot, Contestability Bot, DMF Match Bot, ADB Bot</td><td style="padding:10px 14px"><span style="color:#059669;font-weight:700">93%</span></td></tr>'
+      +'</tbody></table></div>';
+
+    return kpiBar + aiBand + summaryTable;
+  }
+
+  /* ══════════════════════════════════════════════════
+     TAB 2 — DOI BULLETIN FEED (18 bulletins)
+  ══════════════════════════════════════════════════ */
+  function _p45tabBulletins() {
+    var actionCount = _p45bulletins.filter(function(b){return b.status==='Action Required';}).length;
+    var critCount = _p45bulletins.filter(function(b){return b.impact==='Critical';}).length;
+    var lobCounts = {LTC:0,Health:0,Annuity:0,Life:0};
+    _p45bulletins.forEach(function(b){if(lobCounts[b.lob]!==undefined) lobCounts[b.lob]++;});
+
+    var kpis = '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:24px">'
+      +'<div style="background:#fff;border-radius:10px;padding:16px;border-left:4px solid '+C.slate+';box-shadow:0 1px 4px rgba(0,0,0,.08)"><div style="font-size:10px;color:#6b7280;text-transform:uppercase;font-weight:600">Total Bulletins</div><div style="font-size:26px;font-weight:800;color:'+C.slate+'">'+_p45bulletins.length+'</div><div style="font-size:11px;color:#374151">LTC+Health+Ann+Life</div></div>'
+      +'<div style="background:#fff;border-radius:10px;padding:16px;border-left:4px solid #dc2626;box-shadow:0 1px 4px rgba(0,0,0,.08)"><div style="font-size:10px;color:#6b7280;text-transform:uppercase;font-weight:600">Action Required</div><div style="font-size:26px;font-weight:800;color:#dc2626">'+actionCount+'</div><div style="font-size:11px;color:#374151">Immediate Response</div></div>'
+      +'<div style="background:#fff;border-radius:10px;padding:16px;border-left:4px solid #d97706;box-shadow:0 1px 4px rgba(0,0,0,.08)"><div style="font-size:10px;color:#6b7280;text-transform:uppercase;font-weight:600">Critical Impact</div><div style="font-size:26px;font-weight:800;color:#d97706">'+critCount+'</div><div style="font-size:11px;color:#374151">High Exposure</div></div>'
+      +'<div style="background:#fff;border-radius:10px;padding:16px;border-left:4px solid '+C.ai+';box-shadow:0 1px 4px rgba(0,0,0,.08)"><div style="font-size:10px;color:#6b7280;text-transform:uppercase;font-weight:600">AI-Related Mandates</div><div style="font-size:26px;font-weight:800;color:'+C.ai+'">6</div><div style="font-size:11px;color:#374151">Require AI Agent Layer</div></div>'
+      +'<div style="background:#fff;border-radius:10px;padding:16px;border-left:4px solid #059669;box-shadow:0 1px 4px rgba(0,0,0,.08)"><div style="font-size:10px;color:#6b7280;text-transform:uppercase;font-weight:600">Compliant</div><div style="font-size:26px;font-weight:800;color:#059669">3</div><div style="font-size:11px;color:#374151">No Action Required</div></div>'
+      +'</div>';
+
+    var cards = '';
+    _p45bulletins.forEach(function(b) {
+      var borderCol = b.impact==='Critical'?'#dc2626':b.impact==='High'?'#d97706':C.slate;
+      cards += '<div style="background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.08);margin-bottom:14px;border-left:4px solid '+borderCol+'">'
+        +'<div style="padding:14px 20px">'
+        +'<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px">'
+        +'<div style="flex:1">'
+        +'<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:6px">'
+        + _lobPill(b.lob)
+        +'<span style="font-weight:800;color:'+C.slate+';font-size:12px">'+b.id+'</span>'
+        +'<span style="background:#f3f4f6;color:#374151;padding:2px 6px;border-radius:4px;font-size:11px">'+b.state+'</span>'
+        +'<span style="background:#f3f4f6;color:#374151;padding:2px 6px;border-radius:4px;font-size:11px">'+b.category+'</span>'
+        +'<span style="font-size:11px;color:#9ca3af">'+b.date+'</span></div>'
+        +'<div style="font-weight:700;font-size:14px;color:#0f172a;margin-bottom:5px">'+b.title+'</div>'
+        +'<div style="font-size:12px;color:#374151;margin-bottom:6px">'+b.summary+'</div>'
+        +'<div style="font-size:11px;color:#6b7280;margin-bottom:6px">Products: '+b.affectedProducts.join(', ')+' &bull; Ref: '+b.naicRef+'</div>'
+        +'<div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:8px 12px;font-size:11px;color:#92400e">'
+        +'<i class="fas fa-robot" style="color:'+C.ai+';margin-right:5px"></i><strong>AI Agent Role:</strong> '+b.aiAgent+'</div>'
+        +'</div>'
+        +'<div style="margin-left:16px;text-align:right;min-width:140px">'
+        + _impactBadge(b.impact)+'<br>'
+        +'<div style="margin-top:6px">'+_statusBadge(b.status)+'</div>'
+        +'<div style="font-size:11px;font-weight:700;color:'+_urgColor(b.deadline)+';margin-top:8px"><i class="fas fa-calendar-alt" style="margin-right:3px"></i>'+b.deadline+'</div>'
+        +'</div></div></div></div>';
+    });
+
+    return kpis + cards;
+  }
+
+  /* ══════════════════════════════════════════════════
+     TAB 3 — NAIC MODEL LAWS (12 models)
+  ══════════════════════════════════════════════════ */
+  function _p45tabNaic() {
+    var html = '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px">';
+    _p45naicModels.forEach(function(m) {
+      var lobCol = {LTC:C.ltc,Health:C.health,Annuity:C.annuity,Life:C.life,All:'#374151'}[m.lob]||C.slate;
+      html += '<div style="background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.08);padding:18px;border-top:3px solid '+lobCol+'">'
+        +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">'
+        +'<div style="flex:1">'
+        + _lobPill(m.lob)
+        +'<div style="font-weight:700;font-size:13px;color:#0f172a;margin-top:4px">'+m.model+'</div>'
+        +'<div style="font-size:11px;color:#6b7280;margin-top:2px">'+m.topic+'</div>'
+        +'<div style="font-size:11px;color:#9ca3af;margin-top:2px">Last update: '+m.lastUpdate+'</div></div>'
+        + _impactBadge(m.relevance)+'</div>'
+        +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px">'
+        +'<div style="background:#d1fae5;border-radius:7px;padding:8px;text-align:center">'
+        +'<div style="font-weight:800;font-size:18px;color:#059669">'+m.adoptedCount+'</div>'
+        +'<div style="font-size:10px;font-weight:600;color:#059669">ADOPTED</div></div>'
+        +'<div style="background:#fef3c7;border-radius:7px;padding:8px;text-align:center">'
+        +'<div style="font-weight:800;font-size:18px;color:#d97706">'+m.pendingCount+'</div>'
+        +'<div style="font-size:10px;font-weight:600;color:#d97706">PENDING</div></div>'
+        +'<div style="background:#fee2e2;border-radius:7px;padding:8px;text-align:center">'
+        +'<div style="font-weight:800;font-size:18px;color:#dc2626">'+m.notAdoptedCount+'</div>'
+        +'<div style="font-size:10px;font-weight:600;color:#dc2626">NOT ADOPTED</div></div></div>'
+        +'<div style="background:#f0f9ff;border-radius:7px;padding:8px;font-size:11px;color:#0369a1">'
+        +'<i class="fas fa-check-circle" style="margin-right:5px"></i><strong>Platform Coverage:</strong> '+m.platformCoverage+'</div>'
+        +'</div>';
+    });
+    html += '</div>';
+    return html;
+  }
+
+  /* ══════════════════════════════════════════════════
+     TAB 4 — CLAIMS REGULATORY REQUIREMENTS (per LOB)
+  ══════════════════════════════════════════════════ */
+  var _p45claimsLOB = 'LTC';
+  function _p45tabClaims() {
+    var lobTabs = ['LTC','Health','Annuity','Life'];
+    var nav = '<div style="display:flex;gap:6px;margin-bottom:20px">'
+      + lobTabs.map(function(l){
+          var col = {LTC:C.ltc,Health:C.health,Annuity:C.annuity,Life:C.life}[l];
+          var active = _p45claimsLOB === l;
+          return '<button onclick="window._p45setClaimsLOB(\''+l+'\')" style="padding:8px 18px;border:none;border-radius:8px;cursor:pointer;font-weight:700;font-size:12px;background:'+(active?col:'#f1f5f9')+';color:'+(active?'#fff':'#6b7280')+';transition:all .2s"><i class="fas '
+            +({LTC:'fa-wheelchair',Health:'fa-heartbeat',Annuity:'fa-chart-line',Life:'fa-shield-alt'}[l])
+            +'" style="margin-right:5px"></i>'+l+'</button>';
+        }).join('')
+      +'</div>';
+
+    var reqs = _p45claimsReqs[_p45claimsLOB] || [];
+    var cards = reqs.map(function(r) {
+      var riskCol = r.risk==='High'?'#dc2626':r.risk==='Medium'?'#d97706':'#059669';
+      var covCol = r.status==='Full Coverage'?'#059669':r.status==='Partial Coverage'?'#d97706':'#dc2626';
+      return '<div style="background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.08);margin-bottom:14px;padding:18px">'
+        +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">'
+        +'<div style="font-weight:700;font-size:14px;color:#0f172a">'+r.req+'</div>'
+        +'<div style="display:flex;gap:6px">'
+        +'<span style="background:'+(r.status==='Full Coverage'?'#d1fae5':'#fef3c7')+';color:'+covCol+';padding:3px 10px;border-radius:9px;font-size:11px;font-weight:600">'+r.status+'</span>'
+        +'<span style="background:'+(r.risk==='Low'?'#d1fae5':r.risk==='Medium'?'#fef3c7':'#fee2e2')+';color:'+riskCol+';padding:3px 10px;border-radius:9px;font-size:11px;font-weight:600">Risk: '+r.risk+'</span>'
+        +'</div></div>'
+        +'<div style="font-size:11px;color:#0891b2;font-weight:600;margin-bottom:4px"><i class="fas fa-gavel" style="margin-right:4px"></i>Mandate: <span style="color:#374151;font-weight:400">'+r.mandate+'</span></div>'
+        +'<div style="font-size:12px;color:#374151;margin-bottom:10px;background:#f8fafc;border-radius:7px;padding:8px">'+r.requirement+'</div>'
+        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
+        +'<div style="background:#eff6ff;border-radius:8px;padding:10px">'
+        +'<div style="font-size:10px;font-weight:700;color:#1d4ed8;margin-bottom:4px"><i class="fas fa-cog" style="margin-right:4px"></i>PLATFORM SOLUTION</div>'
+        +'<div style="font-size:12px;color:#1e40af">'+r.platformSolution+'</div></div>'
+        +'<div style="background:#fffbeb;border-radius:8px;padding:10px">'
+        +'<div style="font-size:10px;font-weight:700;color:#92400e;margin-bottom:4px"><i class="fas fa-robot" style="margin-right:4px"></i>AI AGENT ROLE + HUMAN OVERSIGHT</div>'
+        +'<div style="font-size:12px;color:#78350f">'+r.agentRole+'</div></div>'
+        +'</div></div>';
+    }).join('');
+
+    return nav + cards;
+  }
+
+  window._p45setClaimsLOB = function(lob) {
+    _p45claimsLOB = lob;
+    var el = document.getElementById('p45-tab-content');
+    if (el) el.innerHTML = _p45tabClaims();
+  };
+
+  /* ══════════════════════════════════════════════════
+     TAB 5 — AI AGENT COMPLIANCE LAYER
+  ══════════════════════════════════════════════════ */
+  function _p45tabAI() {
+    var header = '<div style="background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 100%);border-radius:14px;padding:24px;margin-bottom:24px;color:#fff">'
+      +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">'
+      +'<div style="background:'+C.ai+';color:#0f172a;border-radius:9px;padding:8px 14px;font-weight:800;font-size:14px"><i class="fas fa-robot" style="margin-right:6px"></i>AI Agent Compliance Framework</div>'
+      +'<div style="font-size:13px;opacity:.85">14 agents · 4 LOBs · Zero unsupervised AI decisions · NAIC 2026 Bulletin compliant</div></div>'
+      +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">'
+      +'<div style="background:rgba(255,255,255,.1);border-radius:10px;padding:14px;text-align:center">'
+      +'<div style="font-size:28px;font-weight:800;color:'+C.ai+'">14</div><div style="font-size:11px;opacity:.8">AI Agents Deployed</div></div>'
+      +'<div style="background:rgba(255,255,255,.1);border-radius:10px;padding:14px;text-align:center">'
+      +'<div style="font-size:28px;font-weight:800;color:#10b981">100%</div><div style="font-size:11px;opacity:.8">Human Override Available</div></div>'
+      +'<div style="background:rgba(255,255,255,.1);border-radius:10px;padding:14px;text-align:center">'
+      +'<div style="font-size:28px;font-weight:800;color:#60a5fa">Quarterly</div><div style="font-size:11px;opacity:.8">Bias Audit Frequency</div></div>'
+      +'<div style="background:rgba(255,255,255,.1);border-radius:10px;padding:14px;text-align:center">'
+      +'<div style="font-size:28px;font-weight:800;color:#f87171">0</div><div style="font-size:11px;opacity:.8">Unilateral AI Decisions</div></div>'
+      +'</div></div>';
+
+    var cards = _p45aiAgents.map(function(a) {
+      var lobCol = {LTC:C.ltc,Health:C.health,Annuity:C.annuity,Life:C.life,All:'#374151'}[a.lob]||C.slate;
+      return '<div style="background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.08);margin-bottom:14px;padding:18px;border-left:4px solid '+lobCol+'">'
+        +'<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px">'
+        +'<div>'
+        + _lobPill(a.lob)
+        +'<div style="font-weight:700;font-size:14px;color:#0f172a;margin-top:4px"><i class="fas fa-robot" style="color:'+C.ai+';margin-right:6px"></i>'+a.agent+'</div>'
+        +'<div style="font-size:12px;color:#6b7280;margin-top:2px">'+a.role+'</div></div>'
+        +'<div style="text-align:right">'+_statusBadge(a.status)
+        +'<div style="font-size:11px;color:#6b7280;margin-top:4px">Audit: '+a.auditFreq+'</div></div></div>'
+        +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:10px">'
+        +'<div style="background:#f0f9ff;border-radius:8px;padding:10px">'
+        +'<div style="font-size:10px;font-weight:700;color:#0369a1;margin-bottom:4px"><i class="fas fa-cog" style="margin-right:3px"></i>AGENT ACTION</div>'
+        +'<div style="font-size:11px;color:#0c4a6e">'+a.action+'</div></div>'
+        +'<div style="background:#f0fdf4;border-radius:8px;padding:10px">'
+        +'<div style="font-size:10px;font-weight:700;color:#166534;margin-bottom:4px"><i class="fas fa-user-check" style="margin-right:3px"></i>HUMAN OVERSIGHT</div>'
+        +'<div style="font-size:11px;color:#14532d">'+a.humanOversight+'</div></div>'
+        +'<div style="background:#fffbeb;border-radius:8px;padding:10px">'
+        +'<div style="font-size:10px;font-weight:700;color:#92400e;margin-bottom:4px"><i class="fas fa-hand-paper" style="margin-right:3px"></i>OVERRIDE RULE</div>'
+        +'<div style="font-size:11px;color:#78350f">'+a.override+'</div></div></div>'
+        +'<div style="font-size:11px;color:#6b7280"><i class="fas fa-gavel" style="margin-right:4px;color:'+C.slate+'"></i><strong>Regulatory Basis:</strong> '+a.regulatoryBasis+'</div>'
+        +'</div>';
+    }).join('');
+
+    return header + cards;
+  }
+
+  /* ══════════════════════════════════════════════════
+     TAB 6 — PLATFORM COVERAGE MAP
+  ══════════════════════════════════════════════════ */
+  function _p45tabPlatform() {
+    var avgCov = Math.round(_p45coverageMap.reduce(function(s,m){return s+m.coverage;},0)/_p45coverageMap.length);
+    var summary = '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px">'
+      +'<div style="background:#fff;border-radius:10px;padding:16px;border-left:4px solid #059669;box-shadow:0 1px 4px rgba(0,0,0,.08)">'
+      +'<div style="font-size:10px;color:#6b7280;text-transform:uppercase;font-weight:600">Average Platform Coverage</div>'
+      +'<div style="font-size:32px;font-weight:800;color:#059669">'+avgCov+'%</div>'
+      +'<div style="font-size:11px;color:#374151">Across all 4 LOBs + AI Governance</div></div>'
+      +'<div style="background:#fff;border-radius:10px;padding:16px;border-left:4px solid '+C.ai+';box-shadow:0 1px 4px rgba(0,0,0,.08)">'
+      +'<div style="font-size:10px;color:#6b7280;text-transform:uppercase;font-weight:600">Regulatory Mandates Covered</div>'
+      +'<div style="font-size:32px;font-weight:800;color:'+C.ai+'">47+</div>'
+      +'<div style="font-size:11px;color:#374151">Federal + State + NAIC across all LOBs</div></div>'
+      +'<div style="background:#fff;border-radius:10px;padding:16px;border-left:4px solid '+C.slate+';box-shadow:0 1px 4px rgba(0,0,0,.08)">'
+      +'<div style="font-size:10px;color:#6b7280;text-transform:uppercase;font-weight:600">Platform Modules Active</div>'
+      +'<div style="font-size:32px;font-weight:800;color:'+C.slate+'">6</div>'
+      +'<div style="font-size:11px;color:#374151">LTC, Health, Annuity, Life, AI Gov, Reg Ops</div></div>'
+      +'</div>';
+
+    var cards = _p45coverageMap.map(function(m) {
+      var covColor = m.coverage>=90?'#059669':m.coverage>=80?'#d97706':'#dc2626';
+      return '<div style="background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.08);margin-bottom:16px;padding:20px">'
+        +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">'
+        +'<div>'
+        +'<div style="font-weight:800;font-size:15px;color:#0f172a">'+m.category+'</div>'
+        +'<div style="font-size:12px;color:#6b7280;margin-top:2px"><i class="fas fa-layer-group" style="margin-right:4px;color:'+C.slate+'"></i>'+m.platform+'</div>'
+        +'</div>'
+        +'<div style="text-align:right">'
+        +'<div style="font-size:32px;font-weight:900;color:'+covColor+'">'+m.coverage+'%</div>'
+        +'<div style="font-size:11px;color:#6b7280">Coverage</div>'
+        +'</div></div>'
+        +'<div style="background:#e5e7eb;border-radius:9px;height:10px;overflow:hidden;margin-bottom:14px">'
+        +'<div style="background:'+covColor+';height:10px;border-radius:9px;width:'+m.coverage+'%"></div></div>'
+        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">'
+        +'<div><div style="font-size:11px;font-weight:700;color:#374151;margin-bottom:6px"><i class="fas fa-check-circle" style="color:#059669;margin-right:4px"></i>Regulatory Mandates Addressed</div>'
+        +'<div style="display:flex;flex-wrap:wrap;gap:4px">'
+        + m.regulations.map(function(r){ return '<span style="background:#eff6ff;color:#1d4ed8;padding:2px 8px;border-radius:5px;font-size:10px;font-weight:600">'+r+'</span>'; }).join('')
+        +'</div></div>'
+        +'<div><div style="font-size:11px;font-weight:700;color:#374151;margin-bottom:6px"><i class="fas fa-cogs" style="color:'+C.slate+';margin-right:4px"></i>Platform Capabilities</div>'
+        +'<ul style="margin:0;padding-left:16px;font-size:11px;color:#374151">'
+        + m.capabilities.map(function(c){ return '<li style="margin-bottom:2px">'+c+'</li>'; }).join('')
+        +'</ul></div></div>'
+        +(m.gaps?'<div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:7px;padding:8px 12px;font-size:11px;color:#92400e"><i class="fas fa-exclamation-triangle" style="margin-right:4px"></i><strong>Gap / In Development:</strong> '+m.gaps+'</div>':'')
+        +'</div>';
+    }).join('');
+
+    return summary + cards;
+  }
+
+  /* ══════════════════════════════════════════════════
+     TAB 7 — FILING CALENDAR (all 4 LOBs)
+  ══════════════════════════════════════════════════ */
+  function _p45tabCalendar() {
+    var sorted = _p45filings.slice().sort(function(a,b){ return a.due > b.due ? 1 : -1; });
+    var rows = sorted.map(function(f) {
+      return '<tr style="border-bottom:1px solid #f3f4f6">'
+        +'<td style="padding:10px 14px">'+_lobPill(f.lob)+'</td>'
+        +'<td style="padding:10px 14px;font-size:12px;font-weight:600">'+f.state+'</td>'
+        +'<td style="padding:10px 14px;font-size:12px">'+f.product+'</td>'
+        +'<td style="padding:10px 14px;font-size:12px">'+f.type+'</td>'
+        +'<td style="padding:10px 14px;font-size:13px;font-weight:700;color:'+_urgColor(f.due)+'">'+f.due+'</td>'
+        +'<td style="padding:10px 14px">'+_statusBadge(f.status)+'</td>'
+        +'<td style="padding:10px 14px;font-size:11px;color:#374151">'+f.notes+'</td>'
+        +'</tr>';
+    }).join('');
+
+    return '<div style="background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.08);overflow:auto">'
+      +'<div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;font-weight:700;font-size:15px;color:#0f172a">'
+      +'<i class="fas fa-calendar-check" style="color:'+C.slate+';margin-right:8px"></i>Regulatory Filing Deadline Calendar — All LOBs · Next 6 Months</div>'
+      +'<table style="width:100%;border-collapse:collapse;min-width:800px"><thead><tr style="background:#f9fafb">'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">LOB</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">State/Scope</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Product</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Filing Type</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Due Date</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Status</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Notes</th>'
+      +'</tr></thead><tbody>'+rows+'</tbody></table></div>';
+  }
+
+  /* ══════════════════════════════════════════════════
+     BUILD PAGE — replaces QW4's _qw4buildPage
+  ══════════════════════════════════════════════════ */
+  function _p45buildPage() {
+    var pc = document.getElementById('page-content');
+    if (!pc) return;
+
+    var tabs = [
+      {id:'overview',   icon:'fa-th-large',       label:'LOB Overview'},
+      {id:'bulletins',  icon:'fa-newspaper',       label:'DOI Bulletins (18)'},
+      {id:'naic',       icon:'fa-landmark',        label:'NAIC Model Laws'},
+      {id:'claims',     icon:'fa-file-medical-alt',label:'Claims Requirements'},
+      {id:'ai',         icon:'fa-robot',           label:'AI Agent Layer'},
+      {id:'platform',   icon:'fa-layer-group',     label:'Platform Coverage'},
+      {id:'calendar',   icon:'fa-calendar-check',  label:'Filing Calendar'}
+    ];
+
+    var tabBar = '<div style="display:flex;gap:3px;flex-wrap:wrap;background:#fff;border-radius:10px;padding:6px;box-shadow:0 1px 4px rgba(0,0,0,.08);margin-bottom:24px">'
+      + tabs.map(function(t) {
+          var active = _p45activeTab === t.id;
+          return '<button onclick="window._p45switchTab(\''+t.id+'\')" style="flex:1;min-width:100px;padding:8px 10px;border:none;border-radius:7px;cursor:pointer;font-size:11px;font-weight:600;background:'+(active?C.slate:'transparent')+';color:'+(active?'#fff':'#6b7280')+';transition:all .2s;white-space:nowrap">'
+            +'<i class="fas '+t.icon+'" style="margin-right:4px"></i>'+t.label+'</button>';
+        }).join('')
+      +'</div>';
+
+    pc.innerHTML = '<div style="font-family:\'Inter\',sans-serif;background:#f8fafc;min-height:100vh;padding:0">'
+      +'<div style="background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 70%,#1e40af 100%);color:#fff;padding:28px 32px">'
+      +'<div style="display:flex;align-items:center;gap:16px;margin-bottom:8px">'
+      +'<div style="background:rgba(255,255,255,.18);border-radius:10px;padding:10px 16px;font-weight:800;font-size:16px">REG</div>'
+      +'<div>'
+      +'<h1 style="font-size:22px;font-weight:800;margin:0">Regulatory Intelligence Hub</h1>'
+      +'<p style="font-size:13px;opacity:.85;margin:4px 0 0">LTC · Health · Annuity · Life · 18 Active DOI Bulletins · 12 NAIC Models · 14 AI Compliance Agents · Platform Coverage Map</p>'
+      +'</div>'
+      +'<div style="margin-left:auto;display:flex;gap:8px">'
+      +'<div style="background:rgba(255,255,255,.15);border-radius:8px;padding:8px 14px;text-align:center">'
+      +'<div style="font-size:18px;font-weight:800">18</div><div style="font-size:10px;opacity:.75">Bulletins</div></div>'
+      +'<div style="background:rgba(255,255,255,.15);border-radius:8px;padding:8px 14px;text-align:center">'
+      +'<div style="font-size:18px;font-weight:800">7</div><div style="font-size:10px;opacity:.75">Action Req</div></div>'
+      +'<div style="background:rgba('+C.ai.replace('#','').match(/../g).map(function(h){return parseInt(h,16);}).join(',')+',.3);border-radius:8px;padding:8px 14px;text-align:center">'
+      +'<div style="font-size:18px;font-weight:800;color:'+C.ai+'">14</div><div style="font-size:10px;opacity:.75">AI Agents</div></div>'
+      +'</div></div></div>'
+      +'<div style="padding:24px 32px">'
+      + tabBar
+      +'<div id="p45-tab-content">'+_p45renderTab()+'</div>'
+      +'</div></div>';
+  }
+
+  function _p45renderTab() {
+    if (_p45activeTab==='overview')  return _p45tabOverview();
+    if (_p45activeTab==='bulletins') return _p45tabBulletins();
+    if (_p45activeTab==='naic')      return _p45tabNaic();
+    if (_p45activeTab==='claims')    return _p45tabClaims();
+    if (_p45activeTab==='ai')        return _p45tabAI();
+    if (_p45activeTab==='platform')  return _p45tabPlatform();
+    if (_p45activeTab==='calendar')  return _p45tabCalendar();
+    return '';
+  }
+
+  window._p45switchTab = function(tab) {
+    _p45activeTab = tab;
+    var el = document.getElementById('p45-tab-content');
+    if (el) el.innerHTML = _p45renderTab();
+    /* update tab button styles */
+    var btns = document.querySelectorAll('#page-content button[onclick*="_p45switchTab"]');
+    btns.forEach(function(btn) {
+      var isActive = btn.getAttribute('onclick').indexOf("'"+tab+"'") !== -1;
+      btn.style.background = isActive ? C.slate : 'transparent';
+      btn.style.color = isActive ? '#fff' : '#6b7280';
+    });
+  };
+
+  /* ── Override QW4 navigateTo hook — replace with P45 ── */
+  var _p45origNav = window.navigateTo;
+  window.navigateTo = function(route, params) {
+    if (route === 'hal-reg-tracker') {
+      _p45activeTab = 'overview';
+      _p45claimsLOB = 'LTC';
+      _p45buildPage();
+      return;
+    }
+    if (typeof _p45origNav === 'function') _p45origNav(route, params);
+  };
+
+  console.log('[P45] Expanded Regulatory Intelligence Hub loaded — 7 tabs · 18 bulletins (LTC+Health+Annuity+Life) · 12 NAIC models · 14 AI compliance agents · 6 platform coverage maps · 12 filing deadlines');
+
+}());
