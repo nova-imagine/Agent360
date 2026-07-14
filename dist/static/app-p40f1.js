@@ -95046,3 +95046,1117 @@ var navigateTo=window.navigateTo;
 
   console.log('[P41] Business Rules Engine loaded — 24 rules · AI Suggestions · Rule Simulator · Plain-English Builder · Audit Log · Font size increased');
 }());
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   P42 — BRE ENHANCEMENTS v2
+   Upgrades to P41 Business Rules Engine:
+   1.  Plain-English Builder — sophisticated with pre-built templates, ontology
+       graph visualization, semantic layer panel, knowledge graph panel
+   2.  Run Simulator — 10 rich claim parameters, STP flow diagram
+   3.  STP Dashboard — fully functional modal
+   4.  Edit Rule — full modal with save
+   5.  HAL-Specific rules labelled Health · Life · Annuity correctly
+   6.  AI-Suggested Rules dedicated section (banner + card list)
+   7.  STP Explainer — "How rules drive STP" animated pipeline
+   8.  errorcatch allowlist update handled in EC patch
+   ═══════════════════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  /* ── helper: toast ──────────────────────────────────────────────────────── */
+  function _toast(msg) { window._raToast && window._raToast(msg); }
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     1. ENHANCED HAL RULES — Health · Life · Annuity labelling
+     Override the _breRules entries for HAL-Specific category
+  ═══════════════════════════════════════════════════════════════════════ */
+  // Patch HAL-Specific rules to carry product line info
+  if (window._breRules === undefined) {
+    // _breRules is scoped inside P41 IIFE — access via DOM after page build
+  }
+  // We'll patch the table renderer instead
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     2. EDIT RULE MODAL — full featured
+  ═══════════════════════════════════════════════════════════════════════ */
+  function _p42injectEditModal() {
+    if (document.getElementById('bre-edit-modal')) return;
+    var m = document.createElement('div');
+    m.id = 'bre-edit-modal';
+    m.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9100;align-items:center;justify-content:center;';
+    m.innerHTML =
+      '<div style="background:#fff;border-radius:18px;padding:0;width:680px;max-width:96vw;max-height:90vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 25px 80px rgba(0,0,0,.25);">' +
+        '<div style="background:linear-gradient(135deg,#1e1b4b,#4c1d95);padding:20px 24px;display:flex;align-items:center;justify-content:space-between;">' +
+          '<div>' +
+            '<div style="font-size:16px;font-weight:900;color:#fff;"><i class="fas fa-edit" style="margin-right:8px;color:#a78bfa;"></i>Edit Business Rule</div>' +
+            '<div style="font-size:11px;color:#c4b5fd;margin-top:3px;" id="bre-edit-subtitle">Rule details</div>' +
+          '</div>' +
+          '<button onclick="document.getElementById(\'bre-edit-modal\').style.display=\'none\'" style="background:rgba(255,255,255,.15);border:none;border-radius:8px;padding:6px 10px;color:#fff;cursor:pointer;font-size:16px;">✕</button>' +
+        '</div>' +
+        '<div style="padding:20px 24px;overflow-y:auto;flex:1;">' +
+          '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">' +
+            '<div><label style="font-size:10px;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:5px;">Rule ID</label>' +
+              '<input id="bre-edit-id" readonly style="width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:12px;background:#f9fafb;color:#6b7280;box-sizing:border-box;"></div>' +
+            '<div><label style="font-size:10px;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:5px;">Rule Name</label>' +
+              '<input id="bre-edit-name" style="width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:12px;box-sizing:border-box;outline:none;" onfocus="this.style.borderColor=\'#7c3aed\'" onblur="this.style.borderColor=\'#e5e7eb\'"></div>' +
+          '</div>' +
+          '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">' +
+            '<div><label style="font-size:10px;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:5px;">Category</label>' +
+              '<select id="bre-edit-category" style="width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:12px;box-sizing:border-box;">' +
+                '<option>Eligibility</option><option>Benefit Calc</option><option>Duration</option><option>Fraud/Integrity</option><option>STP</option><option>HAL-Specific</option><option>Compliance</option>' +
+              '</select></div>' +
+            '<div><label style="font-size:10px;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:5px;">Claim Type</label>' +
+              '<select id="bre-edit-claimtype" style="width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:12px;box-sizing:border-box;">' +
+                '<option>All LTC</option><option>Home Health</option><option>Nursing Facility</option><option>Memory Care</option><option>HAL</option><option>Hospice</option><option>Respite</option><option>Adult Day Care</option><option>Assisted Living</option>' +
+              '</select></div>' +
+          '</div>' +
+          '<div style="margin-bottom:14px;"><label style="font-size:10px;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:5px;">Condition Logic</label>' +
+            '<textarea id="bre-edit-condition" rows="3" style="width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:12px;resize:vertical;box-sizing:border-box;line-height:1.5;" onfocus="this.style.borderColor=\'#7c3aed\'" onblur="this.style.borderColor=\'#e5e7eb\'"></textarea></div>' +
+          '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">' +
+            '<div><label style="font-size:10px;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:5px;">Action</label>' +
+              '<select id="bre-edit-action" style="width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:12px;box-sizing:border-box;">' +
+                '<option>Auto-Approve</option><option>Auto-Pay</option><option>Rate-Calc</option><option>Route-to-RN</option><option>Flag-Review</option><option>Hold-SIU</option>' +
+              '</select></div>' +
+            '<div><label style="font-size:10px;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:5px;">AI Health</label>' +
+              '<select id="bre-edit-aihealth" style="width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:12px;box-sizing:border-box;">' +
+                '<option value="healthy">✓ Healthy</option><option value="review">⚠ Needs Review</option><option value="alert">⛔ Alert</option>' +
+              '</select></div>' +
+          '</div>' +
+          '<div style="background:#faf5ff;border:1px solid #ddd6fe;border-radius:10px;padding:14px;margin-bottom:14px;">' +
+            '<div style="font-size:11px;font-weight:800;color:#5b21b6;margin-bottom:10px;"><i class="fas fa-robot" style="margin-right:6px;"></i>AI Rule Analysis</div>' +
+            '<div id="bre-edit-ai-analysis" style="font-size:11px;color:#374151;line-height:1.6;"></div>' +
+          '</div>' +
+          '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px;margin-bottom:4px;">' +
+            '<div style="font-size:11px;font-weight:700;color:#065f46;"><i class="fas fa-link" style="margin-right:6px;"></i>Ontology Linkage</div>' +
+            '<div id="bre-edit-ontology" style="font-size:10px;color:#374151;margin-top:6px;line-height:1.7;"></div>' +
+          '</div>' +
+        '</div>' +
+        '<div style="padding:16px 24px;border-top:1px solid #f3f4f6;display:flex;gap:10px;justify-content:flex-end;background:#f9fafb;">' +
+          '<button onclick="document.getElementById(\'bre-edit-modal\').style.display=\'none\'" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 20px;font-size:12px;font-weight:700;cursor:pointer;">Cancel</button>' +
+          '<button onclick="_p42saveRule()" style="background:linear-gradient(135deg,#7c3aed,#4c1d95);color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:12px;font-weight:800;cursor:pointer;"><i class="fas fa-save" style="margin-right:6px;"></i>Save Rule</button>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(m);
+  }
+
+  window._p41editRule = function (id) {
+    _p42injectEditModal();
+    var modal = document.getElementById('bre-edit-modal');
+    if (!modal) return;
+    // Find rule from table data attribute or _breRules
+    var r = (window._breRules || []).find(function(x){return x.id===id;});
+    // Fallback: search tbody for the rule
+    if (!r) {
+      var rows = document.querySelectorAll('#bre-rule-tbody tr');
+      rows.forEach(function(row){
+        var cells = row.querySelectorAll('td');
+        if (cells[0] && cells[0].textContent.trim()===id) {
+          r = {
+            id: id,
+            name: cells[1] ? cells[1].textContent.trim() : '',
+            category: cells[2] ? cells[2].textContent.trim() : 'Eligibility',
+            claimType: cells[3] ? cells[3].textContent.trim() : 'All LTC',
+            condition: cells[4] ? cells[4].textContent.trim() : '',
+            action: cells[5] ? cells[5].textContent.trim() : 'Flag-Review',
+            aiHealth: 'healthy'
+          };
+        }
+      });
+    }
+    if (!r) { _toast('Rule ' + id + ' not found'); return; }
+    var sub = document.getElementById('bre-edit-subtitle');
+    if (sub) sub.textContent = id + ' — Last modified ' + (r.lastMod || 'recently');
+    var setVal = function(elId, val) { var el=document.getElementById(elId); if(el) el.value = val||''; };
+    setVal('bre-edit-id', r.id);
+    setVal('bre-edit-name', r.name);
+    setVal('bre-edit-condition', r.condition);
+    // category select
+    var catSel = document.getElementById('bre-edit-category');
+    if (catSel) { for(var i=0;i<catSel.options.length;i++){ if(catSel.options[i].value===r.category||catSel.options[i].text===r.category){catSel.selectedIndex=i;break;} } }
+    var ctSel = document.getElementById('bre-edit-claimtype');
+    if (ctSel) { for(var j=0;j<ctSel.options.length;j++){ if(ctSel.options[j].value===r.claimType||ctSel.options[j].text===r.claimType){ctSel.selectedIndex=j;break;} } }
+    var actSel = document.getElementById('bre-edit-action');
+    if (actSel) { for(var k=0;k<actSel.options.length;k++){ if(actSel.options[k].value===r.action||actSel.options[k].text===r.action){actSel.selectedIndex=k;break;} } }
+    var ahSel = document.getElementById('bre-edit-aihealth');
+    if (ahSel) { for(var l=0;l<ahSel.options.length;l++){ if(ahSel.options[l].value===(r.aiHealth||'healthy')){ahSel.selectedIndex=l;break;} } }
+    // AI Analysis
+    var analysisMap = {
+      'BR-001': 'High confidence rule · Fires 8,231×/mo · No conflicts detected · ADL threshold of 2/6 is industry-standard per NAIC LTC model · Suggest adding "Bathing" as weighted ADL for memory care sub-path.',
+      'BR-005': 'Critical STP rule · Responsible for 61% of auto-adjudicated volume · Conflict with BR-023 on $24.5–25.5K edge — resolved by priority order · AI recommends adding confidence threshold parameter.',
+      'BR-019': 'AI-scored gate · 92% confidence threshold was raised from 88% on Jul 11 · Monitors 9,870 claims/mo · Model accuracy: 98.7% on validation set.',
+      'BR-023': 'High-dollar gate · Overrides BR-005 for large claims · 78 claims/mo routed to senior adjudicator · AI recommends raising threshold to $30K based on inflation trends.'
+    };
+    var aiEl = document.getElementById('bre-edit-ai-analysis');
+    if (aiEl) {
+      aiEl.innerHTML = analysisMap[id] ||
+        '<span style="color:#6b7280;">AI analysed ' + (r.hits||'N/A') + ' historical executions of this rule. No anomalies detected. Rule performance is within expected variance. Last model validation: Jul 11, 2026.</span>';
+    }
+    // Ontology linkage
+    var ontoMap = {
+      'Eligibility':     '📎 Ontology Nodes: <strong>LTC_Beneficiary → ADL_Assessment → Benefit_Trigger</strong><br>Semantic Layer: <em>claims.adl_count</em> mapped to <em>onto:FunctionalImpairment</em><br>Knowledge Graph: Connected to 3 policy terms, 2 regulatory nodes (NAIC §4, CMS ADL Criteria)',
+      'Benefit Calc':    '📎 Ontology Nodes: <strong>Policy_Contract → Benefit_Period → Inflation_Rider</strong><br>Semantic Layer: <em>claims.daily_benefit</em> → <em>onto:MonetaryBenefit</em><br>Knowledge Graph: Linked to CPI-U index feed, 7 active policy templates',
+      'STP':             '📎 Ontology Nodes: <strong>Claim_Event → Rules_Engine → Payment_Queue</strong><br>Semantic Layer: <em>claims.stp_confidence</em> → <em>onto:AutoAdjudicationScore</em><br>Knowledge Graph: 5 upstream rule dependencies, 2 downstream payment nodes',
+      'Fraud/Integrity': '📎 Ontology Nodes: <strong>Provider_Entity → License_Registry → SIU_Workflow</strong><br>Semantic Layer: <em>provider.npi_status</em> → <em>onto:LicensureState</em><br>Knowledge Graph: NPI cross-reference graph (14M nodes), state board API feed',
+      'HAL-Specific':    '📎 Ontology Nodes: <strong>HAL_Policy → ProductLine (Health|Life|Annuity) → CareEvent</strong><br>Semantic Layer: <em>policy.product_line</em> → <em>onto:HALProductClassification</em><br>Knowledge Graph: HAL product taxonomy (3 lines × 8 benefit types = 24 nodes)',
+      'Duration':        '📎 Ontology Nodes: <strong>Benefit_Period → Lifetime_Pool → Termination_Event</strong><br>Semantic Layer: <em>claims.cumulative_paid</em> → <em>onto:BenefitPoolBalance</em><br>Knowledge Graph: Policy lifecycle graph, elimination period calendar nodes',
+      'Compliance':      '📎 Ontology Nodes: <strong>Regulatory_Standard → Policy_Term → Filing_Obligation</strong><br>Semantic Layer: <em>policy.naic_compliance</em> → <em>onto:RegulatoryConformance</em><br>Knowledge Graph: NAIC model regulation graph (2026 revision), state filing nodes'
+    };
+    var ontoEl = document.getElementById('bre-edit-ontology');
+    if (ontoEl) ontoEl.innerHTML = ontoMap[r.category] || ontoMap['Compliance'];
+    modal.style.display = 'flex';
+  };
+
+  window._p42saveRule = function () {
+    var id   = (document.getElementById('bre-edit-id')    ||{}).value;
+    var name = (document.getElementById('bre-edit-name')  ||{}).value;
+    var cond = (document.getElementById('bre-edit-condition')||{}).value;
+    var act  = (document.getElementById('bre-edit-action')||{}).value;
+    var cat  = (document.getElementById('bre-edit-category')||{}).value;
+    // Update _breRules in memory if accessible
+    if (window._breRules) {
+      var r = window._breRules.find(function(x){return x.id===id;});
+      if (r) { r.name=name; r.condition=cond; r.action=act; r.category=cat; r.lastMod='Jul 14, 2026'; }
+    }
+    // Refresh table
+    if (window._p41switchTab) window._p41switchTab('all');
+    document.getElementById('bre-edit-modal').style.display = 'none';
+    _toast('✅ Rule ' + id + ' saved — ' + name + '. Changes logged to audit trail.');
+  };
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     3. ENHANCED STP DASHBOARD — full functional modal
+  ═══════════════════════════════════════════════════════════════════════ */
+  function _p42injectSTPDash() {
+    if (document.getElementById('bre-stp-modal')) return;
+    var m = document.createElement('div');
+    m.id = 'bre-stp-modal';
+    m.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9100;align-items:flex-start;justify-content:center;overflow-y:auto;padding:30px 16px;';
+    m.innerHTML =
+      '<div style="background:#fff;border-radius:18px;width:820px;max-width:96vw;box-shadow:0 25px 80px rgba(0,0,0,.25);overflow:hidden;">' +
+        /* header */
+        '<div style="background:linear-gradient(135deg,#064e3b,#059669);padding:20px 28px;display:flex;align-items:center;justify-content:space-between;">' +
+          '<div>' +
+            '<div style="font-size:17px;font-weight:900;color:#fff;"><i class="fas fa-bolt" style="margin-right:10px;color:#6ee7b7;"></i>STP Dashboard — Straight Through Processing</div>' +
+            '<div style="font-size:11px;color:#a7f3d0;margin-top:4px;">Live rule-driven adjudication intelligence · July 2026</div>' +
+          '</div>' +
+          '<button onclick="document.getElementById(\'bre-stp-modal\').style.display=\'none\'" style="background:rgba(255,255,255,.2);border:none;border-radius:8px;padding:7px 12px;color:#fff;cursor:pointer;font-size:15px;">✕ Close</button>' +
+        '</div>' +
+
+        /* STP How It Works — animated pipeline */
+        '<div style="padding:22px 28px;background:#f0fdf4;border-bottom:1px solid #d1fae5;">' +
+          '<div style="font-size:12px;font-weight:800;color:#065f46;margin-bottom:14px;"><i class="fas fa-project-diagram" style="margin-right:7px;"></i>How Rules Drive STP — Claim Adjudication Pipeline</div>' +
+          '<div style="display:flex;align-items:center;gap:0;overflow-x:auto;padding-bottom:6px;">' +
+            _stpPipelineStep('1','Claim Received','fa-file-import','#2563eb','New LTC claim enters system via eLTCAS / EDI / Portal') +
+            _stpArrow() +
+            _stpPipelineStep('2','Eligibility Rules','fa-user-check','#7c3aed','BR-001 ADL Trigger\nBR-007 Elim. Period\nBR-011 LOC Validation') +
+            _stpArrow() +
+            _stpPipelineStep('3','Fraud & Integrity','fa-shield-alt','#dc2626','BR-004 Duplicate Guard\nBR-008 HHA License\nBR-017 NPI Validation') +
+            _stpArrow() +
+            _stpPipelineStep('4','Benefit Calculation','fa-calculator','#0891b2','BR-006 Daily Rate Cap\nBR-012 Inflation Rider\nBR-022 Medicare COB') +
+            _stpArrow() +
+            _stpPipelineStep('5','STP Gate','fa-robot','#059669','BR-005 Auto-Adjudication\nBR-019 AI Confidence ≥92%\nBR-023 $25K Review Gate') +
+            _stpArrow() +
+            _stpPipelineStep('6','AUTO-PAY','fa-check-circle','#059669','✅ Payment queued\nNo human touch\n87.4% of all claims') +
+          '</div>' +
+          '<div style="margin-top:12px;font-size:10px;color:#059669;font-weight:600;"><i class="fas fa-info-circle" style="margin-right:4px;"></i>Rules act as sequential gates. A claim must pass ALL applicable rules to qualify for STP auto-payment. Failure at any gate routes to manual queue.</div>' +
+        '</div>' +
+
+        /* KPI row */
+        '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:0;border-bottom:1px solid #e5e7eb;">' +
+          _stpKpi('22,531','Total Claims','#111827','#fff','fa-file-medical-alt','#2563eb') +
+          _stpKpi('19,692','STP Auto-Paid','#065f46','#f0fdf4','fa-bolt','#059669') +
+          _stpKpi('87.4%','STP Rate','#065f46','#f0fdf4','fa-percentage','#059669') +
+          _stpKpi('2,839','Manual Review','#92400e','#fffbeb','fa-user-clock','#d97706') +
+          _stpKpi('$0','STP Errors','#065f46','#f0fdf4','fa-exclamation-circle','#059669') +
+        '</div>' +
+
+        '<div style="padding:22px 28px;">' +
+
+          /* STP by Rule table */
+          '<div style="font-size:12px;font-weight:800;color:#111827;margin-bottom:12px;"><i class="fas fa-table" style="margin-right:7px;color:#059669;"></i>STP Performance by Rule</div>' +
+          '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;margin-bottom:22px;">' +
+            '<table style="width:100%;border-collapse:collapse;font-size:11px;">' +
+              '<thead><tr style="background:#f9fafb;border-bottom:2px solid #e5e7eb;">' +
+                '<th style="padding:9px 12px;text-align:left;font-weight:800;color:#6b7280;font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Rule</th>' +
+                '<th style="padding:9px 12px;text-align:left;font-weight:800;color:#6b7280;font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Name</th>' +
+                '<th style="padding:9px 12px;text-align:right;font-weight:800;color:#6b7280;font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Claims Processed</th>' +
+                '<th style="padding:9px 12px;text-align:right;font-weight:800;color:#6b7280;font-size:10px;text-transform:uppercase;letter-spacing:.05em;">STP Contribution</th>' +
+                '<th style="padding:9px 12px;text-align:center;font-weight:800;color:#6b7280;font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Role in STP</th>' +
+                '<th style="padding:9px 12px;text-align:center;font-weight:800;color:#6b7280;font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Pass Rate</th>' +
+              '</tr></thead>' +
+              '<tbody>' +
+                _stpRuleRow('BR-001','ADL Benefit Trigger','8,231','36.5%','Gate: Eligibility','99.1%','#059669') +
+                _stpRuleRow('BR-007','Elimination Period Gate','4,102','18.2%','Gate: Pre-condition','97.8%','#059669') +
+                _stpRuleRow('BR-004','Duplicate Claim Guard','47','0.2%','Gate: Fraud Block','99.8%','#059669') +
+                _stpRuleRow('BR-017','Provider License Valid.','61','0.3%','Gate: Fraud Block','99.7%','#059669') +
+                _stpRuleRow('BR-006','Daily Benefit Rate Cap','63,000','100%','Calc: Always fires','100%','#0891b2') +
+                _stpRuleRow('BR-019','AI Confidence Gate','9,870','43.8%','Gate: AI Score','98.7%','#7c3aed') +
+                _stpRuleRow('BR-005','STP Auto-Adjudication','12,094','53.7%','Output: AUTO-PAY','87.4%','#059669') +
+                _stpRuleRow('BR-023','High-Dollar Review','78','0.3%','Gate: Override','100%','#d97706') +
+              '</tbody>' +
+            '</table>' +
+          '</div>' +
+
+          /* Non-STP breakdown */
+          '<div style="font-size:12px;font-weight:800;color:#111827;margin-bottom:12px;"><i class="fas fa-chart-pie" style="margin-right:7px;color:#d97706;"></i>Non-STP Claims — Manual Queue Breakdown (2,839 claims)</div>' +
+          '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:22px;">' +
+            _stpMQ('Route-to-RN','Clinical Review','1,203','#2563eb','42%') +
+            _stpMQ('Flag-Review','Admin / Compliance','1,194','#d97706','42%') +
+            _stpMQ('Hold-SIU','SIU Investigation','442','#dc2626','16%') +
+          '</div>' +
+
+          /* STP Trend sparkline (ASCII art-style bars) */
+          '<div style="font-size:12px;font-weight:800;color:#111827;margin-bottom:10px;"><i class="fas fa-chart-line" style="margin-right:7px;color:#059669;"></i>STP Rate Trend — Last 8 Months</div>' +
+          '<div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:16px;">' +
+            '<div style="display:flex;align-items:flex-end;gap:12px;height:72px;">' +
+              _stpBar('Dec','78.2%',46,'#d1fae5','#059669') +
+              _stpBar('Jan','80.1%',48,'#d1fae5','#059669') +
+              _stpBar('Feb','81.4%',49,'#d1fae5','#059669') +
+              _stpBar('Mar','82.9%',50,'#d1fae5','#059669') +
+              _stpBar('Apr','84.0%',51,'#d1fae5','#059669') +
+              _stpBar('May','85.3%',52,'#d1fae5','#059669') +
+              _stpBar('Jun','86.1%',52,'#d1fae5','#059669') +
+              _stpBar('Jul','87.4%',53,'#059669','#fff') +
+            '</div>' +
+            '<div style="font-size:10px;color:#6b7280;font-weight:600;margin-top:8px;text-align:center;">STP Rate improving month-over-month (+9.2 pts over 8 months) · Target: 90% by Q4 2026</div>' +
+          '</div>' +
+
+        '</div>' + /* end padding */
+      '</div>';
+    document.body.appendChild(m);
+  }
+
+  function _stpPipelineStep(num, label, icon, color, detail) {
+    return '<div style="display:flex;flex-direction:column;align-items:center;min-width:110px;flex:1;">' +
+      '<div style="background:' + color + ';color:#fff;border-radius:12px;padding:10px 12px;text-align:center;width:100%;box-sizing:border-box;">' +
+        '<div style="font-size:9px;font-weight:800;opacity:.7;margin-bottom:3px;">STEP ' + num + '</div>' +
+        '<i class="fas ' + icon + '" style="font-size:18px;margin-bottom:6px;display:block;"></i>' +
+        '<div style="font-size:10px;font-weight:800;line-height:1.2;">' + label + '</div>' +
+      '</div>' +
+      '<div style="font-size:9px;color:#6b7280;margin-top:6px;text-align:center;white-space:pre-line;line-height:1.5;">' + detail + '</div>' +
+    '</div>';
+  }
+  function _stpArrow() {
+    return '<div style="color:#d1d5db;font-size:20px;padding:0 2px;align-self:flex-start;margin-top:18px;">→</div>';
+  }
+  function _stpKpi(val, label, textCol, bg, icon, iconCol) {
+    return '<div style="padding:16px;background:' + bg + ';text-align:center;border-right:1px solid #e5e7eb;">' +
+      '<i class="fas ' + icon + '" style="font-size:16px;color:' + iconCol + ';margin-bottom:6px;display:block;"></i>' +
+      '<div style="font-size:20px;font-weight:900;color:' + textCol + ';">' + val + '</div>' +
+      '<div style="font-size:10px;color:#6b7280;font-weight:600;margin-top:3px;">' + label + '</div>' +
+    '</div>';
+  }
+  function _stpRuleRow(id, name, claims, pct, role, passRate, roleCol) {
+    return '<tr style="border-bottom:1px solid #f3f4f6;" onmouseenter="this.style.background=\'#f9fafb\'" onmouseleave="this.style.background=\'\'">' +
+      '<td style="padding:9px 12px;font-weight:800;color:#7c3aed;">' + id + '</td>' +
+      '<td style="padding:9px 12px;color:#111827;font-weight:600;">' + name + '</td>' +
+      '<td style="padding:9px 12px;text-align:right;color:#374151;">' + claims + '</td>' +
+      '<td style="padding:9px 12px;text-align:right;color:#374151;">' + pct + '</td>' +
+      '<td style="padding:9px 12px;text-align:center;"><span style="background:' + roleCol + '22;color:' + roleCol + ';font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px;">' + role + '</span></td>' +
+      '<td style="padding:9px 12px;text-align:center;font-weight:800;color:#059669;">' + passRate + '</td>' +
+    '</tr>';
+  }
+  function _stpMQ(action, label, count, col, pct) {
+    return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px;">' +
+      '<div style="color:' + col + ';font-size:12px;font-weight:800;margin-bottom:4px;"><i class="fas fa-arrow-right" style="margin-right:5px;"></i>' + action + '</div>' +
+      '<div style="font-size:10px;color:#6b7280;margin-bottom:8px;">' + label + '</div>' +
+      '<div style="font-size:22px;font-weight:900;color:#111827;">' + count + '</div>' +
+      '<div style="background:#e5e7eb;border-radius:4px;height:4px;margin-top:8px;"><div style="background:' + col + ';height:4px;border-radius:4px;width:' + pct + ';"></div></div>' +
+    '</div>';
+  }
+  function _stpBar(month, rate, height, bg, textCol) {
+    return '<div style="display:flex;flex-direction:column;align-items:center;flex:1;gap:4px;">' +
+      '<div style="font-size:9px;font-weight:800;color:' + textCol + ';background:' + bg + ';border-radius:4px;padding:1px 4px;">' + rate + '</div>' +
+      '<div style="width:100%;height:' + height + 'px;background:' + (bg==='#059669'?'#059669':'#6ee7b7') + ';border-radius:4px 4px 0 0;"></div>' +
+      '<div style="font-size:9px;color:#9ca3af;">' + month + '</div>' +
+    '</div>';
+  }
+
+  window._p41openSTPDash = function () {
+    _p42injectSTPDash();
+    var m = document.getElementById('bre-stp-modal');
+    if (m) m.style.display = 'flex';
+  };
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     4. ENHANCED SIMULATOR — 10 rich parameters
+  ═══════════════════════════════════════════════════════════════════════ */
+  function _p42rebuildSimModal() {
+    var old = document.getElementById('bre-sim-modal');
+    if (!old) return;
+    old.innerHTML =
+      '<div style="background:#fff;border-radius:18px;padding:0;width:680px;max-width:96vw;max-height:90vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 25px 80px rgba(0,0,0,.25);">' +
+        '<div style="background:linear-gradient(135deg,#312e81,#7c3aed);padding:20px 24px;display:flex;align-items:center;justify-content:space-between;">' +
+          '<div>' +
+            '<div style="font-size:16px;font-weight:900;color:#fff;"><i class="fas fa-play" style="margin-right:8px;color:#c4b5fd;"></i>Rule Simulator — AI-Powered Claim Testing</div>' +
+            '<div style="font-size:11px;color:#c4b5fd;margin-top:3px;">Enter real claim parameters · AI traces every rule · See exactly how STP is determined</div>' +
+          '</div>' +
+          '<button onclick="document.getElementById(\'bre-sim-modal\').style.display=\'none\'" style="background:rgba(255,255,255,.2);border:none;border-radius:8px;padding:7px 12px;color:#fff;cursor:pointer;font-size:15px;">✕</button>' +
+        '</div>' +
+        '<div style="padding:20px 24px;overflow-y:auto;flex:1;">' +
+          /* Quick scenario presets */
+          '<div style="margin-bottom:16px;">' +
+            '<div style="font-size:11px;font-weight:800;color:#374151;margin-bottom:8px;"><i class="fas fa-magic" style="margin-right:5px;color:#7c3aed;"></i>Quick Scenarios</div>' +
+            '<div style="display:flex;gap:7px;flex-wrap:wrap;">' +
+              '<button onclick="_p42loadScenario(\'typical\')" style="background:#ede9fe;color:#5b21b6;border:none;border-radius:6px;padding:5px 11px;font-size:10px;font-weight:700;cursor:pointer;">✓ Typical STP Claim</button>' +
+              '<button onclick="_p42loadScenario(\'highdollar\')" style="background:#fef3c7;color:#92400e;border:none;border-radius:6px;padding:5px 11px;font-size:10px;font-weight:700;cursor:pointer;">⚠ High-Dollar Claim</button>' +
+              '<button onclick="_p42loadScenario(\'fraud\')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:6px;padding:5px 11px;font-size:10px;font-weight:700;cursor:pointer;">🚨 Fraud Signal</button>' +
+              '<button onclick="_p42loadScenario(\'hospice\')" style="background:#f0fdf4;color:#065f46;border:none;border-radius:6px;padding:5px 11px;font-size:10px;font-weight:700;cursor:pointer;">🏥 Hospice Claim</button>' +
+              '<button onclick="_p42loadScenario(\'hal\')" style="background:#eff6ff;color:#1e40af;border:none;border-radius:6px;padding:5px 11px;font-size:10px;font-weight:700;cursor:pointer;">💼 HAL Multi-Line</button>' +
+            '</div>' +
+          '</div>' +
+          /* 10-parameter form */
+          '<div style="background:#f9fafb;border-radius:12px;padding:16px;margin-bottom:16px;">' +
+            '<div style="font-size:11px;font-weight:800;color:#374151;margin-bottom:12px;"><i class="fas fa-sliders-h" style="margin-right:6px;color:#7c3aed;"></i>Claim Parameters</div>' +
+            '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">' +
+              _simField('sim-claimtype','Claim Type','select','All LTC','<option>All LTC</option><option>Home Health</option><option>Nursing Facility</option><option>Memory Care</option><option>HAL</option><option>Hospice</option><option>Adult Day Care</option><option>Assisted Living</option><option>Respite</option>') +
+              _simField('sim-adl','ADLs Impaired','select','2 of 6','<option>0 of 6 — None</option><option>1 of 6 — Marginal</option><option>2 of 6 — Threshold</option><option>3 of 6 — Moderate</option><option>4 of 6 — Significant</option><option>5 of 6 — Severe</option><option>6 of 6 — Total</option>') +
+              _simField('sim-amount','Monthly Claim Amount ($)','number','4200','') +
+              _simField('sim-elim','Elim. Period Satisfied','select','Yes','<option>Yes — Fully satisfied</option><option>No — Not yet satisfied</option><option>Partial — In progress</option>') +
+              _simField('sim-provider-status','Provider License','select','Active','<option>Active — State verified</option><option>Expired — Lapsed license</option><option>Pending — Under review</option>') +
+              _simField('sim-duplicate','Duplicate Flag','select','No','<option>No — First submission</option><option>Yes — Duplicate detected</option>') +
+              _simField('sim-mmse','MMSE Score (Memory)','number','28','') +
+              _simField('sim-ai-confidence','AI Confidence Score (%)','number','95','') +
+              _simField('sim-policy-type','Policy Type','select','Traditional LTC','<option>Traditional LTC</option><option>HAL — Health Product</option><option>HAL — Life/LTC Hybrid</option><option>HAL — Annuity/LTC Rider</option><option>Shared Benefit</option>') +
+              _simField('sim-inflation','Inflation Rider','select','5% Compound','<option>None</option><option>CPI-U Linked</option><option>3% Simple</option><option>5% Compound</option>') +
+            '</div>' +
+          '</div>' +
+          '<button onclick="_p42runSim()" style="width:100%;background:linear-gradient(135deg,#7c3aed,#4c1d95);color:#fff;border:none;border-radius:10px;padding:13px;font-size:13px;font-weight:900;cursor:pointer;margin-bottom:14px;letter-spacing:.02em;"><i class="fas fa-play" style="margin-right:8px;"></i>Run Simulation — Trace All Rules</button>' +
+          '<div id="bre-sim-result2" style="display:none;"></div>' +
+        '</div>' +
+      '</div>';
+  }
+
+  function _simField(id, label, type, defVal, opts) {
+    var inner = type === 'select'
+      ? '<select id="' + id + '" style="width:100%;border:1px solid #e5e7eb;border-radius:6px;padding:7px;font-size:11px;box-sizing:border-box;">' + opts + '</select>'
+      : '<input id="' + id + '" type="' + type + '" value="' + defVal + '" style="width:100%;border:1px solid #e5e7eb;border-radius:6px;padding:7px;font-size:11px;box-sizing:border-box;">';
+    return '<div><label style="font-size:10px;font-weight:700;color:#6b7280;display:block;margin-bottom:4px;">' + label + '</label>' + inner + '</div>';
+  }
+
+  window._p42loadScenario = function(name) {
+    var s = {
+      typical:    { claimtype:0, adl:2, amount:4200,  elim:0, prov:0, dup:0, mmse:28, conf:95, policy:0, infl:3 },
+      highdollar: { claimtype:2, adl:3, amount:28000, elim:0, prov:0, dup:0, mmse:26, conf:91, policy:0, infl:2 },
+      fraud:      { claimtype:1, adl:2, amount:3800,  elim:0, prov:1, dup:1, mmse:28, conf:72, policy:0, infl:1 },
+      hospice:    { claimtype:5, adl:4, amount:6200,  elim:0, prov:0, dup:0, mmse:18, conf:96, policy:0, infl:0 },
+      hal:        { claimtype:4, adl:2, amount:3500,  elim:0, prov:0, dup:0, mmse:29, conf:93, policy:2, infl:3 }
+    };
+    var sc = s[name]; if (!sc) return;
+    var setIdx = function(id, idx) { var el=document.getElementById(id); if(el&&el.options[idx]) el.selectedIndex=idx; };
+    var setVal = function(id, val) { var el=document.getElementById(id); if(el) el.value=val; };
+    setIdx('sim-claimtype', sc.claimtype);
+    setIdx('sim-adl', sc.adl);
+    setVal('sim-amount', sc.amount);
+    setIdx('sim-elim', sc.elim);
+    setIdx('sim-provider-status', sc.prov);
+    setIdx('sim-duplicate', sc.dup);
+    setVal('sim-mmse', sc.mmse);
+    setVal('sim-ai-confidence', sc.conf);
+    setIdx('sim-policy-type', sc.policy);
+    setIdx('sim-inflation', sc.infl);
+  };
+
+  window._p42runSim = function() {
+    var gv = function(id){ var e=document.getElementById(id); return e?(e.tagName==='SELECT'?e.options[e.selectedIndex].text:e.value):''; };
+    var gn = function(id){ return parseFloat(gv(id))||0; };
+    var ct = gv('sim-claimtype');
+    var adlText = gv('sim-adl');
+    var adlCount = parseInt(adlText)||2;
+    var amount = gn('sim-amount');
+    var elim = gv('sim-elim').indexOf('Yes')>-1;
+    var provOk = gv('sim-provider-status').indexOf('Active')>-1;
+    var noDup = gv('sim-duplicate').indexOf('No')>-1;
+    var mmse = gn('sim-mmse');
+    var conf = gn('sim-ai-confidence');
+    var policy = gv('sim-policy-type');
+    var infl = gv('sim-inflation');
+
+    var steps = [
+      { rule:'BR-007', name:'Elimination Period Gate',    phase:'Eligibility',
+        pass: elim, stp:'Gate',
+        note: elim ? 'Elimination period fully satisfied — claim may proceed' : '❌ FAIL — Elimination period not met. Claim rejected at first gate.' },
+      { rule:'BR-001', name:'ADL Benefit Trigger',        phase:'Eligibility',
+        pass: adlCount >= 2, stp:'Gate',
+        note: adlCount >= 2 ? adlCount + ' of 6 ADLs impaired — eligibility threshold met (' + (adlCount>=4?'severe impairment':'standard path') + ')' : '❌ FAIL — Fewer than 2 ADLs impaired. Not eligible for LTC benefit.' },
+      { rule:'BR-002', name:'Cognitive Impairment Route', phase:'Eligibility',
+        pass: true, stp:'Calc',
+        note: mmse < 24 ? '⚡ MMSE=' + mmse + ' (<24) — Cognitive pathway activated; routed to RN for physician review' : 'MMSE=' + mmse + ' — no cognitive pathway triggered; standard processing' },
+      { rule:'BR-004', name:'Duplicate Claim Guard',      phase:'Fraud',
+        pass: noDup, stp:'Gate',
+        note: noDup ? 'No duplicate found in 30-day rolling window — proceed' : '❌ HOLD-SIU — Duplicate submission detected. Claim forwarded to SIU queue.' },
+      { rule:'BR-017', name:'Provider License Validation',phase:'Fraud',
+        pass: provOk, stp:'Gate',
+        note: provOk ? 'Provider NPI cross-checked against state licensing board — Active ✓' : '❌ HOLD-SIU — Provider license issue detected. Claim held for compliance review.' },
+      { rule:'BR-006', name:'Daily Benefit Rate Cap',     phase:'Benefit Calc',
+        pass: true, stp:'Calc',
+        note: 'Monthly amount $' + amount.toLocaleString() + ' → daily rate $' + (amount/30).toFixed(2) + ' · Inflation rider: ' + infl + ' applied → Adjusted daily benefit calculated' },
+      { rule:'BR-012', name:'Inflation Rider Application',phase:'Benefit Calc',
+        pass: true, stp:'Calc',
+        note: infl === 'None' ? 'No inflation rider on policy — base rate only' : 'Inflation rider (' + infl + ') applied at policy anniversary. Rate adjusted accordingly.' },
+      { rule:'BR-022', name:'Medicare COB Offset',        phase:'Benefit Calc',
+        pass: true, stp:'Calc',
+        note: 'Coordination of Benefits check complete — no Medicare overlap on this claim type. Full LTC benefit payable.' },
+      { rule:'BR-023', name:'High-Dollar Review Gate',    phase:'STP Gate',
+        pass: amount < 25000, stp:'Gate',
+        note: amount >= 25000 ? '⚠ FLAG-REVIEW — Monthly amount $' + amount.toLocaleString() + ' ≥ $25,000 threshold. Routed to senior adjudicator regardless of other rules.' : '$' + amount.toLocaleString() + ' is below $25,000 high-dollar threshold — bypass ✓' },
+      { rule:'BR-019', name:'AI Confidence Score Gate',   phase:'STP Gate',
+        pass: conf >= 92, stp:'Gate',
+        note: conf >= 92 ? 'AI confidence ' + conf + '% ≥ 92% threshold — claim qualifies for auto-adjudication pathway' : '⚠ ROUTE — AI confidence ' + conf + '% below 92% threshold. Routed to adjudicator for manual review.' },
+      { rule:'BR-005', name:'STP Auto-Adjudication',      phase:'STP Output',
+        pass: elim && adlCount >= 2 && noDup && provOk && amount < 25000 && conf >= 92, stp:'Output',
+        note: (elim && adlCount >= 2 && noDup && provOk && amount < 25000 && conf >= 92)
+          ? '✅ ALL GATES PASSED — Claim queued for AUTOMATIC PAYMENT. No human touch required.' : 'One or more gates failed — claim bypasses STP and routes to manual adjudication queue.' }
+    ];
+
+    var allPass = steps[steps.length-1].pass;
+    var phaseColors = { 'Eligibility':'#7c3aed', 'Fraud':'#dc2626', 'Benefit Calc':'#0891b2', 'STP Gate':'#059669', 'STP Output':'#065f46' };
+
+    var html = '<div style="font-size:12px;font-weight:800;color:#111827;margin-bottom:12px;"><i class="fas fa-clipboard-list" style="margin-right:7px;color:#7c3aed;"></i>Rule Trace — ' + ct + ' · $' + amount.toLocaleString() + '/mo · AI Score: ' + conf + '%</div>';
+
+    var lastPhase = '';
+    steps.forEach(function(s) {
+      if (s.phase !== lastPhase) {
+        html += '<div style="font-size:10px;font-weight:800;color:' + (phaseColors[s.phase]||'#374151') + ';text-transform:uppercase;letter-spacing:.07em;margin:10px 0 5px;padding:4px 10px;background:' + (phaseColors[s.phase]||'#374151') + '18;border-radius:5px;display:inline-block;">' + s.phase + '</div><br>';
+        lastPhase = s.phase;
+      }
+      var icon = s.stp === 'Calc' ? 'fa-calculator' : (s.pass ? 'fa-check' : 'fa-times');
+      var bg   = s.stp === 'Calc' ? '#eff6ff' : (s.pass ? '#f0fdf4' : '#fef2f2');
+      var bc   = s.stp === 'Calc' ? '#bfdbfe' : (s.pass ? '#bbf7d0' : '#fecaca');
+      var ic   = s.stp === 'Calc' ? '#2563eb' : (s.pass ? '#059669' : '#dc2626');
+      html += '<div style="display:flex;align-items:flex-start;gap:10px;padding:9px 12px;background:' + bg + ';border:1px solid ' + bc + ';border-radius:8px;margin-bottom:6px;">' +
+        '<div style="width:22px;height:22px;border-radius:50%;background:' + ic + ';display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">' +
+          '<i class="fas ' + icon + '" style="font-size:10px;color:#fff;"></i>' +
+        '</div>' +
+        '<div style="flex:1;">' +
+          '<div style="display:flex;align-items:center;gap:7px;margin-bottom:3px;">' +
+            '<span style="font-size:10px;font-weight:900;color:#7c3aed;">' + s.rule + '</span>' +
+            '<span style="font-size:11px;font-weight:700;color:#111827;">' + s.name + '</span>' +
+            '<span style="font-size:9px;background:' + ic + '22;color:' + ic + ';font-weight:800;padding:1px 6px;border-radius:4px;">' + s.stp + '</span>' +
+          '</div>' +
+          '<div style="font-size:11px;color:#374151;line-height:1.4;">' + s.note + '</div>' +
+        '</div>' +
+      '</div>';
+    });
+
+    /* STP verdict */
+    html += '<div style="margin-top:14px;padding:14px 18px;border-radius:10px;background:' + (allPass?'#d1fae5':'#fef3c7') + ';border:2px solid ' + (allPass?'#6ee7b7':'#fcd34d') + ';">' +
+      '<div style="font-size:13px;font-weight:900;color:' + (allPass?'#065f46':'#92400e') + ';margin-bottom:6px;">' +
+        (allPass ? '✅ OUTCOME: STRAIGHT THROUGH PROCESSING — AUTO-PAY' : '⚠️ OUTCOME: MANUAL REVIEW QUEUE') +
+      '</div>' +
+      '<div style="font-size:11px;color:' + (allPass?'#065f46':'#92400e') + ';line-height:1.5;">' +
+        (allPass
+          ? 'Claim passed all 11 rule gates. No human adjudicator required. Payment will be released in the next batch cycle (within 2 business hours). This is what STP means — end-to-end automation driven entirely by the rules above.'
+          : 'One or more rule gates failed or flagged the claim for review. The claim is routed to the appropriate manual queue. STP was blocked because the rules detected a condition requiring human judgment.') +
+      '</div>' +
+    '</div>';
+
+    var r = document.getElementById('bre-sim-result2');
+    if (r) { r.style.display=''; r.innerHTML=html; }
+  };
+
+  window._p41openSim = function () {
+    var m = document.getElementById('bre-sim-modal');
+    if (!m) return;
+    if (!document.getElementById('sim-claimtype')) _p42rebuildSimModal();
+    m.style.display = 'flex';
+  };
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     5. ENHANCED PLAIN-ENGLISH BUILDER — ontology, semantic, KG panels
+  ═══════════════════════════════════════════════════════════════════════ */
+  function _p42rebuildBuilderModal() {
+    var old = document.getElementById('bre-builder-modal');
+    if (!old) return;
+
+    var templates = [
+      { id:'t1', label:'Eligibility Gate', text:'If the claimant cannot perform at least 2 of 6 Activities of Daily Living (Bathing, Dressing, Toileting, Transfer, Eating, Continence) AND the elimination period of 90 days has been satisfied, then approve the LTC benefit and proceed to benefit calculation.' },
+      { id:'t2', label:'Fraud Detection', text:'If the same provider submits more than 3 claims exceeding $5,000 within a 14-day window AND the provider NPI was registered within the past 6 months, flag the claim for SIU investigation and hold all pending payments.' },
+      { id:'t3', label:'HAL Health Product', text:'For HAL Health product claims, if the claimant is receiving home health aide services AND the authorized hours exceed the care plan by more than 15%, route to the clinical team for care plan update before approving additional hours.' },
+      { id:'t4', label:'HAL Life/LTC Hybrid', text:'For HAL Life/LTC hybrid policies, if the long-term care rider benefit is triggered AND the life insurance face value has not been reduced below the minimum $10,000 floor, calculate the accelerated benefit amount and adjust the remaining death benefit accordingly.' },
+      { id:'t5', label:'HAL Annuity Rider', text:'For HAL Annuity products with LTC riders, if the claimant qualifies for LTC benefits AND the annuity account value exceeds $50,000, calculate the monthly LTC withdrawal amount not to exceed 2% of account value per month, and update the annuity record accordingly.' },
+      { id:'t6', label:'STP Confidence Gate', text:'If the AI adjudication model scores the claim with confidence greater than or equal to 92% AND no fraud flags are present AND the claim amount is below $25,000, automatically approve and queue for payment without human review.' },
+      { id:'t7', label:'Memory Care Route', text:'If the claimant has a MMSE score below 24 indicating cognitive impairment AND the claim is for a memory care secured unit, activate the cognitive impairment pathway, require physician recertification every 90 days, and apply the memory care premium surcharge from the policy rider.' },
+      { id:'t8', label:'Respite Cap', text:'If the claim is for respite care AND the cumulative respite days used in the current calendar year exceed 21 days, flag the claim for review. Respite benefit is only payable when an informal caregiver (family member) is the primary caregiver documented in the care plan.' }
+    ];
+
+    old.innerHTML =
+      '<div style="background:#fff;border-radius:18px;padding:0;width:820px;max-width:96vw;max-height:92vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 25px 80px rgba(0,0,0,.25);">' +
+        /* header */
+        '<div style="background:linear-gradient(135deg,#1e1b4b,#5b21b6);padding:20px 26px;display:flex;align-items:center;justify-content:space-between;">' +
+          '<div>' +
+            '<div style="font-size:16px;font-weight:900;color:#fff;"><i class="fas fa-pen-fancy" style="margin-right:10px;color:#c4b5fd;"></i>Plain-English Rule Builder — AI-Powered</div>' +
+            '<div style="font-size:11px;color:#c4b5fd;margin-top:4px;">Ontology-grounded · Semantic-layer mapped · Knowledge Graph validated</div>' +
+          '</div>' +
+          '<button onclick="document.getElementById(\'bre-builder-modal\').style.display=\'none\'" style="background:rgba(255,255,255,.2);border:none;border-radius:8px;padding:7px 12px;color:#fff;cursor:pointer;font-size:15px;">✕</button>' +
+        '</div>' +
+
+        '<div style="display:flex;flex:1;overflow:hidden;">' +
+          /* LEFT: templates + input */
+          '<div style="width:320px;flex-shrink:0;border-right:1px solid #e5e7eb;overflow-y:auto;padding:18px;">' +
+            '<div style="font-size:11px;font-weight:800;color:#374151;margin-bottom:10px;"><i class="fas fa-book-open" style="margin-right:6px;color:#7c3aed;"></i>Pre-Built Templates</div>' +
+            '<div style="font-size:10px;color:#6b7280;margin-bottom:10px;line-height:1.4;">Click a template to load it into the editor. Use as-is or modify for your specific rule.</div>' +
+            templates.map(function(t) {
+              return '<button onclick="_p42loadTemplate(\'' + t.id + '\')" style="width:100%;text-align:left;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:9px 12px;margin-bottom:7px;cursor:pointer;font-size:10px;font-weight:700;color:#374151;transition:all .15s;" onmouseenter="this.style.background=\'#ede9fe\';this.style.borderColor=\'#7c3aed\'" onmouseleave="this.style.background=\'#f9fafb\';this.style.borderColor=\'#e5e7eb\'">' +
+                '<i class="fas fa-file-alt" style="color:#7c3aed;margin-right:6px;"></i>' + t.label +
+              '</button>';
+            }).join('') +
+            '<div style="margin-top:16px;font-size:11px;font-weight:800;color:#374151;margin-bottom:8px;"><i class="fas fa-keyboard" style="margin-right:6px;color:#7c3aed;"></i>Your Rule Description</div>' +
+            '<textarea id="bre-builder-text2" rows="6" placeholder="Type your rule in plain English, or select a template above…&#10;&#10;e.g. \'If a nursing facility claim exceeds 30 days without a new physician order, flag it for clinical review…\'" style="width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:10px;font-size:11px;resize:vertical;box-sizing:border-box;line-height:1.5;font-family:inherit;" onfocus="this.style.borderColor=\'#7c3aed\'" onblur="this.style.borderColor=\'#e5e7eb\'"></textarea>' +
+            '<button onclick="_p42convertRule2()" style="width:100%;background:linear-gradient(135deg,#7c3aed,#4c1d95);color:#fff;border:none;border-radius:8px;padding:11px;font-size:12px;font-weight:800;cursor:pointer;margin-top:10px;"><i class="fas fa-robot" style="margin-right:7px;"></i>Convert with AI</button>' +
+          '</div>' +
+
+          /* RIGHT: output panels (3 tabs) */
+          '<div style="flex:1;overflow-y:auto;padding:18px;">' +
+            '<div style="display:flex;gap:6px;margin-bottom:14px;">' +
+              '<button id="bre-bl-tab-rule" onclick="_p42blTab(\'rule\')" style="background:#7c3aed;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;">Rule Logic</button>' +
+              '<button id="bre-bl-tab-onto" onclick="_p42blTab(\'onto\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;">Ontology Graph</button>' +
+              '<button id="bre-bl-tab-sem" onclick="_p42blTab(\'sem\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;">Semantic Layer</button>' +
+              '<button id="bre-bl-tab-kg" onclick="_p42blTab(\'kg\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;">Knowledge Graph</button>' +
+            '</div>' +
+            /* Rule Logic panel */
+            '<div id="bre-bl-panel-rule">' +
+              '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px;margin-bottom:14px;">' +
+                '<div style="font-size:11px;font-weight:800;color:#065f46;margin-bottom:10px;"><i class="fas fa-check-circle" style="margin-right:6px;"></i>AI-Generated Rule Structure</div>' +
+                '<div id="bre-builder-output2" style="font-size:11px;color:#374151;line-height:1.8;font-family:monospace;white-space:pre-wrap;background:#fff;border:1px solid #d1fae5;border-radius:6px;padding:12px;">← Select a template or enter your rule description and click Convert with AI</div>' +
+              '</div>' +
+              '<div id="bre-bl-actions" style="display:none;display:flex;gap:8px;">' +
+                '<button onclick="_p42addToEngine()" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:11px;font-weight:800;cursor:pointer;"><i class="fas fa-plus" style="margin-right:5px;"></i>Add to Engine</button>' +
+                '<button onclick="document.getElementById(\'bre-builder-text2\').value=\'\'" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:9px 18px;font-size:11px;font-weight:700;cursor:pointer;">Clear &amp; Refine</button>' +
+                '<button onclick="_p42blTab(\'onto\')" style="background:#ede9fe;color:#5b21b6;border:none;border-radius:8px;padding:9px 18px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-project-diagram" style="margin-right:5px;"></i>View Ontology</button>' +
+              '</div>' +
+            '</div>' +
+            /* Ontology panel */
+            '<div id="bre-bl-panel-onto" style="display:none;">' + _builderOntoPanel() + '</div>' +
+            /* Semantic panel */
+            '<div id="bre-bl-panel-sem" style="display:none;">' + _builderSemPanel() + '</div>' +
+            /* KG panel */
+            '<div id="bre-bl-panel-kg" style="display:none;">' + _builderKGPanel() + '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+  }
+
+  function _builderOntoPanel() {
+    return '<div style="font-size:11px;font-weight:800;color:#374151;margin-bottom:12px;"><i class="fas fa-project-diagram" style="color:#7c3aed;margin-right:7px;"></i>Ontology Graph — LTC Domain Model</div>' +
+      '<div style="font-size:10px;color:#6b7280;margin-bottom:14px;">The BRE uses a formal LTC ontology to ground every rule. Ontology nodes define the concepts, and rules are expressed as relationships between nodes. This ensures rules are unambiguous, reusable, and machine-verifiable.</div>' +
+      /* visual ontology graph using HTML boxes */
+      '<div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:20px;overflow-x:auto;">' +
+        '<div style="min-width:580px;">' +
+          /* Root */
+          '<div style="text-align:center;margin-bottom:16px;"><span style="background:#312e81;color:#fff;font-size:11px;font-weight:800;padding:6px 18px;border-radius:20px;">LTC_Domain_Ontology</span></div>' +
+          /* Level 1 */
+          '<div style="display:flex;justify-content:space-around;margin-bottom:8px;">' +
+            _ontoNode('Claimant_Entity','#7c3aed') + _ontoNode('Policy_Contract','#0891b2') + _ontoNode('Provider_Entity','#dc2626') + _ontoNode('Regulatory_Standard','#6b7280') +
+          '</div>' +
+          '<div style="display:flex;justify-content:space-around;margin-bottom:8px;padding:0 20px;">' +
+            _ontoLine() + _ontoLine() + _ontoLine() + _ontoLine() +
+          '</div>' +
+          /* Level 2 */
+          '<div style="display:flex;justify-content:space-around;margin-bottom:8px;">' +
+            _ontoNode('ADL_Assessment','#7c3aed') + _ontoNode('Benefit_Period','#0891b2') + _ontoNode('License_Registry','#dc2626') + _ontoNode('NAIC_Model_Reg','#6b7280') +
+          '</div>' +
+          '<div style="display:flex;justify-content:center;margin-bottom:8px;">' +
+            '<span style="color:#d1d5db;font-size:24px;">↓</span>' +
+          '</div>' +
+          /* Central: Rules Engine */
+          '<div style="text-align:center;margin-bottom:8px;">' +
+            '<span style="background:#059669;color:#fff;font-size:12px;font-weight:900;padding:10px 28px;border-radius:12px;display:inline-block;"><i class="fas fa-cogs" style="margin-right:7px;"></i>Business_Rules_Engine</span>' +
+          '</div>' +
+          '<div style="display:flex;justify-content:center;margin-bottom:8px;">' +
+            '<span style="color:#d1d5db;font-size:24px;">↓</span>' +
+          '</div>' +
+          /* Level 3: Actions */
+          '<div style="display:flex;justify-content:space-around;">' +
+            _ontoNode('Auto-Pay_Event','#059669') + _ontoNode('Review_Queue','#d97706') + _ontoNode('SIU_Workflow','#dc2626') + _ontoNode('Rate_Calc_Event','#0891b2') +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div style="margin-top:14px;background:#faf5ff;border:1px solid #ddd6fe;border-radius:10px;padding:14px;">' +
+        '<div style="font-size:11px;font-weight:800;color:#5b21b6;margin-bottom:8px;">How Ontology Improves Rule Creation</div>' +
+        '<div style="font-size:11px;color:#374151;line-height:1.7;">' +
+          '• <strong>Disambiguation:</strong> "ADL" is precisely defined as <em>onto:ActivityOfDailyLiving</em> — 6 specific tasks. No ambiguity.<br>' +
+          '• <strong>Reusability:</strong> Rules reference ontology nodes, not raw data fields. Rule BR-001 works across eLTCAS, HAL, and CONNECT systems.<br>' +
+          '• <strong>Auto-validation:</strong> When you write a rule, the AI checks it against the ontology to flag impossible conditions.<br>' +
+          '• <strong>Cross-domain linking:</strong> HAL Health, Life, and Annuity product nodes are all anchored to the same LTC_Domain_Ontology.' +
+        '</div>' +
+      '</div>';
+  }
+
+  function _builderSemPanel() {
+    var rows = [
+      ['claims.adl_count', 'onto:FunctionalImpairmentScore', 'INTEGER (0–6)', 'BR-001, BR-002', '#7c3aed'],
+      ['claims.monthly_amount', 'onto:MonetaryBenefit', 'DECIMAL(12,2)', 'BR-006, BR-023', '#0891b2'],
+      ['claims.elim_satisfied', 'onto:EliminationPeriodStatus', 'BOOLEAN', 'BR-007', '#059669'],
+      ['claims.claim_type', 'onto:LTCClaimClassification', 'ENUM(9 types)', 'BR-011, BR-018', '#374151'],
+      ['claims.ai_confidence', 'onto:AutoAdjudicationScore', 'DECIMAL(5,2)', 'BR-019, BR-005', '#7c3aed'],
+      ['provider.npi_status', 'onto:LicensureState', 'ENUM(Active|Expired|Pending)', 'BR-017, BR-008', '#dc2626'],
+      ['policy.product_line', 'onto:HALProductClassification', 'ENUM(Health|Life|Annuity)', 'BR-009, BR-013, BR-020', '#0369a1'],
+      ['claims.mmse_score', 'onto:CognitiveImpairmentIndex', 'INTEGER (0–30)', 'BR-002', '#d97706'],
+      ['policy.benefit_pool_remaining', 'onto:BenefitPoolBalance', 'DECIMAL(15,2)', 'BR-014', '#059669'],
+      ['claims.duplicate_flag', 'onto:DuplicateSubmissionIndicator', 'BOOLEAN', 'BR-004', '#dc2626']
+    ];
+    return '<div style="font-size:11px;font-weight:800;color:#374151;margin-bottom:12px;"><i class="fas fa-layer-group" style="color:#0891b2;margin-right:7px;"></i>Semantic Layer — Data Field → Ontology Mapping</div>' +
+      '<div style="font-size:10px;color:#6b7280;margin-bottom:14px;">The semantic layer translates raw database columns into ontology-aligned concepts. Rules are written against semantic concepts, making them system-agnostic and portable across HAL, eLTCAS, CONNECT, and external systems.</div>' +
+      '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">' +
+        '<table style="width:100%;border-collapse:collapse;font-size:10px;">' +
+          '<thead><tr style="background:#f9fafb;border-bottom:2px solid #e5e7eb;">' +
+            '<th style="padding:9px 12px;text-align:left;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;">Data Field</th>' +
+            '<th style="padding:9px 12px;text-align:left;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;">Ontology Concept</th>' +
+            '<th style="padding:9px 12px;text-align:left;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;">Data Type</th>' +
+            '<th style="padding:9px 12px;text-align:left;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;">Used By Rules</th>' +
+          '</tr></thead>' +
+          '<tbody>' + rows.map(function(r){
+            return '<tr style="border-bottom:1px solid #f3f4f6;" onmouseenter="this.style.background=\'#f9fafb\'" onmouseleave="this.style.background=\'\'">' +
+              '<td style="padding:8px 12px;font-family:monospace;color:#374151;font-weight:700;">' + r[0] + '</td>' +
+              '<td style="padding:8px 12px;"><span style="color:' + r[4] + ';font-weight:800;">' + r[1] + '</span></td>' +
+              '<td style="padding:8px 12px;color:#6b7280;">' + r[2] + '</td>' +
+              '<td style="padding:8px 12px;">' + r[3].split(',').map(function(x){ return '<span style="background:#ede9fe;color:#5b21b6;font-size:9px;font-weight:700;padding:1px 6px;border-radius:4px;margin-right:3px;">' + x.trim() + '</span>'; }).join('') + '</td>' +
+            '</tr>';
+          }).join('') + '</tbody>' +
+        '</table>' +
+      '</div>' +
+      '<div style="margin-top:14px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:14px;">' +
+        '<div style="font-size:11px;font-weight:800;color:#1e40af;margin-bottom:6px;">Why the Semantic Layer Matters for Rule Creation</div>' +
+        '<div style="font-size:11px;color:#374151;line-height:1.7;">' +
+          '• When you write "if ADL count ≥ 2" in the plain-English builder, AI maps it to <em>claims.adl_count ≥ 2</em> via the semantic layer automatically.<br>' +
+          '• Rules written against ontology concepts survive database migrations — only the semantic mapping changes, rules stay the same.<br>' +
+          '• HAL Health, Life, and Annuity products all share the same semantic concept <em>onto:HALProductClassification</em>, enabling unified rules across product lines.' +
+        '</div>' +
+      '</div>';
+  }
+
+  function _builderKGPanel() {
+    return '<div style="font-size:11px;font-weight:800;color:#374151;margin-bottom:12px;"><i class="fas fa-share-alt" style="color:#d97706;margin-right:7px;"></i>Knowledge Graph — Rule Dependency & Context Network</div>' +
+      '<div style="font-size:10px;color:#6b7280;margin-bottom:14px;">The Knowledge Graph shows how rules, entities, and external data sources are connected. AI uses this graph to detect conflicts, suggest improvements, and validate new rules before activation.</div>' +
+      /* KG visual */
+      '<div style="background:#1e1b4b;border-radius:14px;padding:20px;color:#fff;margin-bottom:14px;">' +
+        '<div style="font-size:10px;font-weight:800;color:#a78bfa;margin-bottom:14px;text-transform:uppercase;letter-spacing:.06em;">Rule Dependency Graph (simplified)</div>' +
+        '<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center;">' +
+          _kgNode('BR-007','Elim. Gate','#7c3aed') + _kgArrow() +
+          _kgNode('BR-001','ADL Trigger','#7c3aed') + _kgArrow() +
+          _kgNode('BR-004','Dup. Guard','#dc2626') + _kgArrow() +
+          _kgNode('BR-017','NPI Valid.','#dc2626') + _kgArrow() +
+          _kgNode('BR-006','Rate Calc','#0891b2') + _kgArrow() +
+          _kgNode('BR-019','AI Gate','#a78bfa') + _kgArrow() +
+          _kgNode('BR-005','AUTO-PAY','#059669') +
+        '</div>' +
+        '<div style="text-align:center;margin-top:12px;font-size:9px;color:#6d28d9;">← claim flows left to right through rule gates →</div>' +
+        '<div style="display:flex;justify-content:space-around;margin-top:14px;flex-wrap:wrap;gap:8px;">' +
+          _kgExtNode('CMS ADL Criteria','External Reg.','#374151') +
+          _kgExtNode('State NPI Registry','Provider DB','#374151') +
+          _kgExtNode('CPI-U Index Feed','Econ. Data','#374151') +
+          _kgExtNode('NAIC 2026 Model','Compliance','#374151') +
+          _kgExtNode('HAL Product Taxonomy','Product Data','#374151') +
+        '</div>' +
+      '</div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">' +
+        '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px;">' +
+          '<div style="font-size:11px;font-weight:800;color:#d97706;margin-bottom:8px;"><i class="fas fa-exclamation-triangle" style="margin-right:5px;"></i>Conflict Detection</div>' +
+          '<div style="font-size:11px;color:#374151;line-height:1.6;">The KG automatically detects when two rules might fire on the same claim with conflicting actions. Current conflict: <strong>BR-005 vs BR-023</strong> on claims $24.5–25.5K. Resolved by priority ordering.</div>' +
+        '</div>' +
+        '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px;">' +
+          '<div style="font-size:11px;font-weight:800;color:#059669;margin-bottom:8px;"><i class="fas fa-lightbulb" style="margin-right:5px;"></i>AI Rule Suggestions</div>' +
+          '<div style="font-size:11px;color:#374151;line-height:1.6;">The KG identifies coverage gaps — patterns in claims data where no rule exists. This is how AI-S01 (Telehealth Rule) was suggested: 147 similar claims were processed manually with no automated pathway.</div>' +
+        '</div>' +
+      '</div>';
+  }
+
+  function _ontoNode(label, col) {
+    return '<span style="background:' + col + '22;color:' + col + ';border:1px solid ' + col + '44;font-size:10px;font-weight:700;padding:5px 10px;border-radius:8px;white-space:nowrap;">' + label.replace(/_/g,' ') + '</span>';
+  }
+  function _ontoLine() { return '<span style="color:#d1d5db;">│</span>'; }
+  function _kgNode(id, label, col) {
+    return '<div style="background:' + col + ';border-radius:8px;padding:8px 12px;text-align:center;min-width:70px;">' +
+      '<div style="font-size:10px;font-weight:900;color:#fff;">' + id + '</div>' +
+      '<div style="font-size:9px;color:rgba(255,255,255,.8);margin-top:2px;">' + label + '</div>' +
+    '</div>';
+  }
+  function _kgArrow() { return '<span style="color:#6d28d9;font-size:16px;">→</span>'; }
+  function _kgExtNode(label, type, col) {
+    return '<div style="background:#374151;border-radius:6px;padding:7px 12px;text-align:center;">' +
+      '<div style="font-size:9px;color:#9ca3af;font-weight:600;">' + type + '</div>' +
+      '<div style="font-size:10px;font-weight:700;color:#f9fafb;margin-top:2px;">' + label + '</div>' +
+    '</div>';
+  }
+
+  var _p42Templates = {
+    t1: 0, t2: 1, t3: 2, t4: 3, t5: 4, t6: 5, t7: 6, t8: 7
+  };
+  var _p42TemplateTexts = [
+    'If the claimant cannot perform at least 2 of 6 Activities of Daily Living (Bathing, Dressing, Toileting, Transfer, Eating, Continence) AND the elimination period of 90 days has been satisfied, then approve the LTC benefit and proceed to benefit calculation.',
+    'If the same provider submits more than 3 claims exceeding $5,000 within a 14-day window AND the provider NPI was registered within the past 6 months, flag the claim for SIU investigation and hold all pending payments.',
+    'For HAL Health product claims, if the claimant is receiving home health aide services AND the authorized hours exceed the care plan by more than 15%, route to the clinical team for care plan update before approving additional hours.',
+    'For HAL Life/LTC hybrid policies, if the long-term care rider benefit is triggered AND the life insurance face value has not been reduced below the minimum $10,000 floor, calculate the accelerated benefit amount and adjust the remaining death benefit accordingly.',
+    'For HAL Annuity products with LTC riders, if the claimant qualifies for LTC benefits AND the annuity account value exceeds $50,000, calculate the monthly LTC withdrawal amount not to exceed 2% of account value per month, and update the annuity record accordingly.',
+    'If the AI adjudication model scores the claim with confidence greater than or equal to 92% AND no fraud flags are present AND the claim amount is below $25,000, automatically approve and queue for payment without human review.',
+    'If the claimant has a MMSE score below 24 indicating cognitive impairment AND the claim is for a memory care secured unit, activate the cognitive impairment pathway, require physician recertification every 90 days, and apply the memory care premium surcharge from the policy rider.',
+    'If the claim is for respite care AND the cumulative respite days used in the current calendar year exceed 21 days, flag the claim for review. Respite benefit is only payable when an informal caregiver (family member) is the primary caregiver documented in the care plan.'
+  ];
+
+  var _p42RuleOutputs = [
+    'Rule ID:    BR-025 (DRAFT)\nCategory:   Eligibility\nClaim Types: All LTC\n\nIF claims.adl_count >= 2\n  AND policy.elim_period_satisfied = TRUE\nTHEN\n  Action: Auto-Approve → Benefit Calc Pipeline\n  STP Impact: High (+8,000–12,000 claims/mo)\n  AI Confidence: 99.1%\n\nOntology: onto:FunctionalImpairmentScore >= 2\n          AND onto:EliminationPeriodStatus = COMPLETE\nSemantic: claims.adl_count · claims.elim_satisfied\nKG Validation: No conflicts detected ✓',
+    'Rule ID:    BR-025 (DRAFT)\nCategory:   Fraud/Integrity\nClaim Types: All LTC\n\nIF provider.claims_last_14d > 3\n  AND AVG(provider.claims_last_14d.amount) > 5000\n  AND provider.npi_age_days < 180\nTHEN\n  Action: Hold-SIU + Payment Freeze\n  STP Impact: Fraud Block (~8–15 claims/mo)\n  AI Confidence: 93%\n\nOntology: onto:ProviderClaimFrequency > threshold\n          AND onto:LicensureAge < 180d\nSemantic: provider.npi_status · provider.claims_count\nKG Conflict: None · Strengthens BR-004 and BR-017',
+    'Rule ID:    BR-025 (DRAFT)\nCategory:   HAL-Specific (Health Product Line)\nClaim Types: HAL — Health\n\nIF policy.product_line = \'HAL_HEALTH\'\n  AND claims.service_type = \'HOME_HEALTH_AIDE\'\n  AND claims.authorized_hours > (careplan.approved_hours * 1.15)\nTHEN\n  Action: Route-to-RN → Care Plan Update Required\n  STP Impact: Clinical Gate (~200–400 claims/mo)\n  AI Confidence: 91%\n\nOntology: onto:HALProductClassification = HEALTH\n          AND onto:AuthorizedCareHours EXCEEDS 15%\nSemantic: policy.product_line · claims.authorized_hours\nKG Validation: Compatible with BR-015 (Care Plan Adherence) ✓',
+    'Rule ID:    BR-025 (DRAFT)\nCategory:   HAL-Specific (Life/LTC Hybrid)\nClaim Types: HAL — Life Product\n\nIF policy.product_line = \'HAL_LIFE_HYBRID\'\n  AND claims.ltc_rider_triggered = TRUE\n  AND policy.life_face_value > 10000\nTHEN\n  Action: Rate-Calc → Accelerated Benefit + Death Benefit Adj.\n  STP Impact: Calc Event (~150–300 claims/mo)\n  AI Confidence: 94%\n\nOntology: onto:HALProductClassification = LIFE\n          AND onto:AcceleratedBenefitEvent\nSemantic: policy.product_line · policy.life_face_value\nKG Validation: Linked to policy.death_benefit update node ✓',
+    'Rule ID:    BR-025 (DRAFT)\nCategory:   HAL-Specific (Annuity/LTC Rider)\nClaim Types: HAL — Annuity Product\n\nIF policy.product_line = \'HAL_ANNUITY\'\n  AND claims.ltc_benefit_triggered = TRUE\n  AND policy.annuity_account_value > 50000\nTHEN\n  monthly_withdrawal = MIN(policy.annuity_account_value * 0.02, policy.ltc_daily_benefit * 30)\n  Action: Rate-Calc → Annuity Record Update\n  STP Impact: Calc Event (~80–150 claims/mo)\n  AI Confidence: 92%\n\nOntology: onto:HALProductClassification = ANNUITY\n          AND onto:MonetaryBenefit <= 2% of AccountValue\nSemantic: policy.annuity_account_value · claims.ltc_benefit\nKG Validation: Linked to HAL Annuity account update API ✓',
+    'Rule ID:    BR-025 (DRAFT)\nCategory:   STP\nClaim Types: All LTC\n\nIF claims.ai_confidence_score >= 92.0\n  AND claims.fraud_flag = FALSE\n  AND claims.monthly_amount < 25000\nTHEN\n  Action: Auto-Pay → Payment Queue (STP)\n  STP Impact: CRITICAL — drives 43.8% of all auto-adjudication\n  AI Confidence: 98.7%\n\nOntology: onto:AutoAdjudicationScore >= 92\n          AND onto:FraudRiskIndicator = NONE\nSemantic: claims.ai_confidence · claims.duplicate_flag\nKG Conflict: BR-023 takes priority for amounts ≥ $25,000 ⚠',
+    'Rule ID:    BR-025 (DRAFT)\nCategory:   Eligibility + HAL-Specific\nClaim Types: Memory Care\n\nIF claims.mmse_score < 24\n  AND claims.service_type = \'MEMORY_CARE_UNIT\'\nTHEN\n  Action: Route-to-RN → Physician Recertification (90d)\n  AND Rate-Calc → Memory Care Premium Surcharge\n  STP Impact: Clinical Route (~700–900 claims/mo)\n  AI Confidence: 97%\n\nOntology: onto:CognitiveImpairmentIndex < 24\n          AND onto:LTCClaimClassification = MEMORY_CARE\nSemantic: claims.mmse_score · claims.claim_type\nKG Validation: References BR-002 · BR-013 · No conflicts ✓',
+    'Rule ID:    BR-025 (DRAFT)\nCategory:   Duration\nClaim Types: Respite\n\nIF claims.claim_type = \'RESPITE\'\n  AND policy.respite_days_used_ytd >= 21\nTHEN\n  Action: Flag-Review → Respite Cap Enforcement\n  REQUIRE: careplan.primary_caregiver_type = \'FAMILY\'\n  STP Impact: Duration Gate (~180–220 claims/mo)\n  AI Confidence: 96%\n\nOntology: onto:LTCClaimClassification = RESPITE\n          AND onto:BenefitPeriod.respite_days >= 21\nSemantic: policy.respite_days_used_ytd · careplan.caregiver_type\nKG Validation: Aligned with BR-010 (Respite Day Limit) ✓'
+  ];
+
+  window._p42loadTemplate = function(tid) {
+    var idx = parseInt(tid.replace('t','')) - 1;
+    var el = document.getElementById('bre-builder-text2');
+    if (el && _p42TemplateTexts[idx]) el.value = _p42TemplateTexts[idx];
+  };
+
+  window._p42blTab = function(tab) {
+    ['rule','onto','sem','kg'].forEach(function(t) {
+      var panel = document.getElementById('bre-bl-panel-' + t);
+      var btn   = document.getElementById('bre-bl-tab-' + t);
+      if (panel) panel.style.display = t === tab ? '' : 'none';
+      if (btn) { btn.style.background = t===tab?'#7c3aed':'#f3f4f6'; btn.style.color = t===tab?'#fff':'#374151'; }
+    });
+  };
+
+  window._p42convertRule2 = function() {
+    var text = (document.getElementById('bre-builder-text2')||{}).value||'';
+    if (!text.trim()) { _toast('Please enter a rule description or select a template first.'); return; }
+    // Match to a template
+    var idx = -1;
+    _p42TemplateTexts.forEach(function(t, i){ if (text.trim() === t.trim()) idx = i; });
+    var output = idx >= 0 ? _p42RuleOutputs[idx] :
+      'Rule ID:    BR-' + (25 + Math.floor(Math.random()*10)) + ' (DRAFT)\nCategory:   ' + _p42guessCategory(text) + '\nClaim Types: All LTC\n\nIF ' + _p42guessCondition(text) + '\nTHEN\n  Action: ' + _p42guessAction(text) + '\n  STP Impact: Estimated ~40–120 claims/month\n  AI Confidence: 87%\n\nOntology: Auto-mapped from plain-English description\nSemantic:  Pending field mapping review\nKG Validation: No conflicts detected on initial scan ✓\n\n⚠ Review AI-generated structure before adding to engine.';
+    var outEl = document.getElementById('bre-builder-output2');
+    if (outEl) outEl.textContent = output;
+    var actEl = document.getElementById('bre-bl-actions');
+    if (actEl) actEl.style.display = 'flex';
+    _p42blTab('rule');
+  };
+
+  function _p42guessCategory(t) {
+    t = t.toLowerCase();
+    if (t.indexOf('fraud')>-1||t.indexOf('siu')>-1||t.indexOf('duplicate')>-1) return 'Fraud/Integrity';
+    if (t.indexOf('hal')>-1||t.indexOf('annuity')>-1||t.indexOf('life')>-1) return 'HAL-Specific';
+    if (t.indexOf('day')>-1||t.indexOf('period')>-1||t.indexOf('month')>-1) return 'Duration';
+    if (t.indexOf('benefit')>-1||t.indexOf('amount')>-1||t.indexOf('rate')>-1) return 'Benefit Calc';
+    if (t.indexOf('naic')>-1||t.indexOf('medicare')>-1||t.indexOf('regulation')>-1) return 'Compliance';
+    if (t.indexOf('stp')>-1||t.indexOf('auto')>-1||t.indexOf('confidence')>-1) return 'STP';
+    return 'Eligibility';
+  }
+  function _p42guessCondition(t) {
+    var words = t.split(' ').slice(0, 20).join(' ');
+    return words.length > 60 ? words.substring(0,60) + '...' : words;
+  }
+  function _p42guessAction(t) {
+    t = t.toLowerCase();
+    if (t.indexOf('siu')>-1||t.indexOf('hold')>-1||t.indexOf('freeze')>-1) return 'Hold-SIU';
+    if (t.indexOf('rn')>-1||t.indexOf('clinical')>-1||t.indexOf('physician')>-1) return 'Route-to-RN';
+    if (t.indexOf('auto')>-1||t.indexOf('approve')>-1) return 'Auto-Approve';
+    if (t.indexOf('pay')>-1) return 'Auto-Pay';
+    if (t.indexOf('rate')>-1||t.indexOf('calc')>-1||t.indexOf('amount')>-1) return 'Rate-Calc';
+    return 'Flag-Review';
+  }
+
+  window._p42addToEngine = function() {
+    _toast('✅ Rule draft added to engine staging area. A compliance officer will review before activation. Audit entry created.');
+  };
+
+  window._p41openBuilder = function () {
+    var m = document.getElementById('bre-builder-modal');
+    if (!m) return;
+    _p42rebuildBuilderModal();
+    m.style.display = 'flex';
+  };
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     6. AI-SUGGESTED RULES SECTION — inject into BRE page
+  ═══════════════════════════════════════════════════════════════════════ */
+  var _p42AISuggestedRules = [
+    {
+      id: 'AI-R01', title: 'Telehealth Remote Monitoring Rule',
+      rationale: 'Pattern analysis of 147 denied HAL claims in June 2026 identified a coverage gap: remote patient monitoring devices (RPM) billed under HAL Health plans have no automated pathway. Claims are processed manually at an average of 4.2 hours each.',
+      proposedRule: 'IF policy.product_line = HAL_HEALTH AND claims.service_type = REMOTE_MONITORING AND provider.rpm_certified = TRUE THEN Auto-Approve up to policy.daily_benefit × 0.15 per day',
+      category: 'HAL-Specific', claimType: 'HAL — Health', confidence: 94,
+      impact: '+890 STP claims/mo', savingsHrs: '3,738 adjudicator-hours/yr saved',
+      source: 'AI Pattern Analysis · Claims Data Jun 2026', icon: 'fa-wifi', col: '#0369a1'
+    },
+    {
+      id: 'AI-R02', title: 'Hospice Inpatient Day Cap (20% Rule)',
+      rationale: 'Medicare requires inpatient hospice days not exceed 20% of total hospice care days. AI found 12 claims in June potentially exceeding this limit with no automated flag. Regulatory risk of $18,400 in overpayments if uncaught.',
+      proposedRule: 'IF claims.claim_type = HOSPICE AND (claims.inpatient_days / claims.total_hospice_days) > 0.20 THEN Flag-Review → Compliance Queue + Medicare COB recalculation',
+      category: 'Compliance', claimType: 'Hospice', confidence: 98,
+      impact: '+12 compliance flags/mo', savingsHrs: 'Regulatory risk mitigation: ~$18K/mo',
+      source: 'Medicare Reg. §418.108 · AI Compliance Scan', icon: 'fa-balance-scale', col: '#6b7280'
+    },
+    {
+      id: 'AI-R03', title: 'Shared Benefit Rider Coordination',
+      rationale: '6 active policies have shared benefit riders between spouses. No rule handles cross-policy benefit pool sharing. When one spouse exhausts their pool, manual coordination is required. Estimated 6 claims/month, 3.1 hours each.',
+      proposedRule: 'IF policy.shared_benefit_rider = TRUE AND policy.benefit_pool_remaining < 100 AND policy.spouse_policy_id IS NOT NULL THEN Rate-Calc → Cross-policy benefit transfer + Shared pool balance update',
+      category: 'Benefit Calc', claimType: 'All LTC', confidence: 89,
+      impact: '+6 auto-coordinated/mo', savingsHrs: '18.6 adjudicator-hours/mo saved',
+      source: 'Policy Data Analysis · Manual Workflow Audit', icon: 'fa-heart', col: '#7c3aed'
+    },
+    {
+      id: 'AI-R04', title: 'HAL Annuity — LTC Withdrawal Rate Guardrail',
+      rationale: 'HAL Annuity products with LTC riders currently have no automated guardrail to prevent LTC withdrawals from depleting annuity accounts below the surrender-charge threshold. AI detected 3 cases approaching this limit with no alert.',
+      proposedRule: 'IF policy.product_line = HAL_ANNUITY AND (policy.annuity_account_value - claims.monthly_amount) < policy.surrender_charge_floor THEN Flag-Review → HAL Annuity specialist queue + policyholder notification',
+      category: 'HAL-Specific', claimType: 'HAL — Annuity', confidence: 91,
+      impact: 'Risk mitigation: 3–5 cases/mo', savingsHrs: 'Prevents annuity account depletion below floor',
+      source: 'HAL Annuity Product Team · AI Risk Scan', icon: 'fa-chart-line', col: '#0891b2'
+    },
+    {
+      id: 'AI-R05', title: 'Adult Day Care — Weekend Billing Anomaly',
+      rationale: 'Adult Day Care centers are licensed for weekday operation only in 34 states. AI detected 23 claims this year with weekend billing that passed without a flag. Potential $41,200 in improper payments.',
+      proposedRule: 'IF claims.claim_type = ADULT_DAY_CARE AND claims.service_day IN (SATURDAY, SUNDAY) AND provider.state IN (weekend_restricted_states) THEN Hold-SIU → Billing anomaly investigation',
+      category: 'Fraud/Integrity', claimType: 'Adult Day Care', confidence: 96,
+      impact: 'Fraud detection: ~23 cases/yr', savingsHrs: 'Prevents ~$41K/yr improper payments',
+      source: 'State ADC Licensing Data · AI Fraud Scan', icon: 'fa-calendar-times', col: '#dc2626'
+    }
+  ];
+
+  function _p42injectAIRulesSection() {
+    var page = document.querySelector('.bre-page');
+    if (!page || document.getElementById('bre-ai-rules-section')) return;
+
+    var section = document.createElement('div');
+    section.id = 'bre-ai-rules-section';
+    section.style.marginTop = '24px';
+
+    section.innerHTML =
+      '<div style="background:linear-gradient(135deg,#faf5ff,#ede9fe);border:2px solid #ddd6fe;border-radius:16px;overflow:hidden;">' +
+        /* header */
+        '<div style="background:linear-gradient(135deg,#5b21b6,#7c3aed);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;">' +
+          '<div>' +
+            '<div style="font-size:13px;font-weight:900;color:#fff;"><i class="fas fa-robot" style="margin-right:8px;color:#c4b5fd;"></i>AI-Suggested Rules <span style="background:rgba(255,255,255,.25);font-size:11px;font-weight:800;padding:2px 9px;border-radius:10px;margin-left:8px;">5 new</span></div>' +
+            '<div style="font-size:10px;color:#c4b5fd;margin-top:3px;">Discovered by AI through pattern analysis of claims data, regulatory scans, and coverage gap detection</div>' +
+          '</div>' +
+          '<button onclick="_p42toggleAIRules()" id="bre-ai-rules-toggle" style="background:rgba(255,255,255,.2);border:none;border-radius:7px;padding:6px 12px;color:#fff;cursor:pointer;font-size:11px;font-weight:700;">Hide ↑</button>' +
+        '</div>' +
+        '<div id="bre-ai-rules-body" style="padding:16px 20px;">' +
+          _p42AISuggestedRules.map(function(r) {
+            return '<div id="bre-ai-rule-' + r.id + '" style="background:#fff;border:1px solid #ddd6fe;border-radius:12px;padding:16px;margin-bottom:12px;">' +
+              '<div style="display:flex;align-items:flex-start;gap:14px;">' +
+                '<div style="width:40px;height:40px;border-radius:10px;background:' + r.col + ';display:flex;align-items:center;justify-content:center;flex-shrink:0;">' +
+                  '<i class="fas ' + r.icon + '" style="color:#fff;font-size:16px;"></i>' +
+                '</div>' +
+                '<div style="flex:1;">' +
+                  '<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">' +
+                    '<span style="font-size:10px;font-weight:900;color:' + r.col + ';">' + r.id + '</span>' +
+                    '<span style="font-size:12px;font-weight:800;color:#111827;">' + r.title + '</span>' +
+                    '<span style="background:#ede9fe;color:#5b21b6;font-size:9px;font-weight:800;padding:2px 8px;border-radius:8px;">' + r.category + '</span>' +
+                    '<span style="background:#f3f4f6;color:#374151;font-size:9px;font-weight:700;padding:2px 8px;border-radius:8px;">' + r.claimType + '</span>' +
+                  '</div>' +
+                  '<div style="font-size:11px;color:#374151;line-height:1.5;margin-bottom:8px;">' + r.rationale + '</div>' +
+                  '<div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:10px;margin-bottom:10px;">' +
+                    '<div style="font-size:9px;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;">Proposed Rule Logic</div>' +
+                    '<div style="font-size:10px;font-family:monospace;color:#374151;line-height:1.6;">' + r.proposedRule + '</div>' +
+                  '</div>' +
+                  '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">' +
+                    '<span style="font-size:10px;"><i class="fas fa-bolt" style="color:#059669;margin-right:4px;"></i><strong>' + r.impact + '</strong></span>' +
+                    '<span style="font-size:10px;color:#6b7280;"><i class="fas fa-clock" style="margin-right:4px;"></i>' + r.savingsHrs + '</span>' +
+                    '<span style="font-size:10px;color:#7c3aed;"><i class="fas fa-robot" style="margin-right:4px;"></i>AI Confidence: <strong>' + r.confidence + '%</strong></span>' +
+                    '<span style="font-size:10px;color:#6b7280;"><i class="fas fa-database" style="margin-right:4px;"></i>' + r.source + '</span>' +
+                  '</div>' +
+                '</div>' +
+                '<div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">' +
+                  '<button onclick="_p42approveAIRule(\'' + r.id + '\')" style="background:#059669;color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:10px;font-weight:800;cursor:pointer;white-space:nowrap;"><i class="fas fa-check" style="margin-right:4px;"></i>Approve</button>' +
+                  '<button onclick="_p42draftAIRule(\'' + r.id + '\')" style="background:#ede9fe;color:#5b21b6;border:none;border-radius:7px;padding:7px 14px;font-size:10px;font-weight:800;cursor:pointer;white-space:nowrap;"><i class="fas fa-pen" style="margin-right:4px;"></i>Edit Draft</button>' +
+                  '<button onclick="_p42dismissAIRule(\'' + r.id + '\')" style="background:#f3f4f6;color:#6b7280;border:none;border-radius:7px;padding:7px 14px;font-size:10px;font-weight:700;cursor:pointer;white-space:nowrap;">Dismiss</button>' +
+                '</div>' +
+              '</div>' +
+            '</div>';
+          }).join('') +
+        '</div>' +
+      '</div>';
+
+    page.appendChild(section);
+  }
+
+  window._p42toggleAIRules = function() {
+    var body = document.getElementById('bre-ai-rules-body');
+    var tog  = document.getElementById('bre-ai-rules-toggle');
+    if (!body) return;
+    body.style.display = body.style.display === 'none' ? '' : 'none';
+    if (tog) tog.textContent = body.style.display === 'none' ? 'Show ↓' : 'Hide ↑';
+  };
+  window._p42approveAIRule = function(id) {
+    var el = document.getElementById('bre-ai-rule-' + id);
+    if (el) { el.style.opacity = '.5'; el.style.pointerEvents = 'none'; }
+    _toast('✅ ' + id + ' approved — added to rule staging for compliance review. Will be active after sign-off.');
+  };
+  window._p42draftAIRule = function(id) {
+    var r = _p42AISuggestedRules.find(function(x){return x.id===id;});
+    if (!r) return;
+    var el = document.getElementById('bre-builder-text2');
+    if (!el) { window._p41openBuilder(); setTimeout(function(){ window._p42draftAIRule(id); }, 400); return; }
+    el.value = r.proposedRule;
+    _p42blTab('rule');
+  };
+  window._p42dismissAIRule = function(id) {
+    var el = document.getElementById('bre-ai-rule-' + id);
+    if (el) el.style.display = 'none';
+    _toast(id + ' dismissed. You can restore dismissed suggestions from the audit log.');
+  };
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     7. HAL TAB — re-render with Health · Life · Annuity labelling
+  ═══════════════════════════════════════════════════════════════════════ */
+  var _p42HALRules = [
+    { id:'BR-009', name:'HAL Health — Geographic Rate Adjustment',
+      productLine:'Health', icon:'fa-heartbeat', col:'#dc2626',
+      condition:'ZIP-code based cost-of-care index applies regional rate differential to HAL Health home aide billing. High-cost markets (NYC, SF, Boston) get +18–32% adjustment.',
+      action:'Rate-Calc', stpImpact:'2,341/mo', aiHealth:'review',
+      detail:'Applies to HAL Health product line only. Uses CMS Home Health Geographic Index (HHGI). Updated quarterly.' },
+    { id:'BR-013', name:'HAL Health — Memory Care Premium Rule',
+      productLine:'Health', icon:'fa-brain', col:'#dc2626',
+      condition:'Memory care secured unit premium surcharge validation for HAL Health policies carrying a memory care rider. Validates against rider terms before applying surcharge.',
+      action:'Rate-Calc', stpImpact:'743/mo', aiHealth:'healthy',
+      detail:'Memory care rider on HAL Health plans adds 8–22% daily benefit surcharge. Requires MMSE < 24 for activation.' },
+    { id:'BR-015', name:'HAL Life/LTC — Care Plan Adherence',
+      productLine:'Life/LTC Hybrid', icon:'fa-file-medical', col:'#7c3aed',
+      condition:'For HAL Life/LTC hybrid policyholders, billed services must match the approved care plan on file within 10% tolerance. Discrepancies > 10% trigger SIU referral.',
+      action:'Hold-SIU', stpImpact:'312/mo', aiHealth:'healthy',
+      detail:'HAL Life/LTC hybrid policies have accelerated death benefit provisions linked to LTC care plans. Care plan accuracy is critical for benefit calculation.' },
+    { id:'BR-020', name:'HAL Life/LTC — Family Caregiver Exclusion',
+      productLine:'Life/LTC Hybrid', icon:'fa-users', col:'#7c3aed',
+      condition:'HAL Life/LTC hybrid policy terms exclude unlicensed family member billing unless specifically endorsed. Validates caregiver credential type before approving home care claims.',
+      action:'Flag-Review', stpImpact:'203/mo', aiHealth:'review',
+      detail:'Family caregiver exclusion is a standard provision in HAL Life/LTC hybrid contracts. Some policies carry a family caregiver rider that modifies this rule.' },
+    { id:'BR-HAL-A01', name:'HAL Annuity — LTC Withdrawal Rate Cap',
+      productLine:'Annuity/LTC Rider', icon:'fa-chart-line', col:'#0891b2',
+      condition:'HAL Annuity products with LTC riders: monthly LTC withdrawal is capped at 2% of annuity account value OR the policy daily benefit × 30, whichever is lower. Prevents account depletion.',
+      action:'Rate-Calc', stpImpact:'~150/mo', aiHealth:'healthy',
+      detail:'Protects the annuity account value floor. Applies to all HAL Annuity products with LTC accelerated benefit riders. New rule — AI-suggested.' },
+    { id:'BR-HAL-A02', name:'HAL Annuity — Surrender Charge Floor Guard',
+      productLine:'Annuity/LTC Rider', icon:'fa-shield-alt', col:'#0891b2',
+      condition:'If an LTC withdrawal would reduce the HAL Annuity account value below the surrender charge threshold, flag for specialist review before processing. Prevents policyholder financial harm.',
+      action:'Flag-Review', stpImpact:'~5/mo', aiHealth:'healthy',
+      detail:'New rule derived from AI risk scan. Protects policyholders whose annuity account is near the surrender charge floor from inadvertent early termination.' }
+  ];
+
+  function _p42buildHALTab() {
+    var tbody = document.getElementById('bre-rule-tbody');
+    if (!tbody) return;
+    var html = '';
+    var prodColors = { 'Health':'#dc2626', 'Life/LTC Hybrid':'#7c3aed', 'Annuity/LTC Rider':'#0891b2' };
+    _p42HALRules.forEach(function(r) {
+      var col = prodColors[r.productLine] || '#374151';
+      html += '<tr style="border-bottom:1px solid #f3f4f6;" onmouseenter="this.style.background=\'#f9fafb\'" onmouseleave="this.style.background=\'\'">' +
+        '<td style="padding:10px 12px;font-size:11px;font-weight:900;color:#7c3aed;white-space:nowrap;">' + r.id + '</td>' +
+        '<td style="padding:10px 12px;">' +
+          '<div style="font-size:12px;font-weight:700;color:#111827;">' + r.name + '</div>' +
+          '<div style="margin-top:4px;"><span style="background:' + col + '18;color:' + col + ';border:1px solid ' + col + '44;font-size:9px;font-weight:800;padding:2px 8px;border-radius:10px;"><i class="fas ' + r.icon + '" style="margin-right:4px;"></i>HAL ' + r.productLine + '</span></div>' +
+        '</td>' +
+        '<td style="padding:10px 12px;"><span style="background:#0369a122;color:#0369a1;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;">HAL-Specific</span></td>' +
+        '<td style="padding:10px 12px;font-size:10px;color:#6b7280;font-weight:600;">HAL — ' + r.productLine + '</td>' +
+        '<td style="padding:10px 12px;font-size:11px;color:#374151;max-width:200px;line-height:1.4;">' + r.condition + '</td>' +
+        '<td style="padding:10px 12px;"><span style="color:' + (r.action==='Hold-SIU'?'#dc2626':r.action==='Rate-Calc'?'#0891b2':r.action==='Flag-Review'?'#d97706':'#059669') + ';font-size:11px;font-weight:800;">' + r.action + '</span></td>' +
+        '<td style="padding:10px 12px;font-size:11px;color:#059669;font-weight:700;">' + r.stpImpact + '</td>' +
+        '<td style="padding:10px 12px;">' + (r.aiHealth==='healthy'?'<span style="background:#d1fae5;color:#065f46;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;">✓ Healthy</span>':'<span style="background:#fef3c7;color:#92400e;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;">⚠ Review</span>') + '</td>' +
+        '<td style="padding:10px 12px;"><span style="background:#10b981;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;">Active</span></td>' +
+        '<td style="padding:10px 12px;font-size:10px;color:#9ca3af;">Jul 2026</td>' +
+        '<td style="padding:10px 12px;"><button onclick="_p41editRule(\'' + r.id + '\')" style="background:#2563eb;color:#fff;border:none;border-radius:5px;padding:5px 10px;font-size:10px;font-weight:700;cursor:pointer;">Edit Rule</button></td>' +
+      '</tr>';
+    });
+    tbody.innerHTML = html;
+    var cnt = document.getElementById('bre-rule-count');
+    if (cnt) cnt.textContent = _p42HALRules.length + ' rules';
+  }
+
+  /* Override _p41switchTab to handle HAL-Specific with enhanced rendering */
+  var _p41origSwitchTab = window._p41switchTab;
+  window._p41switchTab = function(tabId) {
+    if (tabId === 'HAL-Specific') {
+      /* update tab button styles first */
+      var tabMap = { 'all':'all', 'Eligibility':'Eligibility', 'Benefit Calc':'Benefit_Calc', 'Duration':'Duration', 'Fraud/Integrity':'Fraud_Integrity', 'STP':'STP', 'HAL-Specific':'HAL_Specific', 'Compliance':'Compliance' };
+      Object.keys(tabMap).forEach(function(k){
+        var btn = document.getElementById('bre-tab-' + tabMap[k]);
+        if (!btn) return;
+        if (k === tabId) { btn.style.background='#7c3aed'; btn.style.color='#fff'; }
+        else { btn.style.background='#f3f4f6'; btn.style.color='#374151'; }
+      });
+      /* inject HAL-Specific header above table */
+      var hdr = document.querySelector('.bre-page');
+      var existing = document.getElementById('bre-hal-header');
+      if (!existing && hdr) {
+        var halHdr = document.createElement('div');
+        halHdr.id = 'bre-hal-header';
+        halHdr.style.cssText = 'background:linear-gradient(135deg,#0369a1,#0891b2);border-radius:12px;padding:14px 20px;margin-bottom:14px;display:flex;align-items:center;gap:16px;';
+        halHdr.innerHTML =
+          '<i class="fas fa-cube" style="color:#bae6fd;font-size:24px;"></i>' +
+          '<div>' +
+            '<div style="font-size:14px;font-weight:900;color:#fff;">HAL — Health, Life & Annuity</div>' +
+            '<div style="font-size:11px;color:#bae6fd;margin-top:2px;">Rules specific to HAL\'s three product lines: <strong>Health</strong> (LTC home/facility care) · <strong>Life/LTC Hybrid</strong> (accelerated benefit riders) · <strong>Annuity/LTC Rider</strong> (withdrawal-based LTC)</div>' +
+          '</div>' +
+          '<div style="margin-left:auto;display:flex;gap:10px;">' +
+            '<span style="background:#dc262622;color:#dc2626;border:1px solid #dc262644;font-size:10px;font-weight:800;padding:4px 10px;border-radius:8px;"><i class="fas fa-heartbeat" style="margin-right:4px;"></i>Health: 2 rules</span>' +
+            '<span style="background:#7c3aed22;color:#7c3aed;border:1px solid #7c3aed44;font-size:10px;font-weight:800;padding:4px 10px;border-radius:8px;"><i class="fas fa-file-medical" style="margin-right:4px;"></i>Life: 2 rules</span>' +
+            '<span style="background:#0891b222;color:#0891b2;border:1px solid #0891b244;font-size:10px;font-weight:800;padding:4px 10px;border-radius:8px;"><i class="fas fa-chart-line" style="margin-right:4px;"></i>Annuity: 2 rules</span>' +
+          '</div>';
+        /* Insert before the rule table */
+        var tableDiv = document.querySelector('.bre-page > div:last-child, #bre-rule-tbody');
+        if (tableDiv && tableDiv.parentNode) tableDiv.parentNode.insertBefore(halHdr, tableDiv.parentNode);
+      }
+      if (existing) existing.style.display = '';
+      _p42buildHALTab();
+    } else {
+      var halHdr2 = document.getElementById('bre-hal-header');
+      if (halHdr2) halHdr2.style.display = 'none';
+      if (_p41origSwitchTab) _p41origSwitchTab(tabId);
+    }
+    /* Always try to inject AI Rules section */
+    setTimeout(_p42injectAIRulesSection, 300);
+  };
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     8. PATCH: also inject AI Rules section on initial page load
+  ═══════════════════════════════════════════════════════════════════════ */
+  var _origP41onNavigate = window._p41onNavigate || function(){};
+  function _p42patchNavigation() {
+    var origNav = window.navigateTo;
+    if (typeof origNav === 'function' && !origNav._p42patched) {
+      window.navigateTo = function() {
+        origNav.apply(this, arguments);
+        if (arguments[0] === 'ltc-bre') {
+          setTimeout(function(){
+            _p42injectAIRulesSection();
+            /* rebuild sim modal */
+            var simM = document.getElementById('bre-sim-modal');
+            if (simM && !document.getElementById('sim-claimtype')) _p42rebuildSimModal();
+          }, 500);
+        }
+      };
+      window.navigateTo._p42patched = true;
+    }
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     9. INIT P42
+  ═══════════════════════════════════════════════════════════════════════ */
+  (function _p42init() {
+    _p42patchNavigation();
+    /* If BRE page is already visible, patch immediately */
+    setTimeout(function(){
+      var page = document.querySelector('.bre-page');
+      if (page) {
+        _p42injectAIRulesSection();
+        /* rebuild sim if already open */
+        var simM = document.getElementById('bre-sim-modal');
+        if (simM && !document.getElementById('sim-claimtype')) _p42rebuildSimModal();
+      }
+    }, 800);
+    /* MutationObserver: watch for BRE page insertion */
+    var obs = new MutationObserver(function(){
+      var page = document.querySelector('.bre-page');
+      if (page && !document.getElementById('bre-ai-rules-section')) {
+        _p42injectAIRulesSection();
+      }
+    });
+    obs.observe(document.body, { childList: true, subtree: true });
+  }());
+
+  console.log('[P42] BRE Enhancements v2 loaded — Edit Rule modal · STP Dashboard · Enhanced Simulator (10 params + 5 scenarios) · Plain-English Builder (8 templates + Ontology + Semantic + KG) · AI-Suggested Rules (5 rules) · HAL Health·Life·Annuity tab · STP pipeline explainer');
+
+}());
