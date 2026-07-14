@@ -98295,3 +98295,90 @@ var navigateTo=window.navigateTo;
   console.log('[P44] LTC Claims Intelligence Tabs loaded — 6 tabs: Auto-Adjudication Pipeline · Bots & Automation · Claims Lifecycle Heatmap · Transaction Drill-Down · Rework Intelligence · Payment Integrity & COB');
 
 }());
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   P44b — FIX: LTC Claims tab injection — target #page-content directly
+   Root cause: _p44injectTabBar queried .ltc-claims-page which could match
+   the hidden tpl-* div; _p44done scoping prevented re-injection on revisit.
+   Fix: hook navigateTo directly, inject into #page-content after 350ms.
+═══════════════════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  /* Overwrite _p44injectTabBar to target #page-content reliably */
+  window._p44injectTabBar = function() {
+    /* Remove stale tab bar if present (page was re-navigated) */
+    var stale = document.getElementById('p44-tab-bar');
+    if (stale) stale.parentNode.removeChild(stale);
+
+    /* Target #page-content — that's where navigateTo clones the template */
+    var container = document.getElementById('page-content');
+    if (!container) { console.log('[P44b] #page-content not found'); return; }
+
+    /* Confirm ltc-claims page is actually showing */
+    if (!container.querySelector('#ltc-claims-tbody') && !container.querySelector('.ltc-claims-page')) {
+      console.log('[P44b] LTC Claims not in page-content, skipping inject');
+      return;
+    }
+
+    /* Build tab bar HTML */
+    var tabsHtml = window._p44tabs.map(function(t, i) {
+      var isFirst = i === 0;
+      return '<button id="'+t.id+'-btn" onclick="window._p44switchTab(\''+t.id+'\')" '
+        + 'style="display:flex;align-items:center;gap:6px;padding:8px 16px;border:none;border-radius:8px 8px 0 0;'
+        + 'font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap;'
+        + (isFirst ? 'background:'+t.color+';color:#fff;'
+                   : 'background:#f8fafc;color:#6b7280;border:1px solid #e5e7eb;border-bottom:none;')
+        + '">'
+        + '<i class="fas '+t.icon+'" style="font-size:11px;"></i> '+t.label
+        + '</button>';
+    }).join('');
+
+    var barHtml = '<div id="p44-tab-bar" style="margin:20px 24px 24px 24px;">'
+      + '<div style="display:flex;gap:4px;flex-wrap:wrap;border-bottom:2px solid #e5e7eb;">'
+      + tabsHtml
+      + '</div>'
+      + '<div id="p44-tab-content" style="background:#fff;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 12px 12px;min-height:400px;">'
+      + '<div style="display:flex;align-items:center;justify-content:center;padding:60px;color:#6b7280;font-size:14px;">'
+      + '<i class="fas fa-circle-notch fa-spin" style="margin-right:8px;color:#0891b2;"></i>Loading...</div>'
+      + '</div>'
+      + '</div>';
+
+    container.insertAdjacentHTML('beforeend', barHtml);
+
+    setTimeout(function() { window._p44switchTab('tab-adjudication'); }, 60);
+    console.log('[P44b] Tab bar injected into #page-content — 6 intelligence tabs');
+  };
+
+  /* Expose _p44tabs globally so the rewritten _p44injectTabBar can access it */
+  /* (It's already defined in the P44 IIFE closure — re-expose here) */
+  window._p44tabs = [
+    { id:'tab-adjudication',   label:'Auto-Adjudication Pipeline',     icon:'fa-project-diagram',   color:'#0891b2' },
+    { id:'tab-bots',           label:'Bots & Automation',              icon:'fa-robot',             color:'#7c3aed' },
+    { id:'tab-lifecycle',      label:'Claims Lifecycle Heatmap',       icon:'fa-fire',              color:'#dc2626' },
+    { id:'tab-transactions',   label:'Transaction Drill-Down',         icon:'fa-chart-bar',         color:'#d97706' },
+    { id:'tab-rework',         label:'Rework Intelligence',            icon:'fa-redo-alt',          color:'#dc2626' },
+    { id:'tab-cob',            label:'Payment Integrity & COB',        icon:'fa-shield-alt',        color:'#059669' }
+  ];
+
+  /* Hook navigateTo — fire injection 350ms after ltc-claims navigation
+     (rAF + 80ms P9-wrapper + 80ms P38-tbody + buffer = ~350ms safe) */
+  var _p44bOrig = window.navigateTo;
+  if (typeof _p44bOrig === 'function') {
+    window.navigateTo = (function(_orig) {
+      return function(page) {
+        var result = _orig.apply(this, arguments);
+        if (page === 'ltc-claims') {
+          setTimeout(function() {
+            window._p44injectTabBar();
+          }, 380);
+        }
+        return result;
+      };
+    }(_p44bOrig));
+    console.log('[P44b] navigateTo re-hooked — injects tab bar 380ms after ltc-claims navigation');
+  }
+
+  console.log('[P44b] Fix applied — tab injection now targets #page-content directly');
+
+}());
