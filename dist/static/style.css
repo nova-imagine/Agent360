@@ -2240,7 +2240,7 @@ body[data-persona="tpa"] .nav-grp-carrier:not(.nav-grp-tpa) { display: none !imp
   .retire-compare-grid { grid-template-columns: 1fr; }
 }
 
-@media (max-width: 900px) {
+@media (max-width: 600px) {
   :root { --sidebar-width: 0; }
   .sidebar { transform: translateX(-100%); }
   .main-content { margin-left: 0; }
