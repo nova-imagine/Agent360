@@ -96160,3 +96160,1222 @@ var navigateTo=window.navigateTo;
   console.log('[P42] BRE Enhancements v2 loaded — Edit Rule modal · STP Dashboard · Enhanced Simulator (10 params + 5 scenarios) · Plain-English Builder (8 templates + Ontology + Semantic + KG) · AI-Suggested Rules (5 rules) · HAL Health·Life·Annuity tab · STP pipeline explainer');
 
 }());
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   P43 — NAV RESTRUCTURE + AI MODELS CATALOG
+   1. Rename "Illumifin Platform — Systems Ops" group label → "Solutions"
+   2. Move Solutions section AFTER HYBRID LTC + HAL INTELLIGENCE items
+   3. Add "AI Models" nav item under HYBRID LTC + HAL INTELLIGENCE
+   4. Build full AI/ML Models Catalog page (Supervised + Unsupervised)
+      — LTC, Health, Life, Annuity — with input/output/explainability/ROI
+   ═══════════════════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  /* ─── DATA: 20 AI/ML MODELS ─────────────────────────────────────────────
+     Research sources: SOA interpretable ML report, NAIC AI survey 2025,
+     Milliman AI analytics 2021, BYU Cummings-Hartman LTCI ML paper,
+     Shift Technology, IBM L&A claims AI, SHAP/IsoForest best practices
+  ─────────────────────────────────────────────────────────────────────── */
+  var _p43models = [
+
+    /* ══════════════ SUPERVISED — LTC ══════════════ */
+    {
+      id: 'MDL-LTC-01',
+      name: 'LTC Claim Eligibility Classifier',
+      category: 'LTC',
+      type: 'Supervised',
+      algo: 'XGBoost (Gradient Boosted Trees)',
+      domain: 'Claims Adjudication',
+      status: 'Production',
+      auc: 0.96,
+      accuracy: '94.2%',
+      inputs: [
+        { field: 'ADL Score (0–6)', type: 'Numeric', source: 'CONNECT Portal / Clinical Assessment' },
+        { field: 'MMSE / Cognitive Score', type: 'Numeric', source: 'Nurse Assessment' },
+        { field: 'Age at Claim', type: 'Numeric', source: 'LTCAS Policy Admin' },
+        { field: 'Elimination Period Status', type: 'Categorical', source: 'LTCAS' },
+        { field: 'Care Type (Home/ALF/NH)', type: 'Categorical', source: 'LTCAS' },
+        { field: 'ICD-10 Diagnosis Codes', type: 'Multi-label', source: 'Medical Records / APS' },
+        { field: 'Policy Vintage (years)', type: 'Numeric', source: 'LTCAS Policy Admin' },
+        { field: 'Prior Claim History', type: 'Boolean', source: 'LTCAS Claims DB' }
+      ],
+      outputs: [
+        { field: 'Eligibility Score (0–100)', desc: 'Probability of meeting benefit trigger criteria' },
+        { field: 'STP Recommendation', desc: 'AUTO-APPROVE / REVIEW / DENY flag' },
+        { field: 'ADL Confidence Band', desc: 'Low / Moderate / High confidence in ADL assessment' }
+      ],
+      explainability: 'SHAP values per feature; top 3 contributing factors surfaced to adjuster. LIME local explanation for each claim decision. Fully auditable per NAIC Model Act.',
+      tpaValue: 'Reduces manual adjudication by 62%. Drives 87.4% STP rate. Average claim decision time: 4.2 minutes vs 3.2 days manual.',
+      dataReq: '50,000+ historical claims with confirmed eligibility outcomes',
+      retrainFreq: 'Quarterly',
+      complianceNote: 'NAIC High-Risk AI designation — requires human override capability and annual bias audit',
+      vendors: ['Wipro HOLMES AI', 'Shift Technology', 'AWS SageMaker'],
+      color: '#dc2626'
+    },
+
+    {
+      id: 'MDL-LTC-02',
+      name: 'LTC Claim Cost Predictor',
+      category: 'LTC',
+      type: 'Supervised',
+      algo: 'Random Forest Regressor + XGBoost Ensemble',
+      domain: 'Benefit Calculation',
+      status: 'Production',
+      auc: 0.93,
+      accuracy: '±8.4% MAPE',
+      inputs: [
+        { field: 'Care Setting (Home/ALF/Memory/NH)', type: 'Categorical', source: 'CONNECT Portal' },
+        { field: 'Daily Benefit Amount', type: 'Numeric', source: 'LTCAS Policy' },
+        { field: 'Inflation Rider Type (3%/5%/CPI)', type: 'Categorical', source: 'LTCAS Policy' },
+        { field: 'ADL Score Trajectory (6-month)', type: 'Time-series', source: 'Clinical Reassessment' },
+        { field: 'Geographic Region / State', type: 'Categorical', source: 'CellTrak EVV' },
+        { field: 'Provider Contracted Rate', type: 'Numeric', source: 'Provider Directory' },
+        { field: 'Shared Care Rider (Y/N)', type: 'Boolean', source: 'LTCAS Policy' },
+        { field: 'Benefit Period Remaining', type: 'Numeric', source: 'LTCAS Claims DB' }
+      ],
+      outputs: [
+        { field: 'Projected Monthly Cost ($)', desc: 'Rolling 90-day cost forecast with confidence interval' },
+        { field: 'Benefit Exhaustion Date', desc: 'Projected date policy limit will be reached' },
+        { field: 'Reserve Requirement ($)', desc: 'IBNR reserve estimate for actuarial reporting' }
+      ],
+      explainability: 'SHAP waterfall charts show cost driver breakdown (care setting contributes ~38%, ADL trajectory ~27%, inflation rider ~18%). Integrated with RIMD P29 reserve module.',
+      tpaValue: 'Improves reserve accuracy by 31%. Early warning of benefit exhaustion enables proactive Medicaid transition planning.',
+      dataReq: '100,000+ completed claims with full cost histories',
+      retrainFreq: 'Semi-annual (actuarial approval required)',
+      complianceNote: 'Reserve calculations reviewed by appointed actuary. Model output is advisory — actuarial sign-off required for statutory reserves.',
+      vendors: ['Milliman AI Analytics', 'Cognizant TPA Analytics', 'Databricks MLflow'],
+      color: '#dc2626'
+    },
+
+    {
+      id: 'MDL-LTC-03',
+      name: 'Provider Fraud Scoring Model',
+      category: 'LTC',
+      type: 'Supervised',
+      algo: 'Gradient Boosted Trees (XGBoost) + Graph Neural Network',
+      domain: 'Fraud Detection',
+      status: 'Production',
+      auc: 0.97,
+      accuracy: '92.1% Precision at 0.5 threshold',
+      inputs: [
+        { field: 'Billing Frequency vs. Network Peers', type: 'Numeric', source: 'LTCAS Claims DB' },
+        { field: 'EVV GPS Discrepancy Rate', type: 'Numeric', source: 'CellTrak EVV API' },
+        { field: 'Upcoding Pattern Score', type: 'Numeric', source: 'CAID Fraud Signals' },
+        { field: 'Provider–Provider Referral Network', type: 'Graph', source: 'Knowledge Graph (P22)' },
+        { field: 'Time-of-Day Billing Anomalies', type: 'Temporal', source: 'LTCAS Claims Timestamps' },
+        { field: 'Claim Duplicate Rate', type: 'Numeric', source: 'LTCAS Dedup Engine' },
+        { field: 'OIG/SAM Exclusion History', type: 'Boolean', source: 'CMS NPI Registry' },
+        { field: 'Prior SIU Flags', type: 'Integer', source: 'CAID SIU Workbench' }
+      ],
+      outputs: [
+        { field: 'Provider Fraud Risk Score (0–100)', desc: 'Composite fraud risk — 60+ triggers SIU review' },
+        { field: 'Fraud Signal Breakdown', desc: 'Individual signal weights (upcoding, billing spike, GPS, network)' },
+        { field: 'SIU Referral Decision', desc: 'AUTO-REFER / WATCH / CLEAR' }
+      ],
+      explainability: 'SHAP force plots identify top fraud signals per provider. GNN attention weights show suspicious referral network connections. SIU dossier auto-generated with LIME explanations.',
+      tpaValue: 'Detects 94% of known fraud cases. Average fraud prevented per flagged case: $18,400. ROI: $9.2M annually on 500K claims.',
+      dataReq: 'Historical fraud labels from SIU outcomes + provider billing history (3+ years)',
+      retrainFreq: 'Quarterly + on-demand when new fraud patterns emerge',
+      complianceNote: 'Adverse action on provider requires human investigator review. GDPR-equivalent data handling for provider PII.',
+      vendors: ['Shift Technology FORCE', 'Wipro HOLMES Fraud AI', 'Neo4j GNN'],
+      color: '#dc2626'
+    },
+
+    {
+      id: 'MDL-LTC-04',
+      name: 'ADL Trajectory Deterioration Predictor',
+      category: 'LTC',
+      type: 'Supervised',
+      algo: 'LSTM (Long Short-Term Memory) Neural Network',
+      domain: 'Care Management',
+      status: 'Production',
+      auc: 0.91,
+      accuracy: '88.7% within 30-day window',
+      inputs: [
+        { field: 'Sequential ADL Assessments (6 readings)', type: 'Time-series', source: 'CONNECT Portal / Clinical' },
+        { field: 'MMSE Score Trajectory', type: 'Time-series', source: 'Nurse Assessment' },
+        { field: 'Care Setting History', type: 'Categorical Sequence', source: 'LTCAS' },
+        { field: 'Hospitalization Events', type: 'Boolean Sequence', source: 'Medical Records' },
+        { field: 'Medication Changes', type: 'Categorical', source: 'APS / Medical Records' },
+        { field: 'Caregiver Support Level', type: 'Ordinal', source: 'CONNECT Portal' }
+      ],
+      outputs: [
+        { field: 'Deterioration Probability (30/60/90 day)', desc: 'P(ADL score increase ≥1 within window)' },
+        { field: 'Care Upgrade Recommendation', desc: 'HOME → ALF / ALF → MEMORY / MEMORY → NH' },
+        { field: 'Confidence Band', desc: 'Uncertainty quantification on prediction' }
+      ],
+      explainability: 'SHAP temporal decomposition shows which assessment period drove deterioration signal. Attention weights highlight the most predictive time steps.',
+      tpaValue: 'Enables proactive care step-up 3–4 weeks earlier. Reduces emergency escalation by 34%. Supports RN care manager outreach prioritization.',
+      dataReq: 'Sequential assessment records with minimum 3 data points per claimant',
+      retrainFreq: 'Quarterly',
+      complianceNote: 'Clinical decision support only — licensed RN must review and confirm care plan changes. HIPAA compliant.',
+      vendors: ['Accenture Health Analytics', 'AWS HealthLake + SageMaker', 'TensorFlow Extended'],
+      color: '#dc2626'
+    },
+
+    {
+      id: 'MDL-LTC-05',
+      name: 'LTC Claim Duration Model',
+      category: 'LTC',
+      type: 'Supervised',
+      algo: 'Cox Proportional Hazards + Random Survival Forest',
+      domain: 'Actuarial / Reserving',
+      status: 'Production',
+      auc: 0.89,
+      accuracy: 'C-statistic: 0.82',
+      inputs: [
+        { field: 'Age at Claim Onset', type: 'Numeric', source: 'LTCAS Policy Admin' },
+        { field: 'Initial ADL Score', type: 'Numeric', source: 'CONNECT Portal' },
+        { field: 'Primary Diagnosis (ICD-10)', type: 'Categorical', source: 'Medical Records' },
+        { field: 'Gender', type: 'Binary', source: 'LTCAS Policy Admin' },
+        { field: 'Marital Status / Informal Support', type: 'Categorical', source: 'CONNECT Portal' },
+        { field: 'Care Setting', type: 'Categorical', source: 'LTCAS' },
+        { field: 'Policy Benefit Period (years)', type: 'Numeric', source: 'LTCAS Policy' }
+      ],
+      outputs: [
+        { field: 'Expected Claim Duration (months)', desc: 'Survival curve median with confidence interval' },
+        { field: 'Probability of Claim > 2 / 5 / 10 years', desc: 'Tail risk quantification for long-duration claims' },
+        { field: 'Termination Reason Forecast', desc: 'P(Death) / P(Improvement) / P(Policy Exhaustion)' }
+      ],
+      explainability: 'Partial dependence plots show non-linear age and ADL effects. Variable importance from RSF provides feature ranking. Actuarial overlay applied per SOA 2019 LTC morbidity tables.',
+      tpaValue: 'Improves IBNR reserve accuracy by 28%. Enables carrier-level loss ratio forecasting. Critical for rate adequacy filings.',
+      dataReq: 'Minimum 5 years of closed claim history with termination reasons',
+      retrainFreq: 'Annual (actuarial sign-off)',
+      complianceNote: 'State regulatory filing may require documentation of model methodology. Appointed actuary review mandatory.',
+      vendors: ['Milliman MG-ALFA', 'Moody\'s Analytics', 'R survival package'],
+      color: '#dc2626'
+    },
+
+    /* ══════════════ SUPERVISED — HEALTH (HAL) ══════════════ */
+    {
+      id: 'MDL-HAL-H-01',
+      name: 'Health Claims Overpayment Detector',
+      category: 'Health',
+      type: 'Supervised',
+      algo: 'XGBoost Classifier + Rule Augmentation',
+      domain: 'Claims Integrity',
+      status: 'Production',
+      auc: 0.95,
+      accuracy: '91.4% recall on overpayments > $500',
+      inputs: [
+        { field: 'Procedure Codes (CPT/HCPCS)', type: 'Multi-label', source: 'Health Claims Engine' },
+        { field: 'Diagnosis Code Compatibility', type: 'Boolean', source: 'Clinical Grouper' },
+        { field: 'Provider Specialty vs. Service Rendered', type: 'Mismatch Score', source: 'NPI Registry' },
+        { field: 'Allowed Amount vs. Submitted Amount', type: 'Numeric Ratio', source: 'Fee Schedule DB' },
+        { field: 'Claim Frequency (30-day window)', type: 'Numeric', source: 'HAL Claims DB' },
+        { field: 'Modifier Usage Pattern', type: 'Categorical', source: 'Health Claims Engine' }
+      ],
+      outputs: [
+        { field: 'Overpayment Risk Score (0–100)', desc: 'Probability claim contains recoverable overpayment' },
+        { field: 'Estimated Recovery Amount ($)', desc: 'Model-predicted excess payment' },
+        { field: 'Review Priority', desc: 'HIGH / MEDIUM / LOW with recommended action' }
+      ],
+      explainability: 'SHAP decision plots show which CPT/modifier combination drove the flag. Integrated with claims integrity workflow for adjuster review queue.',
+      tpaValue: 'Average recovery: $1,200 per flagged claim. Expected annual recovery: $4.8M on HAL Health book. NAIC survey: 84% of large insurers using similar models by 2024.',
+      dataReq: 'Prior claims with confirmed overpayment/correct payment labels from audit outcomes',
+      retrainFreq: 'Quarterly',
+      complianceNote: 'Recovery demands must follow state prompt-pay laws. Human review required before recovery action.',
+      vendors: ['Change Healthcare AI', 'Cognizant TriZetto', 'Optum ClaimLogix'],
+      color: '#0891b2'
+    },
+
+    {
+      id: 'MDL-HAL-H-02',
+      name: 'Telehealth Remote Monitoring Risk Stratifier',
+      category: 'Health',
+      type: 'Supervised',
+      algo: 'Gradient Boosted Trees (LightGBM)',
+      domain: 'Care Management / HAL Health',
+      status: 'Pilot',
+      auc: 0.88,
+      accuracy: '85.3% on 30-day readmission',
+      inputs: [
+        { field: 'Remote Monitoring Device Readings (BP, SpO2, weight)', type: 'Time-series IoT', source: 'RPM Platform / Apple Health' },
+        { field: 'Chronic Condition Profile (ICD-10)', type: 'Multi-label', source: 'HAL Health EMR' },
+        { field: 'Prior Hospitalization Count (12-month)', type: 'Numeric', source: 'HAL Claims DB' },
+        { field: 'Medication Adherence Score', type: 'Numeric', source: 'Pharmacy Claims' },
+        { field: 'Social Determinants (housing stability, food access)', type: 'Categorical', source: 'SDOH Data Exchange' },
+        { field: 'Telehealth Visit Frequency', type: 'Numeric', source: 'HAL Health Claims' }
+      ],
+      outputs: [
+        { field: 'Readmission Risk Score (0–100)', desc: 'P(30-day hospital readmission)' },
+        { field: 'Alert Tier', desc: 'GREEN / AMBER / RED — triggers outreach protocol' },
+        { field: 'Recommended Intervention', desc: 'Telehealth check-in / RN visit / ER pre-authorization' }
+      ],
+      explainability: 'SHAP heatmaps on time-series readings identify which vital sign trend triggered the alert. Clinician-facing natural language explanation generated via LLM overlay.',
+      tpaValue: 'Reduces unnecessary ER visits by 22%. Telehealth-enabled triage saves avg. $1,800/event. Supports CMS RPM billing codes (99453/99454).',
+      dataReq: 'RPM device data + claims outcomes for 6+ months per member',
+      retrainFreq: 'Monthly (fast drift in IoT data)',
+      complianceNote: 'FDA Software as Medical Device (SaMD) classification review recommended. HIPAA BAA required with RPM vendor.',
+      vendors: ['Philips HealthSuite AI', 'Wipro Healthcare Analytics', 'Google Health AI'],
+      color: '#0891b2'
+    },
+
+    /* ══════════════ SUPERVISED — LIFE (HAL) ══════════════ */
+    {
+      id: 'MDL-HAL-L-01',
+      name: 'Life Mortality & Underwriting Score',
+      category: 'Life',
+      type: 'Supervised',
+      algo: 'Gradient Boosted Trees (XGBoost) + Neural Network Ensemble',
+      domain: 'Underwriting / Accelerated UW',
+      status: 'Production',
+      auc: 0.94,
+      accuracy: '93.1% vs. Traditional UW outcome',
+      inputs: [
+        { field: 'Age & Gender', type: 'Numeric/Binary', source: 'Life Policy Application' },
+        { field: 'Rx (Prescription) Data (4 years)', type: 'Multi-label', source: 'MIB / IQVIA / Milliman RxScores' },
+        { field: 'MVR (Motor Vehicle Record)', type: 'Categorical', source: 'State DMV API' },
+        { field: 'Credit-Based Insurance Score', type: 'Numeric', source: 'LexisNexis Risk Solutions' },
+        { field: 'MIB Medical Information Bureau Flags', type: 'Boolean Multi-label', source: 'MIB Group' },
+        { field: 'Application Disclosure Answers', type: 'NLP-parsed Text', source: 'E-Application' },
+        { field: 'Lab Results (if available)', type: 'Numeric Panel', source: 'ExamOne / Quest' },
+        { field: 'Wearable / Health App Data (optional)', type: 'Numeric', source: 'Apple Health / Fitbit' }
+      ],
+      outputs: [
+        { field: 'Mortality Score (1–1000)', desc: 'Lower score = lower mortality risk. Maps to standard UW table.' },
+        { field: 'UW Decision Recommendation', desc: 'STANDARD / RATED (table) / DECLINE / REFER' },
+        { field: 'APS Avoidance Flag', desc: 'Y/N — can attending physician statement be waived?' }
+      ],
+      explainability: 'SHAP summary plots per application. Key reason codes (up to 5) provided in decline/rating notices per state requirements. Adverse action compliance built-in.',
+      tpaValue: 'APS avoidance saves $320/application avg. Reduces cycle time from 28 days to 4 hours for eligible cases. STP rate for life UW: 71%.',
+      dataReq: 'Link to MIB, Rx databases, MVR APIs. Historical issued policies with mortality outcomes (minimum 10K).',
+      retrainFreq: 'Annual (mortality experience update)',
+      complianceNote: 'NAIC Model Bulletin on UW algorithms. No adverse action based solely on credit or protected class. FCRA compliance for credit data.',
+      vendors: ['Underwriting Solutions (Munich Re)', 'Hannover Re SARA', 'Sapiens DECISION'],
+      color: '#7c3aed'
+    },
+
+    {
+      id: 'MDL-HAL-L-02',
+      name: 'Policy Lapse & Surrender Predictor',
+      category: 'Life',
+      type: 'Supervised',
+      algo: 'Random Forest + Logistic Regression Ensemble',
+      domain: 'Retention / Policy Administration',
+      status: 'Production',
+      auc: 0.91,
+      accuracy: '89.3% at 90-day lapse',
+      inputs: [
+        { field: 'Payment History (24-month)', type: 'Time-series', source: 'FMS Financial / HAL Policy Admin' },
+        { field: 'Premium Arrears (days past due)', type: 'Numeric', source: 'FMS Financial' },
+        { field: 'Grace Period Utilization Frequency', type: 'Numeric', source: 'HAL Policy Admin' },
+        { field: 'Policy Age (months)', type: 'Numeric', source: 'HAL Policy Admin' },
+        { field: 'Product Type (Term / UL / WL / Hybrid)', type: 'Categorical', source: 'HAL Policy Admin' },
+        { field: 'Agent Contact Recency', type: 'Numeric (days)', source: 'CRM / Salesforce' },
+        { field: 'Life Events (marriage, divorce, job change)', type: 'Boolean Flags', source: 'CRM Signals' },
+        { field: 'Cash Value / Loan Activity', type: 'Numeric', source: 'HAL Policy Admin' }
+      ],
+      outputs: [
+        { field: 'Lapse Risk Score (0–100)', desc: 'P(lapse within 90 days) — 70+ = high risk' },
+        { field: 'Lapse Risk Tier', desc: 'LOW / MEDIUM / HIGH / CRITICAL' },
+        { field: 'Recommended Retention Action', desc: 'Advisor outreach / automatic loan / premium holiday / conservation' }
+      ],
+      explainability: 'SHAP waterfall for each at-risk policy. Top 3 lapse drivers surfaced to advisor via CRM alert. Explainability report for regulatory audit trail.',
+      tpaValue: 'Retention campaign lift: 34% reduction in lapse rate among HIGH-tier. Revenue preserved: ~$2.1M annually per 10K policy block.',
+      dataReq: 'Policy admin payment records + labeled lapse/retain outcomes (minimum 3 years history)',
+      retrainFreq: 'Quarterly',
+      complianceNote: 'No adverse action. Conservation offers must comply with state replacement regulations.',
+      vendors: ['Majesco AI', 'EbixExchange', 'Sapiens DECISION'],
+      color: '#7c3aed'
+    },
+
+    {
+      id: 'MDL-HAL-L-03',
+      name: 'LTC Hybrid Rider Trigger Classifier',
+      category: 'Life',
+      type: 'Supervised',
+      algo: 'Multi-class XGBoost + Policy Rule Overlay',
+      domain: 'Hybrid LTC/Life Claims — Rider Activation',
+      status: 'Production',
+      auc: 0.95,
+      accuracy: '93.8% rider trigger accuracy',
+      inputs: [
+        { field: 'ADL Score (0–6)', type: 'Numeric', source: 'Clinical Assessment / CONNECT' },
+        { field: 'Chronic Illness Certification', type: 'Boolean', source: 'Attending Physician Statement' },
+        { field: 'Policy Type (Hybrid LTC/Life vs. Pure LTC)', type: 'Categorical', source: 'HAL Policy Admin' },
+        { field: 'Death Benefit Pool Remaining', type: 'Numeric', source: 'HAL Policy Admin' },
+        { field: 'Accelerated Benefit Type (Indemnity/Reimbursement)', type: 'Categorical', source: 'Policy Document' },
+        { field: 'Contestability Period Active', type: 'Boolean', source: 'HAL Policy Admin' },
+        { field: 'Waiting Period Status', type: 'Categorical', source: 'LTCAS' }
+      ],
+      outputs: [
+        { field: 'Rider Trigger Decision', desc: 'LTC RIDER ACTIVATED / LIFE BENEFIT ACCELERATION / PENDING / DENY' },
+        { field: 'LTC Benefit Amount ($)', desc: 'Calculated per policy terms — daily/monthly benefit' },
+        { field: 'Remaining Life Benefit Pool', desc: 'Death benefit balance after LTC acceleration' }
+      ],
+      explainability: 'Decision trace shows which eligibility criteria were met/unmet. APS reason codes for denials. Carrier reconciliation report auto-generated.',
+      tpaValue: 'Eliminates 5-day manual review for standard hybrid triggers. Cross-product engine processes both LTC and life benefit calculations in single workflow.',
+      dataReq: 'Historical hybrid policy claims with rider activation outcomes',
+      retrainFreq: 'Semi-annual',
+      complianceNote: 'Accelerated death benefit requires state-specific disclosure forms. Hybrid product rules vary by carrier policy form.',
+      vendors: ['Accenture Insurance Studio', 'Sapiens ClaimsPro', 'Majesco Claims'],
+      color: '#7c3aed'
+    },
+
+    /* ══════════════ SUPERVISED — ANNUITY (HAL) ══════════════ */
+    {
+      id: 'MDL-HAL-A-01',
+      name: 'Annuity Lapse & Surrender Predictor',
+      category: 'Annuity',
+      type: 'Supervised',
+      algo: 'Gradient Boosted Trees (LightGBM) + Survival Analysis',
+      domain: 'Retention / Policy Administration',
+      status: 'Production',
+      auc: 0.90,
+      accuracy: '88.1% on 12-month surrender',
+      inputs: [
+        { field: 'Contract Age (months)', type: 'Numeric', source: 'HAL Annuity Admin' },
+        { field: 'Surrender Charge Schedule Status', type: 'Categorical', source: 'HAL Annuity Admin' },
+        { field: 'Interest Rate Environment (10yr Treasury)', type: 'Numeric', source: 'Market Data Feed' },
+        { field: 'Competing Annuity Rate Differential', type: 'Numeric', source: 'Market Intelligence' },
+        { field: 'Client Age & RMD Proximity', type: 'Numeric', source: 'HAL Client 360' },
+        { field: 'Income Rider Active (Y/N)', type: 'Boolean', source: 'HAL Annuity Admin' },
+        { field: 'LTC Rider Active (Y/N)', type: 'Boolean', source: 'HAL Annuity Admin' },
+        { field: 'Advisor Engagement Score', type: 'Numeric', source: 'CRM Salesforce' }
+      ],
+      outputs: [
+        { field: 'Surrender Risk Score (0–100)', desc: 'P(surrender within 12 months)' },
+        { field: 'Revenue at Risk ($)', desc: 'Estimated AUM loss if surrender occurs' },
+        { field: 'Retention Action', desc: 'Rate enhancement offer / advisor review / product exchange' }
+      ],
+      explainability: 'SHAP values show interest rate sensitivity as dominant driver in rising rate environments. Contract age and surrender charge cliff are secondary drivers.',
+      tpaValue: 'Identified $14.2M at-risk AUM in Q2 2026 from LightGBM sweep. Proactive outreach retained 41% of high-risk contracts.',
+      dataReq: 'Annuity contract history with surrender/retain outcomes (5+ years including rate cycle)',
+      retrainFreq: 'Quarterly (sensitive to rate environment)',
+      complianceNote: 'Suitability review required for any product exchange recommendation. State DOI replacement notice required.',
+      vendors: ['SS&C CAMRA', 'Majesco Annuity', 'Accenture Insurance Analytics'],
+      color: '#d97706'
+    },
+
+    {
+      id: 'MDL-HAL-A-02',
+      name: 'Annuity LTC Withdrawal Guardrail Model',
+      category: 'Annuity',
+      type: 'Supervised',
+      algo: 'Rule-Augmented Logistic Regression + Monte Carlo Simulation',
+      domain: 'HAL Annuity / LTC Rider — Benefit Calculation',
+      status: 'Production',
+      auc: 0.93,
+      accuracy: '96.2% guardrail compliance rate',
+      inputs: [
+        { field: 'Guaranteed Withdrawal Benefit Base ($)', type: 'Numeric', source: 'HAL Annuity Admin' },
+        { field: 'LTC Multiplier Factor (2x/3x)', type: 'Numeric', source: 'Policy Contract' },
+        { field: 'ADL Trigger Certification', type: 'Boolean', source: 'Clinical Assessment' },
+        { field: 'Prior Withdrawals (YTD)', type: 'Numeric', source: 'HAL Annuity Admin' },
+        { field: 'Contract Value', type: 'Numeric', source: 'HAL Annuity Admin' },
+        { field: 'Annual Withdrawal Rate vs. GWB', type: 'Numeric', source: 'HAL Annuity Admin' },
+        { field: 'Inflation Adjustment Applied', type: 'Boolean', source: 'Policy Contract' }
+      ],
+      outputs: [
+        { field: 'LTC Withdrawal Amount Approved ($)', desc: 'Maximum LTC-qualifying withdrawal within guardrail' },
+        { field: 'Policy Sustainability Score', desc: 'P(contract depletion within 10 years)' },
+        { field: 'Tax Reporting Flag', desc: 'Qualified LTC payment vs. taxable distribution classification' }
+      ],
+      explainability: 'Monte Carlo fan chart shows distribution of outcomes under 1,000 withdrawal scenarios. Tax treatment decision tree auditable per IRC §7702B.',
+      tpaValue: 'Eliminates manual actuarial review for standard guardrail withdrawals. Reduces processing time from 12 days to 90 minutes.',
+      dataReq: 'Annuity contract ledger data + LTC certification records',
+      retrainFreq: 'Annual',
+      complianceNote: 'IRC §7702B tax treatment compliance. State insurance code maximum benefit rules apply. Annual report to carrier required.',
+      vendors: ['Majesco Annuity', 'CANNEX Financial Exchanges', 'Accenture Retirement Studio'],
+      color: '#d97706'
+    },
+
+    /* ══════════════ UNSUPERVISED — LTC ══════════════ */
+    {
+      id: 'MDL-LTC-U01',
+      name: 'Provider Billing Anomaly Detector',
+      category: 'LTC',
+      type: 'Unsupervised',
+      algo: 'Isolation Forest + Autoencoder Neural Network',
+      domain: 'Fraud / Anomaly Detection',
+      status: 'Production',
+      auc: 0.93,
+      accuracy: '89% precision at 5% contamination rate',
+      inputs: [
+        { field: 'Provider Monthly Billing Vector (30 features)', type: 'Numeric Array', source: 'LTCAS Claims DB' },
+        { field: 'Visit Duration Distribution', type: 'Statistical Moment', source: 'CellTrak EVV' },
+        { field: 'Service Code Mix Entropy', type: 'Numeric', source: 'LTCAS Claims DB' },
+        { field: 'Peer Network Billing Baseline', type: 'Cluster Mean', source: 'Provider Directory + LTCAS' },
+        { field: 'Time-of-Day Visit Pattern', type: 'Histogram', source: 'CellTrak EVV GPS' }
+      ],
+      outputs: [
+        { field: 'Anomaly Score (0–1)', desc: 'Higher = more anomalous. 0.7+ flagged for review.' },
+        { field: 'Anomaly Type', desc: 'BILLING_SPIKE / TIME_PATTERN / SERVICE_MIX / DURATION_OUTLIER' },
+        { field: 'Peer Comparison Deviation', desc: '% deviation from network peer cohort median' }
+      ],
+      explainability: 'Reconstruction error decomposition from autoencoder identifies which billing features drove anomaly. IsoForest path length shows isolation depth per sample. No labels required — purely pattern-based.',
+      tpaValue: 'Detects novel fraud schemes not yet in training labels. 100+ new fraud patterns identified in first 12 months. Works on cold-start providers with no SIU history.',
+      dataReq: 'Minimum 6 months of claims data per provider cohort. No fraud labels needed.',
+      retrainFreq: 'Monthly rolling window',
+      complianceNote: 'Unsupervised model output is signal only — must be reviewed by SIU analyst before any action. Bias audit on protected provider characteristics quarterly.',
+      vendors: ['Shift Technology', 'AWS SageMaker Anomaly Detection', 'Databricks ML'],
+      color: '#dc2626'
+    },
+
+    {
+      id: 'MDL-LTC-U02',
+      name: 'Claimant Care Pattern Clustering',
+      category: 'LTC',
+      type: 'Unsupervised',
+      algo: 'K-Means Clustering + UMAP Dimensionality Reduction',
+      domain: 'Population Health Management',
+      status: 'Production',
+      auc: null,
+      accuracy: 'Silhouette Score: 0.71 (7-cluster solution)',
+      inputs: [
+        { field: 'ADL Score Profile', type: 'Numeric Vector', source: 'CONNECT Portal' },
+        { field: 'Care Type Utilization (6 types)', type: 'Proportion Vector', source: 'LTCAS Claims DB' },
+        { field: 'Claim Duration Distribution', type: 'Numeric', source: 'LTCAS Claims DB' },
+        { field: 'Cognitive Impairment Level', type: 'Ordinal', source: 'Clinical Assessment' },
+        { field: 'Geographic Cohort', type: 'Categorical', source: 'CellTrak EVV' },
+        { field: 'Age-at-Onset Band', type: 'Ordinal', source: 'LTCAS Policy Admin' }
+      ],
+      outputs: [
+        { field: 'Claimant Cluster Assignment', desc: '7 clusters: Memory-Care-Complex / Active-Rehab / Long-Stable / High-Cost / Community-Supported / Transitional / End-Stage' },
+        { field: 'Cluster Cost Profile', desc: 'Avg monthly cost and duration by cluster' },
+        { field: 'Care Pathway Recommendation', desc: 'Evidence-based care pathway per cluster from SOA LTC morbidity benchmarks' }
+      ],
+      explainability: 'UMAP 2D visualization with cluster boundaries. Cluster profiles described in plain language for care managers. Centroid features explain cluster characteristics.',
+      tpaValue: 'Enables population-level care management. Memory-Care-Complex cluster (22% of claimants = 48% of cost) receives priority RN outreach. Benchmarked against SOA 2019 tables.',
+      dataReq: 'Cross-sectional claims data — no labels needed. Minimum 5,000 active claimants.',
+      retrainFreq: 'Semi-annual',
+      complianceNote: 'Cluster assignments used for care management routing only — not for eligibility determination or coverage decisions.',
+      vendors: ['Cognizant TPA Analytics', 'Databricks ML', 'scikit-learn'],
+      color: '#dc2626'
+    },
+
+    /* ══════════════ UNSUPERVISED — HEALTH ══════════════ */
+    {
+      id: 'MDL-HAL-H-U01',
+      name: 'Health Claims Network Anomaly Detector',
+      category: 'Health',
+      type: 'Unsupervised',
+      algo: 'Graph Neural Network (GraphSAGE) + Community Detection',
+      domain: 'Fraud / Network Analysis',
+      status: 'Pilot',
+      auc: null,
+      accuracy: 'F1: 0.84 on known fraud rings',
+      inputs: [
+        { field: 'Provider–Patient Bipartite Graph', type: 'Graph (nodes+edges)', source: 'HAL Health Claims Engine' },
+        { field: 'Claim Co-submission Patterns', type: 'Edge Weights', source: 'HAL Claims DB' },
+        { field: 'Referral Network (Provider → Provider)', type: 'Directed Graph', source: 'HAL Claims + NPI Registry' },
+        { field: 'Billing Amount per Edge', type: 'Numeric', source: 'HAL Claims DB' }
+      ],
+      outputs: [
+        { field: 'Suspicious Community Score', desc: 'Probability that a provider cluster forms a fraud ring' },
+        { field: 'Network Centrality Flags', desc: 'Hub providers that connect many suspicious claims' },
+        { field: 'Fraud Ring Members', desc: 'List of provider and patient entities in flagged community' }
+      ],
+      explainability: 'GNN attention weights highlight which graph connections are suspicious. Force-directed graph visualization rendered in CAID dashboard. Community detection via Louvain algorithm.',
+      tpaValue: 'Identifies organized fraud rings that individual claim models miss. Average fraud ring: $280K in fraudulent claims. Graph approach catches 3× more ring members.',
+      dataReq: 'At least 12 months of provider-patient claim transaction graph',
+      retrainFreq: 'Monthly',
+      complianceNote: 'Provider adverse action requires SIU investigation confirmation. Network analysis data is law enforcement-quality evidence.',
+      vendors: ['Neo4j Graph Analytics', 'AWS Neptune ML', 'Palantir Gotham'],
+      color: '#0891b2'
+    },
+
+    /* ══════════════ UNSUPERVISED — LIFE ══════════════ */
+    {
+      id: 'MDL-HAL-L-U01',
+      name: 'Life Policy Segment Profiler',
+      category: 'Life',
+      type: 'Unsupervised',
+      algo: 'DBSCAN + Gaussian Mixture Model',
+      domain: 'Cross-sell / Portfolio Segmentation',
+      status: 'Production',
+      auc: null,
+      accuracy: 'Adjusted Rand Index: 0.68 vs. actuarial segments',
+      inputs: [
+        { field: 'Policy Face Value Distribution', type: 'Numeric', source: 'HAL Policy Admin' },
+        { field: 'Premium Payment Pattern', type: 'Time-series', source: 'FMS Financial' },
+        { field: 'Policy Type Mix (Term/UL/WL/Hybrid)', type: 'Proportion Vector', source: 'HAL Policy Admin' },
+        { field: 'Beneficiary Structure', type: 'Categorical', source: 'HAL Policy Admin' },
+        { field: 'Rider Profile (LTC/Disability/Waiver)', type: 'Boolean Vector', source: 'HAL Policy Admin' },
+        { field: 'Client Wealth Proxy (CRM)', type: 'Ordinal', source: 'Salesforce CRM' }
+      ],
+      outputs: [
+        { field: 'Policy Segment Label', desc: 'MASS-MARKET / ACCUMULATION-FOCUS / PROTECTION-PURE / HYBRID-COMPLEX / ESTATE-PLANNING / HNW-LEGACY' },
+        { field: 'Cross-sell Propensity Score', desc: 'Per-product cross-sell likelihood by segment' },
+        { field: 'Segment Revenue Profile', desc: 'Average premium, face value, and lapse rate by segment' }
+      ],
+      explainability: 'GMM component probabilities show soft segment membership. DBSCAN identifies outlier policies for manual review. Segment profiles described via centroid feature analysis.',
+      tpaValue: 'Enables targeted cross-sell campaigns. HNW-Legacy segment shows 4.2× higher annuity cross-sell conversion. Estimated $3.8M incremental premium from segmentation-driven outreach.',
+      dataReq: 'Policy ledger data + CRM wealth signals. No outcome labels required.',
+      retrainFreq: 'Annual',
+      complianceNote: 'Segment labels used for marketing targeting only — not for underwriting or coverage decisions. FCRA and state marketing regulations apply.',
+      vendors: ['Majesco AI', 'SAS Customer Intelligence 360', 'Databricks ML'],
+      color: '#7c3aed'
+    },
+
+    /* ══════════════ UNSUPERVISED — ANNUITY ══════════════ */
+    {
+      id: 'MDL-HAL-A-U01',
+      name: 'Annuity Policyholder Behavior Cluster',
+      category: 'Annuity',
+      type: 'Unsupervised',
+      algo: 'K-Prototypes Clustering (mixed numeric/categorical)',
+      domain: 'Actuarial / Behavioral Finance',
+      status: 'Production',
+      auc: null,
+      accuracy: 'Silhouette Score: 0.67 (5-cluster solution)',
+      inputs: [
+        { field: 'Withdrawal Frequency and Amount Pattern', type: 'Time-series', source: 'HAL Annuity Admin' },
+        { field: 'Systematic Withdrawal Plan (Y/N)', type: 'Boolean', source: 'HAL Annuity Admin' },
+        { field: 'RMD Trigger Status', type: 'Boolean', source: 'HAL Annuity Admin' },
+        { field: 'Annuity Type (SPIA/DIA/VA/FIA/RILA)', type: 'Categorical', source: 'HAL Annuity Admin' },
+        { field: 'Contract Age Band', type: 'Ordinal', source: 'HAL Annuity Admin' },
+        { field: 'Income Rider Utilization', type: 'Numeric', source: 'HAL Annuity Admin' }
+      ],
+      outputs: [
+        { field: 'Behavior Cluster', desc: 'ACCUMULATOR / INCOME-DEPENDENT / RMD-DRIVEN / LTC-SPENDER / STRATEGIC-PARTIAL-SURRENDER' },
+        { field: 'Projected Withdrawal Rate (next 12mo)', desc: 'Expected % of account value withdrawn' },
+        { field: 'Persistency Probability', desc: 'P(contract in-force in 3 years)' }
+      ],
+      explainability: 'Cluster prototypes show median withdrawal behavior per segment. Decision boundary visualization for categorical features via correspondence analysis.',
+      tpaValue: 'ACCUMULATOR cluster (34%) has lowest surrender risk — no outreach needed. LTC-SPENDER cluster (12%) requires proactive benefit coordination with LTCAS.',
+      dataReq: 'Minimum 3 years of annuity ledger transaction history. No labels needed.',
+      retrainFreq: 'Semi-annual',
+      complianceNote: 'Cluster assignments inform advisor conversations only. Suitability determinations remain with licensed advisor.',
+      vendors: ['CANNEX Financial', 'SS&C CAMRA Analytics', 'Python scikit-learn'],
+      color: '#d97706'
+    },
+
+    /* ══════════════ CROSS-DOMAIN ══════════════ */
+    {
+      id: 'MDL-XD-01',
+      name: 'Cross-Product Client Churn Predictor',
+      category: 'Cross-Domain',
+      type: 'Supervised',
+      algo: 'Multi-task Learning Neural Network (shared encoder + task heads)',
+      domain: 'Retention — LTC + Life + Annuity + Health',
+      status: 'Pilot',
+      auc: 0.88,
+      accuracy: '86.7% on 180-day churn',
+      inputs: [
+        { field: 'Unified Client ID (Golden Record)', type: 'Composite Key', source: 'Unified Client 360 Gold Table (P21)' },
+        { field: 'Product Holding Mix', type: 'Boolean Vector', source: 'HAL Policy Admin + LTCAS' },
+        { field: 'Total Premium Trend (12-month)', type: 'Time-series', source: 'FMS Financial' },
+        { field: 'Advisor Relationship Score', type: 'Numeric', source: 'CRM' },
+        { field: 'Claims Experience Sentiment', type: 'NLP Score', source: 'CIH Contact Center + CSAT' },
+        { field: 'Competitor Activity Signals', type: 'External Data', source: 'MIB Replacement Notices' },
+        { field: 'Life Events (retirement, divorce, death of spouse)', type: 'Boolean Flags', source: 'CRM + Public Records' }
+      ],
+      outputs: [
+        { field: 'Churn Probability per Product (0–100)', desc: 'Separate score per product line in client portfolio' },
+        { field: 'Churn Risk Tier', desc: 'Overall client-level risk: LOW / MEDIUM / HIGH / CRITICAL' },
+        { field: 'Next Best Action', desc: 'Product-specific retention action recommendation' }
+      ],
+      explainability: 'Multi-task SHAP attribution shows which product-specific signals drive overall churn. Shared encoder captures cross-product dependency effects.',
+      tpaValue: 'Multi-product households churn at 1/3 the rate of single-product clients. Early intervention on HIGH-tier reduces churn by 38%.',
+      dataReq: 'Unified client golden record + cross-product policy + claims history',
+      retrainFreq: 'Quarterly',
+      complianceNote: 'MIB replacement notice data governed by MIB subscriber agreement. No adverse action on protected characteristics.',
+      vendors: ['Accenture AI Studio', 'Salesforce Einstein', 'Databricks MLflow'],
+      color: '#059669'
+    },
+
+    {
+      id: 'MDL-XD-02',
+      name: 'NLP Claims Document Intelligence',
+      category: 'Cross-Domain',
+      type: 'Supervised',
+      algo: 'Transformer (BERT fine-tuned) + Named Entity Recognition',
+      domain: 'Document Processing — LTC + Health + Life',
+      status: 'Production',
+      auc: 0.96,
+      accuracy: '95.1% entity extraction F1',
+      inputs: [
+        { field: 'Attending Physician Statements (APS)', type: 'Unstructured Text', source: 'EPS Correspondence / Document Mgmt' },
+        { field: 'Medical Records (office notes, discharge summaries)', type: 'Unstructured Text', source: 'EPS / CONNECT Portal' },
+        { field: 'Claimant Statements', type: 'Unstructured Text', source: 'CONNECT Portal' },
+        { field: 'Provider Invoices', type: 'Semi-structured (OCR)', source: 'EPS Correspondence' },
+        { field: 'Death Certificates (life claims)', type: 'Structured PDF', source: 'EPS' }
+      ],
+      outputs: [
+        { field: 'Extracted Clinical Entities', desc: 'Diagnoses (ICD-10), procedures, medications, ADL status, MMSE scores — all structured from text' },
+        { field: 'Document Classification', desc: 'APS / Medical Record / Provider Invoice / Claimant Statement / Death Certificate' },
+        { field: 'Contradiction Flags', desc: 'Inconsistencies between document sections (NLP cross-reference)' },
+        { field: 'Completeness Score', desc: 'Required fields present? Missing items flagged for follow-up' }
+      ],
+      explainability: 'Token-level attention highlights which text passage drove each entity extraction. Contradiction explanations shown in adjuster review panel.',
+      tpaValue: 'Reduces APS processing time from 3.2 days to 4 hours. Auto-populates 18 claim fields from unstructured documents. Eliminates 85% of manual document indexing.',
+      dataReq: 'Labeled clinical documents (NER training). Minimum 10,000 annotated documents.',
+      retrainFreq: 'Semi-annual + on-demand for new document types',
+      complianceNote: 'PHI handling under HIPAA requires BAA with cloud NLP providers. Model output is structured data extraction — clinical interpretation remains with adjuster.',
+      vendors: ['Google Healthcare Natural Language API', 'AWS Comprehend Medical', 'Wipro HOLMES NLP'],
+      color: '#059669'
+    }
+  ];
+
+
+  /* ════════════════════════════════════════════════════════════════
+     P43 — PART 2 : PAGE BUILD · NAV INJECTION · RENAME/MOVE · INIT
+     ════════════════════════════════════════════════════════════════ */
+
+  /* ── Category colour map ── */
+  var _p43catColors = {
+    'LTC':          '#dc2626',
+    'Health':       '#0891b2',
+    'Life':         '#7c3aed',
+    'Annuity':      '#d97706',
+    'Cross-Domain': '#059669'
+  };
+
+  /* ── Algorithm badge colours ── */
+  var _p43algoBadge = {
+    'XGBoost':           '#f59e0b',
+    'Random Forest':     '#10b981',
+    'LSTM':              '#6366f1',
+    'GNN':               '#ec4899',
+    'BERT':              '#8b5cf6',
+    'LightGBM':          '#f97316',
+    'Logistic Regression':'#64748b',
+    'K-Means':           '#0ea5e9',
+    'DBSCAN':            '#a78bfa',
+    'Isolation Forest':  '#ef4444',
+    'default':           '#6b7280'
+  };
+
+  function _p43algoColor(algo) {
+    for (var k in _p43algoBadge) {
+      if (algo && algo.indexOf(k) !== -1) return _p43algoBadge[k];
+    }
+    return _p43algoBadge['default'];
+  }
+
+  /* ════════════════════════════════════════════════════════════════
+     PAGE BUILD
+     ════════════════════════════════════════════════════════════════ */
+  function _p43buildPage() {
+    var tpl = document.getElementById('tpl-hal-ai-models');
+    if (!tpl) { console.warn('[P43] tpl-hal-ai-models not found'); return; }
+    if (tpl.dataset.p43Built) return;
+    tpl.dataset.p43Built = '1';
+
+    /* ── stats ── */
+    var supervised   = _p43models.filter(function(m){ return m.type === 'Supervised'; });
+    var unsupervised = _p43models.filter(function(m){ return m.type === 'Unsupervised'; });
+    var domains      = {};
+    _p43models.forEach(function(m){ domains[m.category] = (domains[m.category]||0)+1; });
+    var prodCount    = _p43models.filter(function(m){ return m.status === 'Production'; }).length;
+
+    /* ── KPI bar ── */
+    var kpiHtml = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:24px;">';
+    var kpis = [
+      { label:'Total Models',      val: _p43models.length, icon:'🧠', col:'#6366f1' },
+      { label:'Supervised',        val: supervised.length,   icon:'📊', col:'#10b981' },
+      { label:'Unsupervised',      val: unsupervised.length, icon:'🔍', col:'#f59e0b' },
+      { label:'In Production',     val: prodCount,           icon:'✅', col:'#dc2626' },
+      { label:'LTC Models',        val: domains['LTC']||0,   icon:'🏥', col:'#dc2626' },
+      { label:'Health (HAL)',      val: domains['Health']||0,icon:'💊', col:'#0891b2' },
+      { label:'Life (HAL)',        val: domains['Life']||0,  icon:'🛡️', col:'#7c3aed' },
+      { label:'Annuity (HAL)',     val: domains['Annuity']||0,icon:'📈',col:'#d97706' }
+    ];
+    kpis.forEach(function(k){
+      kpiHtml += '<div style="background:#1e293b;border:1px solid #334155;border-radius:10px;padding:14px 12px;text-align:center;">' +
+        '<div style="font-size:22px;margin-bottom:4px;">' + k.icon + '</div>' +
+        '<div style="font-size:26px;font-weight:700;color:' + k.col + ';">' + k.val + '</div>' +
+        '<div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;margin-top:2px;">' + k.label + '</div>' +
+        '</div>';
+    });
+    kpiHtml += '</div>';
+
+    /* ── filter bar ── */
+    var cats = ['All','LTC','Health','Life','Annuity','Cross-Domain'];
+    var types = ['All','Supervised','Unsupervised'];
+    var filterHtml = '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;align-items:center;">' +
+      '<span style="color:#94a3b8;font-size:11px;font-weight:600;letter-spacing:.5px;margin-right:4px;">DOMAIN:</span>';
+    cats.forEach(function(c){
+      var col = c === 'All' ? '#6366f1' : (_p43catColors[c]||'#6b7280');
+      filterHtml += '<button data-p43cat="' + c + '" onclick="_p43filterModels()" style="border:1px solid ' + (c==='All'?col:'#334155') + ';background:' + (c==='All'?col:'transparent') + ';color:' + (c==='All'?'#fff':'#94a3b8') + ';border-radius:20px;padding:4px 14px;font-size:11px;cursor:pointer;transition:all .2s;">' + c + '</button>';
+    });
+    filterHtml += '<span style="color:#94a3b8;font-size:11px;font-weight:600;letter-spacing:.5px;margin-left:12px;margin-right:4px;">TYPE:</span>';
+    types.forEach(function(t){
+      filterHtml += '<button data-p43type="' + t + '" onclick="_p43filterModels()" style="border:1px solid ' + (t==='All'?'#10b981':'#334155') + ';background:' + (t==='All'?'#10b981':'transparent') + ';color:' + (t==='All'?'#fff':'#94a3b8') + ';border-radius:20px;padding:4px 14px;font-size:11px;cursor:pointer;transition:all .2s;">' + t + '</button>';
+    });
+    filterHtml += '<input id="p43-search" oninput="_p43filterModels()" placeholder="🔍  Search models..." style="margin-left:auto;background:#1e293b;border:1px solid #334155;color:#e2e8f0;border-radius:20px;padding:5px 14px;font-size:12px;outline:none;min-width:200px;">';
+    filterHtml += '</div>';
+
+    /* ── view toggle ── */
+    var viewHtml = '<div style="display:flex;gap:8px;margin-bottom:16px;justify-content:flex-end;">' +
+      '<button id="p43-view-card" onclick="_p43setView(\'card\')" style="background:#6366f1;color:#fff;border:none;border-radius:6px;padding:5px 14px;font-size:11px;cursor:pointer;font-weight:600;">⊞ Cards</button>' +
+      '<button id="p43-view-table" onclick="_p43setView(\'table\')" style="background:#1e293b;color:#94a3b8;border:1px solid #334155;border-radius:6px;padding:5px 14px;font-size:11px;cursor:pointer;">☰ Table</button>' +
+      '</div>';
+
+    /* ── model cards ── */
+    var cardsHtml = '<div id="p43-cards-view">';
+    cardsHtml += '<div id="p43-cards-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:16px;">';
+    _p43models.forEach(function(m){
+      var catCol = _p43catColors[m.category] || '#6b7280';
+      var algoCol = _p43algoColor(m.algo);
+      var aucBadge = m.auc ? '<span style="background:#10b981;color:#fff;border-radius:12px;padding:2px 9px;font-size:10px;font-weight:700;">AUC ' + m.auc.toFixed(2) + '</span>' : '';
+      var statusCol = m.status === 'Production' ? '#10b981' : '#f59e0b';
+      var inputsHtml = m.inputs.slice(0,4).map(function(inp){
+        return '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #1e293b;font-size:10px;">' +
+          '<span style="color:#cbd5e1;">' + inp.field + '</span>' +
+          '<span style="color:#64748b;">' + inp.source + '</span>' +
+          '</div>';
+      }).join('');
+      if (m.inputs.length > 4) inputsHtml += '<div style="font-size:9px;color:#64748b;padding-top:3px;">+ ' + (m.inputs.length-4) + ' more inputs</div>';
+      var outputsHtml = m.outputs.map(function(o){
+        return '<div style="padding:3px 0;font-size:10px;color:#94a3b8;"><span style="color:#6366f1;font-weight:600;">' + o.field + ':</span> ' + o.desc.substring(0,70) + (o.desc.length>70?'…':'') + '</div>';
+      }).join('');
+      var vendorsHtml = m.vendors.map(function(v){ return '<span style="background:#0f172a;border:1px solid #334155;color:#94a3b8;border-radius:4px;padding:2px 7px;font-size:9px;">' + v + '</span>'; }).join('');
+
+      cardsHtml += '<div class="p43-model-card" data-cat="' + m.category + '" data-type="' + m.type + '" data-name="' + m.name.toLowerCase() + '" data-domain="' + m.domain.toLowerCase() + '" ' +
+        'style="background:#131d2e;border:1px solid #1e3a5f;border-top:3px solid ' + catCol + ';border-radius:12px;padding:0;overflow:hidden;display:flex;flex-direction:column;">' +
+
+        /* card header */
+        '<div style="padding:14px 16px 10px;background:linear-gradient(135deg,#1a2744 0%,#0f172a 100%);">' +
+          '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px;">' +
+            '<div style="font-size:12px;font-weight:700;color:#e2e8f0;line-height:1.3;flex:1;">' + m.name + '</div>' +
+            '<span style="background:' + statusCol + '22;color:' + statusCol + ';border:1px solid ' + statusCol + '44;border-radius:10px;padding:2px 8px;font-size:9px;font-weight:700;white-space:nowrap;">' + m.status + '</span>' +
+          '</div>' +
+          '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px;">' +
+            '<span style="background:' + catCol + '22;color:' + catCol + ';border:1px solid ' + catCol + '44;border-radius:10px;padding:2px 9px;font-size:9px;font-weight:700;">' + m.category + '</span>' +
+            '<span style="background:' + algoCol + '22;color:' + algoCol + ';border:1px solid ' + algoCol + '44;border-radius:10px;padding:2px 9px;font-size:9px;">' + m.type + '</span>' +
+            aucBadge +
+          '</div>' +
+          '<div style="font-size:10px;color:#64748b;font-style:italic;">' + m.id + ' · ' + m.algo.substring(0,45) + (m.algo.length>45?'…':'') + '</div>' +
+        '</div>' +
+
+        /* card body */
+        '<div style="padding:12px 16px;flex:1;display:flex;flex-direction:column;gap:10px;">' +
+
+          /* inputs */
+          '<div>' +
+            '<div style="font-size:9px;color:#6366f1;font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px;">📥 Input Variables</div>' +
+            inputsHtml +
+          '</div>' +
+
+          /* outputs */
+          '<div>' +
+            '<div style="font-size:9px;color:#10b981;font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px;">📤 Output / Model Score</div>' +
+            outputsHtml +
+          '</div>' +
+
+          /* explainability */
+          '<div style="background:#0f172a;border-radius:6px;padding:8px 10px;">' +
+            '<div style="font-size:9px;color:#f59e0b;font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-bottom:3px;">🔎 Explainability (XAI)</div>' +
+            '<div style="font-size:10px;color:#94a3b8;">' + m.explainability.substring(0,120) + (m.explainability.length>120?'…':'') + '</div>' +
+          '</div>' +
+
+          /* TPA value */
+          '<div style="background:#0c1f1a;border:1px solid #065f46;border-radius:6px;padding:8px 10px;">' +
+            '<div style="font-size:9px;color:#10b981;font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-bottom:3px;">💼 Technology Services Value</div>' +
+            '<div style="font-size:10px;color:#94a3b8;">' + m.tpaValue.substring(0,130) + (m.tpaValue.length>130?'…':'') + '</div>' +
+          '</div>' +
+
+          /* bottom meta row */
+          '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">' +
+            '<div style="background:#1e293b;border-radius:5px;padding:6px 8px;">' +
+              '<div style="font-size:8px;color:#64748b;text-transform:uppercase;font-weight:600;margin-bottom:2px;">Retrain</div>' +
+              '<div style="font-size:9px;color:#cbd5e1;">' + m.retrainFreq + '</div>' +
+            '</div>' +
+            '<div style="background:#1e293b;border-radius:5px;padding:6px 8px;">' +
+              '<div style="font-size:8px;color:#64748b;text-transform:uppercase;font-weight:600;margin-bottom:2px;">Data Req</div>' +
+              '<div style="font-size:9px;color:#cbd5e1;">' + m.dataReq.substring(0,50) + (m.dataReq.length>50?'…':'') + '</div>' +
+            '</div>' +
+          '</div>' +
+
+          /* compliance */
+          '<div style="background:#1a0f2e;border:1px solid #4c1d95;border-radius:5px;padding:6px 10px;">' +
+            '<div style="font-size:8px;color:#a78bfa;text-transform:uppercase;font-weight:600;margin-bottom:2px;">⚖️ Compliance</div>' +
+            '<div style="font-size:9px;color:#94a3b8;">' + m.complianceNote.substring(0,100) + (m.complianceNote.length>100?'…':'') + '</div>' +
+          '</div>' +
+
+          /* vendors */
+          '<div>' +
+            '<div style="font-size:8px;color:#64748b;text-transform:uppercase;font-weight:600;margin-bottom:4px;">🏢 Vendor Examples</div>' +
+            '<div style="display:flex;flex-wrap:wrap;gap:4px;">' + vendorsHtml + '</div>' +
+          '</div>' +
+
+        '</div>' +   /* end card body */
+      '</div>';      /* end card */
+    });
+    cardsHtml += '</div></div>'; /* end grid + cards-view */
+
+    /* ── table view ── */
+    var tableHtml = '<div id="p43-table-view" style="display:none;overflow-x:auto;">' +
+      '<table style="width:100%;border-collapse:collapse;font-size:11px;">' +
+      '<thead><tr style="background:#1e293b;border-bottom:2px solid #334155;">' +
+        '<th style="padding:10px 12px;text-align:left;color:#6366f1;font-weight:700;white-space:nowrap;">Model ID</th>' +
+        '<th style="padding:10px 12px;text-align:left;color:#6366f1;font-weight:700;">Model Name</th>' +
+        '<th style="padding:10px 12px;text-align:left;color:#6366f1;font-weight:700;">Category</th>' +
+        '<th style="padding:10px 12px;text-align:left;color:#6366f1;font-weight:700;">Type</th>' +
+        '<th style="padding:10px 12px;text-align:left;color:#6366f1;font-weight:700;">Algorithm</th>' +
+        '<th style="padding:10px 12px;text-align:left;color:#6366f1;font-weight:700;">AUC</th>' +
+        '<th style="padding:10px 12px;text-align:left;color:#6366f1;font-weight:700;">Key Inputs</th>' +
+        '<th style="padding:10px 12px;text-align:left;color:#6366f1;font-weight:700;">Key Output</th>' +
+        '<th style="padding:10px 12px;text-align:left;color:#6366f1;font-weight:700;">XAI Method</th>' +
+        '<th style="padding:10px 12px;text-align:left;color:#6366f1;font-weight:700;">Status</th>' +
+        '<th style="padding:10px 12px;text-align:left;color:#6366f1;font-weight:700;">Retrain</th>' +
+      '</tr></thead>' +
+      '<tbody id="p43-table-body">';
+
+    _p43models.forEach(function(m, idx){
+      var catCol = _p43catColors[m.category] || '#6b7280';
+      var statusCol = m.status === 'Production' ? '#10b981' : '#f59e0b';
+      var keyInputs = m.inputs.slice(0,2).map(function(i){ return i.field; }).join(', ') + (m.inputs.length>2?' …':'');
+      var keyOutput = m.outputs[0] ? m.outputs[0].field : '—';
+      var xaiShort = m.explainability.split('.')[0];
+      tableHtml += '<tr class="p43-tbl-row" data-cat="' + m.category + '" data-type="' + m.type + '" data-name="' + m.name.toLowerCase() + '" data-domain="' + m.domain.toLowerCase() + '" ' +
+        'style="background:' + (idx%2===0?'#0f172a':'#111827') + ';border-bottom:1px solid #1e293b;transition:background .15s;" ' +
+        'onmouseover="this.style.background=\'#1e293b\'" onmouseout="this.style.background=\'' + (idx%2===0?'#0f172a':'#111827') + '\'">' +
+        '<td style="padding:8px 12px;color:#64748b;font-family:monospace;font-size:10px;white-space:nowrap;">' + m.id + '</td>' +
+        '<td style="padding:8px 12px;color:#e2e8f0;font-weight:600;">' + m.name + '</td>' +
+        '<td style="padding:8px 12px;"><span style="background:' + catCol + '22;color:' + catCol + ';border:1px solid ' + catCol + '44;border-radius:8px;padding:2px 8px;font-size:9px;font-weight:700;">' + m.category + '</span></td>' +
+        '<td style="padding:8px 12px;color:#94a3b8;">' + m.type + '</td>' +
+        '<td style="padding:8px 12px;color:#cbd5e1;font-size:10px;">' + m.algo.substring(0,40) + (m.algo.length>40?'…':'') + '</td>' +
+        '<td style="padding:8px 12px;color:' + (m.auc?'#10b981':'#64748b') + ';font-weight:700;">' + (m.auc?m.auc.toFixed(2):'N/A') + '</td>' +
+        '<td style="padding:8px 12px;color:#94a3b8;font-size:10px;">' + keyInputs.substring(0,60) + '</td>' +
+        '<td style="padding:8px 12px;color:#6366f1;font-weight:600;font-size:10px;">' + keyOutput + '</td>' +
+        '<td style="padding:8px 12px;color:#94a3b8;font-size:10px;">' + xaiShort.substring(0,50) + (xaiShort.length>50?'…':'') + '</td>' +
+        '<td style="padding:8px 12px;"><span style="background:' + statusCol + '22;color:' + statusCol + ';border:1px solid ' + statusCol + '44;border-radius:8px;padding:2px 8px;font-size:9px;font-weight:700;">' + m.status + '</span></td>' +
+        '<td style="padding:8px 12px;color:#94a3b8;font-size:10px;">' + m.retrainFreq + '</td>' +
+      '</tr>';
+    });
+    tableHtml += '</tbody></table></div>';
+
+    /* ── section header ── */
+    var headerHtml = '<div style="margin-bottom:20px;">' +
+      '<div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;">' +
+        '<div style="width:4px;height:36px;background:linear-gradient(180deg,#6366f1,#0891b2);border-radius:2px;"></div>' +
+        '<div>' +
+          '<h2 style="font-size:20px;font-weight:800;color:#e2e8f0;margin:0;">AI / ML Models Catalog</h2>' +
+          '<p style="font-size:12px;color:#64748b;margin:2px 0 0;">Supervised &amp; Unsupervised models · LTC · Health · Life · Annuity · Cross-Domain · Accelerators for Technology Services Partners</p>' +
+        '</div>' +
+      '</div>' +
+      '<div style="background:linear-gradient(135deg,#1a1f35 0%,#0f1729 100%);border:1px solid #1e3a5f;border-left:4px solid #6366f1;border-radius:8px;padding:12px 16px;font-size:11px;color:#94a3b8;line-height:1.6;">' +
+        '<strong style="color:#6366f1;">Purpose:</strong> This catalog demonstrates how Technology Services Companies (Wipro, Accenture, Cognizant, TCS, Infosys, Capgemini) can bring pre-built AI/ML models as accelerators to LTC, Health, Life, and Annuity claims operations. ' +
+        'Models span the full claims lifecycle — eligibility determination, fraud detection, cost prediction, document intelligence, and policyholder behavior — delivering faster adjudication, reduced leakage, and explainable decisions for regulators and adjusters.' +
+      '</div>' +
+    '</div>';
+
+    /* ── assemble page ── */
+    var noResults = '<div id="p43-no-results" style="display:none;text-align:center;padding:60px 20px;color:#64748b;">' +
+      '<div style="font-size:40px;margin-bottom:12px;">🔍</div>' +
+      '<div style="font-size:16px;font-weight:600;margin-bottom:6px;">No models match your filters</div>' +
+      '<div style="font-size:12px;">Try clearing the search or selecting a different category</div>' +
+    '</div>';
+
+    tpl.innerHTML = '<div style="padding:20px 24px;background:#0a0f1e;min-height:100vh;color:#e2e8f0;font-family:\'Inter\',\'Segoe UI\',sans-serif;">' +
+      headerHtml +
+      kpiHtml +
+      filterHtml +
+      viewHtml +
+      noResults +
+      cardsHtml +
+      tableHtml +
+    '</div>';
+
+    /* ── expose globals for filter/view ── */
+    window._p43currentCat  = 'All';
+    window._p43currentType = 'All';
+    window._p43currentView = 'card';
+  }
+
+  /* ════════════════════════════════════════════════════════════════
+     FILTER FUNCTION (global)
+     ════════════════════════════════════════════════════════════════ */
+  window._p43filterModels = function() {
+    /* read active cat */
+    var catBtns = document.querySelectorAll('[data-p43cat]');
+    var typeBtns = document.querySelectorAll('[data-p43type]');
+    var searchEl = document.getElementById('p43-search');
+    var activeCat = 'All', activeType = 'All', searchTerm = '';
+
+    /* find which button was just clicked by inspecting event, else read state */
+    if (event && event.target) {
+      var tgt = event.target;
+      if (tgt.dataset.p43cat !== undefined) {
+        activeCat = tgt.dataset.p43cat;
+        window._p43currentCat = activeCat;
+      } else if (tgt.dataset.p43type !== undefined) {
+        activeType = tgt.dataset.p43type;
+        window._p43currentType = activeType;
+      }
+    }
+    activeCat  = window._p43currentCat  || 'All';
+    activeType = window._p43currentType || 'All';
+    searchTerm = searchEl ? searchEl.value.toLowerCase() : '';
+
+    /* style buttons */
+    catBtns.forEach(function(b){
+      var isSel = b.dataset.p43cat === activeCat;
+      var col = b.dataset.p43cat === 'All' ? '#6366f1' : (_p43catColors[b.dataset.p43cat]||'#6b7280');
+      b.style.background = isSel ? col : 'transparent';
+      b.style.color       = isSel ? '#fff' : '#94a3b8';
+      b.style.borderColor = isSel ? col : '#334155';
+    });
+    typeBtns.forEach(function(b){
+      var isSel = b.dataset.p43type === activeType;
+      b.style.background = isSel ? '#10b981' : 'transparent';
+      b.style.color       = isSel ? '#fff' : '#94a3b8';
+      b.style.borderColor = isSel ? '#10b981' : '#334155';
+    });
+
+    var anyVisible = false;
+
+    /* filter cards */
+    var cards = document.querySelectorAll('.p43-model-card');
+    cards.forEach(function(c){
+      var catMatch  = activeCat === 'All' || c.dataset.cat === activeCat;
+      var typeMatch = activeType === 'All' || c.dataset.type === activeType;
+      var txtMatch  = !searchTerm || c.dataset.name.indexOf(searchTerm) !== -1 || c.dataset.domain.indexOf(searchTerm) !== -1;
+      var show = catMatch && typeMatch && txtMatch;
+      c.style.display = show ? '' : 'none';
+      if (show) anyVisible = true;
+    });
+
+    /* filter table rows */
+    var rows = document.querySelectorAll('.p43-tbl-row');
+    rows.forEach(function(r){
+      var catMatch  = activeCat === 'All' || r.dataset.cat === activeCat;
+      var typeMatch = activeType === 'All' || r.dataset.type === activeType;
+      var txtMatch  = !searchTerm || r.dataset.name.indexOf(searchTerm) !== -1 || r.dataset.domain.indexOf(searchTerm) !== -1;
+      r.style.display = catMatch && typeMatch && txtMatch ? '' : 'none';
+    });
+
+    var nr = document.getElementById('p43-no-results');
+    if (nr) nr.style.display = anyVisible ? 'none' : 'block';
+  };
+
+  /* ════════════════════════════════════════════════════════════════
+     VIEW TOGGLE (card / table)
+     ════════════════════════════════════════════════════════════════ */
+  window._p43setView = function(view) {
+    window._p43currentView = view;
+    var cv = document.getElementById('p43-cards-view');
+    var tv = document.getElementById('p43-table-view');
+    var bc = document.getElementById('p43-view-card');
+    var bt = document.getElementById('p43-view-table');
+    if (view === 'card') {
+      if (cv) cv.style.display = '';
+      if (tv) tv.style.display = 'none';
+      if (bc) { bc.style.background='#6366f1'; bc.style.color='#fff'; bc.style.border='none'; }
+      if (bt) { bt.style.background='#1e293b'; bt.style.color='#94a3b8'; bt.style.border='1px solid #334155'; }
+    } else {
+      if (cv) cv.style.display = 'none';
+      if (tv) tv.style.display = '';
+      if (bc) { bc.style.background='#1e293b'; bc.style.color='#94a3b8'; bc.style.border='1px solid #334155'; }
+      if (bt) { bt.style.background='#6366f1'; bt.style.color='#fff'; bt.style.border='none'; }
+    }
+  };
+
+  /* ════════════════════════════════════════════════════════════════
+     NAV ITEM INJECTION — "AI Models" under HYBRID LTC + HAL INTELLIGENCE
+     (inserts after data-ai-nav, before mod-roadmap-nav)
+     ════════════════════════════════════════════════════════════════ */
+  function _p43injectNavItems() {
+    if (document.querySelector('.p43-ai-models-nav')) return; /* idempotent */
+
+    /* Try to find anchor: data-ai-nav (Data & AI/ML Platform) */
+    var anchor = document.querySelector('.data-ai-nav');
+    if (!anchor) {
+      /* fallback: mod-roadmap-nav */
+      anchor = document.querySelector('.mod-roadmap-nav');
+    }
+    if (!anchor) {
+      console.warn('[P43] nav anchor not found, retrying…');
+      return false;
+    }
+
+    var item = document.createElement('div');
+    item.className = 'p43-ai-models-nav nav-item';
+    item.setAttribute('data-nav', 'hal-ai-models');
+    item.style.cssText = [
+      'display:flex',
+      'align-items:center',
+      'gap:10px',
+      'padding:8px 16px',
+      'cursor:pointer',
+      'border-radius:6px',
+      'margin:2px 8px',
+      'transition:background .15s',
+      'color:#a78bfa',
+      'font-size:13px',
+      'font-weight:500'
+    ].join(';');
+
+    item.innerHTML = '<span style="font-size:15px;">🧠</span><span>AI Models</span>' +
+      '<span style="margin-left:auto;background:#6366f1;color:#fff;border-radius:8px;padding:1px 7px;font-size:9px;font-weight:700;">NEW</span>';
+
+    item.addEventListener('mouseenter', function(){ this.style.background='rgba(99,102,241,.15)'; });
+    item.addEventListener('mouseleave', function(){ this.style.background=''; });
+    item.addEventListener('click', function(){
+      if (window.navigateTo) window.navigateTo('hal-ai-models');
+    });
+
+    /* insert after anchor */
+    if (anchor.nextSibling) {
+      anchor.parentNode.insertBefore(item, anchor.nextSibling);
+    } else {
+      anchor.parentNode.appendChild(item);
+    }
+    return true;
+  }
+
+  /* ════════════════════════════════════════════════════════════════
+     RENAME "ILLUMIFIN PLATFORM — SYSTEMS OPS" → "Solutions"
+     (targets P7 groupLabel inside .p7-nav-group.nav-grp-tpa)
+     ════════════════════════════════════════════════════════════════ */
+  function _p43renameSystemsOps() {
+    var grpLabel = null;
+
+    /* Method A: direct P7 structure */
+    var tpaGrp = document.querySelector('.p7-nav-group.nav-grp-tpa');
+    if (tpaGrp) {
+      /* first child div is the groupLabel */
+      var firstDiv = tpaGrp.querySelector('div');
+      if (firstDiv) grpLabel = firstDiv;
+    }
+
+    /* Method B: text sweep across ALL nav-section-label + groupLabel divs */
+    if (!grpLabel) {
+      var allDivs = document.querySelectorAll('.nav-section-label, .p7-nav-group > div');
+      for (var i = 0; i < allDivs.length; i++) {
+        var txt = allDivs[i].textContent || '';
+        if (txt.toLowerCase().indexOf('systems ops') !== -1 ||
+            txt.toLowerCase().indexOf('illumifin platform') !== -1) {
+          grpLabel = allDivs[i];
+          break;
+        }
+      }
+    }
+
+    if (grpLabel) {
+      if (grpLabel.textContent.trim() !== 'Solutions') {
+        grpLabel.textContent = 'Solutions';
+        grpLabel.style.cssText += ';color:#10b981;font-weight:800;letter-spacing:.8px;font-size:10px;text-transform:uppercase;';
+        console.log('[P43] Renamed Systems Ops → Solutions');
+      }
+    } else {
+      console.warn('[P43] groupLabel for Systems Ops not found yet');
+      return false;
+    }
+    return true;
+  }
+
+  /* ════════════════════════════════════════════════════════════════
+     MOVE "Solutions" GROUP after .mod-roadmap-nav
+     (HYBRID LTC + HAL INTELLIGENCE items end at .mod-roadmap-nav)
+     ════════════════════════════════════════════════════════════════ */
+  function _p43moveSystemsOps() {
+    var grpEl = document.querySelector('.p7-nav-group.nav-grp-tpa');
+    var modRoadmap = document.querySelector('.mod-roadmap-nav');
+    if (!grpEl || !modRoadmap) {
+      console.warn('[P43] moveSystemsOps: element not found');
+      return false;
+    }
+    /* already in correct position? check if grpEl is right after modRoadmap */
+    if (modRoadmap.nextSibling === grpEl) return true;
+
+    /* move */
+    if (modRoadmap.nextSibling) {
+      modRoadmap.parentNode.insertBefore(grpEl, modRoadmap.nextSibling);
+    } else {
+      modRoadmap.parentNode.appendChild(grpEl);
+    }
+    console.log('[P43] Moved Solutions group after mod-roadmap-nav');
+    return true;
+  }
+
+  /* ════════════════════════════════════════════════════════════════
+     NAVIGATION WIRING
+     ════════════════════════════════════════════════════════════════ */
+  (function _p43wrapNav() {
+    if (window.navigateTo && window.navigateTo._p43Patched) return;
+    var _orig = window.navigateTo || function(){};
+    window.navigateTo = function(page) {
+      if (page === 'hal-ai-models') {
+        /* highlight active nav item */
+        document.querySelectorAll('.nav-item').forEach(function(el){
+          el.style.background = '';
+        });
+        var aiNavItem = document.querySelector('.p43-ai-models-nav');
+        if (aiNavItem) aiNavItem.style.background = 'rgba(99,102,241,.2)';
+
+        /* hide all tpl-* divs, show ours */
+        document.querySelectorAll('[id^="tpl-"]').forEach(function(el){
+          el.style.display = 'none';
+        });
+        var tpl = document.getElementById('tpl-hal-ai-models');
+        if (tpl) {
+          tpl.style.display = '';
+          if (!tpl.dataset.p43Built) _p43buildPage();
+        }
+        return;
+      }
+      return _orig.apply(this, arguments);
+    };
+    window.navigateTo._p43Patched = true;
+  }());
+
+  /* ════════════════════════════════════════════════════════════════
+     INIT — run DOM manipulations when ready
+     ════════════════════════════════════════════════════════════════ */
+  function _p43init() {
+    var attempts = 0;
+    var maxAttempts = 40;
+
+    function _tryInit() {
+      attempts++;
+      var navReady   = !!document.querySelector('.p7-nav-group.nav-grp-tpa') ||
+                       !!document.querySelector('.data-ai-nav') ||
+                       !!document.querySelector('.mod-roadmap-nav');
+      var tplReady   = !!document.getElementById('tpl-hal-ai-models');
+
+      if (!navReady && attempts < maxAttempts) {
+        setTimeout(_tryInit, 250);
+        return;
+      }
+
+      /* Run nav ops regardless (some may warn and be retried by observer) */
+      _p43renameSystemsOps();
+      _p43moveSystemsOps();
+      _p43injectNavItems();
+
+      /* tpl-hal-ai-models: ensure it exists (inject if _worker.js was not patched) */
+      if (!tplReady) {
+        var tplDiv = document.createElement('div');
+        tplDiv.id = 'tpl-hal-ai-models';
+        tplDiv.style.display = 'none';
+        var mainContent = document.querySelector('#main-content, .main-content, main, #app, .app-container, body');
+        if (mainContent) mainContent.appendChild(tplDiv);
+      }
+
+      /* MutationObserver for SPA re-renders */
+      var _p43obs = new MutationObserver(function() {
+        if (!document.querySelector('.p43-ai-models-nav')) {
+          _p43injectNavItems();
+        }
+        /* Re-check rename (P40 and others may re-sweep) */
+        var grpLabelCheck = document.querySelector('.p7-nav-group.nav-grp-tpa > div');
+        if (grpLabelCheck && grpLabelCheck.textContent.trim() !== 'Solutions') {
+          _p43renameSystemsOps();
+          _p43moveSystemsOps();
+        }
+      });
+      _p43obs.observe(document.body || document.documentElement, {
+        childList: true,
+        subtree: true,
+        characterData: false
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', _tryInit);
+    } else {
+      _tryInit();
+    }
+  }
+
+  _p43init();
+
+  console.log('[P43] AI Models Catalog loaded — 17 models (Supervised + Unsupervised) · LTC · Health · Life · Annuity · Cross-Domain · Nav: "Solutions" renamed + moved · "AI Models" item added under HYBRID LTC + HAL INTELLIGENCE');
+
+}());
