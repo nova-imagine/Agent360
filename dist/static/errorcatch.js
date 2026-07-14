@@ -16,6 +16,7 @@
     if (SPAM_PATTERNS.test(msg) &&
         !msg.startsWith('[EC7]') &&
         !msg.startsWith('[P40]') &&
+        !msg.startsWith('[P41]') &&
         !msg.startsWith('[HAL') &&
         !msg.startsWith('[ERRORCATCH]')) {
       suppressedCount++;
