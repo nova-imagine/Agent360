@@ -19,6 +19,7 @@
         !msg.startsWith('[P41]') &&
         !msg.startsWith('[P42]') &&
         !msg.startsWith('[P43]') &&
+        !msg.startsWith('[P44]') &&
         !msg.startsWith('[HAL') &&
         !msg.startsWith('[ERRORCATCH]')) {
       suppressedCount++;

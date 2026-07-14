@@ -97396,3 +97396,902 @@ var navigateTo=window.navigateTo;
   console.log('[P43] AI Models Catalog loaded — 17 models (Supervised + Unsupervised) · LTC · Health · Life · Annuity · Cross-Domain · Nav: "Solutions" renamed + moved · "AI Models" item added under HYBRID LTC + HAL INTELLIGENCE');
 
 }());
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   P44 — LTC CLAIMS NEW FUNCTIONALITY
+   6 Intelligence Sub-Tabs:
+     Tab 1: Auto-Adjudication Pipeline
+     Tab 2: Bots & Automation Command Center
+     Tab 3: Claims Lifecycle Intelligence Heatmap
+     Tab 4: Transaction Type Drill-Down Analyzer
+     Tab 5: Rework Intelligence Center
+     Tab 6: Payment Integrity & COB Center
+   Strategy: Wrap P38's initLtcClaimsPage; inject tab bar via MutationObserver
+             watching for #ltc-claims-tbody; lazy-build each tab panel on click.
+═══════════════════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  /* ─── DATA: 9 Wipro/LA Care Bots ──────────────────────────────────────── */
+  var _p44bots = [
+    { id:'bot-01', name:'Inventory Routing Bot',        abbr:'IRB',  icon:'fa-route',           color:'#0891b2', status:'Running', claimsToday:847,  accuracy:98.4, avgTime:'1.2s',  uptime:'99.9%', queue:14,   desc:'Routes incoming claims to correct work queues by LOB, type, and priority' },
+    { id:'bot-02', name:'2nd Stage Auto Processing',    abbr:'SAP',  icon:'fa-layer-group',      color:'#7c3aed', status:'Running', claimsToday:612,  accuracy:96.8, avgTime:'3.1s',  uptime:'99.7%', queue:22,   desc:'Handles secondary adjudication pass after initial triage; resolves 61% touchless' },
+    { id:'bot-03', name:'Research Bot',                 abbr:'RES',  icon:'fa-search',           color:'#059669', status:'Running', claimsToday:291,  accuracy:94.2, avgTime:'8.4s',  uptime:'98.8%', queue:7,    desc:'Pulls clinical records, policy docs, and eligibility data for complex cases' },
+    { id:'bot-04', name:'COB Intake Creator',           abbr:'COB',  icon:'fa-file-import',      color:'#d97706', status:'Running', claimsToday:183,  accuracy:99.1, avgTime:'2.0s',  uptime:'100%',  queue:5,    desc:'Automatically creates COB intake records and routes to coordination team' },
+    { id:'bot-05', name:'Interest Bot',                 abbr:'INT',  icon:'fa-percentage',       color:'#dc2626', status:'Running', claimsToday:428,  accuracy:99.8, avgTime:'0.4s',  uptime:'100%',  queue:0,    desc:'Calculates and applies interest on late payments per state statute; auto-posts' },
+    { id:'bot-06', name:'Auto Auditor',                 abbr:'AUD',  icon:'fa-clipboard-check',  color:'#003087', status:'Warning', claimsToday:156,  accuracy:92.3, avgTime:'12.7s', uptime:'97.2%', queue:41,   desc:'Audits paid claims for billing anomalies, duplicate detection, and policy limits' },
+    { id:'bot-07', name:'Agent Assist (Gen AI)',        abbr:'AAI',  icon:'fa-robot',            color:'#7c3aed', status:'Running', claimsToday:1204, accuracy:91.5, avgTime:'1.8s',  uptime:'99.5%', queue:3,    desc:'Gen-AI co-pilot for claims examiners — drafts responses, summarizes records, flags outliers' },
+    { id:'bot-08', name:'Authorization Validator',      abbr:'AVL',  icon:'fa-shield-alt',       color:'#059669', status:'Running', claimsToday:334,  accuracy:97.6, avgTime:'2.9s',  uptime:'99.8%', queue:9,    desc:'Validates prior-auth codes against clinical criteria and policy rider rules' },
+    { id:'bot-09', name:'Rework GUI',                   abbr:'RWK',  icon:'fa-redo-alt',         color:'#dc2626', status:'Idle',    claimsToday:88,   accuracy:89.4, avgTime:'6.3s',  uptime:'98.1%', queue:0,    desc:'Surfaces rework candidates, assigns root-cause tags, and re-routes for correction' }
+  ];
+
+  /* ─── DATA: Lifecycle Stages ───────────────────────────────────────────── */
+  var _p44stages = [
+    { id:'s1', label:'Intake &\nTriage',       icon:'fa-inbox',            pct:100, auto:88, avg:'0.4 days', sla:'1 day',   slaOk:true,  volume:1500, touchless:88, desc:'Claim received, verified, classified, and routed by Inventory Routing Bot' },
+    { id:'s2', label:'Eligibility\n& Benefits',icon:'fa-id-card-alt',      pct:96,  auto:74, avg:'1.1 days', sla:'2 days',  slaOk:true,  volume:1440, touchless:74, desc:'Policy lookup, benefit verification, waiting period validation, ADL screening' },
+    { id:'s3', label:'Clinical\nReview',        icon:'fa-stethoscope',      pct:89,  auto:31, avg:'4.8 days', sla:'5 days',  slaOk:true,  volume:1280, touchless:31, desc:'Nurse assessment, physician records, cognitive scoring, functional assessment' },
+    { id:'s4', label:'Adjudication\n& Decision',icon:'fa-balance-scale',    pct:97,  auto:61, avg:'2.2 days', sla:'3 days',  slaOk:true,  volume:1242, touchless:61, desc:'Coverage determination, benefit calculation, 2nd-stage auto processing' },
+    { id:'s5', label:'Payment &\nRecovery',     icon:'fa-dollar-sign',      pct:99,  auto:94, avg:'0.8 days', sla:'2 days',  slaOk:true,  volume:1229, touchless:94, desc:'Electronic remittance, interest calc, COB recovery, audit clearance' }
+  ];
+
+  /* ─── DATA: Transaction Types ──────────────────────────────────────────── */
+  var _p44txTypes = [
+    { type:'Nursing Home',   subLob:'SNF',         volume:4820, pct:32.1, autoRate:79, avgDays:3.2, reworkRate:4.1, totalPaid:'$18.4M', color:'#dc2626' },
+    { type:'Home Health',    subLob:'HHC',         volume:3910, pct:26.0, autoRate:84, avgDays:2.8, reworkRate:3.2, totalPaid:'$12.1M', color:'#0891b2' },
+    { type:'ALF',            subLob:'Assisted',    volume:2640, pct:17.6, autoRate:91, avgDays:1.9, reworkRate:2.1, totalPaid:'$7.8M',  color:'#7c3aed' },
+    { type:'Memory Care',    subLob:'MC',          volume:1870, pct:12.5, autoRate:68, avgDays:4.1, reworkRate:6.8, totalPaid:'$9.2M',  color:'#d97706' },
+    { type:'Adult Day Care', subLob:'ADC',         volume:980,  pct:6.5,  autoRate:96, avgDays:1.1, reworkRate:1.4, totalPaid:'$2.1M',  color:'#059669' },
+    { type:'Hospice',        subLob:'HOS',         volume:790,  pct:5.3,  autoRate:72, avgDays:3.7, reworkRate:5.2, totalPaid:'$3.4M',  color:'#6b7280' }
+  ];
+
+  /* ─── DATA: Rework Records ─────────────────────────────────────────────── */
+  var _p44reworks = [
+    { id:'RW-0041', claimId:'LTC-2026-0103', claimant:'Dorothy Feldstein', cause:'Policy Interpretation Error', stage:'Adjudication', age:3,  severity:'High',   assignee:'J. Martinez', status:'In Review' },
+    { id:'RW-0039', claimId:'LTC-2026-0107', claimant:'Ruth Blackwood',    cause:'Missing Clinical Auth',       stage:'Clinical',     age:5,  severity:'High',   assignee:'S. Park',     status:'In Review' },
+    { id:'RW-0037', claimId:'LTC-2026-0101', claimant:'Margaret O\'Brien', cause:'Benefit Calc Override',       stage:'Adjudication', age:2,  severity:'Medium', assignee:'A. Torres',   status:'Pending' },
+    { id:'RW-0035', claimId:'LTC-2026-0104', claimant:'Arthur Kowalski',   cause:'Duplicate Payment Flag',      stage:'Payment',      age:8,  severity:'Medium', assignee:'K. Williams', status:'Resolved' },
+    { id:'RW-0033', claimId:'LTC-2026-0105', claimant:'Evelyn Marchetti',  cause:'Eligibility Gap',             stage:'Eligibility',  age:1,  severity:'Low',    assignee:'P. Chen',     status:'Pending' }
+  ];
+
+  var _p44rootCauses = [
+    { cause:'Policy Interpretation Error', count:38, pct:28, color:'#dc2626' },
+    { cause:'Missing/Incomplete Docs',      count:29, pct:21, color:'#d97706' },
+    { cause:'Benefit Calculation Error',    count:22, pct:16, color:'#7c3aed' },
+    { cause:'Duplicate Payment',            count:18, pct:13, color:'#0891b2' },
+    { cause:'Eligibility Gap',              count:14, pct:10, color:'#059669' },
+    { cause:'Auth Code Mismatch',           count:11, pct:8,  color:'#003087' },
+    { cause:'Other',                        count:5,  pct:4,  color:'#6b7280' }
+  ];
+
+  /* ─── DATA: COB / Payment Integrity ───────────────────────────────────── */
+  var _p44cobQueue = [
+    { id:'COB-0081', claimId:'LTC-2026-0102', claimant:'Harold Simmons',    primaryPayer:'Medicare',   secondaryPayer:'MassMutual', crossoverAmt:'$2,340', status:'Pending',    age:4,  recoverable:true },
+    { id:'COB-0079', claimId:'LTC-2026-0108', claimant:'George Nakamura',   primaryPayer:'Medicare',   secondaryPayer:'Pacific Life',crossoverAmt:'$1,890', status:'In Review',  age:7,  recoverable:true },
+    { id:'COB-0077', claimId:'LTC-2026-0106', claimant:'Francis Delacroix', primaryPayer:'Medicaid',   secondaryPayer:'TIAA',       crossoverAmt:'$4,120', status:'Recovered',  age:18, recoverable:false },
+    { id:'COB-0075', claimId:'LTC-2026-0104', claimant:'Arthur Kowalski',   primaryPayer:'VA Benefits', secondaryPayer:'Genworth',   crossoverAmt:'$3,200', status:'Disputed',   age:11, recoverable:true },
+    { id:'COB-0073', claimId:'LTC-2026-0101', claimant:'Margaret O\'Brien', primaryPayer:'Medicare',   secondaryPayer:'Prudential', crossoverAmt:'$980',   status:'Pending',    age:2,  recoverable:true }
+  ];
+
+  var _p44payQueue = [
+    { id:'PAY-1041', claimId:'LTC-2026-0101', claimant:'Margaret O\'Brien',  amt:'$2,520',  dueDate:'Jul 15', status:'On Time',  interestDue:false, interestAmt:'—',    method:'EFT' },
+    { id:'PAY-1039', claimId:'LTC-2026-0102', claimant:'Harold Simmons',     amt:'$3,080',  dueDate:'Jul 10', status:'Due Soon', interestDue:false, interestAmt:'—',    method:'EFT' },
+    { id:'PAY-1037', claimId:'LTC-2026-0104', claimant:'Arthur Kowalski',    amt:'$2,800',  dueDate:'Jul 8',  status:'Overdue',  interestDue:true,  interestAmt:'$47',  method:'Check' },
+    { id:'PAY-1035', claimId:'LTC-2026-0107', claimant:'Ruth Blackwood',     amt:'$3,360',  dueDate:'On Hold',status:'Hold',     interestDue:true,  interestAmt:'$112', method:'Hold' },
+    { id:'PAY-1033', claimId:'LTC-2026-0106', claimant:'Francis Delacroix',  amt:'$2,450',  dueDate:'Jul 20', status:'On Time',  interestDue:false, interestAmt:'—',    method:'EFT' }
+  ];
+
+  /* ─── TAB CONFIG ───────────────────────────────────────────────────────── */
+  var _p44tabs = [
+    { id:'tab-adjudication',   label:'Auto-Adjudication Pipeline',     icon:'fa-project-diagram',   color:'#0891b2' },
+    { id:'tab-bots',           label:'Bots & Automation',              icon:'fa-robot',             color:'#7c3aed' },
+    { id:'tab-lifecycle',      label:'Claims Lifecycle Heatmap',       icon:'fa-fire',              color:'#dc2626' },
+    { id:'tab-transactions',   label:'Transaction Drill-Down',         icon:'fa-chart-bar',         color:'#d97706' },
+    { id:'tab-rework',         label:'Rework Intelligence',            icon:'fa-redo-alt',          color:'#dc2626' },
+    { id:'tab-cob',            label:'Payment Integrity & COB',        icon:'fa-shield-alt',        color:'#059669' }
+  ];
+
+  /* ─── HELPER: p44 status badge ────────────────────────────────────────── */
+  function _p44badge(status, custom) {
+    var map = {
+      'Running':   '#059669', 'Idle':     '#6b7280', 'Warning': '#d97706', 'Error': '#dc2626',
+      'On Time':   '#059669', 'Due Soon': '#d97706', 'Overdue': '#dc2626', 'Hold':  '#6b7280',
+      'Pending':   '#d97706', 'In Review':'#0891b2', 'Resolved':'#059669', 'Recovered':'#059669',
+      'Disputed':  '#dc2626', 'High':     '#dc2626', 'Medium':  '#d97706', 'Low':   '#059669'
+    };
+    var c = custom || map[status] || '#6b7280';
+    return '<span style="background:'+c+'1a;color:'+c+';border:1px solid '+c+'44;border-radius:20px;padding:2px 10px;font-size:11px;font-weight:700;">'+status+'</span>';
+  }
+
+  /* ─── INJECT TAB BAR (called after ltc-claims-tbody is in DOM) ─────────── */
+  function _p44injectTabBar() {
+    if (document.getElementById('p44-tab-bar')) return; // already injected
+    var page = document.querySelector('.ltc-claims-page');
+    if (!page) return;
+
+    /* Build tab bar HTML */
+    var tabsHtml = _p44tabs.map(function(t, i) {
+      var isFirst = i === 0;
+      return '<button id="'+t.id+'-btn" onclick="window._p44switchTab(\''+t.id+'\')" '
+        + 'style="display:flex;align-items:center;gap:6px;padding:8px 16px;border:none;border-radius:8px 8px 0 0;'
+        + 'font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap;'
+        + (isFirst ? 'background:'+t.color+';color:#fff;box-shadow:0 -2px 0 '+t.color+' inset;'
+                   : 'background:#f8fafc;color:#6b7280;border:1px solid #e5e7eb;border-bottom:none;')
+        + '">'
+        + '<i class="fas '+t.icon+'" style="font-size:11px;"></i> '+t.label
+        + '</button>';
+    }).join('');
+
+    var barHtml = '<div id="p44-tab-bar" style="margin:20px 0 0 0;">'
+      + '<div style="display:flex;gap:4px;flex-wrap:wrap;border-bottom:2px solid #e5e7eb;padding-bottom:0;">'
+      + tabsHtml
+      + '</div>'
+      + '<div id="p44-tab-content" style="background:#fff;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 12px 12px;min-height:400px;">'
+      + '<div id="p44-loading" style="display:flex;align-items:center;justify-content:center;padding:60px;color:#6b7280;font-size:14px;">'
+      + '<i class="fas fa-circle-notch fa-spin" style="margin-right:8px;color:#0891b2;"></i>Loading intelligence panel...</div>'
+      + '</div>'
+      + '</div>';
+
+    page.insertAdjacentHTML('beforeend', barHtml);
+
+    /* Activate first tab after a short delay */
+    setTimeout(function() { window._p44switchTab('tab-adjudication'); }, 80);
+    console.log('[P44] Tab bar injected — 6 intelligence tabs');
+  }
+
+  /* ─── TAB SWITCHER ──────────────────────────────────────────────────────── */
+  window._p44switchTab = function(tabId) {
+    /* Update button styles */
+    _p44tabs.forEach(function(t) {
+      var btn = document.getElementById(t.id+'-btn');
+      if (!btn) return;
+      if (t.id === tabId) {
+        btn.style.background = t.color;
+        btn.style.color = '#fff';
+        btn.style.boxShadow = '0 -2px 0 '+t.color+' inset';
+        btn.style.border = 'none';
+      } else {
+        btn.style.background = '#f8fafc';
+        btn.style.color = '#6b7280';
+        btn.style.boxShadow = 'none';
+        btn.style.border = '1px solid #e5e7eb';
+        btn.style.borderBottom = 'none';
+      }
+    });
+    /* Build + show panel */
+    var content = document.getElementById('p44-tab-content');
+    if (!content) return;
+    if (tabId === 'tab-adjudication')  { content.innerHTML = _p44buildAdjudication(); }
+    else if (tabId === 'tab-bots')     { content.innerHTML = _p44buildBots(); }
+    else if (tabId === 'tab-lifecycle'){ content.innerHTML = _p44buildLifecycle(); }
+    else if (tabId === 'tab-transactions'){ content.innerHTML = _p44buildTransactions(); }
+    else if (tabId === 'tab-rework')   { content.innerHTML = _p44buildRework(); }
+    else if (tabId === 'tab-cob')      { content.innerHTML = _p44buildCOB(); }
+  };
+
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     TAB 3 — CLAIMS LIFECYCLE INTELLIGENCE HEATMAP
+     5-stage chevron with SLA health, automation rates, volume flow
+  ════════════════════════════════════════════════════════════════════════ */
+  function _p44buildLifecycle() {
+    var totalIn = _p44stages[0].volume;
+
+    /* KPI bar */
+    var kpis = [
+      { val:'82%',    lbl:'End-to-End Automation', icon:'fa-robot',          color:'#7c3aed' },
+      { val:'100%',   lbl:'SLA Compliance',          icon:'fa-check-circle',   color:'#059669' },
+      { val:'9.3 days',lbl:'Avg End-to-End',         icon:'fa-clock',          color:'#0891b2' },
+      { val:'1,229',  lbl:'Claims Completed / mo',   icon:'fa-flag-checkered', color:'#d97706' }
+    ];
+
+    var kpiHtml = '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;">'
+      + kpis.map(function(k) {
+          return '<div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;text-align:center;">'
+            + '<div style="font-size:22px;font-weight:800;color:'+k.color+';">'+k.val+'</div>'
+            + '<div style="font-size:11px;color:#6b7280;margin-top:4px;"><i class="fas '+k.icon+'" style="margin-right:4px;"></i>'+k.lbl+'</div>'
+            + '</div>';
+        }).join('')
+      + '</div>';
+
+    /* Chevron pipeline */
+    var chevronHtml = '<div style="margin-bottom:24px;">'
+      + '<div style="font-size:13px;font-weight:700;color:#374151;margin-bottom:12px;">Claims Lifecycle Flow — Real-Time SLA Health</div>'
+      + '<div style="display:flex;align-items:stretch;gap:0;">';
+
+    _p44stages.forEach(function(s, i) {
+      var isLast = i === _p44stages.length - 1;
+      var autoColor = s.auto >= 80 ? '#059669' : s.auto >= 50 ? '#d97706' : '#dc2626';
+      var barPct = Math.round((s.volume / totalIn) * 100);
+
+      chevronHtml += '<div style="flex:1;position:relative;">'
+        + '<div style="background:linear-gradient(135deg,'+autoColor+'18,'+autoColor+'08);border:2px solid '+autoColor+'44;border-radius:10px;padding:14px 10px;text-align:center;height:100%;box-sizing:border-box;">'
+        + '<div style="width:36px;height:36px;background:'+autoColor+'22;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 8px;">'
+        + '<i class="fas '+s.icon+'" style="font-size:16px;color:'+autoColor+';"></i></div>'
+        + '<div style="font-size:11px;font-weight:800;color:#111827;white-space:pre-line;line-height:1.3;margin-bottom:6px;">'+s.label+'</div>'
+        + '<div style="font-size:18px;font-weight:800;color:'+autoColor+';">'+s.auto+'%</div>'
+        + '<div style="font-size:10px;color:#9ca3af;margin-bottom:8px;">Auto Rate</div>'
+        + '<div style="background:#e5e7eb;border-radius:4px;height:6px;margin-bottom:6px;">'
+        + '<div style="background:'+autoColor+';height:6px;border-radius:4px;width:'+s.auto+'%;"></div></div>'
+        + '<div style="font-size:10px;color:#6b7280;">'+s.volume.toLocaleString()+' claims</div>'
+        + '<div style="font-size:10px;color:#6b7280;">Avg: '+s.avg+'</div>'
+        + '<div style="margin-top:8px;">'
+        + '<span style="background:'+(s.slaOk?'#05966922':'#dc262622')+';color:'+(s.slaOk?'#059669':'#dc2626')+';border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700;">'
+        + (s.slaOk ? '✓ SLA OK' : '⚠ SLA RISK')+'</span>'
+        + '</div></div>'
+        + (!isLast ? '<div style="position:absolute;right:-12px;top:50%;transform:translateY(-50%);z-index:2;font-size:18px;color:#9ca3af;">→</div>' : '')
+        + '</div>';
+    });
+
+    chevronHtml += '</div></div>';
+
+    /* Stage detail table */
+    var tableHtml = '<div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;">'
+      + '<div style="padding:12px 16px;background:#374151;color:#fff;font-size:12px;font-weight:700;">Stage Performance Detail</div>'
+      + '<table style="width:100%;border-collapse:collapse;font-size:12px;">'
+      + '<thead><tr style="background:#f1f5f9;">'
+      + ['Stage','Volume','Auto Rate','Avg Time','SLA Target','Touchless %'].map(function(h) {
+          return '<th style="padding:8px 12px;text-align:left;color:#6b7280;font-weight:700;font-size:11px;text-transform:uppercase;">'+h+'</th>';
+        }).join('')
+      + '</tr></thead><tbody>'
+      + _p44stages.map(function(s, i) {
+          var autoColor = s.auto >= 80 ? '#059669' : s.auto >= 50 ? '#d97706' : '#dc2626';
+          return '<tr style="border-bottom:1px solid #f3f4f6;'+(i%2?'background:#fafafa':'')+';">'
+            + '<td style="padding:10px 12px;font-weight:700;color:#111827;">'+s.label.replace('\n',' ')+'</td>'
+            + '<td style="padding:10px 12px;color:#374151;">'+s.volume.toLocaleString()+'</td>'
+            + '<td style="padding:10px 12px;"><span style="color:'+autoColor+';font-weight:700;">'+s.auto+'%</span></td>'
+            + '<td style="padding:10px 12px;color:#374151;">'+s.avg+'</td>'
+            + '<td style="padding:10px 12px;color:#374151;">'+s.sla+'</td>'
+            + '<td style="padding:10px 12px;"><span style="color:'+autoColor+';font-weight:700;">'+s.touchless+'%</span></td>'
+            + '</tr>';
+        }).join('')
+      + '</tbody></table></div>';
+
+    return '<div style="padding:20px;">'
+      + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">'
+      + '<div style="width:36px;height:36px;background:linear-gradient(135deg,#dc2626,#b91c1c);border-radius:9px;display:flex;align-items:center;justify-content:center;">'
+      + '<i class="fas fa-fire" style="color:#fff;font-size:16px;"></i></div>'
+      + '<div><div style="font-size:16px;font-weight:800;color:#111827;">Claims Lifecycle Intelligence Heatmap</div>'
+      + '<div style="font-size:11px;color:#6b7280;">5-stage end-to-end flow · SLA health · touchless automation rates · real-time volume tracking</div></div>'
+      + '</div>'
+      + kpiHtml + chevronHtml + tableHtml
+      + '</div>';
+  }
+
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     TAB 2 — BOTS & AUTOMATION COMMAND CENTER
+     9 Wipro/LA Care bot tiles with live status, metrics, sparklines
+  ════════════════════════════════════════════════════════════════════════ */
+  function _p44buildBots() {
+    /* Suite KPIs */
+    var totalClaims = _p44bots.reduce(function(a,b){ return a+b.claimsToday; }, 0);
+    var running = _p44bots.filter(function(b){ return b.status==='Running'; }).length;
+    var avgAcc  = Math.round(_p44bots.reduce(function(a,b){ return a+b.accuracy; }, 0) / _p44bots.length * 10) / 10;
+    var totalQ  = _p44bots.reduce(function(a,b){ return a+b.queue; }, 0);
+
+    var kpiHtml = '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;">'
+      + [
+          { val:running+'/9',       lbl:'Bots Online',          icon:'fa-circle',       color:'#059669' },
+          { val:totalClaims.toLocaleString(), lbl:'Claims Processed Today', icon:'fa-bolt', color:'#0891b2' },
+          { val:avgAcc+'%',         lbl:'Suite Avg Accuracy',   icon:'fa-bullseye',     color:'#7c3aed' },
+          { val:totalQ,             lbl:'Total Queue Depth',    icon:'fa-layer-group',  color:'#d97706' }
+        ].map(function(k) {
+          return '<div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;text-align:center;">'
+            + '<div style="font-size:22px;font-weight:800;color:'+k.color+';">'+k.val+'</div>'
+            + '<div style="font-size:11px;color:#6b7280;margin-top:4px;"><i class="fas '+k.icon+'" style="margin-right:4px;"></i>'+k.lbl+'</div>'
+            + '</div>';
+        }).join('')
+      + '</div>';
+
+    /* Bot grid — 3 columns */
+    var gridHtml = '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px;">'
+      + _p44bots.map(function(bot) {
+          var sc = bot.status==='Running'?'#059669':bot.status==='Warning'?'#d97706':'#6b7280';
+          var accColor = bot.accuracy>=97?'#059669':bot.accuracy>=93?'#d97706':'#dc2626';
+          var qColor   = bot.queue===0?'#059669':bot.queue<=10?'#d97706':'#dc2626';
+
+          /* Mini sparkline bars (simulated) */
+          var sparkBars = [65,72,80,70,88,75,bot.claimsToday > 500 ? 95 : 60].map(function(v) {
+            return '<div style="flex:1;background:'+bot.color+'33;border-radius:2px;position:relative;height:20px;">'
+              + '<div style="position:absolute;bottom:0;left:0;right:0;background:'+bot.color+';border-radius:2px;height:'+(v*20/100)+'px;"></div>'
+              + '</div>';
+          }).join('');
+
+          return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;position:relative;overflow:hidden;">'
+            + '<div style="position:absolute;top:0;left:0;right:0;height:3px;background:'+bot.color+';"></div>'
+            + '<div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;">'
+            + '<div style="width:36px;height:36px;background:'+bot.color+'1a;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
+            + '<i class="fas '+bot.icon+'" style="font-size:16px;color:'+bot.color+';"></i></div>'
+            + '<div style="flex:1;min-width:0;">'
+            + '<div style="font-size:12px;font-weight:800;color:#111827;line-height:1.3;margin-bottom:2px;">'+bot.name+'</div>'
+            + '<div style="font-size:10px;color:#9ca3af;">'+bot.abbr+'</div>'
+            + '</div>'
+            + '<span style="background:'+sc+'1a;color:'+sc+';border:1px solid '+sc+'44;border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700;flex-shrink:0;">'+bot.status+'</span>'
+            + '</div>'
+            + '<div style="font-size:10px;color:#6b7280;margin-bottom:10px;line-height:1.4;">'+bot.desc+'</div>'
+            + '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-bottom:10px;">'
+            + '<div style="background:#f8fafc;border-radius:6px;padding:6px 8px;text-align:center;">'
+            + '<div style="font-size:14px;font-weight:800;color:'+bot.color+';">'+bot.claimsToday.toLocaleString()+'</div>'
+            + '<div style="font-size:9px;color:#9ca3af;">Claims Today</div></div>'
+            + '<div style="background:#f8fafc;border-radius:6px;padding:6px 8px;text-align:center;">'
+            + '<div style="font-size:14px;font-weight:800;color:'+accColor+';">'+bot.accuracy+'%</div>'
+            + '<div style="font-size:9px;color:#9ca3af;">Accuracy</div></div>'
+            + '<div style="background:#f8fafc;border-radius:6px;padding:6px 8px;text-align:center;">'
+            + '<div style="font-size:14px;font-weight:800;color:#374151;">'+bot.avgTime+'</div>'
+            + '<div style="font-size:9px;color:#9ca3af;">Avg Time</div></div>'
+            + '<div style="background:#f8fafc;border-radius:6px;padding:6px 8px;text-align:center;">'
+            + '<div style="font-size:14px;font-weight:800;color:'+qColor+';">'+bot.queue+'</div>'
+            + '<div style="font-size:9px;color:#9ca3af;">Queue Depth</div></div>'
+            + '</div>'
+            + '<div style="margin-bottom:6px;">'
+            + '<div style="font-size:9px;color:#9ca3af;margin-bottom:3px;">Uptime: '+bot.uptime+' — Activity</div>'
+            + '<div style="display:flex;gap:2px;align-items:flex-end;height:20px;">'+sparkBars+'</div>'
+            + '</div>'
+            + '</div>';
+        }).join('')
+      + '</div>';
+
+    /* Fleet summary table */
+    var summaryHtml = '<div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;">'
+      + '<div style="padding:12px 16px;background:#7c3aed;color:#fff;font-size:12px;font-weight:700;"><i class="fas fa-table" style="margin-right:6px;"></i>Bot Fleet Summary</div>'
+      + '<table style="width:100%;border-collapse:collapse;font-size:11px;">'
+      + '<thead><tr style="background:#f1f5f9;">'
+      + ['Bot','Status','Claims Today','Accuracy','Avg Time','Queue','Uptime'].map(function(h) {
+          return '<th style="padding:8px 10px;text-align:left;color:#6b7280;font-weight:700;font-size:10px;text-transform:uppercase;">'+h+'</th>';
+        }).join('')
+      + '</tr></thead><tbody>'
+      + _p44bots.map(function(bot, i) {
+          var sc = bot.status==='Running'?'#059669':bot.status==='Warning'?'#d97706':'#6b7280';
+          var accColor = bot.accuracy>=97?'#059669':bot.accuracy>=93?'#d97706':'#dc2626';
+          return '<tr style="border-bottom:1px solid #f3f4f6;'+(i%2?'background:#fafafa':'')+';">'
+            + '<td style="padding:8px 10px;font-weight:700;color:#111827;"><i class="fas '+bot.icon+'" style="color:'+bot.color+';margin-right:5px;font-size:10px;"></i>'+bot.name+'</td>'
+            + '<td style="padding:8px 10px;"><span style="background:'+sc+'1a;color:'+sc+';border-radius:20px;padding:1px 7px;font-size:10px;font-weight:700;">'+bot.status+'</span></td>'
+            + '<td style="padding:8px 10px;color:#374151;font-weight:600;">'+bot.claimsToday.toLocaleString()+'</td>'
+            + '<td style="padding:8px 10px;font-weight:700;color:'+accColor+';">'+bot.accuracy+'%</td>'
+            + '<td style="padding:8px 10px;color:#374151;">'+bot.avgTime+'</td>'
+            + '<td style="padding:8px 10px;color:#374151;">'+bot.queue+'</td>'
+            + '<td style="padding:8px 10px;color:#059669;font-weight:700;">'+bot.uptime+'</td>'
+            + '</tr>';
+        }).join('')
+      + '</tbody></table></div>';
+
+    return '<div style="padding:20px;">'
+      + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">'
+      + '<div style="width:36px;height:36px;background:linear-gradient(135deg,#7c3aed,#6d28d9);border-radius:9px;display:flex;align-items:center;justify-content:center;">'
+      + '<i class="fas fa-robot" style="color:#fff;font-size:16px;"></i></div>'
+      + '<div><div style="font-size:16px;font-weight:800;color:#111827;">Bots & Automation Command Center</div>'
+      + '<div style="font-size:11px;color:#6b7280;">9-bot Wipro/LA Care automation suite · live status · performance metrics · queue depth</div></div>'
+      + '</div>'
+      + kpiHtml + gridHtml + summaryHtml
+      + '</div>';
+  }
+
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     TAB 1 — AUTO-ADJUDICATION PIPELINE
+     Touchless claims flow: Classification Engine → Auto-Approver Lane → Payment
+  ════════════════════════════════════════════════════════════════════════ */
+  function _p44buildAdjudication() {
+    /* Pipeline stages */
+    var pipelineStages = [
+      { icon:'fa-file-import',      label:'Claim Ingestion',        auto:100, count:1500, color:'#0891b2', bots:['Inventory Routing Bot'],                    note:'OCR + EDI parsing; instant routing' },
+      { icon:'fa-brain',            label:'Classification Engine',  auto:96,  count:1440, color:'#7c3aed', bots:['Agent Assist (Gen AI)','Research Bot'],      note:'ML model classifies type, LOB, priority' },
+      { icon:'fa-id-card-alt',      label:'Eligibility Gate',       auto:88,  count:1267, color:'#0891b2', bots:['Authorization Validator'],                   note:'Policy lookup, benefit period, waiting period' },
+      { icon:'fa-balance-scale',    label:'Rules Engine',           auto:74,  count:938,  color:'#059669', bots:['2nd Stage Auto Processing'],                 note:'500+ clinical rules, benefit calc, limit check' },
+      { icon:'fa-robot',            label:'Auto-Approver Lane',     auto:61,  count:572,  color:'#059669', bots:['2nd Stage Auto Processing','Auto Auditor'], note:'Touchless approval — no human required' },
+      { icon:'fa-user-md',          label:'Clinical Review Queue',  auto:0,   count:366,  color:'#d97706', bots:['Research Bot','Agent Assist (Gen AI)'],      note:'Complex cases — RN/MD review required' },
+      { icon:'fa-dollar-sign',      label:'Payment Processing',     auto:94,  count:938,  color:'#059669', bots:['Interest Bot','COB Intake Creator'],         note:'EFT, interest calc, COB coordination' }
+    ];
+
+    /* KPIs */
+    var kpis = [
+      { val:'61%',   lbl:'Touchless Auto-Approval', icon:'fa-magic',          color:'#059669' },
+      { val:'1,500', lbl:'Claims Ingested / mo',    icon:'fa-file-import',    color:'#0891b2' },
+      { val:'$52M',  lbl:'Auto-Processed Value',    icon:'fa-dollar-sign',    color:'#7c3aed' },
+      { val:'2.8h',  lbl:'Avg Touchless Cycle Time',icon:'fa-stopwatch',      color:'#d97706' }
+    ];
+
+    var kpiHtml = '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;">'
+      + kpis.map(function(k) {
+          return '<div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;text-align:center;">'
+            + '<div style="font-size:22px;font-weight:800;color:'+k.color+';">'+k.val+'</div>'
+            + '<div style="font-size:11px;color:#6b7280;margin-top:4px;"><i class="fas '+k.icon+'" style="margin-right:4px;"></i>'+k.lbl+'</div>'
+            + '</div>';
+        }).join('')
+      + '</div>';
+
+    /* Flow funnel visualization */
+    var funnelHtml = '<div style="margin-bottom:24px;">'
+      + '<div style="font-size:13px;font-weight:700;color:#374151;margin-bottom:12px;">Adjudication Flow — Touchless vs Manual Split</div>'
+      + '<div style="display:flex;flex-direction:column;gap:8px;">';
+
+    pipelineStages.forEach(function(stage, i) {
+      var barWidth = Math.round((stage.count / pipelineStages[0].count) * 100);
+      var autoBar  = Math.round(barWidth * stage.auto / 100);
+      var manBar   = barWidth - autoBar;
+      var isAuto   = stage.auto > 50;
+
+      funnelHtml += '<div style="display:flex;align-items:center;gap:10px;">'
+        + '<div style="width:28px;height:28px;background:'+stage.color+'1a;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
+        + '<i class="fas '+stage.icon+'" style="font-size:13px;color:'+stage.color+';"></i></div>'
+        + '<div style="width:140px;font-size:11px;font-weight:700;color:#374151;flex-shrink:0;">'+stage.label+'</div>'
+        + '<div style="flex:1;display:flex;height:22px;border-radius:6px;overflow:hidden;background:#f3f4f6;">'
+        + (autoBar > 0 ? '<div style="width:'+autoBar+'%;background:'+stage.color+';display:flex;align-items:center;justify-content:center;">'
+          + (autoBar > 10 ? '<span style="font-size:9px;font-weight:700;color:#fff;">'+stage.auto+'% auto</span>' : '')+'</div>' : '')
+        + (manBar > 0 ? '<div style="width:'+manBar+'%;background:#e5e7eb;display:flex;align-items:center;justify-content:center;">'
+          + (manBar > 8 ? '<span style="font-size:9px;color:#9ca3af;">'+(100-stage.auto)+'% manual</span>' : '')+'</div>' : '')
+        + '</div>'
+        + '<div style="width:60px;text-align:right;font-size:11px;font-weight:700;color:#374151;flex-shrink:0;">'+stage.count.toLocaleString()+'</div>'
+        + '<div style="width:50px;flex-shrink:0;">'
+        + (stage.auto===0 ? '' : '<span style="background:#05966922;color:#059669;border-radius:20px;padding:1px 6px;font-size:10px;font-weight:700;">auto</span>')
+        + '</div>'
+        + '</div>';
+    });
+
+    funnelHtml += '</div></div>';
+
+    /* Classification engine detail */
+    var classifyHtml = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">'
+      + '<div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:16px;">'
+      + '<div style="font-size:13px;font-weight:700;color:#111827;margin-bottom:12px;"><i class="fas fa-brain" style="color:#7c3aed;margin-right:6px;"></i>Classification Engine — Model Mix</div>'
+      + [
+          { model:'XGBoost Classifier',  use:'Priority + routing',   acc:'96.8%', color:'#0891b2' },
+          { model:'BERT-LTC NLP',        use:'Clinical notes parsing',acc:'94.2%', color:'#7c3aed' },
+          { model:'Rule Ensemble',        use:'Eligibility gate',      acc:'99.1%', color:'#059669' },
+          { model:'Random Forest',        use:'Fraud risk score',      acc:'92.4%', color:'#d97706' }
+        ].map(function(m) {
+          return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f3f4f6;">'
+            + '<div style="width:8px;height:8px;background:'+m.color+';border-radius:50%;flex-shrink:0;"></div>'
+            + '<div style="flex:1;"><div style="font-size:11px;font-weight:700;color:#374151;">'+m.model+'</div>'
+            + '<div style="font-size:10px;color:#9ca3af;">'+m.use+'</div></div>'
+            + '<span style="font-size:11px;font-weight:700;color:'+m.color+';">'+m.acc+'</span>'
+            + '</div>';
+        }).join('')
+      + '</div>'
+      + '<div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:16px;">'
+      + '<div style="font-size:13px;font-weight:700;color:#111827;margin-bottom:12px;"><i class="fas fa-check-circle" style="color:#059669;margin-right:6px;"></i>Auto-Approver Lane — Criteria</div>'
+      + [
+          { rule:'Clean claim — no missing fields',      pct:'100%' },
+          { rule:'Policy Active + waiting period met',   pct:'100%' },
+          { rule:'ADL score ≥ 2 (2 ADL deficits)',      pct:'100%' },
+          { rule:'Benefit calc within plan limits',      pct:'100%' },
+          { rule:'No prior fraud flag or audit hold',    pct:'100%' },
+          { rule:'Provider in-network or authorized',    pct:'100%' }
+        ].map(function(r) {
+          return '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #f3f4f6;">'
+            + '<i class="fas fa-check" style="color:#059669;font-size:10px;flex-shrink:0;"></i>'
+            + '<div style="flex:1;font-size:11px;color:#374151;">'+r.rule+'</div>'
+            + '<span style="font-size:11px;font-weight:700;color:#059669;">'+r.pct+'</span>'
+            + '</div>';
+        }).join('')
+      + '</div></div>';
+
+    return '<div style="padding:20px;">'
+      + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">'
+      + '<div style="width:36px;height:36px;background:linear-gradient(135deg,#0891b2,#0e7490);border-radius:9px;display:flex;align-items:center;justify-content:center;">'
+      + '<i class="fas fa-project-diagram" style="color:#fff;font-size:16px;"></i></div>'
+      + '<div><div style="font-size:16px;font-weight:800;color:#111827;">Auto-Adjudication Pipeline</div>'
+      + '<div style="font-size:11px;color:#6b7280;">Touchless claims flow · 61% auto-approval · classification engine · rules engine · payment lane</div></div>'
+      + '</div>'
+      + kpiHtml + funnelHtml + classifyHtml
+      + '</div>';
+  }
+
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     TAB 4 — TRANSACTION TYPE DRILL-DOWN ANALYZER
+     Sub-LOB breakdown + Pareto chart + rework rate + avg days analysis
+  ════════════════════════════════════════════════════════════════════════ */
+  function _p44buildTransactions() {
+    var totalVol = _p44txTypes.reduce(function(a,b){ return a+b.volume; }, 0);
+
+    /* KPIs */
+    var kpiHtml = '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;">'
+      + [
+          { val: totalVol.toLocaleString(), lbl:'Total Transactions / mo', icon:'fa-exchange-alt', color:'#0891b2' },
+          { val:'6',                         lbl:'Sub-LOB Categories',      icon:'fa-sitemap',      color:'#7c3aed' },
+          { val:'85%',                        lbl:'Avg Auto-Adj Rate',       icon:'fa-robot',        color:'#059669' },
+          { val:'3.4%',                       lbl:'Avg Rework Rate',         icon:'fa-redo-alt',     color:'#dc2626' }
+        ].map(function(k) {
+          return '<div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;text-align:center;">'
+            + '<div style="font-size:22px;font-weight:800;color:'+k.color+';">'+k.val+'</div>'
+            + '<div style="font-size:11px;color:#6b7280;margin-top:4px;"><i class="fas '+k.icon+'" style="margin-right:4px;"></i>'+k.lbl+'</div>'
+            + '</div>';
+        }).join('')
+      + '</div>';
+
+    /* Pareto chart (CSS bar chart) */
+    var maxVol = Math.max.apply(null, _p44txTypes.map(function(t){ return t.volume; }));
+    var paretoHtml = '<div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:16px;margin-bottom:20px;">'
+      + '<div style="font-size:13px;font-weight:700;color:#111827;margin-bottom:16px;"><i class="fas fa-chart-bar" style="color:#d97706;margin-right:6px;"></i>Transaction Volume — Pareto Distribution</div>'
+      + '<div style="display:flex;align-items:flex-end;gap:10px;height:120px;margin-bottom:8px;">'
+      + _p44txTypes.map(function(t) {
+          var h = Math.round((t.volume / maxVol) * 100);
+          return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">'
+            + '<div style="font-size:10px;font-weight:700;color:#374151;">'+t.volume.toLocaleString()+'</div>'
+            + '<div style="width:100%;background:'+t.color+';border-radius:4px 4px 0 0;height:'+h+'%;"></div>'
+            + '</div>';
+        }).join('')
+      + '</div>'
+      + '<div style="display:flex;gap:10px;">'
+      + _p44txTypes.map(function(t) {
+          return '<div style="flex:1;text-align:center;font-size:9px;color:#6b7280;font-weight:700;">'+t.type+'</div>';
+        }).join('')
+      + '</div></div>';
+
+    /* Sub-LOB breakdown table */
+    var tableHtml = '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;">'
+      + '<div style="padding:12px 16px;background:#d97706;color:#fff;font-size:12px;font-weight:700;"><i class="fas fa-table" style="margin-right:6px;"></i>Sub-LOB Breakdown — Full Analysis</div>'
+      + '<table style="width:100%;border-collapse:collapse;font-size:11px;">'
+      + '<thead><tr style="background:#f1f5f9;">'
+      + ['Type','Sub-LOB','Volume','Share','Auto Rate','Avg Days','Rework Rate','Total Paid'].map(function(h) {
+          return '<th style="padding:8px 10px;text-align:left;color:#6b7280;font-weight:700;font-size:10px;text-transform:uppercase;">'+h+'</th>';
+        }).join('')
+      + '</tr></thead><tbody>'
+      + _p44txTypes.map(function(t, i) {
+          var autoColor = t.autoRate >= 90 ? '#059669' : t.autoRate >= 80 ? '#d97706' : '#dc2626';
+          var rwColor   = t.reworkRate <= 2.5 ? '#059669' : t.reworkRate <= 4 ? '#d97706' : '#dc2626';
+          return '<tr style="border-bottom:1px solid #f3f4f6;'+(i%2?'background:#fafafa':'')+';">'
+            + '<td style="padding:10px 10px;">'
+            + '<div style="display:flex;align-items:center;gap:6px;">'
+            + '<div style="width:10px;height:10px;background:'+t.color+';border-radius:3px;flex-shrink:0;"></div>'
+            + '<span style="font-weight:700;color:#111827;font-size:12px;">'+t.type+'</span></div></td>'
+            + '<td style="padding:10px 10px;"><span style="background:#6b728015;color:#6b7280;border-radius:4px;padding:2px 6px;font-size:10px;font-weight:700;">'+t.subLob+'</span></td>'
+            + '<td style="padding:10px 10px;font-weight:700;color:#374151;">'+t.volume.toLocaleString()+'</td>'
+            + '<td style="padding:10px 10px;">'
+            + '<div style="display:flex;align-items:center;gap:6px;">'
+            + '<div style="width:40px;background:#e5e7eb;border-radius:4px;height:6px;">'
+            + '<div style="background:'+t.color+';height:6px;border-radius:4px;width:'+t.pct+'%;"></div></div>'
+            + '<span style="font-size:11px;color:#374151;">'+t.pct+'%</span></div></td>'
+            + '<td style="padding:10px 10px;font-weight:700;color:'+autoColor+';">'+t.autoRate+'%</td>'
+            + '<td style="padding:10px 10px;color:#374151;">'+t.avgDays+' d</td>'
+            + '<td style="padding:10px 10px;font-weight:700;color:'+rwColor+';">'+t.reworkRate+'%</td>'
+            + '<td style="padding:10px 10px;font-weight:700;color:#059669;">'+t.totalPaid+'</td>'
+            + '</tr>';
+        }).join('')
+      + '</tbody></table></div>';
+
+    /* Insight panel */
+    var insightHtml = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px;">'
+      + '<div style="background:#dc262608;border:1px solid #dc262630;border-radius:10px;padding:14px;">'
+      + '<div style="font-size:12px;font-weight:700;color:#dc2626;margin-bottom:8px;"><i class="fas fa-exclamation-triangle" style="margin-right:5px;"></i>High Rework Risk</div>'
+      + '<div style="font-size:11px;color:#374151;line-height:1.6;">Memory Care (6.8% rework) and Hospice (5.2%) drive disproportionate rework costs. Complex clinical criteria and policy ambiguity are primary drivers. Target: auto-resolve via enhanced rules engine Q4.</div>'
+      + '</div>'
+      + '<div style="background:#05966908;border:1px solid #05966930;border-radius:10px;padding:14px;">'
+      + '<div style="font-size:12px;font-weight:700;color:#059669;margin-bottom:8px;"><i class="fas fa-star" style="margin-right:5px;"></i>Top Automation Opportunity</div>'
+      + '<div style="font-size:11px;color:#374151;line-height:1.6;">Adult Day Care (96% auto) and ALF (91% auto) demonstrate highest touchless rates with lowest rework. Nursing Home (79% auto) is the largest volume driver — closing the gap to 90%+ would yield ~$3.1M in processing savings annually.</div>'
+      + '</div></div>';
+
+    return '<div style="padding:20px;">'
+      + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">'
+      + '<div style="width:36px;height:36px;background:linear-gradient(135deg,#d97706,#b45309);border-radius:9px;display:flex;align-items:center;justify-content:center;">'
+      + '<i class="fas fa-chart-bar" style="color:#fff;font-size:16px;"></i></div>'
+      + '<div><div style="font-size:16px;font-weight:800;color:#111827;">Transaction Type Drill-Down Analyzer</div>'
+      + '<div style="font-size:11px;color:#6b7280;">Sub-LOB breakdown · Pareto distribution · automation vs rework rates · financial impact</div></div>'
+      + '</div>'
+      + kpiHtml + paretoHtml + tableHtml + insightHtml
+      + '</div>';
+  }
+
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     TAB 5 — REWORK INTELLIGENCE CENTER
+     Root-cause tagger, rework queue, prevention insights, Pareto chart
+  ════════════════════════════════════════════════════════════════════════ */
+  function _p44buildRework() {
+    var totalRework = _p44rootCauses.reduce(function(a,b){ return a+b.count; }, 0);
+    var highSev = _p44reworks.filter(function(r){ return r.severity==='High'; }).length;
+
+    /* KPIs */
+    var kpiHtml = '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;">'
+      + [
+          { val:totalRework,  lbl:'Total Reworks MTD',        icon:'fa-redo-alt',      color:'#dc2626' },
+          { val:highSev,      lbl:'High Severity Open',       icon:'fa-exclamation',   color:'#dc2626' },
+          { val:'3.4%',       lbl:'Overall Rework Rate',      icon:'fa-percentage',    color:'#d97706' },
+          { val:'$184K',      lbl:'Rework Cost MTD (est.)',   icon:'fa-dollar-sign',   color:'#6b7280' }
+        ].map(function(k) {
+          return '<div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;text-align:center;">'
+            + '<div style="font-size:22px;font-weight:800;color:'+k.color+';">'+k.val+'</div>'
+            + '<div style="font-size:11px;color:#6b7280;margin-top:4px;"><i class="fas '+k.icon+'" style="margin-right:4px;"></i>'+k.lbl+'</div>'
+            + '</div>';
+        }).join('')
+      + '</div>';
+
+    /* Root cause Pareto */
+    var maxCnt = _p44rootCauses[0].count;
+    var paretoHtml = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;">'
+      + '<div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:16px;">'
+      + '<div style="font-size:13px;font-weight:700;color:#111827;margin-bottom:12px;"><i class="fas fa-sitemap" style="color:#dc2626;margin-right:6px;"></i>Root Cause Distribution</div>'
+      + _p44rootCauses.map(function(rc) {
+          var barW = Math.round((rc.count / maxCnt) * 100);
+          return '<div style="margin-bottom:10px;">'
+            + '<div style="display:flex;justify-content:space-between;margin-bottom:3px;">'
+            + '<span style="font-size:11px;color:#374151;font-weight:600;">'+rc.cause+'</span>'
+            + '<span style="font-size:11px;font-weight:700;color:'+rc.color+';">'+rc.count+' ('+rc.pct+'%)</span>'
+            + '</div>'
+            + '<div style="background:#e5e7eb;border-radius:4px;height:8px;">'
+            + '<div style="background:'+rc.color+';height:8px;border-radius:4px;width:'+barW+'%;"></div>'
+            + '</div></div>';
+        }).join('')
+      + '</div>'
+      + '<div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:16px;">'
+      + '<div style="font-size:13px;font-weight:700;color:#111827;margin-bottom:12px;"><i class="fas fa-lightbulb" style="color:#d97706;margin-right:6px;"></i>Prevention Insights — AI Recommendations</div>'
+      + [
+          { prio:'P1', insight:'Deploy enhanced policy-interpretation NLP rules — targets 28% rework reduction', saving:'$51K/mo', color:'#dc2626' },
+          { prio:'P2', insight:'Automate doc-completeness check at intake — eliminate 21% missing-doc reworks', saving:'$39K/mo', color:'#d97706' },
+          { prio:'P3', insight:'Benefit calc model retrain on 2025-2026 data — reduce calc errors by 40%',      saving:'$29K/mo', color:'#7c3aed' },
+          { prio:'P4', insight:'Duplicate detection ML layer before payment — block 95% of duplicate pays',      saving:'$24K/mo', color:'#0891b2' }
+        ].map(function(ins) {
+          return '<div style="display:flex;gap:8px;padding:8px 0;border-bottom:1px solid #f3f4f6;">'
+            + '<span style="background:'+ins.color+';color:#fff;border-radius:4px;padding:1px 6px;font-size:10px;font-weight:700;flex-shrink:0;height:fit-content;margin-top:1px;">'+ins.prio+'</span>'
+            + '<div style="flex:1;"><div style="font-size:11px;color:#374151;line-height:1.4;">'+ins.insight+'</div>'
+            + '<div style="font-size:10px;color:#059669;font-weight:700;margin-top:2px;">Estimated saving: '+ins.saving+'</div></div>'
+            + '</div>';
+        }).join('')
+      + '</div></div>';
+
+    /* Rework queue table */
+    var queueHtml = '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;">'
+      + '<div style="padding:12px 16px;background:#dc2626;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;gap:8px;">'
+      + '<i class="fas fa-redo-alt"></i> Active Rework Queue'
+      + '<span style="margin-left:auto;background:#ffffff33;border-radius:20px;padding:2px 10px;font-size:11px;">'+_p44reworks.length+' items</span>'
+      + '</div>'
+      + '<table style="width:100%;border-collapse:collapse;font-size:11px;">'
+      + '<thead><tr style="background:#f1f5f9;">'
+      + ['RW ID','Claim ID','Claimant','Root Cause','Stage','Age (days)','Severity','Assignee','Status'].map(function(h) {
+          return '<th style="padding:8px 10px;text-align:left;color:#6b7280;font-weight:700;font-size:10px;text-transform:uppercase;">'+h+'</th>';
+        }).join('')
+      + '</tr></thead><tbody>'
+      + _p44reworks.map(function(rw, i) {
+          var sc = rw.severity==='High'?'#dc2626':rw.severity==='Medium'?'#d97706':'#059669';
+          var stc = rw.status==='In Review'?'#0891b2':rw.status==='Resolved'?'#059669':'#d97706';
+          return '<tr style="border-bottom:1px solid #f3f4f6;'+(i%2?'background:#fafafa':'')+';">'
+            + '<td style="padding:8px 10px;font-weight:700;color:#dc2626;font-size:11px;">'+rw.id+'</td>'
+            + '<td style="padding:8px 10px;color:#003087;font-weight:600;font-size:11px;">'+rw.claimId+'</td>'
+            + '<td style="padding:8px 10px;color:#111827;font-weight:600;">'+rw.claimant+'</td>'
+            + '<td style="padding:8px 10px;color:#374151;">'+rw.cause+'</td>'
+            + '<td style="padding:8px 10px;color:#374151;">'+rw.stage+'</td>'
+            + '<td style="padding:8px 10px;text-align:center;color:#374151;font-weight:600;">'+rw.age+'</td>'
+            + '<td style="padding:8px 10px;"><span style="background:'+sc+'1a;color:'+sc+';border-radius:20px;padding:1px 8px;font-size:10px;font-weight:700;">'+rw.severity+'</span></td>'
+            + '<td style="padding:8px 10px;color:#374151;">'+rw.assignee+'</td>'
+            + '<td style="padding:8px 10px;"><span style="background:'+stc+'1a;color:'+stc+';border-radius:20px;padding:1px 8px;font-size:10px;font-weight:700;">'+rw.status+'</span></td>'
+            + '</tr>';
+        }).join('')
+      + '</tbody></table></div>';
+
+    return '<div style="padding:20px;">'
+      + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">'
+      + '<div style="width:36px;height:36px;background:linear-gradient(135deg,#dc2626,#b91c1c);border-radius:9px;display:flex;align-items:center;justify-content:center;">'
+      + '<i class="fas fa-redo-alt" style="color:#fff;font-size:16px;"></i></div>'
+      + '<div><div style="font-size:16px;font-weight:800;color:#111827;">Rework Intelligence Center</div>'
+      + '<div style="font-size:11px;color:#6b7280;">Root-cause Pareto · AI prevention insights · live rework queue · cost estimation</div></div>'
+      + '</div>'
+      + kpiHtml + paretoHtml + queueHtml
+      + '</div>';
+  }
+
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     TAB 6 — PAYMENT INTEGRITY & COB CENTER
+     COB intake queue, pre/post-pay queues, Interest Bot stats, recovery tracker
+  ════════════════════════════════════════════════════════════════════════ */
+  function _p44buildCOB() {
+    var totalCOBRecoverable = _p44cobQueue
+      .filter(function(c){ return c.recoverable && c.status !== 'Recovered'; })
+      .length;
+    var totalIntAmt = _p44payQueue
+      .filter(function(p){ return p.interestDue; })
+      .reduce(function(a, p){ return a + parseFloat((p.interestAmt||'0').replace('$','').replace(',','')||0); }, 0);
+
+    /* KPIs */
+    var kpiHtml = '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;">'
+      + [
+          { val:'$12.4M',  lbl:'COB Recoveries YTD',        icon:'fa-hand-holding-usd', color:'#059669' },
+          { val:totalCOBRecoverable, lbl:'Pending COB Recovery',  icon:'fa-file-import',     color:'#d97706' },
+          { val:'$'+totalIntAmt,  lbl:'Interest Due (open)',  icon:'fa-percentage',      color:'#dc2626' },
+          { val:'99.1%',   lbl:'Interest Bot Accuracy',      icon:'fa-robot',           color:'#7c3aed' }
+        ].map(function(k) {
+          return '<div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;text-align:center;">'
+            + '<div style="font-size:22px;font-weight:800;color:'+k.color+';">'+k.val+'</div>'
+            + '<div style="font-size:11px;color:#6b7280;margin-top:4px;"><i class="fas '+k.icon+'" style="margin-right:4px;"></i>'+k.lbl+'</div>'
+            + '</div>';
+        }).join('')
+      + '</div>';
+
+    /* Two-panel layout: COB Queue + Payment Queue */
+    var panelsHtml = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;">'
+
+      /* COB Intake Queue */
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;">'
+      + '<div style="padding:12px 16px;background:#d97706;color:#fff;font-size:12px;font-weight:700;">'
+      + '<i class="fas fa-file-import" style="margin-right:6px;"></i>COB Intake Queue</div>'
+      + '<table style="width:100%;border-collapse:collapse;font-size:11px;">'
+      + '<thead><tr style="background:#f1f5f9;">'
+      + ['COB ID','Claimant','Primary Payer','Secondary','Crossover','Status'].map(function(h) {
+          return '<th style="padding:7px 8px;text-align:left;color:#6b7280;font-weight:700;font-size:9px;text-transform:uppercase;">'+h+'</th>';
+        }).join('')
+      + '</tr></thead><tbody>'
+      + _p44cobQueue.map(function(cob, i) {
+          var sc = cob.status==='Recovered'?'#059669':cob.status==='Disputed'?'#dc2626':cob.status==='In Review'?'#0891b2':'#d97706';
+          return '<tr style="border-bottom:1px solid #f3f4f6;'+(i%2?'background:#fafafa':'')+';">'
+            + '<td style="padding:7px 8px;font-weight:700;color:#d97706;font-size:10px;">'+cob.id+'</td>'
+            + '<td style="padding:7px 8px;color:#111827;font-weight:600;font-size:10px;">'+cob.claimant+'</td>'
+            + '<td style="padding:7px 8px;color:#374151;font-size:10px;">'+cob.primaryPayer+'</td>'
+            + '<td style="padding:7px 8px;color:#374151;font-size:10px;">'+cob.secondaryPayer+'</td>'
+            + '<td style="padding:7px 8px;font-weight:700;color:#059669;font-size:10px;">'+cob.crossoverAmt+'</td>'
+            + '<td style="padding:7px 8px;"><span style="background:'+sc+'1a;color:'+sc+';border-radius:20px;padding:1px 6px;font-size:9px;font-weight:700;">'+cob.status+'</span></td>'
+            + '</tr>';
+        }).join('')
+      + '</tbody></table></div>'
+
+      /* Payment Integrity Queue */
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;">'
+      + '<div style="padding:12px 16px;background:#059669;color:#fff;font-size:12px;font-weight:700;">'
+      + '<i class="fas fa-dollar-sign" style="margin-right:6px;"></i>Payment Integrity Queue</div>'
+      + '<table style="width:100%;border-collapse:collapse;font-size:11px;">'
+      + '<thead><tr style="background:#f1f5f9;">'
+      + ['Pay ID','Claimant','Amount','Due Date','Status','Interest','Method'].map(function(h) {
+          return '<th style="padding:7px 8px;text-align:left;color:#6b7280;font-weight:700;font-size:9px;text-transform:uppercase;">'+h+'</th>';
+        }).join('')
+      + '</tr></thead><tbody>'
+      + _p44payQueue.map(function(pay, i) {
+          var sc = pay.status==='On Time'?'#059669':pay.status==='Due Soon'?'#d97706':pay.status==='Overdue'?'#dc2626':'#6b7280';
+          return '<tr style="border-bottom:1px solid #f3f4f6;'+(i%2?'background:#fafafa':'')+';">'
+            + '<td style="padding:7px 8px;font-weight:700;color:#059669;font-size:10px;">'+pay.id+'</td>'
+            + '<td style="padding:7px 8px;color:#111827;font-weight:600;font-size:10px;">'+pay.claimant+'</td>'
+            + '<td style="padding:7px 8px;font-weight:700;color:#374151;font-size:10px;">'+pay.amt+'</td>'
+            + '<td style="padding:7px 8px;color:#374151;font-size:10px;">'+pay.dueDate+'</td>'
+            + '<td style="padding:7px 8px;"><span style="background:'+sc+'1a;color:'+sc+';border-radius:20px;padding:1px 6px;font-size:9px;font-weight:700;">'+pay.status+'</span></td>'
+            + '<td style="padding:7px 8px;font-size:10px;'+(pay.interestDue?'color:#dc2626;font-weight:700;':'color:#9ca3af;')+'">'+pay.interestAmt+'</td>'
+            + '<td style="padding:7px 8px;font-size:10px;color:#374151;">'+pay.method+'</td>'
+            + '</tr>';
+        }).join('')
+      + '</tbody></table></div>'
+      + '</div>';
+
+    /* Interest Bot + Recovery Tracker */
+    var botTrackerHtml = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">'
+      /* Interest Bot Stats */
+      + '<div style="background:#7c3aed0a;border:1px solid #7c3aed30;border-radius:10px;padding:16px;">'
+      + '<div style="font-size:13px;font-weight:700;color:#7c3aed;margin-bottom:12px;"><i class="fas fa-robot" style="margin-right:6px;"></i>Interest Bot — Live Stats</div>'
+      + [
+          { lbl:'Claims processed today',      val:'428',     color:'#7c3aed' },
+          { lbl:'Interest calc accuracy',       val:'99.8%',   color:'#059669' },
+          { lbl:'Avg processing time',          val:'0.4s',    color:'#0891b2' },
+          { lbl:'State statutes covered',       val:'51',      color:'#374151' },
+          { lbl:'Interest auto-posted today',   val:'$8,420',  color:'#059669' },
+          { lbl:'Late payment flags raised',    val:'3',       color:'#dc2626' },
+          { lbl:'Bot uptime (30-day)',           val:'100%',    color:'#059669' }
+        ].map(function(s) {
+          return '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #7c3aed18;">'
+            + '<span style="font-size:11px;color:#374151;">'+s.lbl+'</span>'
+            + '<span style="font-size:11px;font-weight:700;color:'+s.color+';">'+s.val+'</span>'
+            + '</div>';
+        }).join('')
+      + '</div>'
+      /* Recovery Tracker */
+      + '<div style="background:#05966908;border:1px solid #05966930;border-radius:10px;padding:16px;">'
+      + '<div style="font-size:13px;font-weight:700;color:#059669;margin-bottom:12px;"><i class="fas fa-hand-holding-usd" style="margin-right:6px;"></i>COB Recovery Tracker — YTD</div>'
+      + [
+          { quarter:'Q1 2026', recovered:'$2.8M', cases:184, rate:'91%', color:'#059669' },
+          { quarter:'Q2 2026', recovered:'$3.4M', cases:218, rate:'94%', color:'#059669' },
+          { quarter:'Q3 2026', recovered:'$3.1M (proj)', cases:196, rate:'93%', color:'#0891b2' },
+          { quarter:'Q4 2026', recovered:'$3.1M (target)', cases:200, rate:'95%', color:'#d97706' }
+        ].map(function(q, i) {
+          var barW = i === 0 ? 71 : i === 1 ? 87 : i === 2 ? 79 : 80;
+          return '<div style="margin-bottom:10px;">'
+            + '<div style="display:flex;justify-content:space-between;margin-bottom:3px;">'
+            + '<span style="font-size:11px;font-weight:700;color:#374151;">'+q.quarter+'</span>'
+            + '<span style="font-size:11px;font-weight:700;color:'+q.color+';">'+q.recovered+'</span>'
+            + '</div>'
+            + '<div style="display:flex;align-items:center;gap:8px;">'
+            + '<div style="flex:1;background:#e5e7eb;border-radius:4px;height:8px;">'
+            + '<div style="background:'+q.color+';height:8px;border-radius:4px;width:'+barW+'%;"></div></div>'
+            + '<span style="font-size:10px;color:#6b7280;white-space:nowrap;">'+q.cases+' cases · '+q.rate+' success</span>'
+            + '</div></div>';
+        }).join('')
+      + '</div></div>';
+
+    return '<div style="padding:20px;">'
+      + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">'
+      + '<div style="width:36px;height:36px;background:linear-gradient(135deg,#059669,#047857);border-radius:9px;display:flex;align-items:center;justify-content:center;">'
+      + '<i class="fas fa-shield-alt" style="color:#fff;font-size:16px;"></i></div>'
+      + '<div><div style="font-size:16px;font-weight:800;color:#111827;">Payment Integrity & COB Center</div>'
+      + '<div style="font-size:11px;color:#6b7280;">COB intake queue · pre/post-pay integrity · Interest Bot stats · YTD recovery tracker</div></div>'
+      + '</div>'
+      + kpiHtml + panelsHtml + botTrackerHtml
+      + '</div>';
+  }
+
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     WRAP initLtcClaimsPage — inject tab bar after P38's claims rows render
+  ════════════════════════════════════════════════════════════════════════ */
+  (function() {
+    var _p44prevInit = window.initLtcClaimsPage;
+    window.initLtcClaimsPage = function() {
+      /* Call P38's version first — it does setTimeout(80ms) to render the table rows */
+      if (typeof _p44prevInit === 'function') _p44prevInit.apply(this, arguments);
+
+      /* Wait 180ms (> P38's 80ms) so the table is in DOM before we inject */
+      setTimeout(function() {
+        _p44injectTabBar();
+      }, 180);
+    };
+    console.log('[P44] initLtcClaimsPage wrapped — tab bar will inject 180ms after P38 renders rows');
+  }());
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     _p44init — DOM-ready observer + immediate attempt
+  ════════════════════════════════════════════════════════════════════════ */
+  function _p44init() {
+    var _p44obs = null;
+    var _p44done = false;
+
+    function _tryP44() {
+      if (_p44done) return;
+      /* If ltc-claims-tbody is already in DOM (page already loaded), inject immediately */
+      if (document.getElementById('ltc-claims-tbody') && document.querySelector('.ltc-claims-page')) {
+        if (!document.getElementById('p44-tab-bar')) {
+          _p44done = true;
+          _p44injectTabBar();
+          if (_p44obs) { try { _p44obs.disconnect(); } catch(e){} }
+        }
+        return;
+      }
+    }
+
+    /* MutationObserver — watches for ltc-claims-tbody appearing after navigateTo('ltc-claims') */
+    if (typeof MutationObserver !== 'undefined') {
+      _p44obs = new MutationObserver(function(mutations) {
+        if (_p44done) return;
+        for (var i = 0; i < mutations.length; i++) {
+          var nodes = mutations[i].addedNodes;
+          for (var j = 0; j < nodes.length; j++) {
+            var n = nodes[j];
+            if (!n || n.nodeType !== 1) continue;
+            /* Check if ltc-claims-tbody appeared inside this mutation */
+            if ((n.id && n.id === 'ltc-claims-tbody') ||
+                (n.querySelector && n.querySelector('#ltc-claims-tbody'))) {
+              if (document.querySelector('.ltc-claims-page') && !document.getElementById('p44-tab-bar')) {
+                _p44done = true;
+                if (_p44obs) { try { _p44obs.disconnect(); } catch(e){} }
+                setTimeout(_p44injectTabBar, 100);
+              }
+            }
+          }
+        }
+      });
+      _p44obs.observe(document.body || document.documentElement, {
+        childList: true,
+        subtree: true,
+        characterData: false
+      });
+    }
+
+    /* Also hook into navigateTo — whenever 'ltc-claims' is navigated to, reset _p44done */
+    var _p44navOrig = window.navigateTo;
+    if (typeof _p44navOrig === 'function') {
+      window.navigateTo = (function(_orig44) {
+        return function(page) {
+          if (page === 'ltc-claims') {
+            _p44done = false; /* allow re-injection on every visit */
+          }
+          return _orig44.apply(this, arguments);
+        };
+      }(_p44navOrig));
+      console.log('[P44] navigateTo wrapped — ltc-claims will re-inject tabs on each visit');
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', _tryP44);
+    } else {
+      _tryP44();
+    }
+  }
+
+  _p44init();
+
+  console.log('[P44] LTC Claims Intelligence Tabs loaded — 6 tabs: Auto-Adjudication Pipeline · Bots & Automation · Claims Lifecycle Heatmap · Transaction Drill-Down · Rework Intelligence · Payment Integrity & COB');
+
+}());
