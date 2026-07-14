@@ -97170,6 +97170,11 @@ var navigateTo=window.navigateTo;
      NAV ITEM INJECTION — "AI Models" under HYBRID LTC + HAL INTELLIGENCE
      (inserts after data-ai-nav, before mod-roadmap-nav)
      ════════════════════════════════════════════════════════════════ */
+  /* expose nav handler as global so onclick attribute works after EC7 rebind */
+  window._p43navToAIModels = function() {
+    if (window.navigateTo) window.navigateTo('hal-ai-models');
+  };
+
   function _p43injectNavItems() {
     if (document.querySelector('.p43-ai-models-nav')) return; /* idempotent */
 
@@ -97184,9 +97189,11 @@ var navigateTo=window.navigateTo;
       return false;
     }
 
-    var item = document.createElement('div');
+    var item = document.createElement('a');
     item.className = 'p43-ai-models-nav nav-item';
     item.setAttribute('data-nav', 'hal-ai-models');
+    item.setAttribute('href', '#');
+    item.setAttribute('onclick', "_p43navToAIModels(); return false;");
     item.style.cssText = [
       'display:flex',
       'align-items:center',
@@ -97198,7 +97205,8 @@ var navigateTo=window.navigateTo;
       'transition:background .15s',
       'color:#a78bfa',
       'font-size:13px',
-      'font-weight:500'
+      'font-weight:500',
+      'text-decoration:none'
     ].join(';');
 
     item.innerHTML = '<span style="font-size:15px;">🧠</span><span>AI Models</span>' +
@@ -97206,9 +97214,6 @@ var navigateTo=window.navigateTo;
 
     item.addEventListener('mouseenter', function(){ this.style.background='rgba(99,102,241,.15)'; });
     item.addEventListener('mouseleave', function(){ this.style.background=''; });
-    item.addEventListener('click', function(){
-      if (window.navigateTo) window.navigateTo('hal-ai-models');
-    });
 
     /* insert after anchor */
     if (anchor.nextSibling) {
@@ -97216,6 +97221,7 @@ var navigateTo=window.navigateTo;
     } else {
       anchor.parentNode.appendChild(item);
     }
+    console.log('[P43] AI Models nav item injected after', anchor.className);
     return true;
   }
 
@@ -97292,21 +97298,32 @@ var navigateTo=window.navigateTo;
     var _orig = window.navigateTo || function(){};
     window.navigateTo = function(page) {
       if (page === 'hal-ai-models') {
-        /* highlight active nav item */
+        /* ── 1. active nav highlight (same as base navigateTo) ── */
         document.querySelectorAll('.nav-item').forEach(function(el){
-          el.style.background = '';
+          el.classList.remove('active');
         });
         var aiNavItem = document.querySelector('.p43-ai-models-nav');
-        if (aiNavItem) aiNavItem.style.background = 'rgba(99,102,241,.2)';
+        if (aiNavItem) aiNavItem.classList.add('active');
 
-        /* hide all tpl-* divs, show ours */
-        document.querySelectorAll('[id^="tpl-"]').forEach(function(el){
-          el.style.display = 'none';
-        });
+        /* ── 2. set page title + breadcrumb ── */
+        var titleEl = document.getElementById('page-title');
+        var bcEl    = document.getElementById('page-breadcrumb');
+        if (titleEl) titleEl.textContent = 'AI / ML Models Catalog';
+        if (bcEl)    bcEl.textContent    = 'Home / HYBRID LTC + HAL INTELLIGENCE / AI Models';
+
+        /* ── 3. build page content into tpl-hal-ai-models if not done ── */
         var tpl = document.getElementById('tpl-hal-ai-models');
-        if (tpl) {
-          tpl.style.display = '';
-          if (!tpl.dataset.p43Built) _p43buildPage();
+        if (tpl && !tpl.dataset.p43Built) _p43buildPage();
+
+        /* ── 4. clone tpl into #page-content (same pattern as base navigateTo) ── */
+        var content = document.getElementById('page-content');
+        if (content && tpl) {
+          var clone = tpl.cloneNode(true);
+          content.innerHTML = clone.innerHTML;
+          /* re-expose filter/view globals so inline onclick handlers work */
+          window._p43currentCat  = 'All';
+          window._p43currentType = 'All';
+          window._p43currentView = 'card';
         }
         return;
       }
