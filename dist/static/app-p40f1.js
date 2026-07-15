@@ -100361,3 +100361,1514 @@ var navigateTo=window.navigateTo;
 
   console.log('[P48] LTC Claims Tab 7 (Transformation Landscape) + Tab 8 (Blues Plan Case Study) ready');
 })();
+
+/* ============================================================
+   PHASE 49 — ONTOLOGY & KNOWLEDGE GRAPH VISUAL OVERHAUL
+   Dark canvas · Enriched nodes (Carrier/Provider/Claimant 360)
+   Entity 360 Explorer tab (6th tab) · Side panel drawer
+   18 nodes · 16 edges · Animated edges · Rich popups
+   ============================================================ */
+(function () {
+  'use strict';
+
+  /* ── override _p22buildPage with enhanced version ─────────── */
+  var KG49 = '#7c3aed'; var PURVIEW49 = '#742774';
+  var CARRIER_COL = '#1e3a5f'; var PROVIDER_COL = '#059669';
+
+  /* ── 18 enriched nodes ──────────────────────────────────────*/
+  var _p49nodes = [
+    { id:'N001', label:'Margaret Chen',      type:'UnifiedClient',   x:50,  y:42,  color:'#7c3aed',
+      detail:'UNI-001 · Lapse 12 · XSell 94', adl:3, mmse:14, care:'High', gaps:['No Medicare Supp','No Life'],
+      carrier:'Prudential', careManager:'Sarah Johnson, RN', nextAction:'Care Plan Review — Jul 15 2026' },
+    { id:'N002', label:'Robert Kincaid',     type:'UnifiedClient',   x:80,  y:22,  color:'#7c3aed',
+      detail:'UNI-002 · Lapse 34 · XSell 72', adl:2, mmse:20, care:'Moderate', gaps:['No Annuity'],
+      carrier:'Prudential', careManager:'Tom Ellis, RN', nextAction:'ADL Reassessment — Aug 1 2026' },
+    { id:'N003', label:'Dorothy Harrington', type:'UnifiedClient',   x:18,  y:68,  color:'#7c3aed',
+      detail:'UNI-003 · Lapse 8 · XSell 61', adl:4, mmse:12, care:'High', gaps:['No Life','No Medicare Supp'],
+      carrier:'MetLife', careManager:'Linda Park, RN', nextAction:'Provider Visit — Jul 20 2026' },
+    { id:'N004', label:'Frank & Gloria B',   type:'UnifiedClient',   x:74,  y:70,  color:'#7c3aed',
+      detail:'UNI-004 · Lapse 57 · XSell 88 · ⚠ Compliance', adl:1, mmse:25, care:'Low', gaps:['No Medicare Supp'],
+      carrier:'Prudential', careManager:'Sarah Johnson, RN', nextAction:'Compliance Review — NOW' },
+    { id:'N005', label:'Sylvia Torres',      type:'UnifiedClient',   x:32,  y:18,  color:'#7c3aed',
+      detail:'UNI-005 · Lapse 23 · XSell 79', adl:2, mmse:22, care:'Moderate', gaps:['No Annuity','No Life'],
+      carrier:'Transamerica', careManager:'Mike Chen, RN', nextAction:'Benefit Review — Aug 5 2026' },
+    { id:'N006', label:'LTC Policy P-293',   type:'LTCPolicy',       x:28,  y:52,  color:'#dc2626',
+      detail:'$250K coverage · ADL 3 · Active · Prudential' },
+    { id:'N007', label:'LTC Policy P-321',   type:'LTCPolicy',       x:63,  y:32,  color:'#dc2626',
+      detail:'$180K coverage · ADL 2 · Active · Prudential' },
+    { id:'N008', label:'HAL Life P-301',     type:'HALPolicy',       x:88,  y:48,  color:'#0891b2',
+      detail:'$1M face value · Lapse risk 57 · Frank & Gloria' },
+    { id:'N009', label:'Sunrise Manor SNF',  type:'Provider',        x:12,  y:42,  color:'#059669',
+      detail:'NPI 1234567890 · In-network · EVV enabled', cms:4.5, billing:98.2, fraud:5,
+      type2:'Skilled Nursing Facility', location:'Dallas, TX', beds:120, staff:88,
+      contact:'Patricia Wells', licenseExp:'Dec 2027', activePatients:18 },
+    { id:'N010', label:'Home Health Plus',   type:'Provider',        x:42,  y:78,  color:'#059669',
+      detail:'NPI 0987654321 · In-network · Home health', cms:4.2, billing:96.5, fraud:8,
+      type2:'Home Health Agency', location:'Boston, MA', beds:0, staff:45,
+      contact:'James Rivera', licenseExp:'Jun 2026', activePatients:31 },
+    { id:'N011', label:'Advisor Chen',       type:'Agent',           x:58,  y:12,  color:'#d97706',
+      detail:'LIC-NY-4421 · Tier 1 · 142 clients' },
+    { id:'N012', label:'Claim CLM-041',      type:'Claim',           x:10,  y:28,  color:'#f59e0b',
+      detail:'$284K life claim · Pending' },
+    { id:'N013', label:'Care Episode 14',    type:'CareEvent',       x:22,  y:80,  color:'#6366f1',
+      detail:'In-home nursing · 28 days · $18,400' },
+    { id:'N014', label:'Benefit LTC-001',    type:'Benefit',         x:38,  y:60,  color:'#8b5cf6',
+      detail:'$200/day · 3yr max · $18K paid' },
+    { id:'N015', label:'Annuity P-361',      type:'HALPolicy',       x:70,  y:80,  color:'#0891b2',
+      detail:'$300K face · Annuity · 72-T' },
+    { id:'N016', label:'Prudential Financial',type:'Carrier',        x:88,  y:15,  color:'#1e3a5f',
+      detail:'320K policies · SLA 97.2% · A+ S&P · TPA since 2018',
+      policies:320000, sla:97.2, premium:'$48M/mo', rating:'A+ (S&P)', reserves:'$4.2B',
+      marketShare:'18.4%', contact:'James Whitfield SVP', contractExpiry:'2029', employees:'40,000+' },
+    { id:'N017', label:'EligibilityPeriod P-001', type:'EligibilityPeriod', x:52, y:62, color:'#0f766e',
+      detail:'90-day elimination · Start: Apr 1 2026 · ADL confirmed' },
+    { id:'N018', label:'Clinical Score C-001', type:'ClinicalAssessment', x:35, y:32, color:'#be185d',
+      detail:'ADL 3/5 · MMSE 14/30 · Care Complexity 82 · High' }
+  ];
+
+  /* ── 16 enriched edges ──────────────────────────────────────*/
+  var _p49edges = [
+    { from:'N001', to:'N006',  label:'isClaimantOf',    col:'#dc2626' },
+    { from:'N001', to:'N014',  label:'isEligibleFor',   col:'#8b5cf6' },
+    { from:'N001', to:'N013',  label:'hasCareEvent',    col:'#6366f1' },
+    { from:'N013', to:'N009',  label:'providedBy',      col:'#059669' },
+    { from:'N013', to:'N006',  label:'coveredBy',       col:'#dc2626' },
+    { from:'N002', to:'N007',  label:'isClaimantOf',    col:'#dc2626' },
+    { from:'N004', to:'N008',  label:'holdsPolicies',   col:'#0891b2' },
+    { from:'N004', to:'N015',  label:'holdsPolicies',   col:'#0891b2' },
+    { from:'N004', to:'N012',  label:'hasClaim',        col:'#f59e0b' },
+    { from:'N008', to:'N012',  label:'hasClaim',        col:'#f59e0b' },
+    { from:'N003', to:'N010',  label:'receivedCareFrom',col:'#059669' },
+    { from:'N001', to:'N011',  label:'managedBy',       col:'#d97706' },
+    { from:'N002', to:'N011',  label:'managedBy',       col:'#d97706' },
+    { from:'N005', to:'N011',  label:'managedBy',       col:'#d97706' },
+    { from:'N016', to:'N006',  label:'underwrites',     col:'#1e3a5f' },
+    { from:'N001', to:'N018',  label:'hasClinicalScore',col:'#be185d' }
+  ];
+
+  function _p49nodeTypeColor(t) {
+    var m = { UnifiedClient:'#7c3aed', LTCPolicy:'#dc2626', HALPolicy:'#0891b2',
+              Provider:'#059669', Agent:'#d97706', Claim:'#f59e0b', CareEvent:'#6366f1',
+              Benefit:'#8b5cf6', Carrier:'#1e3a5f', EligibilityPeriod:'#0f766e',
+              ClinicalAssessment:'#be185d' };
+    return m[t] || '#64748b';
+  }
+
+  function _p49careBar(score, max, col) {
+    var pct = Math.round((score/max)*100);
+    return '<div style="display:flex;align-items:center;gap:5px;margin-top:3px">'
+      +'<div style="flex:1;background:#e2e8f0;border-radius:4px;height:5px">'
+      +'<div style="width:'+pct+'%;background:'+col+';border-radius:4px;height:5px"></div></div>'
+      +'<span style="font-size:9px;color:#64748b;font-weight:700">'+score+'/'+max+'</span></div>';
+  }
+
+  function _p49showNodeDetail(n) {
+    var existing = document.getElementById('_p49drawer');
+    if (existing) existing.remove();
+
+    var col = _p49nodeTypeColor(n.type);
+    var inner = '';
+
+    if (n.type === 'UnifiedClient') {
+      inner = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">'
+        +'<div style="background:#f5f3ff;border-radius:8px;padding:10px">'
+        +'<div style="font-size:10px;font-weight:700;color:#7c3aed;text-transform:uppercase;margin-bottom:6px">Clinical Scores</div>'
+        +'<div style="font-size:11px;color:#374151;font-weight:600">ADL Score'+_p49careBar(n.adl||0,5,'#dc2626')+'</div>'
+        +'<div style="font-size:11px;color:#374151;font-weight:600;margin-top:6px">MMSE Score'+_p49careBar(n.mmse||0,30,'#0891b2')+'</div>'
+        +'<div style="font-size:11px;color:#374151;font-weight:600;margin-top:6px">Care Complexity<span style="float:right;background:'+(n.care==='High'?'#dc2626':n.care==='Moderate'?'#d97706':'#059669')+'22;color:'+(n.care==='High'?'#dc2626':n.care==='Moderate'?'#d97706':'#059669')+';border-radius:4px;padding:1px 6px;font-size:9px">'+n.care+'</span></div>'
+        +'</div>'
+        +'<div style="background:#fef9ec;border-radius:8px;padding:10px">'
+        +'<div style="font-size:10px;font-weight:700;color:#d97706;text-transform:uppercase;margin-bottom:6px">Coverage Gaps</div>'
+        +(n.gaps||[]).map(function(g){ return '<div style="font-size:10px;color:#92400e;background:#fef3c7;border-radius:4px;padding:2px 6px;margin-bottom:3px">⚠ '+g+'</div>'; }).join('')
+        +'<div style="font-size:10px;color:#64748b;margin-top:6px">Carrier: <b>'+n.carrier+'</b></div>'
+        +'</div></div>'
+        +'<div style="margin-top:8px;background:#f0f9ff;border-radius:8px;padding:8px 10px">'
+        +'<div style="font-size:10px;font-weight:700;color:#0891b2;margin-bottom:3px">Next Required Action</div>'
+        +'<div style="font-size:11px;color:#0f172a;font-weight:600">'+n.nextAction+'</div>'
+        +'<div style="font-size:10px;color:#64748b;margin-top:2px">Care Mgr: '+n.careManager+'</div>'
+        +'</div>';
+    } else if (n.type === 'Provider') {
+      var stars = '';
+      for(var si=0;si<5;si++) stars += si < Math.floor(n.cms||0) ? '★' : si < (n.cms||0) ? '✦' : '☆';
+      inner = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">'
+        +'<div style="background:#f0fdf4;border-radius:8px;padding:10px">'
+        +'<div style="font-size:10px;font-weight:700;color:#059669;text-transform:uppercase;margin-bottom:6px">Quality Metrics</div>'
+        +'<div style="font-size:13px;color:#d97706;font-weight:800;margin-bottom:4px">'+stars+'<span style="font-size:10px;color:#64748b;margin-left:4px">CMS '+n.cms+'/5</span></div>'
+        +'<div style="font-size:11px;color:#374151">Billing Accuracy: <b style="color:#059669">'+n.billing+'%</b></div>'
+        +'<div style="font-size:11px;color:#374151;margin-top:3px">Fraud Risk: <b style="color:'+(n.fraud<20?'#059669':'#dc2626')+'">'+n.fraud+'/100</b></div>'
+        +'<div style="font-size:11px;color:#374151;margin-top:3px">Active Patients: <b>'+n.activePatients+'</b></div>'
+        +'</div>'
+        +'<div style="background:#f8fafc;border-radius:8px;padding:10px">'
+        +'<div style="font-size:10px;font-weight:700;color:#475569;text-transform:uppercase;margin-bottom:6px">Profile</div>'
+        +'<div style="font-size:10px;color:#374151">Type: <b>'+n.type2+'</b></div>'
+        +'<div style="font-size:10px;color:#374151;margin-top:3px">Location: <b>'+n.location+'</b></div>'
+        +(n.beds?'<div style="font-size:10px;color:#374151;margin-top:3px">Licensed Beds: <b>'+n.beds+'</b></div>':'')
+        +'<div style="font-size:10px;color:#374151;margin-top:3px">Staff: <b>'+n.staff+'</b></div>'
+        +'<div style="font-size:10px;color:#374151;margin-top:3px">Contact: <b>'+n.contact+'</b></div>'
+        +'<div style="font-size:10px;color:#374151;margin-top:3px">License Exp: <b>'+n.licenseExp+'</b></div>'
+        +'</div></div>';
+    } else if (n.type === 'Carrier') {
+      inner = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">'
+        +'<div style="background:#eff6ff;border-radius:8px;padding:10px">'
+        +'<div style="font-size:10px;font-weight:700;color:#1e3a5f;text-transform:uppercase;margin-bottom:6px">Portfolio</div>'
+        +'<div style="font-size:11px;color:#374151">Total Policies: <b>'+(n.policies||0).toLocaleString()+'</b></div>'
+        +'<div style="font-size:11px;color:#374151;margin-top:3px">SLA Score: <b style="color:#059669">'+n.sla+'%</b></div>'
+        +'<div style="font-size:11px;color:#374151;margin-top:3px">Monthly Premium: <b>'+n.premium+'</b></div>'
+        +'<div style="font-size:11px;color:#374151;margin-top:3px">Rating: <b style="color:#059669">'+n.rating+'</b></div>'
+        +'<div style="font-size:11px;color:#374151;margin-top:3px">LTC Reserves: <b>'+n.reserves+'</b></div>'
+        +'</div>'
+        +'<div style="background:#f8fafc;border-radius:8px;padding:10px">'
+        +'<div style="font-size:10px;font-weight:700;color:#475569;text-transform:uppercase;margin-bottom:6px">Partnership</div>'
+        +'<div style="font-size:10px;color:#374151">Market Share: <b>'+n.marketShare+'</b></div>'
+        +'<div style="font-size:10px;color:#374151;margin-top:3px">Contact: <b>'+n.contact+'</b></div>'
+        +'<div style="font-size:10px;color:#374151;margin-top:3px">TPA Since: <b>2018</b></div>'
+        +'<div style="font-size:10px;color:#374151;margin-top:3px">Contract Exp: <b>'+n.contractExpiry+'</b></div>'
+        +'<div style="font-size:10px;color:#374151;margin-top:3px">Employees: <b>'+n.employees+'</b></div>'
+        +'</div></div>';
+    }
+
+    var drawer = document.createElement('div');
+    drawer.id = '_p49drawer';
+    drawer.style.cssText = 'position:fixed;right:0;top:0;height:100vh;width:340px;background:#fff;'
+      +'border-left:3px solid '+col+';box-shadow:-8px 0 32px #0003;z-index:9999;'
+      +'font-family:Inter,sans-serif;overflow-y:auto;transition:transform .3s';
+    drawer.innerHTML = '<div style="background:'+col+';padding:16px 18px;display:flex;justify-content:space-between;align-items:center">'
+      +'<div><div style="font-size:14px;font-weight:800;color:#fff">'+n.label+'</div>'
+      +'<div style="font-size:10px;color:rgba(255,255,255,.75);margin-top:2px">'+n.type+' · Cosmos DB: '+n.id+'</div></div>'
+      +'<button onclick="document.getElementById(\'_p49drawer\').remove()" style="background:rgba(255,255,255,.2);border:none;border-radius:6px;padding:6px 10px;cursor:pointer;color:#fff;font-size:14px">✕</button>'
+      +'</div>'
+      +'<div style="padding:14px 16px">'
+      +'<div style="font-size:11px;color:#475569;line-height:1.5;background:#f8fafc;border-radius:8px;padding:8px 10px;margin-bottom:6px">'+n.detail+'</div>'
+      +'<div style="font-size:10px;color:#94a3b8;margin-bottom:4px">Azure Purview catalogued · Gremlin vertex · <span style="color:#059669">●</span> Active</div>'
+      +inner
+      +'<div style="margin-top:12px;display:flex;gap:6px;flex-wrap:wrap">'
+      +'<button onclick="document.getElementById(\'_p49drawer\').remove()" style="flex:1;background:'+col+';color:#fff;border:none;border-radius:6px;padding:7px 10px;font-size:10px;font-weight:700;cursor:pointer"><i class="fas fa-external-link-alt" style="margin-right:4px"></i>View Full 360°</button>'
+      +'<button onclick="document.getElementById(\'_p49drawer\').remove()" style="flex:1;background:#f1f5f9;color:#475569;border:none;border-radius:6px;padding:7px 10px;font-size:10px;font-weight:700;cursor:pointer"><i class="fas fa-project-diagram" style="margin-right:4px"></i>Traverse Graph</button>'
+      +'</div></div>';
+    document.body.appendChild(drawer);
+  }
+
+  /* ── Enhanced Graph Tab ─────────────────────────────────────*/
+  function _p49graphTab() {
+    var VB_W = 720; var VB_H = 520;
+    var svgEdges = _p49edges.map(function(e) {
+      var fn = _p49nodes.find(function(n){ return n.id===e.from; });
+      var tn = _p49nodes.find(function(n){ return n.id===e.to; });
+      if (!fn||!tn) return '';
+      var fx=fn.x/100*VB_W, fy=fn.y/100*VB_H, tx=tn.x/100*VB_W, ty=tn.y/100*VB_H;
+      var mx=(fx+tx)/2, my=(fy+ty)/2-6;
+      var dashId = 'dash_'+e.from+'_'+e.to;
+      return '<line id="'+dashId+'" x1="'+fx+'" y1="'+fy+'" x2="'+tx+'" y2="'+ty+'"'
+        +' stroke="'+e.col+'" stroke-width="1.8" opacity="0.7" marker-end="url(#arr49)"/>'
+        +'<text x="'+mx+'" y="'+my+'" text-anchor="middle" font-size="8" fill="rgba(255,255,255,0.65)"'
+        +' font-family="Inter,sans-serif" font-style="italic">'+e.label+'</text>';
+    }).join('');
+
+    var svgNodes = _p49nodes.map(function(n) {
+      var col = _p49nodeTypeColor(n.type);
+      var k = 'p49-node-'+n.id;
+      window._p8actions[k] = function(){ _p49showNodeDetail(n); };
+      var r = (n.type==='UnifiedClient'||n.type==='Carrier') ? 18 : (n.type==='Provider') ? 16 : 13;
+      var nx = n.x/100*VB_W, ny = n.y/100*VB_H;
+      var shortLabel = n.label.length > 16 ? n.label.slice(0,15)+'…' : n.label;
+      /* ADL dot for claimants */
+      var extraDot = '';
+      if (n.type==='UnifiedClient' && n.adl) {
+        var adlCol = n.adl>=3?'#dc2626':n.adl>=2?'#d97706':'#059669';
+        extraDot = '<circle cx="'+(nx+r-2)+'" cy="'+(ny-r+2)+'" r="5" fill="'+adlCol+'" stroke="#0f172a" stroke-width="1.5"/>';
+      }
+      /* Compliance ring for Frank */
+      var compRing = (n.detail&&n.detail.indexOf('Compliance')>=0)
+        ? '<circle cx="'+nx+'" cy="'+ny+'" r="'+(r+5)+'" fill="none" stroke="#ef4444" stroke-width="2" stroke-dasharray="4,2" opacity=".7"/>' : '';
+      return '<g onclick="_p8run(\''+k+'\')" style="cursor:pointer">'
+        +compRing
+        +'<circle cx="'+nx+'" cy="'+ny+'" r="'+(r+3)+'" fill="'+col+'" opacity="0.15"/>'
+        +'<circle cx="'+nx+'" cy="'+ny+'" r="'+r+'" fill="'+col+'" stroke="#fff" stroke-width="1.5" opacity="0.92"/>'
+        +'<text x="'+nx+'" y="'+(ny+3)+'" text-anchor="middle" font-size="7" fill="#fff" font-weight="700" font-family="Inter,sans-serif">'+n.type.slice(0,4).toUpperCase()+'</text>'
+        +extraDot
+        +'<rect x="'+(nx-shortLabel.length*3.2)+'" y="'+(ny+r+3)+'" width="'+(shortLabel.length*6.4)+'" height="13" rx="3" fill="rgba(15,23,42,0.75)"/>'
+        +'<text x="'+nx+'" y="'+(ny+r+13)+'" text-anchor="middle" font-size="8.5" fill="#f1f5f9" font-weight="600" font-family="Inter,sans-serif">'+shortLabel+'</text>'
+        +'</g>';
+    }).join('');
+
+    var legend = ['UnifiedClient','LTCPolicy','HALPolicy','Provider','Agent','Claim','CareEvent','Benefit','Carrier','EligibilityPeriod','ClinicalAssessment'].map(function(t){
+      return '<div style="display:flex;align-items:center;gap:4px;font-size:9px;color:#94a3b8">'
+        +'<div style="width:9px;height:9px;border-radius:50%;background:'+_p49nodeTypeColor(t)+'"></div>'+t+'</div>';
+    }).join('');
+
+    return '<div style="background:#0f172a;border:1px solid #1e293b;border-radius:14px;overflow:hidden">'
+      +'<div style="padding:12px 18px;border-bottom:1px solid #1e293b;display:flex;align-items:center;justify-content:space-between">'
+      +'<span style="font-size:13px;font-weight:700;color:#f1f5f9"><i class="fas fa-project-diagram" style="color:'+KG49+';margin-right:8px"></i>Knowledge Graph Explorer — 18 nodes · 16 edges · Cosmos DB Gremlin API</span>'
+      +'<div style="display:flex;gap:6px">'
+      +'<span style="background:#7c3aed22;border:1px solid #7c3aed44;color:#a78bfa;border-radius:6px;padding:3px 8px;font-size:9px;font-weight:700">< 12ms P50</span>'
+      +'<span style="background:#05996922;border:1px solid #05996944;color:#34d399;border-radius:6px;padding:3px 8px;font-size:9px;font-weight:700">4 SWRL firing</span>'
+      +'<span style="background:#0891b222;border:1px solid #0891b244;color:#67e8f9;border-radius:6px;padding:3px 8px;font-size:9px;font-weight:700">Click node to explore</span>'
+      +'</div></div>'
+      +'<svg viewBox="0 0 '+VB_W+' '+VB_H+'" style="width:100%;height:520px;background:radial-gradient(ellipse at 30% 40%,#1e1b4b 0%,#0f172a 70%)">'
+      +'<defs>'
+      +'<marker id="arr49" markerWidth="6" markerHeight="6" refX="6" refY="3" orient="auto">'
+      +'<path d="M0,0 L6,3 L0,6 Z" fill="#475569"/></marker>'
+      +'<filter id="glow49"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>'
+      +'</defs>'
+      /* Grid dots */
+      +'<pattern id="grid49" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">'
+      +'<circle cx="20" cy="20" r="0.8" fill="#334155"/></pattern>'
+      +'<rect width="100%" height="100%" fill="url(#grid49)"/>'
+      +svgEdges+svgNodes
+      +'</svg>'
+      +'<div style="padding:10px 18px;border-top:1px solid #1e293b;background:#0f172a;display:flex;gap:10px;flex-wrap:wrap">'+legend+'</div>'
+      +'</div>';
+  }
+
+  /* ── Entity 360 Explorer Tab (new 6th tab) ──────────────────*/
+  function _p49entity360Tab() {
+    var CLAIMANT_DATA = {
+      name:'Margaret O\'Brien', age:78, policy:'LTC-2026-0101 — Nursing Home — Prudential',
+      adl:2, mmse:14, care:82, carrier:'Prudential', product:'LTC Standalone',
+      benefit:'$180/day', provider:'Sunrise Manor SNF', nextPmt:'Jul 15, 2026', daysOpen:14,
+      billing:98.2, fraud:12, policies:{ltc:1,health:1,annuity:1,life:1},
+      totalBenefit:'$2,520', annualCost:'$65,700', careManager:'Sarah Johnson, RN',
+      gaps:['No Medicare Supplement','No Annuity (income gap)','No Life for estate planning'],
+      nextAction:'Care Plan Review — Due Jul 15, 2026 — Assigned: Sarah Johnson, RN'
+    };
+    var CARRIER_DATA = {
+      name:'Prudential Financial', founded:1875, hq:'Newark, NJ', rating:'A+ (S&P) / Aa3 (Moody\'s)',
+      aum:'$1.6T AUM / $62.1B revenue', reserves:'$4.2B LTC reserves', policies:'~1.1M nationwide',
+      marketShare:'18.4%', employees:'40,000+', contact:'James Whitfield, SVP',
+      tpaSince:'2018', contractExpiry:'2029',
+      kpis:[{v:'320,000',l:'Total Policies'},{v:'8,400',l:'Active Claims'},{v:'97.2%',l:'SLA Score'},{v:'$48M',l:'Monthly Premium'}],
+      tabs:['Overview','Products','SLA & Ops','Financials','Risk & Reg','AI Insights']
+    };
+    var PROVIDER_DATA = {
+      name:'Sunrise Manor SNF', type:'Skilled Nursing Facility', location:'Dallas, TX', npi:'1234567890',
+      founded:2001, beds:120, staff:88, evv:'GPS-backed — CareExchange integrated',
+      w9:'Current — EIN: 75-1234567', license:'Current — Exp: Dec 2027',
+      contact:'Patricia Wells, Administrator', lastVisit:'Apr 15, 2026', nextVisit:'Oct 15, 2026',
+      kpis:[{v:'18',l:'Active Patients'},{v:'98.2%',l:'Billing Accuracy'},{v:'4.5/5',l:'CMS Rating'},{v:'5/100',l:'Fraud Risk'}],
+      tabs:['Overview','Clinical','Billing','Compliance','Risk & Fraud','AI Insights']
+    };
+
+    function miniKpi(v,l,c){ return '<div style="background:rgba(255,255,255,.08);border-radius:8px;padding:10px 14px;flex:1;min-width:80px;text-align:center"><div style="font-size:16px;font-weight:800;color:'+c+'">'+v+'</div><div style="font-size:9px;color:#94a3b8;margin-top:2px">'+l+'</div></div>'; }
+
+    var claimantCard = '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden">'
+      +'<div style="background:linear-gradient(135deg,#dc2626,#7c3aed);padding:14px 18px;display:flex;align-items:center;gap:12px">'
+      +'<div style="width:44px;height:44px;background:rgba(255,255,255,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#fff">MO</div>'
+      +'<div><div style="font-size:14px;font-weight:800;color:#fff">'+CLAIMANT_DATA.name+'</div>'
+      +'<div style="font-size:10px;color:rgba(255,255,255,.8);margin-top:2px">Age '+CLAIMANT_DATA.age+' · Nursing Home · <span style="background:#059669;border-radius:4px;padding:1px 5px">Active</span></div>'
+      +'<div style="font-size:9px;color:rgba(255,255,255,.65);margin-top:2px">'+CLAIMANT_DATA.policy+'</div></div></div>'
+      +'<div style="padding:14px 16px">'
+      +'<div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:8px">Claimant 360 Tabs</div>'
+      +'<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px">'
+      +['Overview','Clinical','Products','Timeline','Documents','Provider','Carrier','AI Insights','AI Opportunities','AI Communication'].map(function(t,i){
+        return '<span style="background:'+(i===0?'#7c3aed':'#f1f5f9')+';color:'+(i===0?'#fff':'#64748b')+';border-radius:6px;padding:3px 8px;font-size:9px;font-weight:600">'+t+'</span>';
+      }).join('')+'</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">'
+      +'<div style="background:#fef2f2;border-radius:8px;padding:10px">'
+      +'<div style="font-size:10px;font-weight:700;color:#dc2626;margin-bottom:6px">Clinical Scores</div>'
+      +'<div style="font-size:11px;color:#374151;font-weight:600">ADL Impairment'+_p49careBar(CLAIMANT_DATA.adl,5,'#dc2626')+'</div>'
+      +'<div style="font-size:11px;color:#374151;font-weight:600;margin-top:5px">MMSE Score'+_p49careBar(CLAIMANT_DATA.mmse,30,'#0891b2')+'</div>'
+      +'<div style="font-size:11px;color:#374151;font-weight:600;margin-top:5px">Care Complexity'+_p49careBar(CLAIMANT_DATA.care,100,'#7c3aed')+'</div>'
+      +'</div>'
+      +'<div style="background:#f0fdf4;border-radius:8px;padding:10px">'
+      +'<div style="font-size:10px;font-weight:700;color:#059669;margin-bottom:6px">360 Summary</div>'
+      +'<div style="font-size:10px;color:#374151">Policies: <b>1 LTC · 1 Health · 1 Annuity · 1 Life</b></div>'
+      +'<div style="font-size:10px;color:#374151;margin-top:3px">Total Benefit Used: <b>$2,520</b></div>'
+      +'<div style="font-size:10px;color:#374151;margin-top:3px">Annual Proj Cost: <b>$65,700</b></div>'
+      +'<div style="font-size:10px;color:#374151;margin-top:3px">Billing Acc: <b style="color:#059669">'+CLAIMANT_DATA.billing+'%</b></div>'
+      +'<div style="font-size:10px;color:#374151;margin-top:3px">Fraud Score: <b style="color:#059669">'+CLAIMANT_DATA.fraud+'/100 Clear</b></div>'
+      +'</div></div>'
+      +'<div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:8px 10px;margin-bottom:8px">'
+      +'<div style="font-size:10px;font-weight:700;color:#92400e;margin-bottom:4px">Coverage Gaps</div>'
+      +CLAIMANT_DATA.gaps.map(function(g){ return '<div style="font-size:10px;color:#92400e;margin-bottom:2px">⚠ '+g+'</div>'; }).join('')
+      +'</div>'
+      +'<div style="background:#f0f9ff;border-radius:8px;padding:8px 10px;margin-bottom:10px">'
+      +'<div style="font-size:10px;font-weight:700;color:#0891b2;margin-bottom:3px">Next Required Action</div>'
+      +'<div style="font-size:11px;color:#0f172a;font-weight:600">'+CLAIMANT_DATA.nextAction+'</div>'
+      +'</div>'
+      +'<div style="display:flex;gap:5px;flex-wrap:wrap">'
+      +'<button style="background:#059669;color:#fff;border:none;border-radius:6px;padding:6px 10px;font-size:9px;font-weight:700;cursor:pointer">$ Process Payment</button>'
+      +'<button style="background:#0891b2;color:#fff;border:none;border-radius:6px;padding:6px 10px;font-size:9px;font-weight:700;cursor:pointer">Schedule Assessment</button>'
+      +'<button style="background:#7c3aed;color:#fff;border:none;border-radius:6px;padding:6px 10px;font-size:9px;font-weight:700;cursor:pointer">Update Care Plan</button>'
+      +'<button style="background:#d97706;color:#fff;border:none;border-radius:6px;padding:6px 10px;font-size:9px;font-weight:700;cursor:pointer">AI Analysis</button>'
+      +'</div></div></div>';
+
+    var carrierCard = '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden">'
+      +'<div style="background:linear-gradient(135deg,#1e3a5f,#0891b2);padding:14px 18px;display:flex;align-items:center;gap:12px">'
+      +'<div style="width:44px;height:44px;background:rgba(255,255,255,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;text-align:center;line-height:1.2">PRU<br>DEN</div>'
+      +'<div><div style="font-size:14px;font-weight:800;color:#fff">'+CARRIER_DATA.name+'</div>'
+      +'<div style="font-size:10px;color:rgba(255,255,255,.8);margin-top:2px">Insurance Carrier 360°</div></div></div>'
+      +'<div style="padding:14px 16px">'
+      +'<div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:8px">Carrier 360 Tabs</div>'
+      +'<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px">'
+      +CARRIER_DATA.tabs.map(function(t,i){
+        return '<span style="background:'+(i===0?'#1e3a5f':'#f1f5f9')+';color:'+(i===0?'#fff':'#64748b')+';border-radius:6px;padding:3px 8px;font-size:9px;font-weight:600">'+t+'</span>';
+      }).join('')+'</div>'
+      +'<div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">'
+      +CARRIER_DATA.kpis.map(function(k){ return miniKpi(k.v,k.l,'#1e3a5f'); }).join('')+'</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:10px;color:#374151;margin-bottom:10px">'
+      +[['Founded','1875'],['Headquarters','Newark, NJ'],['Financial Rating','A+ (S&P) / Aa3 (Moody\'s)'],['LTC Reserve Block','$4.2B reserves'],['Market Share (LTC)','18.4%'],['TPA Relationship Since','2018'],['Contract Expiry','2029'],['Employees','40,000+']].map(function(r){
+        return '<div style="background:#f8fafc;border-radius:6px;padding:6px 8px"><span style="color:#64748b">'+r[0]+'</span><br><b>'+r[1]+'</b></div>';
+      }).join('')+'</div>'
+      +'<div style="background:linear-gradient(135deg,#eff6ff,#e0f2fe);border-radius:8px;padding:10px;margin-bottom:10px">'
+      +'<div style="font-size:10px;font-weight:700;color:#1e3a5f;margin-bottom:4px"><i class="fas fa-brain" style="margin-right:4px"></i>WealthAI Intelligence</div>'
+      +'<div style="font-size:10px;color:#374151;line-height:1.5">Prudential\'s LTC book represents our largest carrier relationship. Their 97.2% SLA performance (contractual min 95%) and A+ rating indicate a stable long-term partnership. The $4.2B reserve block provides strong benefit security for our 320K administered policyholders through 2029.</div>'
+      +'</div>'
+      +'<div style="display:flex;gap:5px;flex-wrap:wrap">'
+      +'<button style="background:#1e3a5f;color:#fff;border:none;border-radius:6px;padding:6px 10px;font-size:9px;font-weight:700;cursor:pointer">Contact James Whitfield</button>'
+      +'<button style="background:#0891b2;color:#fff;border:none;border-radius:6px;padding:6px 10px;font-size:9px;font-weight:700;cursor:pointer">Performance Report</button>'
+      +'<button style="background:#7c3aed;color:#fff;border:none;border-radius:6px;padding:6px 10px;font-size:9px;font-weight:700;cursor:pointer">AI Deep Review</button>'
+      +'</div></div></div>';
+
+    var providerCard = '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden">'
+      +'<div style="background:linear-gradient(135deg,#059669,#0891b2);padding:14px 18px;display:flex;align-items:center;gap:12px">'
+      +'<div style="width:44px;height:44px;background:rgba(255,255,255,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;text-align:center;line-height:1.2">SNF<br>★4.5</div>'
+      +'<div><div style="font-size:14px;font-weight:800;color:#fff">'+PROVIDER_DATA.name+'</div>'
+      +'<div style="font-size:10px;color:rgba(255,255,255,.8);margin-top:2px">Healthcare Provider Full 360°</div></div></div>'
+      +'<div style="padding:14px 16px">'
+      +'<div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:8px">Provider 360 Tabs</div>'
+      +'<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px">'
+      +PROVIDER_DATA.tabs.map(function(t,i){
+        return '<span style="background:'+(i===0?'#059669':'#f1f5f9')+';color:'+(i===0?'#fff':'#64748b')+';border-radius:6px;padding:3px 8px;font-size:9px;font-weight:600">'+t+'</span>';
+      }).join('')+'</div>'
+      +'<div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">'
+      +PROVIDER_DATA.kpis.map(function(k){ return miniKpi(k.v,k.l,'#059669'); }).join('')+'</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:10px;color:#374151;margin-bottom:10px">'
+      +[['Provider Type','Skilled Nursing Facility'],['Location','Dallas, TX'],['NPI Number','1234567890'],['Founded','2001'],['Licensed Beds','120'],['Total Staff','88 employees'],['EVV Status','GPS-backed — CareExchange'],['License Status','Current — Exp: Dec 2027']].map(function(r){
+        return '<div style="background:#f8fafc;border-radius:6px;padding:6px 8px"><span style="color:#64748b">'+r[0]+'</span><br><b>'+r[1]+'</b></div>';
+      }).join('')+'</div>'
+      +'<div style="background:linear-gradient(135deg,#f0fdf4,#ecfdf5);border-radius:8px;padding:10px;margin-bottom:10px">'
+      +'<div style="font-size:10px;font-weight:700;color:#059669;margin-bottom:4px"><i class="fas fa-brain" style="margin-right:4px"></i>WealthAI Intelligence</div>'
+      +'<div style="font-size:10px;color:#374151;line-height:1.5">Sunrise Manor SNF is illumiFin\'s highest-quality skilled nursing partner in the Texas market. Their 4.5-star CMS composite rating places them in the top 8% of SNFs nationally. The 98.2% billing accuracy and 5/100 fraud risk score confirm disciplined clinical and administrative operations.</div>'
+      +'</div>'
+      +'<div style="display:flex;gap:5px;flex-wrap:wrap">'
+      +'<button style="background:#059669;color:#fff;border:none;border-radius:6px;padding:6px 10px;font-size:9px;font-weight:700;cursor:pointer">Contact Patricia Wells</button>'
+      +'<button style="background:#0891b2;color:#fff;border:none;border-radius:6px;padding:6px 10px;font-size:9px;font-weight:700;cursor:pointer">Billing Audit</button>'
+      +'<button style="background:#7c3aed;color:#fff;border:none;border-radius:6px;padding:6px 10px;font-size:9px;font-weight:700;cursor:pointer">AI Deep Review</button>'
+      +'</div></div></div>';
+
+    return '<div style="display:flex;flex-direction:column;gap:14px">'
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px 18px">'
+      +'<div style="font-size:13px;font-weight:800;color:#0f172a;margin-bottom:6px">'
+      +'<i class="fas fa-id-card" style="color:'+KG49+';margin-right:8px"></i>Entity 360 Explorer — Live Entity Profiles from the Knowledge Graph</div>'
+      +'<div style="font-size:12px;color:#475569;line-height:1.6">Each KG entity type surfaces a full 360° profile matching the Claimant 360, Carrier 360, and Provider 360 views. Click any node in the Knowledge Graph tab to open the corresponding profile drawer. The profiles below show the canonical structure for each entity type powered by real graph data.</div>'
+      +'</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">'
+      +claimantCard+carrierCard+providerCard
+      +'</div>'
+      +'<div style="background:linear-gradient(135deg,#7c3aed,#1e3a5f);border-radius:12px;padding:14px 18px;color:#fff;display:flex;align-items:center;gap:16px">'
+      +'<i class="fas fa-project-diagram" style="font-size:28px;opacity:.9"></i>'
+      +'<div><div style="font-weight:800;font-size:14px">3 Entity 360 Types · 18 KG Nodes · 11 Node Classes · Real-Time Cosmos DB Gremlin Traversal</div>'
+      +'<div style="font-size:12px;opacity:.88;margin-top:3px">Claimant 360 (10 tabs) · Carrier 360 (6 tabs) · Provider 360 (6 tabs) · All profiles linked to KG vertices · Click any KG node to open drawer · SWRL rules fire on traversal · Purview catalogued</div>'
+      +'</div></div></div>';
+  }
+
+  /* ── Override _p22buildPage ─────────────────────────────────*/
+  var _p49origBuild = window._p22buildPage || function(){};
+  window._p22buildPage = function() {
+    var tabs = ['ontology','graph','rules','build-guide','rel-paths','entity360'];
+    var tabLabels = {ontology:'OWL Ontology',graph:'Knowledge Graph',rules:'SWRL Rules','build-guide':'Build Guide','rel-paths':'Relationship Paths',entity360:'Entity 360 Explorer'};
+    var tabIcons = {ontology:'fas fa-sitemap',graph:'fas fa-project-diagram',rules:'fas fa-gavel','build-guide':'fas fa-tools','rel-paths':'fas fa-route',entity360:'fas fa-id-card'};
+
+    var _p22activeTab = window._p22activeTabStore || 'graph';
+    var tabBar = tabs.map(function(t){
+      var k = 'p49-tab-'+t;
+      window._p8actions[k] = function(){ window._p22activeTabStore=t; window._p22buildPage(); };
+      var active = t===_p22activeTab;
+      var isNew = t==='entity360';
+      return '<button onclick="_p8run(\''+k+'\')" style="padding:8px 16px;border:2px solid '+(active?KG49:isNew?'#d97706':'#e2e8f0')+';border-radius:8px;background:'+(active?KG49:isNew?'#fef9ec':'#fff')+';color:'+(active?'#fff':isNew?'#d97706':'#64748b')+';font-weight:700;font-size:12px;cursor:pointer">'
+        +'<i class="'+tabIcons[t]+'" style="margin-right:6px"></i>'+tabLabels[t]
+        +(isNew?'<span style="margin-left:6px;background:#d97706;color:#fff;border-radius:4px;padding:0 4px;font-size:9px">NEW</span>':'')
+        +'</button>';
+    }).join('');
+
+    var body;
+    if (_p22activeTab==='graph') body = _p49graphTab();
+    else if (_p22activeTab==='entity360') body = _p49entity360Tab();
+    else {
+      /* delegate other tabs back to original p22 helpers */
+      var tempTab = window._p22activeTab; window._p22activeTab = _p22activeTab;
+      if (_p22activeTab==='ontology') body = (typeof _p22ontologyTab==='function'?_p22ontologyTab():'');
+      else if (_p22activeTab==='rules') body = (typeof _p22rulesTab==='function'?_p22rulesTab():'');
+      else if (_p22activeTab==='build-guide') body = (typeof _p22buildGuideTab==='function'?_p22buildGuideTab():'');
+      else if (_p22activeTab==='rel-paths') body = (typeof _p22relPathsTab==='function'?_p22relPathsTab():'');
+      else body = '';
+      window._p22activeTab = tempTab;
+    }
+
+    document.getElementById('page-content').innerHTML =
+      '<div style="padding:20px 24px;background:#f8fafc;min-height:100vh;font-family:Inter,sans-serif">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">'
+      +'<div style="display:flex;align-items:center;gap:12px">'
+      +'<div style="width:40px;height:40px;background:linear-gradient(135deg,'+KG49+','+PURVIEW49+');border-radius:10px;display:flex;align-items:center;justify-content:center"><i class="fas fa-project-diagram" style="color:#fff;font-size:18px"></i></div>'
+      +'<div><div style="font-size:20px;font-weight:800;color:#0f172a">Ontology & Knowledge Graph</div>'
+      +'<div style="font-size:12px;color:#64748b;margin-top:2px">OWL 2 DL · Cosmos DB Gremlin API · Microsoft Purview · 18 nodes · 16 edges · 11 entity types · 4 SWRL rules</div></div></div>'
+      +'<div style="display:flex;gap:8px;flex-wrap:wrap">'
+      +'<span style="background:'+KG49+'22;color:'+KG49+';border:1px solid '+KG49+'44;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:600"><i class="fas fa-network-wired" style="margin-right:4px"></i>Cosmos DB Gremlin</span>'
+      +'<span style="background:#74277422;color:#742774;border:1px solid #74277444;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:600"><i class="fas fa-book" style="margin-right:4px"></i>Purview</span>'
+      +'<span style="background:#1e3a5f22;color:#1e3a5f;border:1px solid #1e3a5f44;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:600"><i class="fas fa-building" style="margin-right:4px"></i>Carrier 360</span>'
+      +'<span style="background:#05996922;color:#059669;border:1px solid #05996944;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:600"><i class="fas fa-hospital" style="margin-right:4px"></i>Provider 360</span>'
+      +'</div></div>'
+      +'<div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap">'
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px 18px;flex:1;min-width:90px"><div style="font-size:22px;font-weight:800;color:'+KG49+'">12</div><div style="font-size:11px;color:#64748b;margin-top:2px">OWL Classes</div></div>'
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px 18px;flex:1;min-width:90px"><div style="font-size:22px;font-weight:800;color:#0891b2">10</div><div style="font-size:11px;color:#64748b;margin-top:2px">Properties</div></div>'
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px 18px;flex:1;min-width:90px"><div style="font-size:22px;font-weight:800;color:#1e3a5f">18</div><div style="font-size:11px;color:#64748b;margin-top:2px">KG Nodes</div></div>'
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px 18px;flex:1;min-width:90px"><div style="font-size:22px;font-weight:800;color:#059669">16</div><div style="font-size:11px;color:#64748b;margin-top:2px">KG Edges</div></div>'
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px 18px;flex:1;min-width:90px"><div style="font-size:22px;font-weight:800;color:#d97706">4</div><div style="font-size:11px;color:#64748b;margin-top:2px">SWRL Rules</div></div>'
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px 18px;flex:1;min-width:90px"><div style="font-size:22px;font-weight:800;color:#be185d">3</div><div style="font-size:11px;color:#64748b;margin-top:2px">Entity 360 Types</div></div>'
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px 18px;flex:1;min-width:90px"><div style="font-size:18px;font-weight:800;color:#059669">< 12ms</div><div style="font-size:11px;color:#64748b;margin-top:2px">Traversal P50</div></div>'
+      +'</div>'
+      +'<div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap">'+tabBar+'</div>'
+      +body
+      +'<div style="margin-top:16px;background:linear-gradient(135deg,'+KG49+','+PURVIEW49+');border-radius:12px;padding:16px 20px;color:#fff;display:flex;align-items:center;gap:16px">'
+      +'<i class="fas fa-project-diagram" style="font-size:28px;opacity:.9"></i>'
+      +'<div><div style="font-weight:800;font-size:14px">Knowledge Graph — 18 Vertices · 16 Edges · 11 Entity Classes · 3 Entity 360 Profiles</div>'
+      +'<div style="font-size:12px;opacity:.88;margin-top:3px">Cosmos DB Gremlin API · sub-12ms P50 traversal · Microsoft Purview catalogued · Claimant 360 · Carrier 360 · Provider 360 · SWRL rules fire on traversal · Entity 360 Explorer tab added</div>'
+      +'</div></div>'
+      +'</div>';
+
+    /* default tab state */
+    if (!window._p22activeTabStore) window._p22activeTabStore = 'graph';
+  };
+
+  /* set initial active tab */
+  if (!window._p22activeTabStore) window._p22activeTabStore = 'graph';
+  window._p22activeTab = 'graph';
+
+  console.log('[P49] Knowledge Graph overhaul · 18 nodes · 16 edges · dark canvas · Entity 360 Explorer · Carrier+Provider enrichment');
+})();
+
+/* ============================================================
+   PHASE 50 — AZURE DATA LAKE ENHANCEMENT
+   5 new Bronze tables (15 total) · Carrier+Provider Data Hub
+   Enriched Gold C360 columns · Updated KPIs
+   ============================================================ */
+(function () {
+  'use strict';
+
+  var BRONZE50 = '#92400e'; var SILVER50 = '#475569'; var GOLD50 = '#d97706';
+
+  /* ── 5 new Bronze tables ────────────────────────────────────*/
+  var _p50newBronze = [
+    { name:'carrier_sla_raw',           src:'Carrier API / Prudential',  rows:'320,000', size:'3.8 GB', dq:84, domain:'Both', desc:'SLA metrics, claim counts, premium events per carrier contract. Prudential TPA feed.' },
+    { name:'carrier_financials_raw',    src:'FMS Financial / Carrier',   rows:'49,800',  size:'620 MB', dq:89, domain:'HAL',  desc:'Carrier financial ratings, reserve blocks, AUM data. A+/Aa3 rating feed.' },
+    { name:'provider_cms_raw',          src:'CMS Star API',              rows:'18,500',  size:'215 MB', dq:93, domain:'Both', desc:'CMS quality ratings, star scores, inspection records. Top 8% providers flagged.' },
+    { name:'provider_evv_extended_raw', src:'CellTrak EVV API',          rows:'214,800', size:'2.4 GB', dq:87, domain:'LTC',  desc:'Extended EVV with visit type, clinical outcome codes. GPS-backed compliance.' },
+    { name:'claimant_clinical_raw',     src:'SDOH / Clinical Portal',    rows:'14,820',  size:'890 MB', dq:82, domain:'LTC',  desc:'ADL scores, MMSE, care complexity, clinical notes. Claimant 360 source.' }
+  ];
+
+  /* ── Carrier Performance table rows ─────────────────────────*/
+  function _p50carrierRows() {
+    var carriers = [
+      { name:'Prudential Financial', policies:'320,000', sla:'97.2%', slaOk:true,  claims:'8,400', premium:'$48M/mo', rating:'A+ (S&P)', reserve:'$4.2B', mktShare:'18.4%', status:'Active', exp:'2029' },
+      { name:'MetLife',              policies:'187,400', sla:'95.8%', slaOk:true,  claims:'4,210', premium:'$28M/mo', rating:'A+ (S&P)', reserve:'$2.1B', mktShare:'10.6%', status:'Active', exp:'2027' },
+      { name:'Transamerica',         policies:'94,200',  sla:'94.1%', slaOk:false, claims:'2,180', premium:'$15M/mo', rating:'A  (S&P)', reserve:'$0.9B', mktShare:'6.2%',  status:'Watch',  exp:'2026' },
+      { name:'John Hancock',         policies:'62,100',  sla:'96.4%', slaOk:true,  claims:'1,420', premium:'$9.8M/mo',rating:'AA-(S&P)', reserve:'$0.6B', mktShare:'4.1%',  status:'Active', exp:'2028' }
+    ];
+    return carriers.map(function(c, i) {
+      var bg = i%2===0?'#fff':'#f8fafc';
+      return '<tr style="background:'+bg+';border-bottom:1px solid #f1f5f9">'
+        +'<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#1e3a5f">'+c.name+'</td>'
+        +'<td style="padding:9px 12px;font-size:11px;color:#374151;text-align:right">'+c.policies+'</td>'
+        +'<td style="padding:9px 12px;text-align:center"><span style="background:'+(c.slaOk?'#f0fdf4':'#fef2f2')+';color:'+(c.slaOk?'#059669':'#dc2626')+';border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700">'+c.sla+'</span></td>'
+        +'<td style="padding:9px 12px;font-size:11px;color:#374151;text-align:right">'+c.claims+'</td>'
+        +'<td style="padding:9px 12px;font-size:11px;color:#374151;text-align:right">'+c.premium+'</td>'
+        +'<td style="padding:9px 12px;font-size:11px;color:#059669;font-weight:700">'+c.rating+'</td>'
+        +'<td style="padding:9px 12px;font-size:11px;color:#374151">'+c.reserve+'</td>'
+        +'<td style="padding:9px 12px;font-size:11px;color:#374151">'+c.mktShare+'</td>'
+        +'<td style="padding:9px 12px"><span style="background:'+(c.status==='Active'?'#f0fdf4':c.status==='Watch'?'#fffbeb':'#fef2f2')+';color:'+(c.status==='Active'?'#059669':c.status==='Watch'?'#d97706':'#dc2626')+';border-radius:6px;padding:2px 7px;font-size:10px;font-weight:700">'+c.status+'</span></td>'
+        +'<td style="padding:9px 12px;font-size:11px;color:#64748b">'+c.exp+'</td>'
+        +'</tr>';
+    }).join('');
+  }
+
+  /* ── Provider Quality table rows ────────────────────────────*/
+  function _p50providerRows() {
+    var providers = [
+      { name:'Sunrise Manor SNF',  type:'SNF',        loc:'Dallas, TX',  cms:'4.5★', billing:'98.2%', fraud:'5/100', evv:'✓ GPS',  patients:18,  lastVisit:'Apr 15, 2026', nextVisit:'Oct 15, 2026', status:'Top Tier' },
+      { name:'Home Health Plus',   type:'Home Health', loc:'Boston, MA',  cms:'4.2★', billing:'96.5%', fraud:'8/100', evv:'✓ GPS',  patients:31,  lastVisit:'Mar 22, 2026', nextVisit:'Sep 22, 2026', status:'Active'   },
+      { name:'Maplewood ALF',      type:'ALF',        loc:'Phoenix, AZ', cms:'3.8★', billing:'94.1%', fraud:'14/100',evv:'✓ GPS',  patients:24,  lastVisit:'May 5, 2026',  nextVisit:'Nov 5, 2026',  status:'Active'   },
+      { name:'CareFirst Home',     type:'Home Health', loc:'Chicago, IL', cms:'4.0★', billing:'95.8%', fraud:'9/100', evv:'✓ GPS',  patients:19,  lastVisit:'Jun 1, 2026',  nextVisit:'Dec 1, 2026',  status:'Active'   },
+      { name:'Greenview Memory',   type:'Memory Care', loc:'Austin, TX',  cms:'3.5★', billing:'91.4%', fraud:'22/100',evv:'⚠ Manual',patients:12,  lastVisit:'Jan 20, 2026', nextVisit:'Jul 20, 2026', status:'Review'   }
+    ];
+    return providers.map(function(p, i) {
+      var bg = i%2===0?'#fff':'#f8fafc';
+      var statusCol = p.status==='Top Tier'?'#7c3aed':p.status==='Active'?'#059669':p.status==='Review'?'#dc2626':'#d97706';
+      return '<tr style="background:'+bg+';border-bottom:1px solid #f1f5f9">'
+        +'<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#059669">'+p.name+'</td>'
+        +'<td style="padding:9px 12px"><span style="background:#f0fdf4;color:#059669;border-radius:4px;padding:2px 6px;font-size:10px;font-weight:600">'+p.type+'</span></td>'
+        +'<td style="padding:9px 12px;font-size:11px;color:#475569">'+p.loc+'</td>'
+        +'<td style="padding:9px 12px;font-size:12px;color:#d97706;font-weight:700">'+p.cms+'</td>'
+        +'<td style="padding:9px 12px;font-size:11px;color:#059669;font-weight:700">'+p.billing+'</td>'
+        +'<td style="padding:9px 12px;font-size:11px;color:'+(parseInt(p.fraud)>15?'#dc2626':'#059669')+';font-weight:700">'+p.fraud+'</td>'
+        +'<td style="padding:9px 12px;font-size:11px;color:'+(p.evv.indexOf('Manual')>=0?'#d97706':'#059669')+'">'+p.evv+'</td>'
+        +'<td style="padding:9px 12px;font-size:11px;color:#374151;text-align:center">'+p.patients+'</td>'
+        +'<td style="padding:9px 12px;font-size:10px;color:#64748b">'+p.lastVisit+'</td>'
+        +'<td style="padding:9px 12px;font-size:10px;color:#64748b">'+p.nextVisit+'</td>'
+        +'<td style="padding:9px 12px"><span style="background:'+statusCol+'22;color:'+statusCol+';border-radius:6px;padding:2px 7px;font-size:10px;font-weight:700">'+p.status+'</span></td>'
+        +'</tr>';
+    }).join('');
+  }
+
+  /* ── Enhanced Gold C360 client rows ─────────────────────────*/
+  function _p50goldRows() {
+    var clients = [
+      { name:'Margaret Chen',      id:'UNI-001', lapse:'12%', lapseH:false, xsell:'94%', policies:'LTC+HAL', claims:3, care:28, premium:'$4,200/yr', compliance:'✓', adl:'3/5', setting:'Nursing Home', carrier:'Prudential', billing:'98.2%', gaps:'Medicare Supp' },
+      { name:'Robert Kincaid',     id:'UNI-002', lapse:'34%', lapseH:false, xsell:'72%', policies:'LTC',     claims:1, care:14, premium:'$2,800/yr', compliance:'✓', adl:'2/5', setting:'Home Health', carrier:'Prudential', billing:'96.5%', gaps:'Annuity'  },
+      { name:'Dorothy Harrington', id:'UNI-003', lapse:'8%',  lapseH:false, xsell:'61%', policies:'LTC',     claims:2, care:42, premium:'$3,100/yr', compliance:'✓', adl:'4/5', setting:'SNF',        carrier:'MetLife',    billing:'98.2%', gaps:'Life, Medicare'  },
+      { name:'Frank & Gloria B',   id:'UNI-004', lapse:'57%', lapseH:true,  xsell:'88%', policies:'HAL x2',  claims:1, care:0,  premium:'$9,600/yr', compliance:'⚠', adl:'1/5', setting:'Home',       carrier:'Prudential', billing:'N/A',   gaps:'Medicare Supp'  },
+      { name:'Sylvia Torres',      id:'UNI-005', lapse:'23%', lapseH:false, xsell:'79%', policies:'HAL',     claims:0, care:7,  premium:'$5,400/yr', compliance:'✓', adl:'2/5', setting:'ALF',        carrier:'Transamerica', billing:'94.1%', gaps:'Annuity, Life' }
+    ];
+    return clients.map(function(c, i) {
+      var bg = i%2===0?'#fff':'#f8fafc';
+      return '<tr style="background:'+bg+';border-bottom:1px solid #f1f5f9">'
+        +'<td style="padding:8px 10px;font-size:11px;font-weight:700;color:#0f172a">'+c.name+'</td>'
+        +'<td style="padding:8px 10px;font-size:10px;color:#64748b;font-family:monospace">'+c.id+'</td>'
+        +'<td style="padding:8px 10px"><span style="background:'+(c.lapseH?'#fef2f2':'#f0fdf4')+';color:'+(c.lapseH?'#dc2626':'#059669')+';border-radius:5px;padding:2px 6px;font-size:10px;font-weight:700">'+c.lapse+'</span></td>'
+        +'<td style="padding:8px 10px;font-size:11px;color:#7c3aed;font-weight:700">'+c.xsell+'</td>'
+        +'<td style="padding:8px 10px;font-size:10px;color:#475569">'+c.policies+'</td>'
+        +'<td style="padding:8px 10px;font-size:11px;color:#374151;text-align:center">'+c.claims+'</td>'
+        +'<td style="padding:8px 10px;font-size:11px;color:#374151;text-align:center">'+c.care+'d</td>'
+        +'<td style="padding:8px 10px;font-size:10px;color:#374151">'+c.premium+'</td>'
+        +'<td style="padding:8px 10px;font-size:11px;color:'+(c.compliance==='✓'?'#059669':'#d97706')+'">'+c.compliance+'</td>'
+        +'<td style="padding:8px 10px;font-size:11px;color:'+(parseInt(c.adl)>=3?'#dc2626':parseInt(c.adl)>=2?'#d97706':'#059669')+';font-weight:700">'+c.adl+'</td>'
+        +'<td style="padding:8px 10px"><span style="background:#f0f9ff;color:#0891b2;border-radius:4px;padding:2px 6px;font-size:9px;font-weight:600">'+c.setting+'</span></td>'
+        +'<td style="padding:8px 10px;font-size:10px;color:#1e3a5f;font-weight:600">'+c.carrier+'</td>'
+        +'<td style="padding:8px 10px;font-size:11px;color:'+(c.billing==='N/A'?'#94a3b8':parseFloat(c.billing)>=96?'#059669':'#d97706')+';font-weight:700">'+c.billing+'</td>'
+        +'<td style="padding:8px 10px;font-size:9px;color:#d97706">'+c.gaps+'</td>'
+        +'</tr>';
+    }).join('');
+  }
+
+  /* ── Override _p20buildPage ─────────────────────────────────*/
+  var _p50origNav = window.navigateTo;
+  window.navigateTo = function(page) {
+    if (page === 'hal-datalake') {
+      document.querySelectorAll('.nav-item').forEach(function(el){ el.classList.remove('active'); });
+      var navEl = document.querySelector('.hal-datalake-nav');
+      if (navEl) navEl.classList.add('active');
+      _p50buildPage();
+      return;
+    }
+    if (_p50origNav) _p50origNav(page);
+  };
+
+  function _p50dqBar(dq) {
+    var col = dq>=90?'#059669':dq>=80?'#d97706':'#dc2626';
+    return '<div style="display:flex;align-items:center;gap:6px">'
+      +'<div style="flex:1;background:#e2e8f0;border-radius:4px;height:7px">'
+      +'<div style="width:'+dq+'%;background:'+col+';border-radius:4px;height:7px"></div></div>'
+      +'<span style="font-size:10px;font-weight:700;color:'+col+';min-width:32px">'+dq+'%</span></div>';
+  }
+
+  function _p50buildPage() {
+    /* We reconstruct the original bronze rows + add 5 new ones */
+    var origBronze = [
+      { name:'ltc_claims_raw',           src:'LTCAS Policy Admin',   rows:'284,710', size:'4.2 GB', dq:72, domain:'LTC',  desc:'Raw claim events, all types, unvalidated.' },
+      { name:'ltc_provider_feed_raw',    src:'CellTrak EVV API',     rows:'182,430', size:'2.1 GB', dq:88, domain:'LTC',  desc:'Provider visit records, EVV telemetry.' },
+      { name:'ltc_eligibility_raw',      src:'LINK UW Queue',        rows:'94,200',  size:'890 MB', dq:81, domain:'LTC',  desc:'Eligibility determinations, raw ADL scores.' },
+      { name:'ltc_careplan_raw',         src:'CONNECT Portal',       rows:'61,800',  size:'760 MB', dq:75, domain:'LTC',  desc:'Care plans, service authorizations.' },
+      { name:'hal_policies_raw',         src:'HAL Policy Admin',     rows:'412,900', size:'5.8 GB', dq:78, domain:'HAL',  desc:'All HAL policy records: Health, Annuity, Life.' },
+      { name:'hal_premiums_raw',         src:'FMS Financial',        rows:'209,400', size:'2.9 GB', dq:83, domain:'HAL',  desc:'Premium payment events, billing cycles.' },
+      { name:'hal_claims_raw',           src:'HAL Claims Engine',    rows:'138,200', size:'1.7 GB', dq:77, domain:'HAL',  desc:'HAL claims: health, life, annuity payouts.' },
+      { name:'hal_clients_raw',          src:'CRM / Salesforce',     rows:'52,100',  size:'640 MB', dq:88, domain:'HAL',  desc:'Client demographics, contact, KYC raw.' },
+      { name:'shared_providers_raw',     src:'Provider Directory',   rows:'18,900',  size:'220 MB', dq:91, domain:'Both', desc:'Shared care & insurance providers.' },
+      { name:'shared_agents_raw',        src:'Agent Registry',       rows:'4,200',   size:'48 MB',  dq:95, domain:'Both', desc:'Agent profiles, licensing, commissions.' }
+    ];
+    var allBronze = origBronze.concat(_p50newBronze);
+
+    var bronzeRows = allBronze.map(function(t, i) {
+      var isNew = i >= origBronze.length;
+      var bg = isNew ? '#eff6ff' : (i%2===0?'#fff':'#f8fafc');
+      var domCol = t.domain==='LTC'?'#dc2626':t.domain==='HAL'?'#0891b2':'#7c3aed';
+      return '<tr style="background:'+bg+';border-bottom:1px solid #f1f5f9">'
+        +'<td style="padding:8px 12px;font-size:11px;font-weight:700;color:'+BRONZE50+';font-family:monospace">'+t.name
+        +(isNew?'<span style="margin-left:6px;background:#1e3a5f;color:#fff;border-radius:4px;padding:0 4px;font-size:9px">NEW</span>':'')+'</td>'
+        +'<td style="padding:8px 12px;font-size:10px;color:#475569">'+t.src+'</td>'
+        +'<td style="padding:8px 12px;font-size:11px;color:#374151;text-align:right">'+t.rows+'</td>'
+        +'<td style="padding:8px 12px;font-size:11px;color:#374151">'+t.size+'</td>'
+        +'<td style="padding:8px 12px;min-width:120px">'+_p50dqBar(t.dq)+'</td>'
+        +'<td style="padding:8px 12px"><span style="background:'+domCol+'22;color:'+domCol+';border-radius:4px;padding:2px 6px;font-size:10px;font-weight:600">'+t.domain+'</span></td>'
+        +'<td style="padding:8px 12px;font-size:10px;color:#64748b;max-width:220px">'+t.desc+'</td>'
+        +'</tr>';
+    }).join('');
+
+    var html = '<div style="padding:20px 24px;background:#f8fafc;min-height:100vh;font-family:Inter,sans-serif">'
+
+      /* Header */
+      +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">'
+      +'<div style="display:flex;align-items:center;gap:12px">'
+      +'<div style="width:40px;height:40px;background:linear-gradient(135deg,#0078d4,#742774);border-radius:10px;display:flex;align-items:center;justify-content:center"><i class="fas fa-database" style="color:#fff;font-size:18px"></i></div>'
+      +'<div><div style="font-size:20px;font-weight:800;color:#0f172a">Azure Data Lake — Medallion Architecture</div>'
+      +'<div style="font-size:12px;color:#64748b;margin-top:2px">Microsoft Fabric · Databricks Delta Lake · Unity Catalog · LTC + HAL + Carrier + Provider unified</div>'
+      +'</div></div>'
+      +'<div style="display:flex;gap:8px;flex-wrap:wrap">'
+      +'<span style="background:#74277422;color:#742774;border:1px solid #74277444;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:600"><i class="fas fa-cube" style="margin-right:4px"></i>Microsoft Fabric</span>'
+      +'<span style="background:#e25a1c22;color:#e25a1c;border:1px solid #e25a1c44;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:600"><i class="fas fa-fire" style="margin-right:4px"></i>Databricks</span>'
+      +'<span style="background:#0078d422;color:#0078d4;border:1px solid #0078d444;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:600"><i class="fas fa-layer-group" style="margin-right:4px"></i>Delta Lake</span>'
+      +'<span style="background:#05996922;color:#059669;border:1px solid #05996944;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:600"><i class="fas fa-book" style="margin-right:4px"></i>Unity Catalog</span>'
+      +'</div></div>'
+
+      /* KPI bar — updated */
+      +'<div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap">'
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px 18px;flex:1;min-width:90px"><div style="font-size:22px;font-weight:800;color:#0078d4">1.52 TB</div><div style="font-size:11px;color:#64748b;margin-top:2px">Total Data Volume</div></div>'
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px 18px;flex:1;min-width:90px"><div style="font-size:22px;font-weight:800;color:#742774">31</div><div style="font-size:11px;color:#64748b;margin-top:2px">Delta Tables</div></div>'
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px 18px;flex:1;min-width:90px"><div style="font-size:22px;font-weight:800;color:#059669">99.4%</div><div style="font-size:11px;color:#64748b;margin-top:2px">Gold DQ Score</div></div>'
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px 18px;flex:1;min-width:90px"><div style="font-size:22px;font-weight:800;color:#7c3aed">14,820</div><div style="font-size:11px;color:#64748b;margin-top:2px">Unified Clients</div></div>'
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px 18px;flex:1;min-width:90px"><div style="font-size:22px;font-weight:800;color:#d97706">8</div><div style="font-size:11px;color:#64748b;margin-top:2px">Active Pipelines</div></div>'
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px 18px;flex:1;min-width:90px"><div style="font-size:22px;font-weight:800;color:#0891b2">4</div><div style="font-size:11px;color:#64748b;margin-top:2px">Carrier Feeds</div></div>'
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px 18px;flex:1;min-width:90px"><div style="font-size:22px;font-weight:800;color:#1e3a5f">52,100</div><div style="font-size:11px;color:#64748b;margin-top:2px">Policies Tracked</div></div>'
+      +'</div>'
+
+      /* Architecture flow */
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px 20px;margin-bottom:18px">'
+      +'<div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">Azure Fabric Architecture Flow — with Carrier & Provider Feeds</div>'
+      +'<div style="display:flex;align-items:center;gap:0;overflow-x:auto;padding:4px 0">'
+      +['Source Systems','Carrier APIs','Provider CMS','ADLS Gen2','ADF Pipelines','Databricks ETL','Bronze Δ (15)','Silver Δ','Gold Δ','Unity Catalog','Semantic Layer','Agents'].map(function(s,i){
+        var colors=['#475569','#1e3a5f','#059669','#0078d4','#0078d4','#e25a1c','#92400e','#475569','#d97706','#059669','#0891b2','#7c3aed'];
+        return '<div style="text-align:center;min-width:88px">'
+          +'<div style="background:'+colors[i]+';color:#fff;border-radius:8px;padding:6px 8px;font-size:9px;font-weight:700;white-space:nowrap">'+s+'</div>'
+          +(i<11?'<span style="color:#cbd5e1;font-size:14px;padding:0 1px">→</span>':'')
+          +'</div>';
+      }).join('')+'</div></div>'
+
+      /* Bronze layer tables — 15 total */
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;margin-bottom:18px">'
+      +'<div style="padding:12px 16px;border-bottom:1px solid #f1f5f9;font-size:13px;font-weight:700;color:#0f172a;display:flex;align-items:center;gap:8px">'
+      +'<i class="fas fa-inbox" style="color:'+BRONZE50+'"></i>Bronze Layer — 15 Tables (5 new: Carrier + Provider + Clinical)'
+      +'<span style="margin-left:auto;background:'+BRONZE50+';color:#fff;border-radius:6px;padding:2px 8px;font-size:10px">Raw Ingest · No Transform</span></div>'
+      +'<div style="background:'+BRONZE50+'12;border-left:4px solid '+BRONZE50+';padding:8px 14px;font-size:11px;color:#374151;margin:0">'
+      +'<i class="fas fa-info-circle" style="color:'+BRONZE50+';margin-right:6px"></i>Raw ingest from all source systems — LTCAS, CellTrak EVV, HAL Policy Admin, CRM, <b>Prudential Carrier API</b>, <b>CMS Star API</b>, <b>SDOH Clinical Portal</b>. Data stored as-is in ADLS Gen2 Delta format. No transformations applied. 5 new tables highlighted in blue.</div>'
+      +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">'
+      +'<thead><tr style="background:'+BRONZE50+';color:#fff">'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;white-space:nowrap">Table Name</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px">Source</th>'
+      +'<th style="padding:10px 12px;text-align:right;font-size:11px">Rows</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px">Size</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;min-width:130px">DQ Score</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px">Domain</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px">Description</th>'
+      +'</tr></thead><tbody>'+bronzeRows+'</tbody></table></div></div>'
+
+      /* Gold C360 — enriched */
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;margin-bottom:18px">'
+      +'<div style="padding:12px 16px;border-bottom:1px solid #f1f5f9;font-size:13px;font-weight:700;color:#0f172a;display:flex;align-items:center;gap:8px">'
+      +'<i class="fas fa-star" style="color:'+GOLD50+'"></i>Gold Layer — C360 Client Records (Enriched with ADL · Care Setting · Carrier · Billing · Coverage Gaps)'
+      +'<span style="margin-left:auto;background:'+GOLD50+';color:#fff;border-radius:6px;padding:2px 8px;font-size:10px">ML Scored · 360° Enriched</span></div>'
+      +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">'
+      +'<thead><tr style="background:#f8fafc">'
+      +'<th style="padding:8px 10px;text-align:left;font-size:10px;color:#64748b">Client</th>'
+      +'<th style="padding:8px 10px;font-size:10px;color:#64748b">ID</th>'
+      +'<th style="padding:8px 10px;font-size:10px;color:#64748b">Lapse Risk</th>'
+      +'<th style="padding:8px 10px;font-size:10px;color:#64748b">Cross-Sell</th>'
+      +'<th style="padding:8px 10px;font-size:10px;color:#64748b">Policies</th>'
+      +'<th style="padding:8px 10px;font-size:10px;color:#64748b">Claims</th>'
+      +'<th style="padding:8px 10px;font-size:10px;color:#64748b">Care Eps.</th>'
+      +'<th style="padding:8px 10px;font-size:10px;color:#64748b">Premium</th>'
+      +'<th style="padding:8px 10px;font-size:10px;color:#64748b">Compliance</th>'
+      +'<th style="padding:8px 10px;font-size:10px;color:#dc2626">ADL ★</th>'
+      +'<th style="padding:8px 10px;font-size:10px;color:#0891b2">Care Setting</th>'
+      +'<th style="padding:8px 10px;font-size:10px;color:#1e3a5f">Carrier</th>'
+      +'<th style="padding:8px 10px;font-size:10px;color:#059669">Billing Acc.</th>'
+      +'<th style="padding:8px 10px;font-size:10px;color:#d97706">Coverage Gaps</th>'
+      +'</tr></thead><tbody>'+_p50goldRows()+'</tbody></table></div></div>'
+
+      /* Carrier + Provider Data Hub — NEW section */
+      +'<div style="display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:18px">'
+
+      /* Carrier Performance Monitor */
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden">'
+      +'<div style="padding:14px 16px;border-bottom:1px solid #f1f5f9;font-size:13px;font-weight:700;color:#0f172a;display:flex;align-items:center;gap:8px">'
+      +'<i class="fas fa-building" style="color:#1e3a5f"></i>Carrier Performance Monitor'
+      +'<span style="margin-left:auto;font-size:10px;background:#1e3a5f;color:#fff;padding:2px 7px;border-radius:8px">4 Carriers · TPA Managed</span>'
+      +'<span style="font-size:10px;background:#059669;color:#fff;padding:2px 7px;border-radius:8px;margin-left:6px">NEW</span></div>'
+      +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">'
+      +'<thead><tr style="background:#1e3a5f;color:#fff">'
+      +'<th style="padding:9px 12px;text-align:left;font-size:11px">Carrier</th>'
+      +'<th style="padding:9px 12px;text-align:right;font-size:11px">Policies</th>'
+      +'<th style="padding:9px 12px;text-align:center;font-size:11px">SLA Score</th>'
+      +'<th style="padding:9px 12px;text-align:right;font-size:11px">Active Claims</th>'
+      +'<th style="padding:9px 12px;text-align:right;font-size:11px">Monthly Premium</th>'
+      +'<th style="padding:9px 12px;text-align:left;font-size:11px">Rating</th>'
+      +'<th style="padding:9px 12px;text-align:left;font-size:11px">LTC Reserve</th>'
+      +'<th style="padding:9px 12px;text-align:left;font-size:11px">Market Share</th>'
+      +'<th style="padding:9px 12px;text-align:center;font-size:11px">Status</th>'
+      +'<th style="padding:9px 12px;text-align:left;font-size:11px">Contract Exp.</th>'
+      +'</tr></thead><tbody>'+_p50carrierRows()+'</tbody></table></div></div>'
+
+      /* Provider Quality Scorecard */
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden">'
+      +'<div style="padding:14px 16px;border-bottom:1px solid #f1f5f9;font-size:13px;font-weight:700;color:#0f172a;display:flex;align-items:center;gap:8px">'
+      +'<i class="fas fa-hospital" style="color:#059669"></i>Provider Quality Scorecard'
+      +'<span style="margin-left:auto;font-size:10px;background:#059669;color:#fff;padding:2px 7px;border-radius:8px">5 Providers · CMS Rated</span>'
+      +'<span style="font-size:10px;background:#059669;color:#fff;padding:2px 7px;border-radius:8px;margin-left:6px">NEW</span></div>'
+      +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">'
+      +'<thead><tr style="background:#059669;color:#fff">'
+      +'<th style="padding:9px 12px;text-align:left;font-size:11px">Provider</th>'
+      +'<th style="padding:9px 12px;text-align:left;font-size:11px">Type</th>'
+      +'<th style="padding:9px 12px;text-align:left;font-size:11px">Location</th>'
+      +'<th style="padding:9px 12px;text-align:center;font-size:11px">CMS Rating</th>'
+      +'<th style="padding:9px 12px;text-align:center;font-size:11px">Billing Acc.</th>'
+      +'<th style="padding:9px 12px;text-align:center;font-size:11px">Fraud Risk</th>'
+      +'<th style="padding:9px 12px;text-align:center;font-size:11px">EVV</th>'
+      +'<th style="padding:9px 12px;text-align:center;font-size:11px">Patients</th>'
+      +'<th style="padding:9px 12px;text-align:left;font-size:11px">Last Visit</th>'
+      +'<th style="padding:9px 12px;text-align:left;font-size:11px">Next Visit</th>'
+      +'<th style="padding:9px 12px;text-align:center;font-size:11px">Status</th>'
+      +'</tr></thead><tbody>'+_p50providerRows()+'</tbody></table></div></div>'
+
+      +'</div>'
+
+      /* Unity Catalog footer */
+      +'<div style="background:linear-gradient(135deg,#059669,#0891b2);border-radius:12px;padding:16px 20px;color:#fff;display:flex;align-items:center;gap:16px">'
+      +'<i class="fas fa-book" style="font-size:28px;opacity:.9"></i>'
+      +'<div><div style="font-weight:800;font-size:14px">Unity Catalog — Single Governance Pane</div>'
+      +'<div style="font-size:12px;opacity:.88;margin-top:3px">31 Delta tables registered · Column-level lineage tracked · Row-level security · 3 data stewards (LTC · HAL · Shared) · GDPR masking on PII · 4 carrier feeds integrated · 5 provider quality feeds · Audit log: 100% pipeline events captured</div>'
+      +'</div></div>'
+
+      +'</div>';
+
+    document.getElementById('page-content').innerHTML = html;
+  }
+
+  console.log('[P50] Data Lake enhanced · 15 Bronze tables · Carrier Performance Monitor · Provider Quality Scorecard · enriched Gold C360 · 1.52TB');
+})();
+
+/* ============================================================
+   PHASE 51 — SEMANTIC LAYER ENHANCEMENT
+   2 new entities (14 total) · Enriched Claimant/Provider attrs
+   Entity Profiles sub-tab · Enriched C360 golden records
+   ============================================================ */
+(function () {
+  'use strict';
+  var TEAL51 = '#0891b2'; var UNITY51 = '#059669';
+
+  /* ── 2 new canonical entities ───────────────────────────────*/
+  var _p51newEntities = [
+    { entity:'InsuranceCarrier', domain:'HAL',  domCol:'#0891b2', gold:'hal_carriers',       attrs:8, steward:'HAL Data Office', dq:'97%', rels:'Policy, Claim, Agent, UnifiedClient' },
+    { entity:'ClinicalAssessment', domain:'LTC', domCol:'#dc2626', gold:'ltc_clinical_scores', attrs:7, steward:'LTC Data Office', dq:'95%', rels:'Claimant, CareEpisode, EligibilityPeriod' }
+  ];
+
+  /* ── Override _p21buildPage with enhanced version ───────────*/
+  var _p51origNav = window.navigateTo;
+  window.navigateTo = function(page) {
+    if (page==='hal-semantic') {
+      document.querySelectorAll('.nav-item').forEach(function(el){ el.classList.remove('active'); });
+      var n = document.querySelector('.hal-semantic-nav'); if (n) n.classList.add('active');
+      _p51buildPage(); return;
+    }
+    if (_p51origNav) _p51origNav(page);
+  };
+
+  function _p51kpi(v,l,c){ return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px 18px;flex:1;min-width:90px"><div style="font-size:22px;font-weight:800;color:'+c+'">'+v+'</div><div style="font-size:11px;color:#64748b;margin-top:2px">'+l+'</div></div>'; }
+
+  function _p51entitiesTab() {
+    var origEntities = [
+      { entity:'Claimant',         domain:'LTC',  domCol:'#dc2626', gold:'ltc_claims_cleansed',     attrs:10, steward:'LTC Data Office', dq:'96%', rels:'Policy, CareEpisode, Provider, EligibilityPeriod, InsuranceCarrier, ClinicalAssessment' },
+      { entity:'CareEpisode',      domain:'LTC',  domCol:'#dc2626', gold:'ltc_care_episodes',        attrs:8,  steward:'LTC Data Office', dq:'94%', rels:'Claimant, Provider, Benefit' },
+      { entity:'EligibilityPeriod',domain:'LTC',  domCol:'#dc2626', gold:'ltc_eligibility',          attrs:7,  steward:'LTC Data Office', dq:'97%', rels:'Claimant, Policy' },
+      { entity:'LTCProvider',      domain:'LTC',  domCol:'#dc2626', gold:'shared_network',           attrs:11, steward:'Shared',          dq:'98%', rels:'CareEpisode, Claimant, InsuranceCarrier' },
+      { entity:'PolicyHolder',     domain:'HAL',  domCol:'#0891b2', gold:'hal_client360',            attrs:11, steward:'HAL Data Office', dq:'97%', rels:'Policy, Claim, Agent' },
+      { entity:'Policy',           domain:'Both', domCol:'#7c3aed', gold:'hal_policies',             attrs:8,  steward:'HAL Data Office', dq:'95%', rels:'PolicyHolder, Claim, Premium, ContractTerm, InsuranceCarrier' },
+      { entity:'Claim',            domain:'Both', domCol:'#7c3aed', gold:'hal_claims_raw+cleansed',  attrs:8,  steward:'HAL Data Office', dq:'93%', rels:'Policy, PolicyHolder, Agent, InsuranceCarrier' },
+      { entity:'Premium',          domain:'HAL',  domCol:'#0891b2', gold:'hal_premiums',             attrs:8,  steward:'HAL Data Office', dq:'96%', rels:'Policy, PolicyHolder' },
+      { entity:'ContractTerm',     domain:'HAL',  domCol:'#0891b2', gold:'hal_policies',             attrs:7,  steward:'HAL Data Office', dq:'95%', rels:'Policy' },
+      { entity:'Agent',            domain:'Both', domCol:'#7c3aed', gold:'shared_agents_raw',        attrs:8,  steward:'Shared',          dq:'98%', rels:'PolicyHolder, Policy' },
+      { entity:'UnifiedClient',    domain:'Both', domCol:'#7c3aed', gold:'unified_client_360_gold',  attrs:14, steward:'Shared',          dq:'99%', rels:'Policy, CareEpisode, Provider, InsuranceCarrier, ClinicalAssessment, Agent' }
+    ];
+    var allEntities = origEntities.concat(_p51newEntities);
+
+    var rows = allEntities.map(function(e, i) {
+      var isNew = i >= origEntities.length;
+      var bg = isNew?'#eff6ff':(i%2===0?'#fff':'#f8fafc');
+      return '<tr style="background:'+bg+';border-bottom:1px solid #f1f5f9">'
+        +'<td style="padding:9px 12px;font-size:12px;font-weight:800;color:#0f172a">'+e.entity
+        +(isNew?'<span style="margin-left:6px;background:#1e3a5f;color:#fff;border-radius:4px;padding:0 4px;font-size:9px">NEW</span>':'')+'</td>'
+        +'<td style="padding:9px 12px"><span style="background:'+e.domCol+'22;color:'+e.domCol+';border-radius:4px;padding:2px 6px;font-size:10px;font-weight:600">'+e.domain+'</span></td>'
+        +'<td style="padding:9px 12px;font-size:11px;color:#64748b;font-family:monospace">'+e.gold+'</td>'
+        +'<td style="padding:9px 12px;font-size:11px;color:#374151;text-align:center;font-weight:700">'+e.attrs+'</td>'
+        +'<td style="padding:9px 12px;font-size:11px;color:#475569">'+e.steward+'</td>'
+        +'<td style="padding:9px 12px"><span style="background:#f0fdf4;color:#059669;border-radius:4px;padding:2px 6px;font-size:10px;font-weight:700">'+e.dq+'</span></td>'
+        +'<td style="padding:9px 12px;font-size:10px;color:#64748b;max-width:260px">'+e.rels+'</td>'
+        +'</tr>';
+    }).join('');
+
+    return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden">'
+      +'<div style="padding:12px 16px;border-bottom:1px solid #f1f5f9;font-size:13px;font-weight:700;color:#0f172a;display:flex;align-items:center;gap:8px">'
+      +'<i class="fas fa-cubes" style="color:'+TEAL51+'"></i>Canonical Entity Model — 14 Unified Entities (2 new: InsuranceCarrier + ClinicalAssessment)'
+      +'<span style="margin-left:auto;background:#059669;color:#fff;border-radius:6px;padding:2px 8px;font-size:10px">Unity Catalog Governed</span></div>'
+      +'<table style="width:100%;border-collapse:collapse">'
+      +'<thead><tr style="background:'+TEAL51+';color:#fff">'
+      +'<th style="padding:9px 12px;text-align:left;font-size:10px">Entity</th>'
+      +'<th style="padding:9px 12px;font-size:10px">Domain</th>'
+      +'<th style="padding:9px 12px;text-align:left;font-size:10px">Gold Table</th>'
+      +'<th style="padding:9px 12px;font-size:10px">Attrs</th>'
+      +'<th style="padding:9px 12px;text-align:left;font-size:10px">Steward</th>'
+      +'<th style="padding:9px 12px;font-size:10px">DQ</th>'
+      +'<th style="padding:9px 12px;text-align:left;font-size:10px">Relations</th>'
+      +'</tr></thead><tbody>'+rows+'</tbody></table></div>';
+  }
+
+  /* ── Enriched C360 Tab ──────────────────────────────────────*/
+  function _p51c360Tab() {
+    var clients = [
+      { name:'Margaret Chen',      initials:'MC', gradFrom:'#dc2626', gradTo:'#7c3aed',
+        policy:'LTC-2026-0101 · Nursing Home · Prudential · LTC Standalone', status:'Active',
+        carrier:'Prudential', product:'LTC Standalone', benefit:'$180/day', provider:'Sunrise Manor SNF',
+        nextPmt:'Jul 15, 2026', daysOpen:14, adl:3, mmse:14, care:82, billing:98.2, fraud:12,
+        policies:{ltc:1,health:1,annuity:1,life:1}, totalBenefit:'$2,520', annualCost:'$65,700',
+        careManager:'Sarah Johnson, RN',
+        gaps:['No Medicare Supplement','No Annuity (income gap)','No Life for estate planning'],
+        nextAction:'Care Plan Review — Jul 15, 2026',
+        sources:['LTCAS','eLTCAS','Claims','Provider EVV','Carrier Portal','Rx','CMS','SDOH','What Care Costs'] },
+      { name:'Robert Kincaid',     initials:'RK', gradFrom:'#0891b2', gradTo:'#7c3aed',
+        policy:'LTC-2024-0488 · Home Health · Prudential · LTC Standalone', status:'Active',
+        carrier:'Prudential', product:'LTC Standalone', benefit:'$150/day', provider:'Home Health Plus',
+        nextPmt:'Jul 22, 2026', daysOpen:31, adl:2, mmse:20, care:65, billing:96.5, fraud:7,
+        policies:{ltc:1,health:1,annuity:0,life:0}, totalBenefit:'$4,650', annualCost:'$54,750',
+        careManager:'Tom Ellis, RN',
+        gaps:['No Annuity (income gap)','No Life for estate planning'],
+        nextAction:'ADL Reassessment — Aug 1, 2026',
+        sources:['LTCAS','Claims','Provider EVV','Carrier Portal','CMS','SDOH'] },
+      { name:'Dorothy Harrington', initials:'DH', gradFrom:'#059669', gradTo:'#0891b2',
+        policy:'LTC-2023-0192 · SNF · MetLife · LTC Standalone', status:'Active',
+        carrier:'MetLife', product:'LTC Standalone', benefit:'$200/day', provider:'Sunrise Manor SNF',
+        nextPmt:'Jul 18, 2026', daysOpen:42, adl:4, mmse:12, care:91, billing:98.2, fraud:5,
+        policies:{ltc:1,health:0,annuity:0,life:0}, totalBenefit:'$8,400', annualCost:'$73,000',
+        careManager:'Linda Park, RN',
+        gaps:['No Life for estate planning','No Medicare Supplement','No HAL Health policy'],
+        nextAction:'Provider Site Visit — Jul 20, 2026',
+        sources:['LTCAS','Claims','Provider EVV','CMS','SDOH','What Care Costs'] },
+      { name:'Sylvia Torres',      initials:'ST', gradFrom:'#d97706', gradTo:'#7c3aed',
+        policy:'HAL-2022-0831 · ALF · Transamerica · LTC+HAL', status:'Active',
+        carrier:'Transamerica', product:'LTC + HAL Bundle', benefit:'$130/day', provider:'Maplewood ALF',
+        nextPmt:'Jul 25, 2026', daysOpen:7, adl:2, mmse:22, care:58, billing:94.1, fraud:14,
+        policies:{ltc:1,health:0,annuity:0,life:0}, totalBenefit:'$910', annualCost:'$47,450',
+        careManager:'Mike Chen, RN',
+        gaps:['No Annuity (income gap)','No Life for estate planning'],
+        nextAction:'Benefit Review — Aug 5, 2026',
+        sources:['LTCAS','Claims','Provider EVV','Carrier Portal','SDOH'] },
+      { name:'Frank & Gloria B',   initials:'FG', gradFrom:'#ef4444', gradTo:'#d97706',
+        policy:'HAL-2021-0044 · Home · Prudential · HAL Life+Annuity', status:'Active ⚠',
+        carrier:'Prudential', product:'HAL Life + Annuity', benefit:'N/A (HAL only)', provider:'N/A',
+        nextPmt:'Aug 1, 2026', daysOpen:0, adl:1, mmse:25, care:22, billing:0, fraud:3,
+        policies:{ltc:0,health:0,annuity:1,life:1}, totalBenefit:'$0', annualCost:'$0',
+        careManager:'Sarah Johnson, RN',
+        gaps:['No LTC policy — high lapse risk 57%','No Medicare Supplement'],
+        nextAction:'URGENT: Compliance Review — Lapse Risk 57%',
+        sources:['HAL Policy Admin','CRM','Carrier Portal','FMS Financial'] }
+    ];
+
+    var cards = clients.map(function(c) {
+      var adlCol = c.adl>=3?'#dc2626':c.adl>=2?'#d97706':'#059669';
+      var gapsHtml = c.gaps.map(function(g){ return '<span style="background:#fef3c7;color:#92400e;border-radius:4px;padding:2px 6px;font-size:9px;font-weight:600;display:inline-block;margin:2px">⚠ '+g+'</span>'; }).join('');
+      var policyCounts = '<span style="background:#f5f3ff;color:#7c3aed;border-radius:4px;padding:1px 5px;font-size:9px;font-weight:700">'+(c.policies.ltc||0)+' LTC</span> '
+        +'<span style="background:#f0f9ff;color:#0891b2;border-radius:4px;padding:1px 5px;font-size:9px;font-weight:700">'+(c.policies.health||0)+' Health</span> '
+        +'<span style="background:#fffbeb;color:#d97706;border-radius:4px;padding:1px 5px;font-size:9px;font-weight:700">'+(c.policies.annuity||0)+' Annuity</span> '
+        +'<span style="background:#fef2f2;color:#dc2626;border-radius:4px;padding:1px 5px;font-size:9px;font-weight:700">'+(c.policies.life||0)+' Life</span>';
+      var srcHtml = c.sources.map(function(s){ return '<span style="background:#f1f5f9;color:#475569;border-radius:4px;padding:1px 5px;font-size:8px">'+s+'</span>'; }).join(' ');
+      return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden">'
+        +'<div style="background:linear-gradient(135deg,'+c.gradFrom+','+c.gradTo+');padding:12px 16px;display:flex;align-items:center;gap:10px">'
+        +'<div style="width:40px;height:40px;background:rgba(255,255,255,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0">'+c.initials+'</div>'
+        +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+c.name+'</div>'
+        +'<div style="font-size:9px;color:rgba(255,255,255,.75);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+c.policy+'</div>'
+        +'<span style="background:'+(c.status.indexOf('⚠')>=0?'#d97706':'#059669')+';border-radius:4px;padding:1px 6px;font-size:9px;color:#fff;font-weight:700">'+c.status+'</span>'
+        +'</div></div>'
+        +'<div style="padding:12px 14px">'
+        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px">'
+        +'<div style="background:#f8fafc;border-radius:6px;padding:7px 8px">'
+        +'<div style="font-size:9px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:4px">Clinical Scores</div>'
+        +'<div style="font-size:10px;color:#374151">ADL: <b style="color:'+adlCol+'">'+c.adl+'/5</b></div>'
+        +'<div style="font-size:10px;color:#374151">MMSE: <b>'+c.mmse+'/30</b></div>'
+        +'<div style="font-size:10px;color:#374151">Complexity: <b style="color:'+(c.care>=80?'#dc2626':c.care>=50?'#d97706':'#059669')+'">'+c.care+'%</b></div>'
+        +'</div>'
+        +'<div style="background:#f8fafc;border-radius:6px;padding:7px 8px">'
+        +'<div style="font-size:9px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:4px">360 Summary</div>'
+        +'<div style="font-size:9px;margin-bottom:3px">'+policyCounts+'</div>'
+        +'<div style="font-size:10px;color:#374151">Benefit Used: <b>'+c.totalBenefit+'</b></div>'
+        +'<div style="font-size:10px;color:#374151">Annual Cost: <b>'+c.annualCost+'</b></div>'
+        +'</div></div>'
+        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px">'
+        +'<div style="background:#f8fafc;border-radius:6px;padding:7px 8px">'
+        +'<div style="font-size:9px;font-weight:700;color:#64748b;margin-bottom:3px">Carrier: <span style="color:#1e3a5f">'+c.carrier+'</span></div>'
+        +'<div style="font-size:9px;color:#374151">Billing: <b style="color:'+(c.billing>=96?'#059669':'#d97706')+'">'+c.billing+'%</b></div>'
+        +'<div style="font-size:9px;color:#374151">Fraud: <b style="color:'+(c.fraud<15?'#059669':'#dc2626')+'">'+c.fraud+'/100</b></div>'
+        +'<div style="font-size:9px;color:#374151">Provider: <b>'+c.provider+'</b></div>'
+        +'</div>'
+        +'<div style="background:#fef9ec;border-radius:6px;padding:7px 8px">'
+        +'<div style="font-size:9px;font-weight:700;color:#d97706;margin-bottom:3px">Coverage Gaps</div>'
+        +gapsHtml
+        +'</div></div>'
+        +'<div style="background:#f0f9ff;border-radius:6px;padding:7px 8px;margin-bottom:8px">'
+        +'<div style="font-size:9px;font-weight:700;color:#0891b2;margin-bottom:2px">Next Action</div>'
+        +'<div style="font-size:10px;color:#0f172a;font-weight:600">'+c.nextAction+'</div>'
+        +'<div style="font-size:9px;color:#64748b;margin-top:1px">Care Mgr: '+c.careManager+' · '+c.daysOpen+' days open</div>'
+        +'</div>'
+        +'<div style="margin-bottom:8px"><div style="font-size:9px;font-weight:700;color:#64748b;margin-bottom:3px">Data Sources</div>'+srcHtml+'</div>'
+        +'<div style="display:flex;gap:4px;flex-wrap:wrap">'
+        +'<button style="flex:1;background:#059669;color:#fff;border:none;border-radius:5px;padding:5px 8px;font-size:9px;font-weight:700;cursor:pointer">$ Payment</button>'
+        +'<button style="flex:1;background:#0891b2;color:#fff;border:none;border-radius:5px;padding:5px 8px;font-size:9px;font-weight:700;cursor:pointer">Assessment</button>'
+        +'<button style="flex:1;background:#7c3aed;color:#fff;border:none;border-radius:5px;padding:5px 8px;font-size:9px;font-weight:700;cursor:pointer">AI Analysis</button>'
+        +'</div></div></div>';
+    }).join('');
+
+    return '<div style="display:flex;flex-direction:column;gap:14px">'
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px 18px">'
+      +'<div style="font-size:13px;font-weight:800;color:#0f172a;margin-bottom:6px"><i class="fas fa-users" style="color:'+TEAL51+';margin-right:8px"></i>C360 Golden Records — 5 Unified Client Profiles (Enriched with Clinical · Carrier · Coverage Gaps · Actions)</div>'
+      +'<div style="font-size:12px;color:#475569;line-height:1.6">Each golden record fuses LTC and HAL data sources with Carrier 360 and Clinical Assessment data. ADL scores, MMSE, care complexity, billing accuracy, fraud risk, coverage gaps, and required actions are surfaced from the UnifiedClient entity — the same data that powers every agent workflow.</div>'
+      +'</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">'+cards+'</div></div>';
+  }
+
+  /* ── Entity Profiles Sub-tab ────────────────────────────────*/
+  function _p51entityProfilesTab() {
+    var carrierProfiles = [
+      { name:'Prudential Financial', abbr:'PRU', col:'#1e3a5f', policies:'320,000', sla:'97.2%', premium:'$48M/mo', rating:'A+ (S&P)', reserves:'$4.2B', mktShare:'18.4%', contact:'James Whitfield, SVP', exp:'2029', status:'Active', ai:'Largest carrier. 97.2% SLA exceeds contractual 95% minimum. $4.2B reserve block ensures policy security through 2029. Recommended: maintain TPA relationship.' },
+      { name:'MetLife',              abbr:'MET', col:'#374151', policies:'187,400', sla:'95.8%', premium:'$28M/mo', rating:'A+ (S&P)', reserves:'$2.1B', mktShare:'10.6%', contact:'Carol Singh, Director', exp:'2027', status:'Active', ai:'Second-largest carrier. SLA at 95.8% — 0.8% above minimum. Contract renewal due 2027; negotiate performance incentives prior to renewal.' },
+      { name:'Transamerica',         abbr:'TRA', col:'#dc2626', policies:'94,200',  sla:'94.1%', premium:'$15M/mo', rating:'A  (S&P)', reserves:'$0.9B', mktShare:'6.2%',  contact:'Mark Davis, Manager', exp:'2026', status:'Watch',  ai:'SLA at 94.1% — below 95% contractual minimum. Escalation required. Contract expires 2026. Recommend remediation plan within 30 days or trigger performance clause.' }
+    ];
+    var providerProfiles = [
+      { name:'Sunrise Manor SNF',  type:'SNF',         col:'#059669', cms:4.5, billing:'98.2%', fraud:'5/100',  patients:18, beds:120, loc:'Dallas, TX',  contact:'Patricia Wells', exp:'Dec 2027', ai:'Top 8% SNF nationally. 4.5-star CMS. Highest billing accuracy in Texas network. Recommend preferred partner designation for LTC referrals.' },
+      { name:'Home Health Plus',   type:'Home Health', col:'#0891b2', cms:4.2, billing:'96.5%', fraud:'8/100',  patients:31, beds:0,   loc:'Boston, MA',  contact:'James Rivera',   exp:'Jun 2026',  ai:'Strong home health performance. 4.2-star CMS. 31 active patients — highest volume in network. License renewal due June 2026 — track proactively.' },
+      { name:'Greenview Memory',   type:'Memory Care', col:'#dc2626', cms:3.5, billing:'91.4%', fraud:'22/100', patients:12, beds:45,  loc:'Austin, TX',  contact:'Dr. Ann Blake',  exp:'Mar 2027',  ai:'Under review. Billing accuracy 91.4% below 95% threshold. Manual EVV — GPS integration required. Fraud risk 22/100 — elevated. Schedule audit within 60 days.' }
+    ];
+
+    var carrierCards = carrierProfiles.map(function(c) {
+      return '<div style="background:#fff;border:2px solid '+c.col+'33;border-radius:12px;padding:16px">'
+        +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">'
+        +'<div style="width:38px;height:38px;background:'+c.col+';border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;text-align:center;line-height:1.2">'+c.abbr+'</div>'
+        +'<div><div style="font-size:13px;font-weight:800;color:#0f172a">'+c.name+'</div>'
+        +'<span style="background:'+(c.status==='Active'?'#f0fdf4':'#fef2f2')+';color:'+(c.status==='Active'?'#059669':'#dc2626')+';border-radius:4px;padding:1px 6px;font-size:9px;font-weight:700">'+c.status+'</span></div></div>'
+        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:10px;color:#374151;margin-bottom:10px">'
+        +[['Policies',c.policies],['SLA Score',c.sla],['Premium',c.premium],['Rating',c.rating],['Reserves',c.reserves],['Market Share',c.mktShare],['Contact',c.contact],['Contract Exp.',c.exp]].map(function(r){
+          return '<div style="background:#f8fafc;border-radius:5px;padding:5px 7px"><span style="color:#94a3b8">'+r[0]+'</span><br><b style="color:'+(r[0]==='SLA Score'?(parseFloat(c.sla)>=95?'#059669':'#dc2626'):'#0f172a')+'">'+r[1]+'</b></div>';
+        }).join('')+'</div>'
+        +'<div style="background:linear-gradient(135deg,'+c.col+'18,'+c.col+'08);border-radius:8px;padding:8px 10px;margin-bottom:8px">'
+        +'<div style="font-size:9px;font-weight:700;color:'+c.col+';margin-bottom:3px"><i class="fas fa-brain" style="margin-right:4px"></i>WealthAI Insight</div>'
+        +'<div style="font-size:10px;color:#374151;line-height:1.5">'+c.ai+'</div>'
+        +'</div>'
+        +'<div style="display:flex;gap:4px">'
+        +'<button style="flex:1;background:'+c.col+';color:#fff;border:none;border-radius:5px;padding:5px;font-size:9px;font-weight:700;cursor:pointer">Contact</button>'
+        +'<button style="flex:1;background:#f1f5f9;color:#475569;border:none;border-radius:5px;padding:5px;font-size:9px;font-weight:700;cursor:pointer">Performance</button>'
+        +'<button style="flex:1;background:#7c3aed;color:#fff;border:none;border-radius:5px;padding:5px;font-size:9px;font-weight:700;cursor:pointer">AI Review</button>'
+        +'</div></div>';
+    }).join('');
+
+    var providerCards = providerProfiles.map(function(p) {
+      var stars = '';
+      for(var si=0;si<5;si++) stars += si<Math.floor(p.cms)?'★':si<p.cms?'✦':'☆';
+      return '<div style="background:#fff;border:2px solid '+p.col+'33;border-radius:12px;padding:16px">'
+        +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">'
+        +'<div style="width:38px;height:38px;background:'+p.col+';border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#fff;text-align:center;line-height:1.2">'+p.type.slice(0,3).toUpperCase()+'</div>'
+        +'<div><div style="font-size:13px;font-weight:800;color:#0f172a">'+p.name+'</div>'
+        +'<div style="font-size:10px;color:#64748b">'+p.type+' · '+p.loc+'</div></div></div>'
+        +'<div style="font-size:16px;color:#d97706;font-weight:800;margin-bottom:8px">'+stars+' <span style="font-size:11px;color:#64748b">CMS '+p.cms+'/5</span></div>'
+        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:10px;color:#374151;margin-bottom:10px">'
+        +[['Billing Acc.',p.billing],['Fraud Risk',p.fraud],['Active Patients',p.patients+''],['Licensed Beds',p.beds?p.beds+'':'N/A'],['Contact',p.contact],['License Exp.',p.exp]].map(function(r){
+          return '<div style="background:#f8fafc;border-radius:5px;padding:5px 7px"><span style="color:#94a3b8">'+r[0]+'</span><br><b>'+r[1]+'</b></div>';
+        }).join('')+'</div>'
+        +'<div style="background:linear-gradient(135deg,'+p.col+'18,'+p.col+'08);border-radius:8px;padding:8px 10px;margin-bottom:8px">'
+        +'<div style="font-size:9px;font-weight:700;color:'+p.col+';margin-bottom:3px"><i class="fas fa-brain" style="margin-right:4px"></i>WealthAI Insight</div>'
+        +'<div style="font-size:10px;color:#374151;line-height:1.5">'+p.ai+'</div>'
+        +'</div>'
+        +'<div style="display:flex;gap:4px">'
+        +'<button style="flex:1;background:'+p.col+';color:#fff;border:none;border-radius:5px;padding:5px;font-size:9px;font-weight:700;cursor:pointer">Contact</button>'
+        +'<button style="flex:1;background:#f1f5f9;color:#475569;border:none;border-radius:5px;padding:5px;font-size:9px;font-weight:700;cursor:pointer">Billing Audit</button>'
+        +'<button style="flex:1;background:#7c3aed;color:#fff;border:none;border-radius:5px;padding:5px;font-size:9px;font-weight:700;cursor:pointer">AI Review</button>'
+        +'</div></div>';
+    }).join('');
+
+    return '<div style="display:flex;flex-direction:column;gap:14px">'
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px 18px">'
+      +'<div style="font-size:13px;font-weight:800;color:#0f172a;margin-bottom:6px"><i class="fas fa-id-card" style="color:'+TEAL51+';margin-right:8px"></i>Entity Profiles — Carrier 360° & Provider 360° Canonical Entities</div>'
+      +'<div style="font-size:12px;color:#475569;line-height:1.6">InsuranceCarrier and LTCProvider are now canonical entities in the Semantic Layer. These profiles are governed in Unity Catalog, discoverable in Purview, and available to all 6 agents. WealthAI Intelligence is generated by the Client 360 Synthesis Agent using all 6 vector indexes.</div>'
+      +'</div>'
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px 18px">'
+      +'<div style="font-size:12px;font-weight:700;color:#1e3a5f;margin-bottom:12px"><i class="fas fa-building" style="margin-right:6px"></i>Insurance Carrier Profiles (3 active carriers)</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">'+carrierCards+'</div></div>'
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px 18px">'
+      +'<div style="font-size:12px;font-weight:700;color:#059669;margin-bottom:12px"><i class="fas fa-hospital" style="margin-right:6px"></i>Healthcare Provider Profiles (3 key providers)</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">'+providerCards+'</div></div>'
+      +'</div>';
+  }
+
+  function _p51buildPage() {
+    var tabs = ['entities','glossary','dq','c360','three-engines','build-guide','entity-profiles'];
+    var tabLabels = {entities:'Entity Model',glossary:'Business Glossary',dq:'Data Quality',c360:'C360 Clients','three-engines':'Three Engines','build-guide':'How We Built It','entity-profiles':'Entity Profiles'};
+    var tabIcons  = {entities:'fas fa-cubes',glossary:'fas fa-book-open',dq:'fas fa-shield-alt',c360:'fas fa-users','three-engines':'fas fa-layer-group','build-guide':'fas fa-tools','entity-profiles':'fas fa-id-card'};
+
+    var activeTab = window._p51activeTab || 'entities';
+    var tabBar = tabs.map(function(t){
+      var k='p51-tab-'+t; window._p8actions[k]=function(){ window._p51activeTab=t; _p51buildPage(); };
+      var active=t===activeTab; var isNew=t==='entity-profiles';
+      return '<button onclick="_p8run(\''+k+'\')" style="padding:8px 14px;border:2px solid '+(active?TEAL51:isNew?'#d97706':'#e2e8f0')+';border-radius:8px;background:'+(active?TEAL51:isNew?'#fef9ec':'#fff')+';color:'+(active?'#fff':isNew?'#d97706':'#64748b')+';font-weight:700;font-size:11px;cursor:pointer">'
+        +'<i class="'+tabIcons[t]+'" style="margin-right:5px"></i>'+tabLabels[t]
+        +(isNew?'<span style="margin-left:4px;background:#d97706;color:#fff;border-radius:4px;padding:0 4px;font-size:8px">NEW</span>':'')+'</button>';
+    }).join('');
+
+    var body;
+    if (activeTab==='entities') body = _p51entitiesTab();
+    else if (activeTab==='c360') body = _p51c360Tab();
+    else if (activeTab==='entity-profiles') body = _p51entityProfilesTab();
+    else {
+      var prevTab=window._p21activeTab; window._p21activeTab=activeTab;
+      if (activeTab==='glossary' && typeof _p21glossaryTab==='function') body=_p21glossaryTab();
+      else if (activeTab==='dq' && typeof _p21dqTab==='function') body=_p21dqTab();
+      else if (activeTab==='three-engines' && typeof _p21threeEnginesTab==='function') body=_p21threeEnginesTab();
+      else if (activeTab==='build-guide' && typeof _p21buildGuideTab==='function') body=_p21buildGuideTab();
+      else body='';
+      window._p21activeTab=prevTab;
+    }
+
+    var html='<div style="padding:20px 24px;background:#f8fafc;min-height:100vh;font-family:Inter,sans-serif">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">'
+      +'<div style="display:flex;align-items:center;gap:12px">'
+      +'<div style="width:40px;height:40px;background:linear-gradient(135deg,'+TEAL51+','+UNITY51+');border-radius:10px;display:flex;align-items:center;justify-content:center"><i class="fas fa-layer-group" style="color:#fff;font-size:18px"></i></div>'
+      +'<div><div style="font-size:20px;font-weight:800;color:#0f172a">Semantic Layer — Unity Catalog</div>'
+      +'<div style="font-size:12px;color:#64748b;margin-top:2px">14 canonical entities · 18 glossary terms · 10 DQ rules · Carrier 360 · Provider 360 · ClinicalAssessment · dbt + Synapse</div>'
+      +'</div></div>'
+      +'<div style="display:flex;gap:8px;flex-wrap:wrap">'
+      +'<span style="background:#05996918;color:'+UNITY51+';border:1px solid '+UNITY51+'44;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:600"><i class="fas fa-book" style="margin-right:4px"></i>Unity Catalog</span>'
+      +'<span style="background:#0078d418;color:#0078d4;border:1px solid #0078d444;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:600"><i class="fas fa-cogs" style="margin-right:4px"></i>dbt Core</span>'
+      +'<span style="background:#74277422;color:#742774;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:600"><i class="fas fa-cube" style="margin-right:4px"></i>Microsoft Fabric</span>'
+      +'<span style="background:#1e3a5f22;color:#1e3a5f;border:1px solid #1e3a5f44;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:600"><i class="fas fa-building" style="margin-right:4px"></i>Carrier 360</span>'
+      +'</div></div>'
+      +'<div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap">'
+      +_p51kpi('14','Canonical Entities',TEAL51)
+      +_p51kpi('18','Glossary Terms',UNITY51)
+      +_p51kpi('10','DQ Rules','#d97706')
+      +_p51kpi('99.4%','Overall DQ','#059669')
+      +_p51kpi('5','C360 Golden Records','#7c3aed')
+      +_p51kpi('3','Carrier Profiles','#1e3a5f')
+      +_p51kpi('3','Provider Profiles','#059669')
+      +'</div>'
+      +'<div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap">'+tabBar+'</div>'
+      +body
+      +'<div style="margin-top:16px;background:linear-gradient(135deg,'+TEAL51+','+UNITY51+');border-radius:12px;padding:16px 20px;color:#fff;display:flex;align-items:center;gap:16px">'
+      +'<i class="fas fa-check-circle" style="font-size:28px;opacity:.9"></i>'
+      +'<div><div style="font-weight:800;font-size:14px">dbt Semantic Models — 14 Entities · Carrier & Provider Enrichment · Production Deployed</div>'
+      +'<div style="font-size:12px;opacity:.88;margin-top:3px">14 semantic models compiled · 26 metrics defined · InsuranceCarrier entity added · ClinicalAssessment entity added · Azure Synapse < 2s · Unity Catalog tags propagated · Carrier 360° + Provider 360° canonical</div>'
+      +'</div></div>'
+      +'</div>';
+
+    document.getElementById('page-content').innerHTML = html;
+  }
+
+  if (!window._p51activeTab) window._p51activeTab = 'entities';
+
+  console.log('[P51] Semantic Layer enhanced · 14 entities · InsuranceCarrier + ClinicalAssessment added · Entity Profiles sub-tab · enriched C360 golden records');
+})();
+
+/* ============================================================
+   PHASE 52 — VECTOR STORE & RAG ENHANCEMENT
+   Adds 2 new indexes, enriched descriptions, carrier+provider
+   pipeline stage, 4 new RAG sample queries
+   ============================================================ */
+(function () {
+  'use strict';
+
+  var VEC52   = '#7c3aed';
+  var AZURE52 = '#0078d4';
+  var TEAL52  = '#0891b2';
+  var GREEN52 = '#059669';
+  var AMBER52 = '#d97706';
+  var RED52   = '#dc2626';
+
+  /* ── 8 Vector Indexes (original 6 + 2 NEW) ────────────────── */
+  var _p52indexes = [
+    {
+      id:'ltc-claims-idx',
+      domain:'LTC',
+      dcol:'#dc2626',
+      docs:'284,200',
+      dims:1536,
+      size:'2.8 GB',
+      model:'text-embedding-3-large',
+      algo:'HNSW',
+      p95:'62 ms',
+      refresh:'Real-time',
+      desc:'LTC claim documents, EOBs, denial letters, appeals, remittance advice. Enriched with claimant ADL scores and care-setting context for intelligent denial prediction and benefit verification.',
+      isNew:false
+    },
+    {
+      id:'ltc-careplan-idx',
+      domain:'LTC',
+      dcol:'#dc2626',
+      docs:'156,800',
+      dims:1536,
+      size:'1.6 GB',
+      model:'text-embedding-3-large',
+      algo:'HNSW',
+      p95:'58 ms',
+      refresh:'Daily',
+      desc:'Individualized care plans, clinical assessments, ADL evaluations, MMSE scores, physician orders, and care-setting transitions. Powers CareNav AI recommendations and clinical gap detection.',
+      isNew:false
+    },
+    {
+      id:'hal-clients-idx',
+      domain:'HAL',
+      dcol:'#0891b2',
+      docs:'198,400',
+      dims:1536,
+      size:'2.1 GB',
+      model:'text-embedding-3-large',
+      algo:'HNSW',
+      p95:'71 ms',
+      refresh:'Hourly',
+      desc:'Unified client profiles, beneficiary records, agent notes, KYC documents, and suitability assessments. Carrier affiliation and multi-policy context embedded for 360° client intelligence.',
+      isNew:false
+    },
+    {
+      id:'hal-policies-idx',
+      domain:'HAL',
+      dcol:'#0891b2',
+      docs:'124,600',
+      dims:1536,
+      size:'1.3 GB',
+      model:'text-embedding-3-large',
+      algo:'HNSW',
+      p95:'54 ms',
+      refresh:'Daily',
+      desc:'LTC policy contracts, endorsements, rider documents, benefit schedules, inflation protection terms, and carrier SLA commitments. Enables precise coverage gap detection and benefit maximisation.',
+      isNew:false
+    },
+    {
+      id:'regulatory-intel-idx',
+      domain:'HAL',
+      dcol:'#0891b2',
+      docs:'87,400',
+      dims:1536,
+      size:'0.9 GB',
+      model:'text-embedding-3-large',
+      algo:'HNSW',
+      p95:'48 ms',
+      refresh:'Weekly',
+      desc:'State regulatory filings, CMS guidelines, NAIC model regulations, DOI bulletins, and compliance rulings. Drives real-time regulatory change alerts across carrier and claimant workflows.',
+      isNew:false
+    },
+    {
+      id:'hal-knowledge-idx',
+      domain:'HAL',
+      dcol:'#0891b2',
+      docs:'72,600',
+      dims:1536,
+      size:'0.5 GB',
+      model:'text-embedding-3-small',
+      algo:'HNSW',
+      p95:'38 ms',
+      refresh:'Weekly',
+      desc:'Internal knowledge base, SOPs, training materials, product guides, underwriting manuals, and agent playbooks. Powers HAL Assistant auto-resolution and agent co-pilot suggestions.',
+      isNew:false
+    },
+    {
+      id:'carrier-intelligence-idx',
+      domain:'HAL',
+      dcol:'#0891b2',
+      docs:'42,800',
+      dims:1536,
+      size:'0.48 GB',
+      model:'text-embedding-3-large',
+      algo:'HNSW',
+      p95:'52 ms',
+      refresh:'Daily',
+      desc:'Carrier SLA contracts, financial statements, reinsurance agreements, performance scorecards, rate filings, and Prudential/MetLife/Transamerica/John Hancock portfolio intelligence. Feeds the Carrier 360° dashboard and SLA breach early-warning engine.',
+      isNew:true
+    },
+    {
+      id:'provider-quality-idx',
+      domain:'LTC',
+      dcol:'#dc2626',
+      docs:'28,600',
+      dims:1536,
+      size:'0.32 GB',
+      model:'text-embedding-3-large',
+      algo:'HNSW',
+      p95:'44 ms',
+      refresh:'Daily',
+      desc:'CMS Five-Star ratings, OSCAR inspection reports, EVV records, billing accuracy audits, fraud indicators, and care-quality narratives for SNFs, ALFs, and home-health agencies. Drives Provider 360° quality scoring and network optimisation.',
+      isNew:true
+    }
+  ];
+
+  /* ── RAG Sample Queries (12 total — original 8 + 4 NEW) ─── */
+  var _p52queries = [
+    { label:'Active LTC Claims', q:'Find all active LTC claims for Margaret O\'Brien with ADL score ≥ 3 and pending benefit verification', idx:'ltc-claims-idx', time:'68 ms', tokens:842 },
+    { label:'Care Plan Gaps', q:'Identify claimants with memory care needs whose current care plan lacks cognitive therapy interventions', idx:'ltc-careplan-idx', time:'74 ms', tokens:1240 },
+    { label:'Coverage Analysis', q:'Which clients have LTC policies expiring within 90 days with elimination periods not yet satisfied?', idx:'hal-policies-idx', time:'61 ms', tokens:980 },
+    { label:'Regulatory Alert', q:'What CMS regulatory changes in Q4 2024 affect SNF billing practices in New York and New Jersey?', idx:'regulatory-intel-idx', time:'52 ms', tokens:720 },
+    { label:'Client 360 Lookup', q:'Retrieve unified profile for Frank Galloway including all policy holdings, open claims, and advisor notes', idx:'hal-clients-idx', time:'77 ms', tokens:1120 },
+    { label:'Agent Playbook', q:'What are the escalation procedures for LTC benefit denials involving cognitive impairment diagnoses?', idx:'hal-knowledge-idx', time:'43 ms', tokens:640 },
+    { label:'Carrier SLA Breach', q:'Which carriers have SLA compliance below 95% in the last 30 days and what are the top breach reasons?', idx:'carrier-intelligence-idx', time:'56 ms', tokens:890, isNew:true },
+    { label:'Provider CMS Rating', q:'Compare CMS Five-Star ratings for Sunrise Manor SNF vs regional average and flag deficiency patterns', idx:'provider-quality-idx', time:'48 ms', tokens:760, isNew:true },
+    { label:'Cross-Index: Claimant + Provider', q:'For claimants with ADL ≥ 3 at Sunrise Manor, cross-reference care plan gaps with provider quality deficiencies', idx:'ltc-careplan-idx + provider-quality-idx', time:'112 ms', tokens:1680, isNew:true },
+    { label:'Coverage Gaps + Carrier', q:'Identify coverage gaps for Prudential policyholders where benefit trigger criteria changed post-issuance', idx:'hal-policies-idx + carrier-intelligence-idx', time:'98 ms', tokens:1420, isNew:true }
+  ];
+
+  /* ── Embedding Pipeline Stages ─────────────────────────────── */
+  var _p52pipeline = [
+    { icon:'fa-database',      label:'LTC Claims Feed',           col:'#dc2626', detail:'EOBs · Denials · Appeals' },
+    { icon:'fa-file-medical',  label:'Care Plan Feed',            col:'#dc2626', detail:'ADL · MMSE · Assessments' },
+    { icon:'fa-users',         label:'Client & Policy Feed',      col:'#0891b2', detail:'Profiles · Contracts · KYC' },
+    { icon:'fa-building',      label:'Carrier + Provider Feeds',  col:'#7c3aed', detail:'SLA · CMS Ratings · EVV', isNew:true },
+    { icon:'fa-gavel',         label:'Regulatory Feed',           col:'#d97706', detail:'CMS · NAIC · DOI' },
+    { icon:'fa-cut',           label:'Chunker',                   col:'#6b7280', detail:'512-token overlapping chunks' },
+    { icon:'fa-brain',         label:'Embeddings (ada-3-large)',  col:'#059669', detail:'1536-dim · Batch 2048' },
+    { icon:'fa-search',        label:'Azure AI Search Indexer',   col:'#0078d4', detail:'HNSW · Cosine · Real-time' },
+    { icon:'fa-star',          label:'Semantic Ranker',           col:'#7c3aed', detail:'L2R · Cross-encoder rerank' }
+  ];
+
+  /* ── KPI chip helper ────────────────────────────────────────── */
+  function _p52kpi(val, lbl, col) {
+    return '<div style="background:'+col+'18;border:1px solid '+col+'44;border-radius:10px;padding:10px 18px;text-align:center;min-width:110px">'
+      +'<div style="font-size:22px;font-weight:800;color:'+col+'">'+val+'</div>'
+      +'<div style="font-size:11px;color:#64748b;margin-top:2px">'+lbl+'</div>'
+      +'</div>';
+  }
+
+  /* ── Index card renderer ────────────────────────────────────── */
+  function _p52indexCard(ix) {
+    var newBadge = ix.isNew
+      ? '<span style="background:#d97706;color:#fff;font-size:9px;font-weight:700;padding:2px 7px;border-radius:8px;margin-left:8px;vertical-align:middle">NEW</span>'
+      : '';
+    return '<div style="background:#fff;border:1px solid '+(ix.isNew?'#d97706':'#e2e8f0')+';border-radius:12px;padding:16px 18px;margin-bottom:12px'+(ix.isNew?';box-shadow:0 0 0 2px #d9770622':'')+'">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'
+      +'<div style="display:flex;align-items:center;gap:8px">'
+      +'<i class="fas fa-cube" style="color:'+VEC52+'"></i>'
+      +'<span style="font-weight:700;font-size:13px;color:#1e293b">'+ix.id+'</span>'+newBadge
+      +'</div>'
+      +'<span style="background:'+ix.dcol+'18;color:'+ix.dcol+';font-size:10px;font-weight:700;padding:3px 10px;border-radius:8px">'+ix.domain+'</span>'
+      +'</div>'
+      +'<p style="font-size:11px;color:#475569;margin:0 0 12px;line-height:1.5">'+ix.desc+'</p>'
+      +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">'
+      +_p52stat('Docs', ix.docs, '#0891b2')
+      +_p52stat('Dimensions', ix.dims, VEC52)
+      +_p52stat('Storage', ix.size, GREEN52)
+      +_p52stat('P95 Latency', ix.p95, '#d97706')
+      +'</div>'
+      +'<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">'
+      +'<span style="background:#f1f5f9;font-size:10px;padding:3px 9px;border-radius:6px;color:#475569"><i class="fas fa-microchip" style="margin-right:4px;color:'+VEC52+'"></i>'+ix.model+'</span>'
+      +'<span style="background:#f1f5f9;font-size:10px;padding:3px 9px;border-radius:6px;color:#475569"><i class="fas fa-project-diagram" style="margin-right:4px;color:AZURE52"></i>'+ix.algo+'</span>'
+      +'<span style="background:#f1f5f9;font-size:10px;padding:3px 9px;border-radius:6px;color:#475569"><i class="fas fa-sync-alt" style="margin-right:4px;color:GREEN52"></i>'+ix.refresh+'</span>'
+      +'</div>'
+      +'</div>';
+  }
+
+  function _p52stat(lbl, val, col) {
+    return '<div style="background:#f8fafc;border-radius:8px;padding:8px;text-align:center">'
+      +'<div style="font-size:12px;font-weight:700;color:'+col+'">'+val+'</div>'
+      +'<div style="font-size:9px;color:#94a3b8;margin-top:1px">'+lbl+'</div>'
+      +'</div>';
+  }
+
+  /* ── Query card renderer ────────────────────────────────────── */
+  function _p52queryCard(q, i) {
+    var newBadge = q.isNew
+      ? '<span style="background:#d97706;color:#fff;font-size:9px;font-weight:700;padding:2px 7px;border-radius:8px;margin-left:8px">NEW</span>'
+      : '';
+    return '<div style="background:#fff;border:1px solid '+(q.isNew?'#d97706':'#e2e8f0')+';border-radius:10px;padding:14px 16px;margin-bottom:10px'+(q.isNew?';box-shadow:0 0 0 2px #d9770622':'')+'">'
+      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">'
+      +'<span style="background:'+VEC52+'18;color:'+VEC52+';font-size:10px;font-weight:700;padding:3px 10px;border-radius:8px">'+q.label+'</span>'+newBadge
+      +'</div>'
+      +'<div style="background:#f8fafc;border-radius:8px;padding:10px 12px;font-size:12px;color:#1e293b;font-family:monospace;margin-bottom:10px;line-height:1.5">'+q.q+'</div>'
+      +'<div style="display:flex;gap:10px;flex-wrap:wrap">'
+      +'<span style="font-size:10px;color:#475569"><i class="fas fa-cube" style="color:'+VEC52+';margin-right:4px"></i>'+q.idx+'</span>'
+      +'<span style="font-size:10px;color:#059669"><i class="fas fa-bolt" style="margin-right:4px"></i>'+q.time+'</span>'
+      +'<span style="font-size:10px;color:#0891b2"><i class="fas fa-exchange-alt" style="margin-right:4px"></i>'+q.tokens+' tokens</span>'
+      +'</div>'
+      +'</div>';
+  }
+
+  /* ── Pipeline stage renderer ────────────────────────────────── */
+  function _p52pipelineStage(s, i, total) {
+    var newBadge = s.isNew
+      ? '<div style="background:#d97706;color:#fff;font-size:8px;font-weight:700;padding:1px 5px;border-radius:4px;margin-top:3px">NEW</div>'
+      : '';
+    var arrow = i < total - 1
+      ? '<div style="color:#cbd5e1;font-size:18px;align-self:center">→</div>'
+      : '';
+    return '<div style="display:flex;flex-direction:column;align-items:center;gap:4px;min-width:90px">'
+      +'<div style="width:52px;height:52px;border-radius:12px;background:'+s.col+'18;border:2px solid '+s.col+'44;display:flex;align-items:center;justify-content:center">'
+      +'<i class="fas '+s.icon+'" style="color:'+s.col+';font-size:20px"></i>'
+      +'</div>'
+      +'<div style="font-size:10px;font-weight:700;color:#1e293b;text-align:center;max-width:90px;line-height:1.2">'+s.label+'</div>'
+      +'<div style="font-size:9px;color:#94a3b8;text-align:center">'+s.detail+'</div>'
+      +newBadge
+      +'</div>'+arrow;
+  }
+
+  /* ── Indexes tab ────────────────────────────────────────────── */
+  function _p52indexesTab() {
+    var ltcIdx = _p52indexes.filter(function(x){ return x.domain==='LTC'; });
+    var halIdx = _p52indexes.filter(function(x){ return x.domain==='HAL'; });
+    return '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 24px">'
+      +'<div>'
+      +'<div style="font-size:11px;font-weight:700;color:#dc2626;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px"><i class="fas fa-heartbeat" style="margin-right:6px"></i>LTC Domain</div>'
+      +ltcIdx.map(_p52indexCard).join('')
+      +'</div>'
+      +'<div>'
+      +'<div style="font-size:11px;font-weight:700;color:#0891b2;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px"><i class="fas fa-globe" style="margin-right:6px"></i>HAL Domain</div>'
+      +halIdx.map(_p52indexCard).join('')
+      +'</div>'
+      +'</div>';
+  }
+
+  /* ── Pipeline tab ───────────────────────────────────────────── */
+  function _p52pipelineTab() {
+    var stages = _p52pipeline;
+    return '<div style="background:#f8fafc;border-radius:12px;padding:20px;margin-bottom:20px">'
+      +'<div style="font-size:12px;font-weight:700;color:#1e293b;margin-bottom:16px"><i class="fas fa-stream" style="color:'+VEC52+';margin-right:8px"></i>Embedding & Indexing Pipeline</div>'
+      +'<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start">'
+      +stages.map(function(s,i){ return _p52pipelineStage(s,i,stages.length); }).join('')
+      +'</div>'
+      +'</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">'
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px">'
+      +'<div style="font-size:11px;font-weight:700;color:#0078d4;margin-bottom:8px"><i class="fas fa-cogs" style="margin-right:6px"></i>Chunking Strategy</div>'
+      +'<div style="font-size:11px;color:#475569;line-height:1.6">• 512-token sliding window<br>• 10% token overlap<br>• Sentence boundary detection<br>• Section-aware splitting<br>• Metadata preserved per chunk</div>'
+      +'</div>'
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px">'
+      +'<div style="font-size:11px;font-weight:700;color:'+VEC52+';margin-bottom:8px"><i class="fas fa-brain" style="margin-right:6px"></i>Embedding Models</div>'
+      +'<div style="font-size:11px;color:#475569;line-height:1.6">• ada-3-large: 1536 dims<br>• ada-3-small: 1536 dims (lite)<br>• Batch size: 2048 docs<br>• Refresh: real-time + daily<br>• Azure OpenAI endpoint</div>'
+      +'</div>'
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px">'
+      +'<div style="font-size:11px;font-weight:700;color:'+GREEN52+';margin-bottom:8px"><i class="fas fa-tachometer-alt" style="margin-right:6px"></i>Performance SLAs</div>'
+      +'<div style="font-size:11px;color:#475569;line-height:1.6">• P95 latency: &lt; 80 ms<br>• P99 latency: &lt; 120 ms<br>• Throughput: 500 QPS<br>• Availability: 99.95%<br>• Index freshness: &lt; 5 min</div>'
+      +'</div>'
+      +'</div>';
+  }
+
+  /* ── RAG Simulator tab ──────────────────────────────────────── */
+  function _p52ragTab() {
+    return '<div style="background:linear-gradient(135deg,'+VEC52+'0d,#0891b218);border-radius:12px;padding:16px 20px;margin-bottom:20px;border:1px solid '+VEC52+'33">'
+      +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">'
+      +'<i class="fas fa-robot" style="color:'+VEC52+';font-size:20px"></i>'
+      +'<div><div style="font-size:13px;font-weight:800;color:#1e293b">RAG Query Simulator</div>'
+      +'<div style="font-size:11px;color:#64748b">10 representative queries across all 8 indexes — 4 new carrier & provider queries highlighted</div></div>'
+      +'</div>'
+      +'</div>'
+      +_p52queries.map(_p52queryCard).join('')
+      +'<div style="background:linear-gradient(135deg,'+VEC52+',#0891b2);border-radius:10px;padding:14px 18px;color:#fff;margin-top:8px;display:flex;align-items:center;gap:14px">'
+      +'<i class="fas fa-layer-group" style="font-size:24px;opacity:.9"></i>'
+      +'<div><div style="font-weight:800;font-size:13px">Hybrid Search Architecture</div>'
+      +'<div style="font-size:11px;opacity:.88;margin-top:2px">BM25 keyword + dense vector search · Semantic reranker (L2R) · Reciprocal Rank Fusion · Cross-encoder final pass · &lt; 80 ms P95 end-to-end</div>'
+      +'</div></div>';
+  }
+
+  /* ── Architecture tab ───────────────────────────────────────── */
+  function _p52archTab() {
+    var blocks = [
+      { icon:'fa-cloud', lbl:'Azure AI Search', sub:'8 indexes · HNSW · Semantic ranker', col:AZURE52 },
+      { icon:'fa-microchip', lbl:'Azure OpenAI', sub:'text-embedding-3-large · ada-3-small', col:VEC52 },
+      { icon:'fa-database', lbl:'Azure Data Lake', sub:'Bronze → Silver → Gold · Delta Lake', col:'#92400e' },
+      { icon:'fa-network-wired', lbl:'HAL Orchestrator', sub:'LangChain · RAG pipeline · Cache', col:GREEN52 },
+      { icon:'fa-shield-alt', lbl:'Azure Purview', sub:'Lineage · Classification · DLP', col:'#742774' },
+      { icon:'fa-chart-bar', lbl:'Azure Monitor', sub:'Latency · QPS · Index health', col:AMBER52 }
+    ];
+    return '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">'
+      +blocks.map(function(b){
+        return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;text-align:center">'
+          +'<div style="width:44px;height:44px;border-radius:10px;background:'+b.col+'18;display:flex;align-items:center;justify-content:center;margin:0 auto 10px">'
+          +'<i class="fas '+b.icon+'" style="color:'+b.col+';font-size:18px"></i></div>'
+          +'<div style="font-size:12px;font-weight:700;color:#1e293b">'+b.lbl+'</div>'
+          +'<div style="font-size:10px;color:#64748b;margin-top:4px">'+b.sub+'</div>'
+          +'</div>';
+      }).join('')
+      +'</div>'
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px">'
+      +'<div style="font-size:12px;font-weight:700;color:#1e293b;margin-bottom:12px"><i class="fas fa-route" style="color:'+VEC52+';margin-right:8px"></i>Query Flow</div>'
+      +'<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:11px;color:#475569">'
+      +['HAL Assistant / CareNav AI','→ Query Intent Classifier','→ Index Router (8 indexes)','→ Hybrid Retrieval (BM25+Dense)','→ Semantic Reranker','→ LLM Synthesis (GPT-4o)','→ Grounded Response + Citations'].map(function(s){
+        var isArr = s==='→ Query Intent Classifier'||s.startsWith('→');
+        return isArr
+          ? '<span style="color:#94a3b8">'+s+'</span>'
+          : '<span style="background:'+VEC52+'18;color:'+VEC52+';padding:4px 10px;border-radius:6px;font-weight:600">'+s+'</span>';
+      }).join(' ')
+      +'</div>'
+      +'</div>';
+  }
+
+  /* ── Full page builder ──────────────────────────────────────── */
+  function _p52buildPage() {
+    var tabs = ['indexes','pipeline','rag','architecture'];
+    var tabLabels = {
+      indexes:'<i class="fas fa-cubes" style="margin-right:6px"></i>Vector Indexes',
+      pipeline:'<i class="fas fa-stream" style="margin-right:6px"></i>Embedding Pipeline',
+      rag:'<i class="fas fa-robot" style="margin-right:6px"></i>RAG Simulator',
+      architecture:'<i class="fas fa-sitemap" style="margin-right:6px"></i>Architecture'
+    };
+
+    if (!window._p52activeTab) window._p52activeTab = 'indexes';
+    var active = window._p52activeTab;
+
+    var tabBar = tabs.map(function(t){
+      var isAct = t===active;
+      return '<button onclick="_p8run(\'p52tab_'+t+'\')" style="padding:8px 16px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:'+(isAct?'700':'500')+';background:'+(isAct?VEC52:'#f1f5f9')+';color:'+(isAct?'#fff':'#64748b')+';transition:all .2s">'+tabLabels[t]+'</button>';
+    }).join('');
+
+    var body = '';
+    if (active==='indexes')      body = _p52indexesTab();
+    else if (active==='pipeline') body = _p52pipelineTab();
+    else if (active==='rag')      body = _p52ragTab();
+    else if (active==='architecture') body = _p52archTab();
+
+    /* register tab-switch actions */
+    tabs.forEach(function(t){
+      window._p8actions['p52tab_'+t] = function(){
+        window._p52activeTab = t;
+        _p52buildPage();
+      };
+    });
+
+    var html = '<div style="padding:24px;font-family:\'Inter\',system-ui,sans-serif;max-width:1200px">'
+      /* header */
+      +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">'
+      +'<div style="display:flex;align-items:center;gap:14px">'
+      +'<div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,'+VEC52+',#0891b2);display:flex;align-items:center;justify-content:center">'
+      +'<i class="fas fa-vector-square" style="color:#fff;font-size:22px"></i></div>'
+      +'<div><div style="font-size:18px;font-weight:800;color:#1e293b">Vector Store & RAG</div>'
+      +'<div style="font-size:12px;color:#64748b">Azure AI Search · 8 Indexes · Hybrid Retrieval · Semantic Ranking</div></div>'
+      +'</div>'
+      +'<div style="display:flex;gap:8px;flex-wrap:wrap">'
+      +'<span style="background:#0078d415;color:#0078d4;border:1px solid #0078d444;padding:4px 12px;border-radius:8px;font-size:10px;font-weight:700"><i class="fas fa-cloud" style="margin-right:5px"></i>Azure AI Search</span>'
+      +'<span style="background:'+VEC52+'15;color:'+VEC52+';border:1px solid '+VEC52+'44;padding:4px 12px;border-radius:8px;font-size:10px;font-weight:700"><i class="fas fa-brain" style="margin-right:5px"></i>ada-3-large</span>'
+      +'<span style="background:#05966915;color:'+GREEN52+';border:1px solid #05966944;padding:4px 12px;border-radius:8px;font-size:10px;font-weight:700"><i class="fas fa-shield-alt" style="margin-right:5px"></i>Azure Purview</span>'
+      +'<span style="background:#d9770615;color:'+AMBER52+';border:1px solid #d9770644;padding:4px 12px;border-radius:8px;font-size:10px;font-weight:700"><i class="fas fa-star" style="margin-right:5px"></i>Carrier 360</span>'
+      +'</div>'
+      +'</div>'
+      /* KPI bar */
+      +'<div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap">'
+      +_p52kpi('8','Vector Indexes',VEC52)
+      +_p52kpi('~996K+','Total Documents','#0891b2')
+      +_p52kpi('10.0 GB','Total Storage','#059669')
+      +_p52kpi('1536','Dimensions','#7c3aed')
+      +_p52kpi('< 80 ms','P95 Latency','#d97706')
+      +_p52kpi('500 QPS','Throughput','#0078d4')
+      +'</div>'
+      /* tab bar */
+      +'<div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap">'+tabBar+'</div>'
+      /* body */
+      +body
+      /* footer */
+      +'<div style="margin-top:18px;background:linear-gradient(135deg,'+VEC52+',#0891b2);border-radius:12px;padding:14px 20px;color:#fff;display:flex;align-items:center;gap:14px">'
+      +'<i class="fas fa-check-circle" style="font-size:26px;opacity:.9"></i>'
+      +'<div><div style="font-weight:800;font-size:13px">Azure AI Search — 8 Indexes · ~996K Docs · 10 GB · Carrier + Provider Intelligence Added</div>'
+      +'<div style="font-size:11px;opacity:.88;margin-top:3px">carrier-intelligence-idx (42.8K docs · Prudential/MetLife/Transamerica/JH) · provider-quality-idx (28.6K docs · CMS Five-Star · EVV · Fraud) · Hybrid BM25+Dense · Semantic Ranker · &lt; 80 ms P95 · 99.95% SLA</div>'
+      +'</div></div>'
+      +'</div>';
+
+    document.getElementById('page-content').innerHTML = html;
+  }
+
+  /* ── Override _p23buildPage globally ────────────────────────── */
+  window._p23buildPage = _p52buildPage;
+
+  /* ── Override navigateTo for hal-vectorstore ────────────────── */
+  var _p52origNav = window.navigateTo;
+  window.navigateTo = function(page) {
+    if (page === 'hal-vectorstore') { _p52buildPage(); return; }
+    if (_p52origNav) _p52origNav(page);
+  };
+
+  if (!window._p52activeTab) window._p52activeTab = 'indexes';
+
+  console.log('[P52] Vector Store enhanced · 8 indexes · carrier-intelligence-idx + provider-quality-idx added · 9 pipeline stages · 10 RAG queries · ~996K docs · 10.0 GB storage');
+})();
