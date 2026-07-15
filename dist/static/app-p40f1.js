@@ -99297,3 +99297,1067 @@ var navigateTo=window.navigateTo;
   console.log('[P45] Expanded Regulatory Intelligence Hub loaded — 7 tabs · 18 bulletins (LTC+Health+Annuity+Life) · 12 NAIC models · 14 AI compliance agents · 6 platform coverage maps · 12 filing deadlines');
 
 }());
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   P46 — E1: HAL Contact Intelligence Hub — Contact Center Operations tab
+   Adds a 6th tab "Contact Center Ops" to the existing P27 hal-cih page.
+   Content: Wipro NexGen AI architecture · 10 call drivers · Challenge/Solution
+   Pattern: intercepts _p27switchTab + buildPage, injects new tab transparently
+   ═══════════════════════════════════════════════════════════════════════════ */
+(function(){ 'use strict';
+
+  var C1='#0891b2'; var C2='#06b6d4'; var C3='#164e63';
+  var SUC='#059669'; var DAN='#dc2626'; var AMB='#d97706'; var PUR='#7c3aed';
+  var WARN='#f59e0b'; var SLATE='#334155';
+
+  /* ── Contact Center Challenge/Solution data from Wipro slides ── */
+  var _p46challenges=[
+    {id:'ch1',icon:'fa-network-wired',color:C1,
+     challenge:'Managing omni-channel interactions across multiple systems, handles, and functions',
+     solution:'NexGen AI-powered omni-channel contact center framework — single unified routing engine across voice, chat, email, and portal channels'},
+    {id:'ch2',icon:'fa-phone-volume',color:PUR,
+     challenge:'High call volume related to claim status, eligibility, and benefit inquiries — agents spending majority of time on self-serviceable queries',
+     solution:'AI bots and virtual agents with LLM-based assistance handle 40%+ of total call volume. Proactive outbound deflects a further 25% before contact occurs'},
+    {id:'ch3',icon:'fa-project-diagram',color:SUC,
+     challenge:'First Call Resolution (FCR) challenges caused by disconnected systems — agents context-switching across 6–8 screens per call',
+     solution:'Federated data model with real-time AI agent assist. Single pane of glass shows claim, policy, eligibility, payment, and document status simultaneously'},
+    {id:'ch4',icon:'fa-users-cog',color:AMB,
+     challenge:'Workforce management during volume fluctuations — seasonal spikes, claims surges, and document deadline months create staffing crises',
+     solution:'AI-driven workforce forecasting with dynamic scheduling. Predictive volume models trained on 3-year call history + claims calendar + LTC seasonal patterns'}
+  ];
+
+  /* ── Top 10 LTC Call Drivers from Wipro slides ── */
+  var _p46callDrivers=[
+    {rank:1,driver:'Status of Claims',pct:'15–20%',icon:'fa-search-dollar',color:DAN,
+     rootCause:'Lack of real-time updates; claimants unaware of adjudication milestones',
+     approaches:['Proactive Outreach','Channel Deflection']},
+    {rank:2,driver:'Missing Documentation',pct:'10–15%',icon:'fa-file-times',color:DAN,
+     rootCause:'Unclear requirements, inconsistent agent guidance on document standards',
+     approaches:['Proactive Outreach','Segmentation']},
+    {rank:3,driver:'Benefit Eligibility / Coverage',pct:'8–12%',icon:'fa-clipboard-check',color:AMB,
+     rootCause:'Knowledge gaps, policy change confusion, state-specific trigger variations',
+     approaches:['Segmentation','Quality & Compliance']},
+    {rank:4,driver:'Payment Status / EOB Inquiries',pct:'5–8%',icon:'fa-dollar-sign',color:AMB,
+     rootCause:'Delays in payment processing, no remittance visibility for claimants',
+     approaches:['Proactive Outreach','Channel Deflection']},
+    {rank:5,driver:'Document Submission / Disclosure',pct:'5–8%',icon:'fa-upload',color:AMB,
+     rootCause:'PDFs and documents hard to submit online; fax-only creates uncertainty',
+     approaches:['Channel Deflection','Quality & Compliance']},
+    {rank:6,driver:'Appeals & Denials',pct:'5–7%',icon:'fa-gavel',color:WARN,
+     rootCause:'Complexity of appeals process; denial letters written in policy language',
+     approaches:['Segmentation','Quality & Compliance']},
+    {rank:7,driver:'Premium Billing / Invoicing',pct:'4–6%',icon:'fa-file-invoice-dollar',color:WARN,
+     rootCause:'Unclear billing statements, invoice disputes, grace period confusion',
+     approaches:['Proactive Outreach','Channel Deflection']},
+    {rank:8,driver:'Payment Scheduling / Coordination',pct:'2–7%',icon:'fa-calendar-check',color:WARN,
+     rootCause:'Multiple payors, care coordinators, and benefit periods create confusion',
+     approaches:['Segmentation','Quality & Compliance']},
+    {rank:9,driver:'Address / Info Change Requests',pct:'2–5%',icon:'fa-address-card',color:SUC,
+     rootCause:'Unclear change processes, identity verification requirements not explained',
+     approaches:['Channel Deflection']},
+    {rank:10,driver:'Prior Authorization / LOI',pct:'2–5%',icon:'fa-file-signature',color:SUC,
+     rootCause:'Complex prior auth coordination between providers, carriers, and care managers',
+     approaches:['Segmentation','Quality & Compliance']}
+  ];
+
+  /* ── Solution approaches ── */
+  var _p46approaches=[
+    {id:'Proactive Outreach',icon:'fa-bullhorn',color:C1,
+     desc:'Claim status alerts, document requirement reminders, proactive payment notifications before the call is placed'},
+    {id:'Segmentation',icon:'fa-sitemap',color:PUR,
+     desc:'Smart routing by call driver type, claim complexity, claimant tier, and predicted resolution path'},
+    {id:'Quality & Compliance',icon:'fa-shield-check',color:SUC,
+     desc:'QA scoring, real-time compliance audit overlay, agent performance coaching, and regulatory adherence monitoring'},
+    {id:'Channel Deflection',icon:'fa-random',color:AMB,
+     desc:'AI bots, IVR self-service, digital portal deflection, and proactive outbound campaigns reduce inbound volume'}
+  ];
+
+  /* ── NexGen AI Architecture layers ── */
+  var _p46layers=[
+    {phase:'PRE-CALL AI',icon:'fa-broadcast-tower',color:'#7c3aed',
+     title:'Pre-Call Intelligence & Deflection',
+     subtitle:'Intercept contacts before they reach a live agent',
+     items:[
+       {icon:'fa-robot',label:'Voice Bot (IVR)',desc:'Natural language processing, intent detection, claim status self-service'},
+       {icon:'fa-video',label:'Video Bot',desc:'Visual authentication, care coordinator escalation, screen-share support'},
+       {icon:'fa-comment-alt',label:'Chat Bot',desc:'Web and mobile messaging, 24/7 availability, LLM-powered responses'},
+       {icon:'fa-route',label:'Auth & Routing Engine',desc:'Identity verification, smart intent routing, priority queue management'},
+       {icon:'fa-phone',label:'Smart IVR',desc:'Voice-driven self-service for payment status, eligibility, document status'}
+     ]},
+    {phase:'IN-CALL AI',icon:'fa-microphone-alt',color:'#0891b2',
+     title:'Real-Time Agent Intelligence',
+     subtitle:'AI-assisted agents with instant knowledge and guided resolution',
+     items:[
+       {icon:'fa-language',label:'AI Language Processor',desc:'Real-time speech-to-text, sentiment detection, intent classification throughout call'},
+       {icon:'fa-desktop',label:'Real-Time Screen Pop',desc:'Instant claim, policy, payment, and eligibility data surfaced on agent desktop'},
+       {icon:'fa-magic',label:'Next Best Action',desc:'AI recommends exact resolution step — reduces average handle time by 40%'},
+       {icon:'fa-graduation-cap',label:'Compliance Overlay',desc:'Real-time regulatory guidance and script compliance monitoring'},
+       {icon:'fa-server',label:'Powered By',desc:'NVIDIA AI · Google Cloud · AWS Connect — enterprise-grade infrastructure'}
+     ]},
+    {phase:'POST-CALL AI',icon:'fa-chart-line',color:'#059669',
+     title:'Post-Call Analytics & Continuous Improvement',
+     subtitle:'Every call generates intelligence that improves the next one',
+     items:[
+       {icon:'fa-file-alt',label:'Auto Call Summary',desc:'AI generates structured call summary in under 30 seconds — zero manual documentation'},
+       {icon:'fa-smile',label:'Sentiment Scoring',desc:'Per-call and trend sentiment analysis flags distressed claimants for proactive follow-up'},
+       {icon:'fa-check-circle',label:'QA Automation',desc:'100% call QA coverage vs. traditional 3–5% manual sampling — automated scoring'},
+       {icon:'fa-flag',label:'Compliance Flagging',desc:'Automatic flagging of regulatory non-compliance events for supervisor review'},
+       {icon:'fa-lightbulb',label:'Business Insights',desc:'FCR improvement drivers, deflection rate trends, agent coaching signal generation'}
+     ]}
+  ];
+
+  /* ── Technology Partners ── */
+  var _p46techPartners=[
+    {name:'Genesys',icon:'fa-cloud',color:'#ff4f00'},
+    {name:'NICE',icon:'fa-shield-alt',color:'#00a1e0'},
+    {name:'Twilio',icon:'fa-phone-alt',color:'#f22f46'},
+    {name:'Five9',icon:'fa-headset',color:'#e8642c'},
+    {name:'Avaya',icon:'fa-network-wired',color:'#d4003f'},
+    {name:'Verint',icon:'fa-chart-bar',color:'#6b2fa0'},
+    {name:'Salesforce',icon:'fa-cloud-upload-alt',color:'#00a1e0'},
+    {name:'ServiceNow',icon:'fa-cogs',color:'#62d84e'},
+    {name:'Google Cloud',icon:'fa-google',color:'#4285f4'},
+    {name:'AWS',icon:'fa-aws',color:'#ff9900'}
+  ];
+
+  var _p46activeSection='nexgen';
+
+  /* ── Build the Contact Center Ops tab content ── */
+  function _p46buildTab(){
+    var html='<div style="font-family:\'Segoe UI\',sans-serif;">';
+
+    /* Section nav */
+    var sections=[
+      {id:'nexgen',   icon:'fa-layer-group',  label:'NexGen AI Architecture'},
+      {id:'drivers',  icon:'fa-phone-volume', label:'Top 10 Call Drivers'},
+      {id:'approach', icon:'fa-lightbulb',    label:'Wipro Solution Approach'}
+    ];
+    html+='<div style="display:flex;gap:8px;margin-bottom:24px;flex-wrap:wrap;">';
+    sections.forEach(function(s){
+      var active=_p46activeSection===s.id;
+      html+='<button onclick="window._p46setSection(\''+s.id+'\')" style="display:flex;align-items:center;gap:7px;padding:10px 18px;border-radius:10px;border:2px solid '+(active?C1:'#e2e8f0')+';background:'+(active?C1:'#fff')+';color:'+(active?'#fff':'#64748b')+';font-size:13px;font-weight:'+(active?'700':'500')+';cursor:pointer;transition:all .2s;">'
+        +'<i class="fas '+s.icon+'"></i>'+s.label+'</button>';
+    });
+    html+='</div>';
+
+    /* KPI strip always visible */
+    html+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;">';
+    [
+      {v:'750K',l:'Annual Call Volume',s:'Before CIH deflection',c:DAN,ic:'fa-phone-volume'},
+      {v:'65%',l:'Deflection Target',s:'AI + self-service combined',c:C1,ic:'fa-bolt'},
+      {v:'40%+',l:'Bot Resolution Rate',s:'No live agent needed',c:SUC,ic:'fa-robot'},
+      {v:'$5.3M',l:'Annual Labor Savings',s:'FTE redeployment + AHT reduction',c:PUR,ic:'fa-coins'}
+    ].forEach(function(k){
+      html+='<div style="background:#fff;border:2px solid '+k.c+'22;border-radius:12px;padding:14px 16px;">'
+        +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">'
+        +'<i class="fas '+k.ic+'" style="color:'+k.c+';font-size:14px;"></i>'
+        +'<span style="font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.5px;">'+k.l+'</span>'
+        +'</div>'
+        +'<div style="font-size:26px;font-weight:800;color:'+k.c+';">'+k.v+'</div>'
+        +'<div style="font-size:11px;color:#94a3b8;margin-top:2px;">'+k.s+'</div>'
+        +'</div>';
+    });
+    html+='</div>';
+
+    if(_p46activeSection==='nexgen') html+=_p46buildNexGen();
+    else if(_p46activeSection==='drivers') html+=_p46buildDrivers();
+    else html+=_p46buildApproach();
+
+    html+='</div>';
+    return html;
+  }
+
+  function _p46buildNexGen(){
+    var html='<div>';
+    /* Architecture header */
+    html+='<div style="background:linear-gradient(135deg,'+C3+',#0c4a6e);border-radius:14px;padding:20px 24px;color:#fff;margin-bottom:20px;">'
+      +'<div style="font-size:16px;font-weight:800;margin-bottom:4px;"><i class="fas fa-layer-group" style="margin-right:8px;"></i>Wipro AI-Powered NexGen Contact Center Architecture</div>'
+      +'<div style="font-size:12px;opacity:.85;">Three-layer AI framework spanning the full contact lifecycle — Pre-Call deflection → In-Call intelligence → Post-Call analytics</div>'
+      +'</div>';
+
+    /* 3 layers */
+    _p46layers.forEach(function(layer,li){
+      html+='<div style="background:#fff;border:2px solid '+layer.color+'33;border-radius:14px;margin-bottom:16px;overflow:hidden;">'
+        +'<div style="background:'+layer.color+';padding:14px 20px;display:flex;align-items:center;gap:12px;">'
+        +'<div style="background:rgba(255,255,255,.2);border-radius:10px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;">'
+        +'<i class="fas '+layer.icon+'" style="color:#fff;font-size:18px;"></i></div>'
+        +'<div>'
+        +'<div style="font-size:13px;font-weight:800;color:#fff;letter-spacing:.5px;">'+layer.phase+'</div>'
+        +'<div style="font-size:14px;font-weight:700;color:rgba(255,255,255,.95);">'+layer.title+'</div>'
+        +'<div style="font-size:11px;color:rgba(255,255,255,.8);">'+layer.subtitle+'</div>'
+        +'</div></div>'
+        +'<div style="padding:16px 20px;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;">';
+      layer.items.forEach(function(item){
+        html+='<div style="background:'+layer.color+'08;border:1px solid '+layer.color+'22;border-radius:10px;padding:12px;">'
+          +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">'
+          +'<i class="fas '+item.icon+'" style="color:'+layer.color+';font-size:13px;"></i>'
+          +'<span style="font-size:12px;font-weight:700;color:'+SLATE+';">'+item.label+'</span>'
+          +'</div>'
+          +'<div style="font-size:11px;color:#64748b;line-height:1.5;">'+item.desc+'</div>'
+          +'</div>';
+      });
+      html+='</div></div>';
+    });
+
+    /* Tech partner strip */
+    html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:16px 20px;">'
+      +'<div style="font-size:12px;font-weight:700;color:#64748b;margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px;"><i class="fas fa-plug" style="margin-right:6px;color:'+C1+';"></i>Technology Integration Partners</div>'
+      +'<div style="display:flex;flex-wrap:wrap;gap:10px;">';
+    _p46techPartners.forEach(function(tp){
+      html+='<div style="display:flex;align-items:center;gap:6px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:7px 14px;">'
+        +'<i class="fab '+tp.icon+' fa-solid" style="color:'+tp.color+';font-size:13px;"></i>'
+        +'<span style="font-size:12px;font-weight:600;color:#334155;">'+tp.name+'</span>'
+        +'</div>';
+    });
+    html+='</div></div>';
+    html+='</div>';
+    return html;
+  }
+
+  function _p46buildDrivers(){
+    var html='<div>';
+    /* Header */
+    html+='<div style="background:linear-gradient(135deg,#7c3aed,#6d28d9);border-radius:14px;padding:20px 24px;color:#fff;margin-bottom:20px;">'
+      +'<div style="font-size:16px;font-weight:800;margin-bottom:4px;"><i class="fas fa-phone-volume" style="margin-right:8px;"></i>Top 10 LTC Contact Center Call Drivers</div>'
+      +'<div style="font-size:12px;opacity:.85;">Compiled from Wipro LTC operations analysis — ranked by inbound volume contribution. Drives AI deflection prioritization.</div>'
+      +'</div>';
+
+    /* Driver table */
+    html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden;margin-bottom:20px;">'
+      +'<table style="width:100%;border-collapse:collapse;">'
+      +'<thead><tr style="background:#f8fafc;">'
+      +'<th style="padding:12px 16px;text-align:left;font-size:11px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid #e2e8f0;">#</th>'
+      +'<th style="padding:12px 16px;text-align:left;font-size:11px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid #e2e8f0;">Call Driver</th>'
+      +'<th style="padding:12px 16px;text-align:center;font-size:11px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid #e2e8f0;">% Volume</th>'
+      +'<th style="padding:12px 16px;text-align:left;font-size:11px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid #e2e8f0;">Root Cause</th>'
+      +'<th style="padding:12px 16px;text-align:left;font-size:11px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid #e2e8f0;">Solution Approaches</th>'
+      +'</tr></thead><tbody>';
+    _p46callDrivers.forEach(function(d,i){
+      html+='<tr style="border-bottom:1px solid #f1f5f9;'+(i%2===0?'background:#fff;':'background:#fafbff;')+'">'
+        +'<td style="padding:12px 16px;"><div style="width:28px;height:28px;border-radius:50%;background:'+d.color+';display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:800;">'+d.rank+'</div></td>'
+        +'<td style="padding:12px 16px;"><div style="display:flex;align-items:center;gap:9px;">'
+        +'<i class="fas '+d.icon+'" style="color:'+d.color+';font-size:14px;width:18px;text-align:center;"></i>'
+        +'<span style="font-size:13px;font-weight:600;color:'+SLATE+';">'+d.driver+'</span></div></td>'
+        +'<td style="padding:12px 16px;text-align:center;"><span style="background:'+d.color+'1a;color:'+d.color+';border-radius:20px;padding:4px 12px;font-size:12px;font-weight:700;">'+d.pct+'</span></td>'
+        +'<td style="padding:12px 16px;font-size:12px;color:#64748b;max-width:220px;">'+d.rootCause+'</td>'
+        +'<td style="padding:12px 16px;">'
+        +d.approaches.map(function(a){
+          var ac=a==='Proactive Outreach'?C1:a==='Segmentation'?PUR:a==='Quality & Compliance'?SUC:AMB;
+          return '<span style="display:inline-block;background:'+ac+'1a;color:'+ac+';border-radius:6px;padding:3px 8px;font-size:10px;font-weight:700;margin:2px;">'+a+'</span>';
+        }).join('')
+        +'</td></tr>';
+    });
+    html+='</tbody></table></div>';
+
+    /* Solution approach cards */
+    html+='<div style="font-size:14px;font-weight:700;color:'+SLATE+';margin-bottom:12px;"><i class="fas fa-lightbulb" style="color:'+C1+';margin-right:8px;"></i>4 Solution Approaches</div>';
+    html+='<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;">';
+    _p46approaches.forEach(function(ap){
+      html+='<div style="background:#fff;border:2px solid '+ap.color+'22;border-radius:12px;padding:16px 18px;">'
+        +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">'
+        +'<div style="width:36px;height:36px;border-radius:10px;background:'+ap.color+';display:flex;align-items:center;justify-content:center;">'
+        +'<i class="fas '+ap.icon+'" style="color:#fff;font-size:15px;"></i></div>'
+        +'<span style="font-size:13px;font-weight:700;color:'+ap.color+';">'+ap.id+'</span>'
+        +'</div>'
+        +'<div style="font-size:12px;color:#64748b;line-height:1.6;">'+ap.desc+'</div>'
+        +'</div>';
+    });
+    html+='</div></div>';
+    return html;
+  }
+
+  function _p46buildApproach(){
+    var html='<div>';
+    /* Header */
+    html+='<div style="background:linear-gradient(135deg,#059669,#047857);border-radius:14px;padding:20px 24px;color:#fff;margin-bottom:20px;">'
+      +'<div style="font-size:16px;font-weight:800;margin-bottom:4px;"><i class="fas fa-check-double" style="margin-right:8px;"></i>Wipro Solution Approach — Contact Center Transformation</div>'
+      +'<div style="font-size:12px;opacity:.85;">Four challenge domains addressed through Wipro\'s NexGen AI platform and operational redesign</div>'
+      +'</div>';
+
+    _p46challenges.forEach(function(ch,i){
+      html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:20px 22px;margin-bottom:14px;">'
+        +'<div style="display:flex;gap:16px;align-items:flex-start;">'
+        +'<div style="flex-shrink:0;width:44px;height:44px;border-radius:12px;background:'+ch.color+';display:flex;align-items:center;justify-content:center;">'
+        +'<i class="fas '+ch.icon+'" style="color:#fff;font-size:18px;"></i></div>'
+        +'<div style="flex:1;">'
+        +'<div style="font-size:11px;font-weight:700;color:'+ch.color+';text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">CHALLENGE '+(i+1)+'</div>'
+        +'<div style="font-size:13px;font-weight:600;color:'+SLATE+';margin-bottom:10px;line-height:1.5;">'+ch.challenge+'</div>'
+        +'<div style="background:#f0fdf4;border-left:3px solid '+SUC+';border-radius:0 8px 8px 0;padding:10px 14px;">'
+        +'<div style="font-size:11px;font-weight:700;color:'+SUC+';margin-bottom:4px;"><i class="fas fa-check-circle" style="margin-right:5px;"></i>WIPRO SOLUTION</div>'
+        +'<div style="font-size:12px;color:#166534;line-height:1.6;">'+ch.solution+'</div>'
+        +'</div></div></div></div>';
+    });
+
+    /* Value proposition footer */
+    html+='<div style="background:linear-gradient(135deg,'+C3+',#0369a1);border-radius:14px;padding:20px 24px;color:#fff;margin-top:8px;">'
+      +'<div style="font-size:14px;font-weight:700;margin-bottom:14px;"><i class="fas fa-trophy" style="margin-right:8px;"></i>Contact Center Transformation Outcomes</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">';
+    [
+      {v:'65%',l:'Call Deflection Rate',s:'AI + proactive outreach'},
+      {v:'+43pts',l:'NPS Improvement',s:'Faster, accurate resolution'},
+      {v:'−40%',l:'Average Handle Time',s:'AI agent assist + screen pop'},
+      {v:'100%',l:'QA Call Coverage',s:'vs. 3–5% manual sampling'},
+      {v:'221',l:'FTEs Redeployed',s:'From 340 → 119 live agents'},
+      {v:'<60s',l:'Bot Response Time',s:'LLM-powered instant answers'}
+    ].forEach(function(m){
+      html+='<div style="background:rgba(255,255,255,.12);border-radius:10px;padding:12px 14px;">'
+        +'<div style="font-size:22px;font-weight:800;color:#67e8f9;">'+m.v+'</div>'
+        +'<div style="font-size:12px;font-weight:600;opacity:.95;margin-top:2px;">'+m.l+'</div>'
+        +'<div style="font-size:10px;opacity:.75;margin-top:2px;">'+m.s+'</div>'
+        +'</div>';
+    });
+    html+='</div></div></div>';
+    return html;
+  }
+
+  /* ── Global section switcher ── */
+  window._p46setSection=function(id){
+    _p46activeSection=id;
+    var tc=document.getElementById('p46-cc-content');
+    if(tc) tc.innerHTML=_p46buildTab();
+  };
+
+  /* ── Patch P27 buildPage to add a 6th tab ── */
+  var _p46origBuild=window._p27buildPageFn||null;
+
+  /* Hook: after any hal-cih navigation, inject the extra tab */
+  function _p46injectCCTab(){
+    /* Wait for P27 to finish rendering */
+    setTimeout(function(){
+      var tabBar=document.querySelector('#page-content [style*="border-bottom:2px solid #e0f2fe"]');
+      if(!tabBar) return;
+      /* Don't double-inject */
+      if(document.getElementById('p46-cc-tab')) return;
+
+      /* Add tab button */
+      var btn=document.createElement('div');
+      btn.id='p46-cc-tab';
+      btn.setAttribute('data-p27tab','ccops');
+      btn.innerHTML='<i class="fas fa-headset"></i> Contact Center Ops';
+      btn.style.cssText='padding:14px 20px;cursor:pointer;display:flex;align-items:center;gap:7px;font-size:13px;font-weight:500;color:#64748b;border-bottom:3px solid transparent;white-space:nowrap;transition:all .2s;';
+      btn.onclick=function(){
+        /* Deactivate all P27 tabs */
+        document.querySelectorAll('[data-p27tab]').forEach(function(el){
+          el.style.color='#64748b';
+          el.style.fontWeight='500';
+          el.style.borderBottom='3px solid transparent';
+        });
+        btn.style.color='#0891b2';
+        btn.style.fontWeight='700';
+        btn.style.borderBottom='3px solid #0891b2';
+        var tc=document.getElementById('p27-tab-content');
+        if(tc){
+          tc.innerHTML='<div id="p46-cc-content" style="padding:24px 0;">'+_p46buildTab()+'</div>';
+        }
+      };
+      tabBar.appendChild(btn);
+      console.log('[P46] Contact Center Ops tab injected into hal-cih');
+    },500);
+  }
+
+  /* ── Intercept navigateTo for hal-cih ── */
+  var _p46origNav=window.navigateTo;
+  window.navigateTo=function(page,params){
+    var result=typeof _p46origNav==='function'?_p46origNav.apply(this,arguments):undefined;
+    if(page==='hal-cih') _p46injectCCTab();
+    return result;
+  };
+  /* Keep bare global in sync */
+  var navigateTo=window.navigateTo;
+
+  console.log('[P46] Contact Center Ops tab ready for hal-cih — NexGen AI architecture · 10 call drivers · 4 solution approaches');
+})();
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   P47 — E2: LTC Policy Administration — NEW PAGE in LTC OPERATIONS
+   Route: ltc-policy-admin | Sidebar: LTC OPERATIONS | Icon: fa-file-contract
+   3 Tabs: Capabilities Hub · Transformation Landscape · Wipro Solution
+   ═══════════════════════════════════════════════════════════════════════════ */
+(function(){ 'use strict';
+
+  var PA1='#7c3aed'; var PA2='#8b5cf6'; var PA3='#4c1d95';
+  var SUC='#059669'; var DAN='#dc2626'; var AMB='#d97706'; var CYN='#0891b2';
+  var SLATE='#334155';
+
+  var _p47activeTab='capabilities';
+
+  /* ── 4 Capability Domains ── */
+  var _p47domains=[
+    {id:'servicing',icon:'fa-file-contract',color:'#0891b2',title:'Policy Servicing',
+     items:[
+       'Comprehensive master record management per insured',
+       'Insured/carrier capabilities portal with real-time updates',
+       'Policy change workflow automation with audit trail',
+       'Lapse and reinstatement processing with grace period tracking',
+       'Coverage verification and rider management'
+     ]},
+    {id:'billing',icon:'fa-dollar-sign',color:'#059669',title:'Billing & Premium',
+     items:[
+       'Flex premium management (up to 20% of face value)',
+       '180-day grace period tracking with automated notification',
+       'EFT / ACH payment processing with retry logic',
+       'Returned item / NOC workflow with auto-alerts',
+       'Premium adjustment and waiver processing'
+     ]},
+    {id:'financial',icon:'fa-landmark',color:'#d97706',title:'Financial Controls',
+     items:[
+       'Financial processing, posting, and control management',
+       'Automated financial close and audit reconciliation',
+       'FPVS adjustment workflow for non-compliant systems',
+       'Refund QC and misdirected payment recovery automation',
+       'Reconciliation reporting with exception flagging'
+     ]},
+    {id:'qc',icon:'fa-check-double',color:'#7c3aed',title:'QC & Keepsource',
+     items:[
+       'Audit-QC cycle completed in under 90 days',
+       'Age-related discrepancy rate maintained below 5%',
+       'Quality scoring and disposition tracking per transaction',
+       'Closed-loop review cycle with supervisor sign-off',
+       'Keepsource data integrity monitoring and alerts'
+     ]}
+  ];
+
+  /* ── 4 Accelerators ── */
+  var _p47accelerators=[
+    {icon:'fa-database',color:CYN,title:'DaaS-First Delivery Backbone',
+     desc:'OCR, rules engine, and dependency validation form the backbone of periodic review processes. Every transaction digitized at source.'},
+    {icon:'fa-robot',color:PA1,title:'Automation as Accelerator',
+     desc:'250+ RPA bots in production. 25% of manual task inventory eliminated. Date-driven workflow triggers across all policy servicing functions.'},
+    {icon:'fa-chart-line',color:SUC,title:'DaaS-Deliverable Quality Model',
+     desc:'Defined quality metrics, SLA targets, and priority tiering applied to every deliverable. Continuous measurement with published scorecards.'},
+    {icon:'fa-project-diagram',color:AMB,title:'Next-Iteration Integration Strategy',
+     desc:'Standardized systems and processes for integration delivery. API-first approach ensures carrier, provider, and regulator connectivity.'}
+  ];
+
+  /* ── Bottom Functional Pillars ── */
+  var _p47pillars=[
+    {title:'Policy Servicing',color:CYN,icon:'fa-file-alt',
+     items:['Flex claim steps','Premium adjustments','Grace and lapse management']},
+    {title:'Billing & Premium',color:SUC,icon:'fa-receipt',
+     items:['Flex premium (20% face)','Self-service portal','Grace and lapse workflow']},
+    {title:'Provider Data',color:AMB,icon:'fa-hospital',
+     items:['Flex claim steps','Provider verification','Provider info management']},
+    {title:'LTC Customer Experience',color:PA1,icon:'fa-users',
+     items:['Standard policy set','Disclosures management','Customer experience portal']}
+  ];
+
+  /* ── 6 Transformation Levers ── */
+  var _p47levers=[
+    {id:'fpvs',icon:'fa-sliders-h',color:DAN,
+     title:'FPVS Adjustments / Premium Void Stop',
+     step:'Intake → Validate',
+     items:[
+       'Remediate systems with non-compliant FPVS data',
+       'Interim rules to address premium void processing gaps',
+       'Reduction in issues through integration and automation'
+     ]},
+    {id:'refund',icon:'fa-undo-alt',color:AMB,
+     title:'Refund QC / Misdirected Payments',
+     step:'Validate → Process',
+     items:[
+       'Rules-based automated refund trigger processing',
+       'AI-enhanced reconciliation for misdirected payments',
+       'Real-time audit and compliance tracking with alerts'
+     ]},
+    {id:'waiver',icon:'fa-shield-alt',color:CYN,
+     title:'Waiver of Premium / Coverage Change',
+     step:'Process',
+     items:[
+       '5,200+ automated data setups for premium waiver coverage',
+       'Automated eligibility checks and coverage update workflow',
+       'Integration with claims system for waiver triggers'
+     ]},
+    {id:'indexing',icon:'fa-trending-up',color:PA1,
+     title:'Indexing / Rate Increase Response',
+     step:'Process → Control',
+     items:[
+       'Regulatory approval tracking for rate change applications',
+       'Smart parsing tools for rate filings and requests',
+       'Automated customer notification and communication workflows'
+     ]},
+    {id:'billmode',icon:'fa-money-check-alt',color:SUC,
+     title:'Bill Mode / EFT Rejects / Returned Cheques / NOC',
+     step:'Control → Notify',
+     items:[
+       'Real-time returned item processing with auto-alerts',
+       'AI-enhanced reconciliation and automated retry logic',
+       'Automated customer communication and case closure'
+     ]},
+    {id:'premium',icon:'fa-history',color:AMB,
+     title:'Premium History',
+     step:'Control → Notify',
+     items:[
+       'Full premium history maintained for rate change calculations',
+       'Automated verification and reconciliation workflow',
+       'Regulatory audit export with complete premium ledger'
+     ]}
+  ];
+
+  /* ── Build Page ── */
+  function _p47buildPage(){
+    var pc=document.getElementById('page-content');
+    if(!pc) return;
+    pc.innerHTML=''
+      +'<div style="font-family:\'Segoe UI\',sans-serif;background:#faf5ff;min-height:100vh;padding:0;">'
+      /* Hero */
+      +'<div style="background:linear-gradient(135deg,'+PA3+' 0%,#6d28d9 50%,'+PA1+' 100%);padding:28px 32px 22px;color:#fff;">'
+      +'<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">'
+      +'<div style="background:rgba(255,255,255,.15);border-radius:14px;width:56px;height:56px;display:flex;align-items:center;justify-content:center;">'
+      +'<i class="fas fa-file-contract" style="font-size:26px;"></i></div>'
+      +'<div style="flex:1;">'
+      +'<div style="font-size:22px;font-weight:800;letter-spacing:-.3px;">LTC Policy Administration</div>'
+      +'<div style="font-size:13px;opacity:.88;margin-top:3px;">Wipro-Powered Policy Ops · 250+ RPA Bots · 5,200+ Automated Setups · DaaS-First Delivery</div>'
+      +'</div>'
+      +'<div style="display:flex;gap:10px;flex-wrap:wrap;">'
+      +_p47badge('250+','RPA Bots Active','fa-robot')
+      +_p47badge('90 days','Audit-QC Cycle','fa-clock')
+      +_p47badge('<5%','Discrepancy Rate','fa-check-circle')
+      +_p47badge('5,200+','Automated Setups','fa-cogs')
+      +'</div></div></div>'
+      /* Tab bar */
+      +'<div style="background:#fff;border-bottom:2px solid #ede9fe;padding:0 32px;display:flex;gap:0;overflow-x:auto;">'
+      +_p47tabBtn('capabilities','fa-th-large','Capabilities Hub')
+      +_p47tabBtn('transformation','fa-project-diagram','Transformation Landscape')
+      +_p47tabBtn('solution','fa-lightbulb','Wipro Solution Approach')
+      +'</div>'
+      +'<div id="p47-tab-content" style="padding:28px 32px;">'
+      +_p47renderTab()
+      +'</div></div>';
+  }
+
+  function _p47badge(v,l,ic){
+    return '<div style="background:rgba(255,255,255,.12);border-radius:10px;padding:10px 16px;text-align:center;min-width:90px;">'
+      +'<div style="font-size:17px;font-weight:800;">'+v+'</div>'
+      +'<div style="font-size:10px;opacity:.8;display:flex;align-items:center;gap:4px;justify-content:center;margin-top:2px;">'
+      +'<i class="fas '+ic+'" style="font-size:9px;"></i>'+l+'</div></div>';
+  }
+
+  function _p47tabBtn(id,icon,label){
+    var active=_p47activeTab===id;
+    return '<div onclick="window._p47switchTab(\''+id+'\')" data-p47tab="'+id+'" style="padding:14px 22px;cursor:pointer;display:flex;align-items:center;gap:7px;'
+      +'font-size:13px;font-weight:'+(active?'700':'500')+';color:'+(active?PA1:'#64748b')+';'
+      +'border-bottom:3px solid '+(active?PA1:'transparent')+';white-space:nowrap;transition:all .2s;">'
+      +'<i class="fas '+icon+'"></i>'+label+'</div>';
+  }
+
+  function _p47renderTab(){
+    if(_p47activeTab==='capabilities') return _p47capabilitiesTab();
+    if(_p47activeTab==='transformation') return _p47transformationTab();
+    return _p47solutionTab();
+  }
+
+  window._p47switchTab=function(id){
+    _p47activeTab=id;
+    var tc=document.getElementById('p47-tab-content');
+    if(tc) tc.innerHTML=_p47renderTab();
+    document.querySelectorAll('[data-p47tab]').forEach(function(el){
+      var tid=el.getAttribute('data-p47tab');
+      el.style.color=tid===id?PA1:'#64748b';
+      el.style.fontWeight=tid===id?'700':'500';
+      el.style.borderBottom='3px solid '+(tid===id?PA1:'transparent');
+    });
+  };
+
+  /* TAB 1: Capabilities Hub */
+  function _p47capabilitiesTab(){
+    var html='<div>';
+
+    /* 4 Domain cards */
+    html+='<div style="font-size:15px;font-weight:700;color:'+SLATE+';margin-bottom:14px;"><i class="fas fa-th-large" style="color:'+PA1+';margin-right:8px;"></i>4 Primary Capability Domains</div>';
+    html+='<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:28px;">';
+    _p47domains.forEach(function(d){
+      html+='<div style="background:#fff;border:2px solid '+d.color+'22;border-radius:14px;overflow:hidden;">'
+        +'<div style="background:'+d.color+';padding:14px 18px;display:flex;align-items:center;gap:10px;">'
+        +'<i class="fas '+d.icon+'" style="color:#fff;font-size:18px;"></i>'
+        +'<span style="font-size:14px;font-weight:700;color:#fff;">'+d.title+'</span>'
+        +'</div>'
+        +'<div style="padding:14px 18px;">'
+        +'<ul style="margin:0;padding:0;list-style:none;">';
+      d.items.forEach(function(item){
+        html+='<li style="display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-bottom:1px solid #f8fafc;font-size:12px;color:#475569;">'
+          +'<i class="fas fa-check-circle" style="color:'+d.color+';margin-top:2px;font-size:11px;flex-shrink:0;"></i>'+item+'</li>';
+      });
+      html+='</ul></div></div>';
+    });
+    html+='</div>';
+
+    /* 4 Accelerators */
+    html+='<div style="font-size:15px;font-weight:700;color:'+SLATE+';margin-bottom:14px;"><i class="fas fa-rocket" style="color:'+PA1+';margin-right:8px;"></i>4 Delivery Accelerators</div>';
+    html+='<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:28px;">';
+    _p47accelerators.forEach(function(a){
+      html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px 18px;display:flex;gap:14px;align-items:flex-start;">'
+        +'<div style="width:42px;height:42px;border-radius:12px;background:'+a.color+';display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
+        +'<i class="fas '+a.icon+'" style="color:#fff;font-size:17px;"></i></div>'
+        +'<div>'
+        +'<div style="font-size:13px;font-weight:700;color:'+a.color+';margin-bottom:5px;">'+a.title+'</div>'
+        +'<div style="font-size:12px;color:#64748b;line-height:1.6;">'+a.desc+'</div>'
+        +'</div></div>';
+    });
+    html+='</div>';
+
+    /* Functional pillars */
+    html+='<div style="font-size:15px;font-weight:700;color:'+SLATE+';margin-bottom:14px;"><i class="fas fa-columns" style="color:'+PA1+';margin-right:8px;"></i>Functional Service Pillars</div>';
+    html+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">';
+    _p47pillars.forEach(function(p){
+      html+='<div style="background:#fff;border:2px solid '+p.color+'22;border-radius:12px;overflow:hidden;">'
+        +'<div style="background:'+p.color+';padding:10px 14px;display:flex;align-items:center;gap:8px;">'
+        +'<i class="fas '+p.icon+'" style="color:#fff;font-size:13px;"></i>'
+        +'<span style="font-size:12px;font-weight:700;color:#fff;">'+p.title+'</span>'
+        +'</div><div style="padding:12px 14px;">';
+      p.items.forEach(function(item){
+        html+='<div style="font-size:11px;color:#64748b;padding:4px 0;border-bottom:1px solid #f8fafc;display:flex;align-items:center;gap:6px;">'
+          +'<i class="fas fa-angle-right" style="color:'+p.color+';font-size:10px;"></i>'+item+'</div>';
+      });
+      html+='</div></div>';
+    });
+    html+='</div></div>';
+    return html;
+  }
+
+  /* TAB 2: Transformation Landscape */
+  function _p47transformationTab(){
+    var html='<div>';
+
+    /* 5-Step chevron */
+    var steps=['1. Intake','2. Validate','3. Process','4. Control','5. Notify'];
+    var stepColors=[CYN,PA1,AMB,SUC,DAN];
+    html+='<div style="background:linear-gradient(135deg,'+PA3+',#4338ca);border-radius:14px;padding:20px 24px;margin-bottom:24px;color:#fff;">'
+      +'<div style="font-size:15px;font-weight:700;margin-bottom:14px;"><i class="fas fa-project-diagram" style="margin-right:8px;"></i>Policy Administration Transformation Landscape — 5-Step Process Flow</div>'
+      +'<div style="display:flex;gap:4px;flex-wrap:wrap;">';
+    steps.forEach(function(s,i){
+      var isLast=i===steps.length-1;
+      html+='<div style="background:'+stepColors[i]+';border-radius:8px;padding:10px 18px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;">'+s
+        +(isLast?'':'<i class="fas fa-arrow-right" style="font-size:10px;opacity:.7;margin-left:4px;"></i>')
+        +'</div>';
+    });
+    html+='</div></div>';
+
+    /* 6 Transformation lever cards */
+    html+='<div style="font-size:15px;font-weight:700;color:'+SLATE+';margin-bottom:14px;"><i class="fas fa-tools" style="color:'+PA1+';margin-right:8px;"></i>6 Transformation Levers</div>';
+    html+='<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;">';
+    _p47levers.forEach(function(lev){
+      html+='<div style="background:#fff;border:2px solid '+lev.color+'22;border-left:4px solid '+lev.color+';border-radius:12px;padding:18px 20px;">'
+        +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">'
+        +'<div style="width:36px;height:36px;border-radius:10px;background:'+lev.color+';display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
+        +'<i class="fas '+lev.icon+'" style="color:#fff;font-size:14px;"></i></div>'
+        +'<div>'
+        +'<div style="font-size:13px;font-weight:700;color:'+SLATE+';">'+lev.title+'</div>'
+        +'<div style="font-size:10px;background:'+lev.color+'1a;color:'+lev.color+';border-radius:6px;padding:2px 8px;display:inline-block;margin-top:3px;font-weight:600;">Process step: '+lev.step+'</div>'
+        +'</div></div>'
+        +'<ul style="margin:0;padding:0;list-style:none;">';
+      lev.items.forEach(function(item){
+        html+='<li style="display:flex;align-items:flex-start;gap:7px;padding:5px 0;border-bottom:1px solid #f8fafc;font-size:12px;color:#475569;">'
+          +'<i class="fas fa-check" style="color:'+lev.color+';margin-top:2px;font-size:10px;flex-shrink:0;"></i>'+item+'</li>';
+      });
+      html+='</ul></div>';
+    });
+    html+='</div></div>';
+    return html;
+  }
+
+  /* TAB 3: Wipro Solution Approach */
+  function _p47solutionTab(){
+    var html='<div>';
+    html+='<div style="background:linear-gradient(135deg,'+PA3+',#6d28d9);border-radius:14px;padding:20px 24px;color:#fff;margin-bottom:24px;">'
+      +'<div style="font-size:16px;font-weight:800;margin-bottom:4px;"><i class="fas fa-lightbulb" style="margin-right:8px;"></i>Wipro Policy Administration — Challenge to Solution Mapping</div>'
+      +'<div style="font-size:12px;opacity:.85;">How Wipro\'s DaaS + RPA + AI framework addresses the most complex LTC policy administration challenges</div>'
+      +'</div>';
+
+    var challenges=[
+      {icon:'fa-puzzle-piece',color:DAN,
+       challenge:'Complex policy language and benefit determination driving high manual interpretation effort',
+       solution:'AI-based contract parsing with benefit calculation engine. Policy-specific rules extracted and codified into workflow decisioning.'},
+      {icon:'fa-bolt',color:AMB,
+       challenge:'High-volume admin creating manual bottlenecks — thousands of policy changes, premium adjustments, and correspondence daily',
+       solution:'250+ RPA bots in production automating 25% of total task inventory. Date-driven triggers eliminate manual monitoring overhead.'},
+      {icon:'fa-gavel',color:PA1,
+       challenge:'Regulatory compliance across the full policy lifecycle — 50 states, multiple benefit types, ongoing rate filings',
+       solution:'Automated FPVS workflows, regulatory rate filing tracking, audit trail generation, and real-time compliance monitoring.'},
+      {icon:'fa-exclamation-triangle',color:CYN,
+       challenge:'Payment errors, returned items, billing disputes, and premium reconciliation failures causing claimant dissatisfaction',
+       solution:'AI reconciliation with real-time returned item alerts, automated retry logic, and instant case closure notifications.'},
+      {icon:'fa-chart-line',color:SUC,
+       challenge:'Lack of visibility into quality metrics, SLA performance, and process health across distributed policy servicing operations',
+       solution:'DaaS-Deliverable Quality Model with published scorecards, exception-based review queues, and continuous SLA measurement.'}
+    ];
+
+    challenges.forEach(function(ch,i){
+      html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:20px 22px;margin-bottom:14px;">'
+        +'<div style="display:flex;gap:16px;align-items:flex-start;">'
+        +'<div style="flex-shrink:0;width:44px;height:44px;border-radius:12px;background:'+ch.color+';display:flex;align-items:center;justify-content:center;">'
+        +'<i class="fas '+ch.icon+'" style="color:#fff;font-size:18px;"></i></div>'
+        +'<div style="flex:1;">'
+        +'<div style="font-size:11px;font-weight:700;color:'+ch.color+';text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">CHALLENGE '+(i+1)+'</div>'
+        +'<div style="font-size:13px;font-weight:600;color:'+SLATE+';margin-bottom:10px;line-height:1.5;">'+ch.challenge+'</div>'
+        +'<div style="background:#f0fdf4;border-left:3px solid '+SUC+';border-radius:0 8px 8px 0;padding:10px 14px;">'
+        +'<div style="font-size:11px;font-weight:700;color:'+SUC+';margin-bottom:4px;"><i class="fas fa-check-circle" style="margin-right:5px;"></i>WIPRO SOLUTION</div>'
+        +'<div style="font-size:12px;color:#166534;line-height:1.6;">'+ch.solution+'</div>'
+        +'</div></div></div></div>';
+    });
+
+    /* Outcome summary */
+    html+='<div style="background:linear-gradient(135deg,'+PA3+',#0c4a6e);border-radius:14px;padding:20px 24px;color:#fff;margin-top:8px;">'
+      +'<div style="font-size:14px;font-weight:700;margin-bottom:14px;"><i class="fas fa-award" style="margin-right:8px;"></i>Policy Administration Transformation Outcomes</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">';
+    [
+      {v:'250+',l:'RPA Bots in Production',s:'Across all policy servicing functions'},
+      {v:'25%',l:'Task Inventory Eliminated',s:'Manual steps removed via automation'},
+      {v:'5,200+',l:'Automated Setups',s:'Premium waiver and coverage change'},
+      {v:'<90 days',l:'Audit-QC Cycle',s:'End-to-end quality review time'},
+      {v:'<5%',l:'Discrepancy Rate',s:'Age-related data quality target'},
+      {v:'99%+',l:'Reconciliation Accuracy',s:'Financial control and audit precision'}
+    ].forEach(function(m){
+      html+='<div style="background:rgba(255,255,255,.12);border-radius:10px;padding:12px 14px;">'
+        +'<div style="font-size:22px;font-weight:800;color:#c4b5fd;">'+m.v+'</div>'
+        +'<div style="font-size:12px;font-weight:600;opacity:.95;margin-top:2px;">'+m.l+'</div>'
+        +'<div style="font-size:10px;opacity:.75;margin-top:2px;">'+m.s+'</div>'
+        +'</div>';
+    });
+    html+='</div></div></div>';
+    return html;
+  }
+
+  /* ── Register route in the nav intercept chain ── */
+  var _p47origNav=window.navigateTo;
+  window.navigateTo=function(page,params){
+    if(page==='ltc-policy-admin'){
+      var pc=document.getElementById('page-content');
+      if(!pc){ if(typeof _p47origNav==='function') _p47origNav.apply(this,arguments); return; }
+      pc.innerHTML='';
+      _p47buildPage();
+      document.querySelectorAll('.nav-item').forEach(function(el){ el.classList.remove('active'); });
+      var navEl=document.querySelector('[data-page="ltc-policy-admin"]');
+      if(navEl) navEl.classList.add('active');
+      window.scrollTo(0,0);
+      return;
+    }
+    if(typeof _p47origNav==='function') _p47origNav.apply(this,arguments);
+  };
+  var navigateTo=window.navigateTo;
+
+  /* ── Inject nav item into the sidebar LTC OPERATIONS folder ── */
+  function _p47injectSidebarItem(){
+    /* Find the ltc-upd-ops nav item and insert after it, or find the LTC section */
+    var existing=document.querySelector('[onclick*="ltc-policy-admin"]')||document.querySelector('[data-page="ltc-policy-admin"]');
+    if(existing) return; /* already injected */
+
+    /* Look for ltc-upd-ops or ltc-ai-agents as insertion anchor */
+    var anchor=document.querySelector('[onclick*="ltc-upd-ops"]')||document.querySelector('[onclick*="ltc-ai-agents"]');
+    if(!anchor) return;
+
+    var li=document.createElement('div');
+    li.className='nav-item';
+    li.setAttribute('data-page','ltc-policy-admin');
+    li.setAttribute('onclick','navigateTo(\'ltc-policy-admin\')');
+    li.style.cssText='display:flex;align-items:center;gap:10px;padding:8px 16px 8px 32px;cursor:pointer;font-size:13px;color:#374151;border-radius:6px;margin:1px 8px;';
+    li.innerHTML='<i class="fas fa-file-contract" style="color:#7c3aed;font-size:12px;width:14px;text-align:center;"></i><span>Policy Administration</span>';
+    li.onmouseenter=function(){ if(!li.classList.contains('active')) li.style.background='#f3f4f6'; };
+    li.onmouseleave=function(){ if(!li.classList.contains('active')) li.style.background=''; };
+    anchor.parentNode.insertBefore(li,anchor.nextSibling);
+    console.log('[P47] Policy Administration nav item injected into sidebar');
+  }
+
+  /* Try to inject immediately and also after a short delay for dynamic sidebars */
+  setTimeout(_p47injectSidebarItem, 800);
+  document.addEventListener('click', function(){ setTimeout(_p47injectSidebarItem,200); });
+
+  console.log('[P47] LTC Policy Administration page loaded — 3 tabs · 4 domains · 4 accelerators · 6 transformation levers');
+})();
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   P48 — E3: LTC Claims — Add Tabs 7 & 8 to P44b tab bar
+   Tab 7: Transformation Landscape (7-step flow + 5 layers + 4-row mapping)
+   Tab 8: Case Study — Blues Plan (~100% SLA · 99.5% accuracy · 120K+ auto)
+   Pattern: extend window._p44tabs array + add switchTab rendering branches
+   ═══════════════════════════════════════════════════════════════════════════ */
+(function(){ 'use strict';
+
+  var TL1='#0891b2'; var TL2='#1e40af'; var TL3='#164e63';
+  var SUC='#059669'; var DAN='#dc2626'; var AMB='#d97706'; var PUR='#7c3aed';
+  var SLATE='#334155';
+
+  /* ── Extend _p44tabs with 2 new entries ── */
+  function _p48extendTabs(){
+    if(!window._p44tabs) return;
+    /* Don't double-add */
+    if(window._p44tabs.some(function(t){ return t.id==='tab-transform'; })) return;
+    window._p44tabs.push(
+      { id:'tab-transform', label:'Transformation Landscape', icon:'fa-project-diagram', color:'#1e40af' },
+      { id:'tab-bluesplan', label:'Case Study: Blues Plan',   icon:'fa-award',           color:'#059669' }
+    );
+    console.log('[P48] Extended _p44tabs to 8 tabs');
+  }
+
+  /* ── 5 Processing Layers ── */
+  var _p48layers=[
+    {num:1,icon:'fa-brain',color:TL1,title:'Intake Intelligence',
+     desc:'Extracts and classifies unstructured documents: forms, medical notes, invoices, care plans. OCR + NLP pipeline processes all intake channels with 99%+ routing accuracy.'},
+    {num:2,icon:'fa-sitemap',color:PUR,title:'Process Orchestration',
+     desc:'AI-driven case management with rules engine providing step-by-step workflow guidance, exception routing, and escalation triggers. Eliminates 1,700+ manual process steps.'},
+    {num:3,icon:'fa-magic',color:AMB,title:'Decision Automation',
+     desc:'Rules + ML models support adjudication: elimination period calculation, benefit offsets, coordination of benefits, STP vs. exception routing.'},
+    {num:4,icon:'fa-search',color:DAN,title:'Quality Intelligence',
+     desc:'Probability-based sampling, auto-audits, anomaly detection, and closed-loop review cycles. Quality scoring dashboard with exception-based review queues.'},
+    {num:5,icon:'fa-shield-alt',color:SUC,title:'Governance & Integration',
+     desc:'Complete audit trails, cloud system connectors, provider data APIs, and core policy admin system integration. Full regulatory traceability.'}
+  ];
+
+  /* ── 4-Row Solution-to-Process Mapping ── */
+  var _p48mapping=[
+    {opportunity:'Digitize unstructured documents, forms, and invoices',
+     layer:'AI document intake via OCR + AI identification pipeline',
+     outcome:'99%+ accurate routing and classification',
+     control:'Auto-validation and routing control engine'},
+    {opportunity:'Eliminate 1,700 manual steps and reduce processing errors',
+     layer:'End-to-end claim rules with automated workflow and STP triggers',
+     outcome:'Higher STP rate, reduced manual touch, lower unit cost',
+     control:'Exception-based adjudication queue with priority scoring'},
+    {opportunity:'Reimagine claim review decisions and exception handling',
+     layer:'Establish STP for auto-approved vs. exception-only pathways',
+     outcome:'End-to-end visibility across entire claims workflow',
+     control:'QC automation with closed-loop exception handling'},
+    {opportunity:'Introduce cross-system real-time eligibility verification',
+     layer:'STP for key functions with AI auto-adjudication engine',
+     outcome:'Higher LTC compliance within the STP facility network',
+     control:'Fully digital self-service with AI medical and care workflow'}
+  ];
+
+  /* ── Blues Plan metrics ── */
+  var _p48blues={
+    metrics:[
+      {v:'~100%',l:'SLA Compliance',ic:'fa-trophy',c:SUC},
+      {v:'99.50%+',l:'Accuracy Rate',ic:'fa-check-double',c:TL1},
+      {v:'120K+',l:'Processes Automated',ic:'fa-robot',c:PUR},
+      {v:'3x–5x',l:'Process Acceleration',ic:'fa-bolt',c:AMB}
+    ],
+    challenges:[
+      'Complex policy language requiring specialist interpretation for every adjudication decision',
+      'High incoming volume across agents, facilities, and mail requiring manual sorting and intake',
+      'Long adjudication timelines (often 30+ days) generating policyholder complaints and DOI inquiries',
+      'Quality and compliance failures leading to increased audit scrutiny and regulatory risk',
+      'Siloed claims teams unable to cross-train across facility, home care, and memory care claim types'
+    ],
+    solutions:[
+      {icon:'fa-eye',color:TL1,label:'ABBYY OCR Platform',desc:'Omni-channel digitization — all document formats (PDF, fax, mail, portal) ingested and classified automatically'},
+      {icon:'fa-keyboard',color:PUR,label:'Re-Keying Elimination',desc:'Multiplex LTC Claims Intake automation removes all manual data transcription from the process'},
+      {icon:'fa-robot',color:AMB,label:'RPA Workflow Automation',desc:'End-to-end RPA across all critical STP facility steps — from intake through disbursement'},
+      {icon:'fa-tachometer-alt',color:DAN,label:'3x–5x Acceleration',desc:'End-to-end processing time compressed from weeks to days across all claim categories'},
+      {icon:'fa-layer-group',color:SUC,label:'Consolidated Intake',desc:'Simplified, unified intake platform replaces disparate manual processes for all claim types'}
+    ],
+    workflow:['Claim Intake','Open Claim','Claim Review','Claim Adjudication','Disbursement / Payment']
+  };
+
+  /* ── Tab 7: Transformation Landscape ── */
+  function _p48transformTab(){
+    var html='<div style="font-family:\'Segoe UI\',sans-serif;padding:20px 24px;">';
+
+    /* Header */
+    html+='<div style="background:linear-gradient(135deg,'+TL3+',#1e3a8a);border-radius:14px;padding:20px 24px;color:#fff;margin-bottom:22px;">'
+      +'<div style="font-size:16px;font-weight:800;margin-bottom:4px;"><i class="fas fa-project-diagram" style="margin-right:8px;"></i>LTC Claims Transformation Landscape</div>'
+      +'<div style="font-size:12px;opacity:.85;">7-step end-to-end workflow · 5 AI processing layers · eliminating 1,700+ manual steps through intelligent automation</div>'
+      +'</div>';
+
+    /* 7-step workflow */
+    var wfSteps=['Intake','OCR / Classify','Case Assessment','Benefit Determination','Adjudication','Payment','Disbursement'];
+    var wfColors=[TL1,'#7c3aed',AMB,'#1e40af',DAN,SUC,'#0f766e'];
+    html+='<div style="margin-bottom:22px;">'
+      +'<div style="font-size:13px;font-weight:700;color:'+SLATE+';margin-bottom:12px;"><i class="fas fa-stream" style="color:'+TL1+';margin-right:7px;"></i>7-Step Claims Workflow</div>'
+      +'<div style="display:flex;gap:0;overflow-x:auto;padding-bottom:4px;">';
+    wfSteps.forEach(function(step,i){
+      var isLast=i===wfSteps.length-1;
+      html+='<div style="display:flex;align-items:center;flex-shrink:0;">'
+        +'<div style="background:'+wfColors[i]+';color:#fff;border-radius:10px;padding:10px 16px;text-align:center;">'
+        +'<div style="font-size:10px;font-weight:800;opacity:.8;">STEP '+(i+1)+'</div>'
+        +'<div style="font-size:12px;font-weight:700;margin-top:2px;">'+step+'</div>'
+        +'</div>'
+        +(isLast?'':'<i class="fas fa-angle-right" style="color:#94a3b8;font-size:16px;margin:0 4px;"></i>');
+      html+='</div>';
+    });
+    html+='</div></div>';
+
+    /* 5 Processing Layers */
+    html+='<div style="font-size:13px;font-weight:700;color:'+SLATE+';margin-bottom:12px;"><i class="fas fa-layer-group" style="color:'+TL1+';margin-right:7px;"></i>5 AI Processing Layers</div>';
+    html+='<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px;">';
+    _p48layers.forEach(function(layer){
+      html+='<div style="background:#fff;border:2px solid '+layer.color+'22;border-left:4px solid '+layer.color+';border-radius:10px;padding:14px 18px;display:flex;gap:14px;align-items:flex-start;">'
+        +'<div style="width:36px;height:36px;border-radius:10px;background:'+layer.color+';display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
+        +'<span style="color:#fff;font-size:13px;font-weight:800;">'+layer.num+'</span></div>'
+        +'<div>'
+        +'<div style="font-size:13px;font-weight:700;color:'+layer.color+';margin-bottom:4px;"><i class="fas '+layer.icon+'" style="margin-right:6px;"></i>'+layer.title+'</div>'
+        +'<div style="font-size:12px;color:#64748b;line-height:1.6;">'+layer.desc+'</div>'
+        +'</div></div>';
+    });
+    html+='</div>';
+
+    /* 4-Row Mapping Table */
+    html+='<div style="font-size:13px;font-weight:700;color:'+SLATE+';margin-bottom:12px;"><i class="fas fa-table" style="color:'+TL1+';margin-right:7px;"></i>Solution-to-Process Mapping</div>';
+    html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden;">'
+      +'<table style="width:100%;border-collapse:collapse;">'
+      +'<thead><tr style="background:'+TL3+';">'
+      +'<th style="padding:11px 14px;text-align:left;font-size:11px;color:#fff;font-weight:700;letter-spacing:.4px;">Opportunity</th>'
+      +'<th style="padding:11px 14px;text-align:left;font-size:11px;color:#fff;font-weight:700;letter-spacing:.4px;">Transformation Layer</th>'
+      +'<th style="padding:11px 14px;text-align:left;font-size:11px;color:#fff;font-weight:700;letter-spacing:.4px;">Outcome</th>'
+      +'<th style="padding:11px 14px;text-align:left;font-size:11px;color:#fff;font-weight:700;letter-spacing:.4px;">Control Mechanism</th>'
+      +'</tr></thead><tbody>';
+    _p48mapping.forEach(function(row,i){
+      html+='<tr style="border-bottom:1px solid #f1f5f9;'+(i%2===0?'background:#fff;':'background:#f8fafc;')+'">'
+        +'<td style="padding:11px 14px;font-size:12px;color:#1e293b;font-weight:500;">'+row.opportunity+'</td>'
+        +'<td style="padding:11px 14px;font-size:12px;color:#475569;">'+row.layer+'</td>'
+        +'<td style="padding:11px 14px;font-size:12px;color:'+SUC+';font-weight:600;">'+row.outcome+'</td>'
+        +'<td style="padding:11px 14px;font-size:12px;color:#64748b;">'+row.control+'</td>'
+        +'</tr>';
+    });
+    html+='</tbody></table></div></div>';
+    return html;
+  }
+
+  /* ── Tab 8: Blues Plan Case Study ── */
+  function _p48bluesTab(){
+    var b=_p48blues;
+    var html='<div style="font-family:\'Segoe UI\',sans-serif;padding:20px 24px;">';
+
+    /* Hero */
+    html+='<div style="background:linear-gradient(135deg,#064e3b,#047857,'+SUC+');border-radius:14px;padding:22px 28px;color:#fff;margin-bottom:22px;">'
+      +'<div style="font-size:11px;font-weight:700;opacity:.8;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;">Case in Point</div>'
+      +'<div style="font-size:20px;font-weight:800;margin-bottom:4px;">Streamlining LTC Claims Processing — Blues Plan</div>'
+      +'<div style="font-size:12px;opacity:.85;">How Wipro transformed end-to-end claims operations for a leading Blue Cross Blue Shield LTC portfolio</div>'
+      +'</div>';
+
+    /* 4 hero metrics */
+    html+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;">';
+    b.metrics.forEach(function(m){
+      html+='<div style="background:#fff;border:2px solid '+m.c+';border-radius:14px;padding:18px;text-align:center;">'
+        +'<i class="fas '+m.ic+'" style="font-size:22px;color:'+m.c+';margin-bottom:8px;display:block;"></i>'
+        +'<div style="font-size:26px;font-weight:800;color:'+m.c+';">'+m.v+'</div>'
+        +'<div style="font-size:12px;color:#64748b;margin-top:4px;font-weight:600;">'+m.l+'</div>'
+        +'</div>';
+    });
+    html+='</div>';
+
+    /* Challenges */
+    html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px;">';
+
+    html+='<div style="background:#fff;border:1px solid #fecaca;border-radius:14px;padding:18px;">'
+      +'<div style="font-size:13px;font-weight:700;color:'+DAN+';margin-bottom:12px;"><i class="fas fa-exclamation-triangle" style="margin-right:8px;"></i>Challenges Before Wipro</div>';
+    b.challenges.forEach(function(ch){
+      html+='<div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid #fef2f2;font-size:12px;color:#475569;">'
+        +'<i class="fas fa-times-circle" style="color:'+DAN+';margin-top:2px;flex-shrink:0;font-size:11px;"></i>'+ch+'</div>';
+    });
+    html+='</div>';
+
+    html+='<div style="background:#fff;border:1px solid #bbf7d0;border-radius:14px;padding:18px;">'
+      +'<div style="font-size:13px;font-weight:700;color:'+SUC+';margin-bottom:12px;"><i class="fas fa-check-circle" style="margin-right:8px;"></i>Wipro Solution Highlights</div>';
+    b.solutions.forEach(function(sol){
+      html+='<div style="display:flex;align-items:flex-start;gap:10px;padding:7px 0;border-bottom:1px solid #f0fdf4;">'
+        +'<div style="width:28px;height:28px;border-radius:8px;background:'+sol.color+';display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
+        +'<i class="fas '+sol.icon+'" style="color:#fff;font-size:10px;"></i></div>'
+        +'<div><div style="font-size:12px;font-weight:700;color:'+sol.color+';">'+sol.label+'</div>'
+        +'<div style="font-size:11px;color:#64748b;line-height:1.4;">'+sol.desc+'</div></div>'
+        +'</div>';
+    });
+    html+='</div></div>';
+
+    /* Workflow */
+    html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:18px;margin-bottom:18px;">'
+      +'<div style="font-size:13px;font-weight:700;color:'+SLATE+';margin-bottom:12px;"><i class="fas fa-stream" style="color:'+SUC+';margin-right:8px;"></i>Transformed Claims Workflow</div>'
+      +'<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">';
+    b.workflow.forEach(function(step,i){
+      var isLast=i===b.workflow.length-1;
+      html+='<div style="background:'+SUC+';color:#fff;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;">'+step+'</div>'
+        +(isLast?'':'<i class="fas fa-arrow-right" style="color:#94a3b8;font-size:14px;"></i>');
+    });
+    html+='</div>'
+      +'<div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:8px;">'
+      +['ABBYY (OCR/Intake)','Open Management','Claim Adjudication Engine','RPA Automation Layer','Payment Processing'].map(function(tool){
+        return '<span style="font-size:11px;background:#f0fdf4;color:'+SUC+';border:1px solid #bbf7d0;border-radius:6px;padding:4px 10px;font-weight:600;">'+tool+'</span>';
+      }).join('')
+      +'</div></div>';
+
+    /* Outcome summary */
+    html+='<div style="background:linear-gradient(135deg,#064e3b,#065f46);border-radius:14px;padding:18px 22px;color:#fff;">'
+      +'<div style="font-size:13px;font-weight:700;margin-bottom:12px;"><i class="fas fa-chart-line" style="margin-right:8px;"></i>Business Outcomes Delivered</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">';
+    ['3x to 5x acceleration in end-to-end claims processing time',
+     'RPA automation across all critical STP facility steps',
+     'Consolidated, simplified intake via ABBYY OCR — all formats',
+     'Re-keying fully eliminated via Multiplex Claims Intake automation',
+     '~100% SLA compliance achieved across all service tiers',
+     '99.5%+ accuracy rate sustained across 120K+ automated processes'
+    ].forEach(function(outcome){
+      html+='<div style="display:flex;align-items:flex-start;gap:8px;font-size:12px;opacity:.95;">'
+        +'<i class="fas fa-check-circle" style="color:#6ee7b7;margin-top:2px;flex-shrink:0;"></i>'+outcome+'</div>';
+    });
+    html+='</div></div></div>';
+    return html;
+  }
+
+  /* ── Patch _p44switchTab to handle the 2 new tab IDs ── */
+  function _p48patchSwitchTab(){
+    var _origSwitch=window._p44switchTab;
+    if(!_origSwitch) return;
+    window._p44switchTab=function(tabId){
+      if(tabId==='tab-transform'){
+        /* Highlight tab button */
+        _p48highlightTab(tabId);
+        var tc=document.getElementById('p44-tab-content');
+        if(tc) tc.innerHTML=_p48transformTab();
+        return;
+      }
+      if(tabId==='tab-bluesplan'){
+        _p48highlightTab(tabId);
+        var tc2=document.getElementById('p44-tab-content');
+        if(tc2) tc2.innerHTML=_p48bluesTab();
+        return;
+      }
+      _origSwitch.apply(this,arguments);
+    };
+    console.log('[P48] _p44switchTab patched for tab-transform and tab-bluesplan');
+  }
+
+  function _p48highlightTab(activeId){
+    if(!window._p44tabs) return;
+    window._p44tabs.forEach(function(t){
+      var btn=document.getElementById(t.id+'-btn');
+      if(!btn) return;
+      var isActive=t.id===activeId;
+      btn.style.background=isActive?t.color:'#f8fafc';
+      btn.style.color=isActive?'#fff':'#6b7280';
+    });
+  }
+
+  /* ── Inject after P44b tab bar is ready ── */
+  var _p48origNav=window.navigateTo;
+  window.navigateTo=function(page,params){
+    var result=typeof _p48origNav==='function'?_p48origNav.apply(this,arguments):undefined;
+    if(page==='ltc-claims'){
+      setTimeout(function(){
+        _p48extendTabs();
+        /* Re-render the tab bar now that _p44tabs has 8 entries */
+        var bar=document.getElementById('p44-tab-bar');
+        if(bar){
+          var btnRow=bar.querySelector('div');
+          if(btnRow){
+            /* Append the 2 new buttons if not present */
+            if(!document.getElementById('tab-transform-btn')){
+              ['tab-transform','tab-bluesplan'].forEach(function(id){
+                var t=window._p44tabs.find(function(x){ return x.id===id; });
+                if(!t) return;
+                var btn=document.createElement('button');
+                btn.id=id+'-btn';
+                btn.onclick=function(){ window._p44switchTab(id); };
+                btn.style.cssText='display:flex;align-items:center;gap:6px;padding:8px 16px;border:none;border-radius:8px 8px 0 0;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap;background:#f8fafc;color:#6b7280;border:1px solid #e5e7eb;border-bottom:none;';
+                btn.innerHTML='<i class="fas '+t.icon+'" style="font-size:11px;"></i> '+t.label;
+                btnRow.appendChild(btn);
+              });
+            }
+          }
+        }
+        _p48patchSwitchTab();
+      }, 500);
+    }
+    return result;
+  };
+  var navigateTo=window.navigateTo;
+
+  console.log('[P48] LTC Claims Tab 7 (Transformation Landscape) + Tab 8 (Blues Plan Case Study) ready');
+})();
