@@ -103923,3 +103923,997 @@ var navigateTo=window.navigateTo;
 
   console.log('[P54] P&C Operations Hub loaded · 3,951 policies · 6 tabs · pc-ops route');
 })();
+/* PHASE 55 — P&C UNDERWRITING WORKBENCH (pc-underwriting) */
+(function () {
+  'use strict';
+  var UW55   = '#7c3aed';   /* purple  — primary brand     */
+  var UW55B  = '#1d4ed8';   /* blue    — submissions       */
+  var UW55G  = '#059669';   /* green   — approved / bound  */
+  var UW55Y  = '#d97706';   /* amber   — referral / review */
+  var UW55R  = '#dc2626';   /* red     — declined / alert  */
+  var UW55T  = '#0891b2';   /* teal    — pricing           */
+  var UW55S  = '#475569';   /* slate   — neutral text      */
+  var UW55N  = '#0f172a';   /* navy    — headings          */
+
+  /* ── SUBMISSIONS DATA (10 risks in queue) ── */
+  var uwSubmissions = [
+    { id:'SUB-2026-1101', insured:'Apex Roofing Contractors',
+      lob:'Commercial Property', state:'TX', premium:148000,
+      tiv:4200000, constructionType:'Frame', occupancy:'Contractor',
+      yearBuilt:2004, stories:2, sprinklered:false,
+      submittedBy:'Sandra Voss', submittedDate:'2026-07-10',
+      referralReasons:['TIV >$3M Frame','Non-sprinklered'],
+      status:'Referral', priority:'high', daysOpen:7,
+      moodyScore:72, uwAction:null,
+      deductible:25000, policyLimit:4200000,
+      naicsCode:'238160', sic:'1761' },
+    { id:'SUB-2026-1102', insured:'Lakeside Medical Group',
+      lob:'General Liability', state:'FL', premium:62000,
+      tiv:0, constructionType:'N/A', occupancy:'Medical Office',
+      yearBuilt:2010, stories:4, sprinklered:true,
+      submittedBy:'Marcus Reid', submittedDate:'2026-07-11',
+      referralReasons:[],
+      status:'Approved', priority:'medium', daysOpen:6,
+      moodyScore:88, uwAction:'Bind',
+      deductible:5000, policyLimit:2000000,
+      naicsCode:'621111', sic:'8011' },
+    { id:'SUB-2026-1103', insured:'Gulf Coast Seafood Co.',
+      lob:'Commercial Property', state:'FL', premium:213000,
+      tiv:7800000, constructionType:'Masonry', occupancy:'Food Processing',
+      yearBuilt:1998, stories:1, sprinklered:true,
+      submittedBy:'Linda Park', submittedDate:'2026-07-08',
+      referralReasons:['CAT zone — FL Wind','TIV >$5M'],
+      status:'Referral', priority:'urgent', daysOpen:9,
+      moodyScore:61, uwAction:null,
+      deductible:50000, policyLimit:7800000,
+      naicsCode:'311710', sic:'2092' },
+    { id:'SUB-2026-1104', insured:'Pioneer Logistics LLC',
+      lob:'Commercial Auto', state:'TX', premium:94000,
+      tiv:0, constructionType:'N/A', occupancy:'Trucking',
+      yearBuilt:0, stories:0, sprinklered:false,
+      submittedBy:'David Chen', submittedDate:'2026-07-12',
+      referralReasons:['Fleet >25 units','Radius >500mi'],
+      status:'Referral', priority:'high', daysOpen:5,
+      moodyScore:67, uwAction:null,
+      deductible:10000, policyLimit:1000000,
+      naicsCode:'484121', sic:'4213' },
+    { id:'SUB-2026-1105', insured:'Sunrise Apartment REIT',
+      lob:'Commercial Property', state:'CA', premium:387000,
+      tiv:18500000, constructionType:'Wood Frame', occupancy:'Habitational',
+      yearBuilt:1986, stories:5, sprinklered:true,
+      submittedBy:'Angela Torres', submittedDate:'2026-07-07',
+      referralReasons:['Seismic zone','Pre-1990 construction','TIV >$10M'],
+      status:'Pending', priority:'urgent', daysOpen:10,
+      moodyScore:54, uwAction:null,
+      deductible:100000, policyLimit:18500000,
+      naicsCode:'531110', sic:'6512' },
+    { id:'SUB-2026-1106', insured:'Hartwell Auto Dealership',
+      lob:'Commercial Auto', state:'OH', premium:38000,
+      tiv:0, constructionType:'N/A', occupancy:'Auto Sales',
+      yearBuilt:0, stories:0, sprinklered:false,
+      submittedBy:'Sandra Voss', submittedDate:'2026-07-14',
+      referralReasons:[],
+      status:'Approved', priority:'low', daysOpen:3,
+      moodyScore:91, uwAction:'Bind',
+      deductible:2500, policyLimit:500000,
+      naicsCode:'441110', sic:'5511' },
+    { id:'SUB-2026-1107', insured:'NovaTech Manufacturing',
+      lob:'Workers\' Comp', state:'IL', premium:176000,
+      tiv:0, constructionType:'N/A', occupancy:'Light Manufacturing',
+      yearBuilt:2001, stories:2, sprinklered:true,
+      submittedBy:'Marcus Reid', submittedDate:'2026-07-09',
+      referralReasons:['EMR 1.18 — above threshold'],
+      status:'Referral', priority:'high', daysOpen:8,
+      moodyScore:69, uwAction:null,
+      deductible:50000, policyLimit:0,
+      naicsCode:'332710', sic:'3490' },
+    { id:'SUB-2026-1108', insured:'Blue Ridge Brewing Co.',
+      lob:'Commercial Property', state:'NC', premium:52000,
+      tiv:1800000, constructionType:'Masonry', occupancy:'Brewery',
+      yearBuilt:2012, stories:2, sprinklered:true,
+      submittedBy:'Linda Park', submittedDate:'2026-07-15',
+      referralReasons:[],
+      status:'Approved', priority:'low', daysOpen:2,
+      moodyScore:85, uwAction:'Quote',
+      deductible:10000, policyLimit:1800000,
+      naicsCode:'312120', sic:'2082' },
+    { id:'SUB-2026-1109', insured:'Delta River Casinos Inc.',
+      lob:'General Liability', state:'MS', premium:0,
+      tiv:0, constructionType:'N/A', occupancy:'Gaming/Entertainment',
+      yearBuilt:2005, stories:3, sprinklered:true,
+      submittedBy:'David Chen', submittedDate:'2026-07-13',
+      referralReasons:['Excluded class — Gaming'],
+      status:'Declined', priority:'medium', daysOpen:4,
+      moodyScore:38, uwAction:'Decline',
+      deductible:0, policyLimit:0,
+      naicsCode:'713210', sic:'7993' },
+    { id:'SUB-2026-1110', insured:'Crestwood School District',
+      lob:'Commercial Property', state:'NY', premium:118000,
+      tiv:3600000, constructionType:'Masonry', occupancy:'Educational',
+      yearBuilt:1962, stories:3, sprinklered:false,
+      submittedBy:'Angela Torres', submittedDate:'2026-07-11',
+      referralReasons:['Pre-1970 construction','Non-sprinklered'],
+      status:'Referral', priority:'high', daysOpen:6,
+      moodyScore:65, uwAction:null,
+      deductible:25000, policyLimit:3600000,
+      naicsCode:'611110', sic:'8211' }
+  ];
+
+  /* ── PORTFOLIO EXPOSURE DATA (by LoB) ── */
+  var uwPortfolio = [
+    { lob:'Commercial Property', tiv:148000000, gwp:3820000, policies:312,
+      lossRatio:62.1, combinedRatio:95.4, catExposure:42000000,
+      avgPremium:12244, retentionRate:88.1, growthYOY:8.2 },
+    { lob:'Personal Auto',       tiv:0,         gwp:2640000, policies:1847,
+      lossRatio:66.8, combinedRatio:98.2, catExposure:0,
+      avgPremium:1429,  retentionRate:91.3, growthYOY:5.4 },
+    { lob:'Homeowners',          tiv:0,         gwp:2210000, policies:921,
+      lossRatio:55.3, combinedRatio:91.8, catExposure:18000000,
+      avgPremium:2400,  retentionRate:87.6, growthYOY:4.1 },
+    { lob:'Workers\' Comp',      tiv:0,         gwp:1890000, policies:204,
+      lossRatio:70.4, combinedRatio:102.1, catExposure:0,
+      avgPremium:9265,  retentionRate:82.4, growthYOY:-1.2 },
+    { lob:'General Liability',   tiv:0,         gwp:1450000, policies:389,
+      lossRatio:48.9, combinedRatio:84.7, catExposure:0,
+      avgPremium:3728,  retentionRate:89.2, growthYOY:6.7 },
+    { lob:'Commercial Auto',     tiv:0,         gwp:1030000, policies:278,
+      lossRatio:61.2, combinedRatio:95.8, catExposure:0,
+      avgPremium:3705,  retentionRate:85.9, growthYOY:3.9 }
+  ];
+
+  /* ── REINSURANCE TREATIES ── */
+  var uwReinsurance = [
+    { treaty:'XL-PROP-2026', type:'Excess of Loss', lob:'Commercial Property',
+      reinsurer:'Swiss Re', layer:'$5M xs $2M', premium:284000,
+      cededPct:22.4, retention:2000000, limit:5000000,
+      status:'Active', expiry:'Dec 31 2026', cedingCommission:28.5 },
+    { treaty:'QS-AUTO-2026', type:'Quota Share', lob:'Commercial Auto',
+      reinsurer:'Munich Re', layer:'30% QS', premium:98000,
+      cededPct:30.0, retention:0, limit:0,
+      status:'Active', expiry:'Dec 31 2026', cedingCommission:32.0 },
+    { treaty:'CAT-FL-2026', type:'Catastrophe XL', lob:'Multi-Line',
+      reinsurer:'Everest Re', layer:'$20M xs $5M', premium:412000,
+      cededPct:0, retention:5000000, limit:20000000,
+      status:'Active', expiry:'Jun 30 2027', cedingCommission:0 },
+    { treaty:'XL-WC-2026', type:'Excess of Loss', lob:'Workers\' Comp',
+      reinsurer:'Gen Re', layer:'$2M xs $500K', premium:142000,
+      cededPct:0, retention:500000, limit:2000000,
+      status:'Active', expiry:'Dec 31 2026', cedingCommission:0 },
+    { treaty:'FAC-PROP-1105', type:'Facultative', lob:'Commercial Property',
+      reinsurer:'Lloyd\'s Syndicate 2623', layer:'60% of $18.5M', premium:186000,
+      cededPct:60.0, retention:7400000, limit:11100000,
+      status:'Placed', expiry:'Jul 06 2027', cedingCommission:25.0 }
+  ];
+
+  /* ── HELPERS ── */
+  function _p55kpi(val, lbl, col) {
+    return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;' +
+      'padding:10px 16px;min-width:120px;flex:1;">' +
+      '<div style="font-size:18px;font-weight:700;color:' + col + ';">' + val + '</div>' +
+      '<div style="font-size:10px;color:#64748b;margin-top:1px;">' + lbl + '</div></div>';
+  }
+
+  function _p55badge(status) {
+    var map = {
+      'Approved':    'background:#f0fdf4;color:#059669;border:1px solid #bbf7d0;',
+      'Referral':    'background:#fffbeb;color:#d97706;border:1px solid #fde68a;',
+      'Pending':     'background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;',
+      'Declined':    'background:#fef2f2;color:#dc2626;border:1px solid #fca5a5;',
+      'Bound':       'background:#f0fdf4;color:#059669;border:1px solid #bbf7d0;',
+      'Active':      'background:#f0fdf4;color:#059669;border:1px solid #bbf7d0;',
+      'Placed':      'background:#faf5ff;color:#7c3aed;border:1px solid #ddd6fe;',
+      'Expired':     'background:#f8fafc;color:#94a3b8;border:1px solid #e2e8f0;'
+    };
+    var st = map[status] || 'background:#f8fafc;color:#475569;border:1px solid #e2e8f0;';
+    return '<span style="padding:3px 9px;border-radius:12px;font-size:11px;font-weight:600;' + st + '">' + status + '</span>';
+  }
+
+  function _p55priorityDot(p) {
+    var c = p === 'urgent' ? UW55R : p === 'high' ? UW55Y : p === 'medium' ? UW55B : '#94a3b8';
+    return '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' + c + ';margin-right:5px;"></span>';
+  }
+
+  function _p55scoreBar(score) {
+    var c = score >= 80 ? UW55G : score >= 65 ? UW55Y : UW55R;
+    return '<div style="display:flex;align-items:center;gap:6px;">' +
+      '<div style="flex:1;background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden;">' +
+      '<div style="background:' + c + ';height:100%;border-radius:4px;width:' + score + '%;"></div></div>' +
+      '<span style="font-size:11px;font-weight:700;color:' + c + ';min-width:24px;">' + score + '</span></div>';
+  }
+
+  function _p55fmt(n) { return '$' + Number(n).toLocaleString(); }
+  function _p55fmtM(n) { return '$' + (n / 1000000).toFixed(1) + 'M'; }
+  /* ══════════════════════════════════════════════════════════════
+     TAB 1 — UNDERWRITING DASHBOARD
+     ══════════════════════════════════════════════════════════════ */
+  function _p55tabDashboard() {
+    var referrals = uwSubmissions.filter(function(s){ return s.status === 'Referral'; });
+    var pending   = uwSubmissions.filter(function(s){ return s.status === 'Pending';  });
+    var approved  = uwSubmissions.filter(function(s){ return s.status === 'Approved'; });
+    var declined  = uwSubmissions.filter(function(s){ return s.status === 'Declined'; });
+    var urgent    = uwSubmissions.filter(function(s){ return s.priority === 'urgent'; });
+
+    var h = '<div style="padding:0 4px;">';
+
+    /* ── AI Triage alert strip ── */
+    h += '<div style="background:linear-gradient(90deg,#faf5ff,#eff6ff);border:1px solid #ddd6fe;border-radius:8px;padding:11px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;">';
+    h += '<span style="font-size:18px;">🤖</span>';
+    h += '<div style="flex:1;">';
+    h += '<strong style="color:#7c3aed;font-size:12px;">AI Triage Engine</strong>';
+    h += '<span style="color:#475569;font-size:12px;margin-left:8px;">'+urgent.length+' urgent submissions require immediate UW attention · SUB-2026-1105 (Sunrise REIT · $18.5M TIV) flagged for Senior UW review</span>';
+    h += '</div>';
+    h += '<span style="background:#7c3aed;color:#fff;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap;">View Queue</span>';
+    h += '</div>';
+
+    /* ── KPI strip ── */
+    h += '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px;">';
+    var dkpis = [
+      { v: uwSubmissions.length, l:'In Queue',    c: UW55B  },
+      { v: referrals.length,     l:'Referrals',   c: UW55Y  },
+      { v: urgent.length,        l:'Urgent',      c: UW55R  },
+      { v: approved.length,      l:'Approved',    c: UW55G  },
+      { v: declined.length,      l:'Declined',    c: UW55S  }
+    ];
+    dkpis.forEach(function(k) {
+      h += '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px;text-align:center;border-top:3px solid '+k.c+';">';
+      h += '<div style="font-size:28px;font-weight:700;color:'+k.c+';">'+k.v+'</div>';
+      h += '<div style="font-size:11px;color:#64748b;margin-top:2px;">'+k.l+'</div></div>';
+    });
+    h += '</div>';
+
+    /* ── Main 2-col grid ── */
+    h += '<div style="display:grid;grid-template-columns:1fr 340px;gap:16px;margin-bottom:16px;">';
+
+    /* — Referral queue (left) — */
+    h += '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">';
+    h += '<div style="padding:13px 16px;border-bottom:1px solid #f1f5f9;display:flex;justify-content:space-between;align-items:center;">';
+    h += '<strong style="color:#0f172a;font-size:13px;">⚠️ Referral Queue</strong>';
+    h += '<span style="background:#fffbeb;color:#d97706;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;">'+referrals.length+' open</span></div>';
+    referrals.concat(pending).forEach(function(s) {
+      var pc = s.priority === 'urgent' ? UW55R : s.priority === 'high' ? UW55Y : UW55B;
+      h += '<div style="padding:12px 16px;border-bottom:1px solid #f8fafc;display:flex;align-items:flex-start;gap:12px;">';
+      h += '<div style="width:4px;min-height:48px;background:'+pc+';border-radius:2px;flex-shrink:0;"></div>';
+      h += '<div style="flex:1;min-width:0;">';
+      h += '<div style="display:flex;justify-content:space-between;align-items:center;">';
+      h += '<span style="font-weight:600;font-size:12px;color:#0f172a;">'+s.insured+'</span>';
+      h += _p55badge(s.status)+'</div>';
+      h += '<div style="font-size:11px;color:#64748b;margin-top:3px;">'+s.id+' · '+s.lob+' · '+s.state+'</div>';
+      h += '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:5px;">';
+      s.referralReasons.forEach(function(r) {
+        h += '<span style="background:#fef3c7;color:#92400e;padding:1px 7px;border-radius:4px;font-size:10px;">⚡ '+r+'</span>';
+      });
+      h += '</div>';
+      h += '<div style="display:flex;justify-content:space-between;margin-top:5px;">';
+      h += '<span style="font-size:10px;color:#94a3b8;">'+s.daysOpen+'d open · by '+s.submittedBy+'</span>';
+      h += '<span style="font-size:11px;font-weight:600;color:#0f172a;">'+(s.premium ? _p55fmt(s.premium) : '—')+'</span>';
+      h += '</div></div></div>';
+    });
+    h += '</div>';
+
+    /* — Right column: UW score distribution + activity ── */
+    h += '<div style="display:flex;flex-direction:column;gap:12px;">';
+
+    /* Score distribution */
+    h += '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">';
+    h += '<div style="padding:12px 14px;border-bottom:1px solid #f1f5f9;"><strong style="color:#0f172a;font-size:13px;">🎯 Moody Risk Score Distribution</strong></div>';
+    h += '<div style="padding:12px 14px;">';
+    var scoreRanges = [
+      { label:'Preferred (80–100)', min:80, max:100, col:UW55G },
+      { label:'Standard (65–79)',   min:65, max:79,  col:UW55Y },
+      { label:'Substandard (<65)',  min:0,  max:64,  col:UW55R }
+    ];
+    scoreRanges.forEach(function(r) {
+      var cnt = uwSubmissions.filter(function(s){ return s.moodyScore >= r.min && s.moodyScore <= r.max; }).length;
+      var pct = Math.round((cnt / uwSubmissions.length) * 100);
+      h += '<div style="margin-bottom:10px;">';
+      h += '<div style="display:flex;justify-content:space-between;margin-bottom:3px;">';
+      h += '<span style="font-size:11px;color:#334155;">'+r.label+'</span>';
+      h += '<span style="font-size:11px;font-weight:700;color:'+r.col+';">'+cnt+' ('+pct+'%)</span></div>';
+      h += '<div style="background:#f1f5f9;border-radius:4px;height:10px;overflow:hidden;">';
+      h += '<div style="background:'+r.col+';height:100%;border-radius:4px;width:'+pct+'%;"></div></div>';
+      h += '</div>';
+    });
+    h += '</div></div>';
+
+    /* UW decisions activity */
+    h += '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">';
+    h += '<div style="padding:12px 14px;border-bottom:1px solid #f1f5f9;"><strong style="color:#0f172a;font-size:13px;">📋 Recent UW Decisions</strong></div>';
+    h += '<div style="padding:8px 0;">';
+    var decided = uwSubmissions.filter(function(s){ return s.uwAction; });
+    decided.forEach(function(s) {
+      var ic = s.uwAction === 'Bind' ? '✅' : s.uwAction === 'Quote' ? '📄' : s.uwAction === 'Decline' ? '🚫' : '📌';
+      var ac = s.uwAction === 'Bind' ? UW55G : s.uwAction === 'Quote' ? UW55B : s.uwAction === 'Decline' ? UW55R : UW55Y;
+      h += '<div style="padding:8px 14px;border-bottom:1px solid #f8fafc;display:flex;align-items:center;gap:10px;">';
+      h += '<span style="font-size:14px;">'+ic+'</span>';
+      h += '<div style="flex:1;min-width:0;">';
+      h += '<div style="font-size:11px;font-weight:600;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+s.insured+'</div>';
+      h += '<div style="font-size:10px;color:#94a3b8;">'+s.id+' · '+s.lob+'</div></div>';
+      h += '<span style="color:'+ac+';font-weight:700;font-size:11px;">'+s.uwAction+'</span>';
+      h += '</div>';
+    });
+    h += '</div></div>';
+
+    h += '</div>'; /* end right col */
+    h += '</div>'; /* end main grid */
+
+    /* ── Submission pipeline funnel ── */
+    h += '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:16px;">';
+    h += '<strong style="color:#0f172a;font-size:13px;">🔁 Submission Pipeline</strong>';
+    h += '<div style="display:flex;align-items:center;gap:4px;margin-top:12px;">';
+    var stages = [
+      { label:'Submitted', n:10, c:UW55B  },
+      { label:'Triage',    n:8,  c:UW55Y  },
+      { label:'Referral',  n:referrals.length, c:'#d97706' },
+      { label:'Approved',  n:approved.length,  c:UW55G  },
+      { label:'Bound',     n:2,  c:'#065f46' }
+    ];
+    stages.forEach(function(s, i) {
+      h += '<div style="flex:'+s.n+';background:'+s.c+';color:#fff;padding:10px 8px;text-align:center;'+(i===0?'border-radius:6px 0 0 6px;':'')+(i===stages.length-1?'border-radius:0 6px 6px 0;':'')+'">';
+      h += '<div style="font-weight:700;font-size:14px;">'+s.n+'</div>';
+      h += '<div style="font-size:9px;opacity:.9;">'+s.label+'</div></div>';
+    });
+    h += '</div></div>';
+
+    h += '</div>';
+    return h;
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     TAB 2 — SUBMISSIONS REGISTER
+     ══════════════════════════════════════════════════════════════ */
+  function _p55tabSubmissions() {
+    var h = '<div style="padding:0 4px;">';
+
+    /* Summary pills */
+    h += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">';
+    var grps = {Referral:0, Pending:0, Approved:0, Declined:0};
+    uwSubmissions.forEach(function(s){ if(grps[s.status]!==undefined) grps[s.status]++; });
+    var gCols = {Referral:UW55Y, Pending:UW55B, Approved:UW55G, Declined:UW55R};
+    Object.keys(grps).forEach(function(k) {
+      h += '<span style="background:'+gCols[k]+'18;color:'+gCols[k]+';border:1px solid '+gCols[k]+'40;padding:4px 12px;border-radius:12px;font-size:11px;font-weight:600;">'+k+': '+grps[k]+'</span>';
+    });
+    var totalPrem = uwSubmissions.reduce(function(a,s){ return a+s.premium; }, 0);
+    h += '<span style="margin-left:auto;font-size:11px;color:#64748b;align-self:center;">Total ind. premium: <strong>'+_p55fmt(totalPrem)+'</strong></span>';
+    h += '</div>';
+
+    /* Full submissions table */
+    h += '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">';
+    h += '<table style="width:100%;border-collapse:collapse;font-size:11px;">';
+    h += '<thead><tr style="background:#f8fafc;">';
+    ['Priority','Submission ID','Insured','LoB','State','Ind. Premium','TIV','Moody Score','UW Status','Days Open','Agent','Action'].forEach(function(col) {
+      h += '<th style="padding:8px 10px;text-align:left;color:#64748b;font-weight:600;border-bottom:1px solid #f1f5f9;white-space:nowrap;">'+col+'</th>';
+    });
+    h += '</tr></thead><tbody>';
+    /* Sort: urgent first, then high, then rest */
+    var order = {urgent:0,high:1,medium:2,low:3};
+    var sorted = uwSubmissions.slice().sort(function(a,b){ return (order[a.priority]||9)-(order[b.priority]||9); });
+    sorted.forEach(function(s, i) {
+      var bg = i % 2 === 0 ? '#fff' : '#fafafa';
+      var pCol = s.priority === 'urgent' ? UW55R : s.priority === 'high' ? UW55Y : s.priority === 'medium' ? UW55B : '#94a3b8';
+      h += '<tr style="background:'+bg+';border-bottom:1px solid #f1f5f9;">';
+      h += '<td style="padding:8px 10px;">'+_p55priorityDot(s.priority)+'<span style="font-size:9px;color:'+pCol+';font-weight:700;text-transform:uppercase;">'+s.priority+'</span></td>';
+      h += '<td style="padding:8px 10px;font-family:monospace;font-weight:600;color:#334155;white-space:nowrap;">'+s.id+'</td>';
+      h += '<td style="padding:8px 10px;font-weight:600;color:#0f172a;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="'+s.insured+'">'+s.insured+'</td>';
+      h += '<td style="padding:8px 10px;color:#334155;white-space:nowrap;">'+s.lob+'</td>';
+      h += '<td style="padding:8px 10px;"><span style="background:#eff6ff;color:#1d4ed8;padding:2px 7px;border-radius:4px;font-weight:600;">'+s.state+'</span></td>';
+      h += '<td style="padding:8px 10px;font-weight:600;color:#0f172a;">'+(s.premium ? _p55fmt(s.premium) : '<span style="color:#94a3b8;">—</span>')+'</td>';
+      h += '<td style="padding:8px 10px;color:#334155;">'+(s.tiv ? _p55fmtM(s.tiv) : '<span style="color:#94a3b8;">N/A</span>')+'</td>';
+      h += '<td style="padding:8px 10px;min-width:100px;">'+_p55scoreBar(s.moodyScore)+'</td>';
+      h += '<td style="padding:8px 10px;">'+_p55badge(s.status)+'</td>';
+      h += '<td style="padding:8px 10px;color:#334155;">'+s.daysOpen+'d</td>';
+      h += '<td style="padding:8px 10px;color:#334155;white-space:nowrap;">'+s.submittedBy+'</td>';
+      var ac = s.uwAction || 'Review';
+      var acCol = s.uwAction === 'Bind' ? UW55G : s.uwAction === 'Decline' ? UW55R : UW55B;
+      h += '<td style="padding:8px 10px;"><button style="background:'+acCol+';color:#fff;border:none;padding:4px 10px;border-radius:5px;font-size:10px;font-weight:600;cursor:pointer;">'+ac+'</button></td>';
+      h += '</tr>';
+    });
+    h += '</tbody></table></div>';
+
+    /* Referral reasons breakdown */
+    h += '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;margin-top:14px;overflow:hidden;">';
+    h += '<div style="padding:13px 16px;border-bottom:1px solid #f1f5f9;"><strong style="color:#0f172a;font-size:13px;">⚡ Referral Reasons Frequency</strong></div>';
+    h += '<div style="padding:12px 16px;display:flex;flex-wrap:wrap;gap:8px;">';
+    var reasonMap = {};
+    uwSubmissions.forEach(function(s){ s.referralReasons.forEach(function(r){ reasonMap[r] = (reasonMap[r]||0)+1; }); });
+    var reasons = Object.keys(reasonMap).sort(function(a,b){ return reasonMap[b]-reasonMap[a]; });
+    reasons.forEach(function(r) {
+      h += '<span style="background:#fef3c7;color:#92400e;border:1px solid #fde68a;padding:4px 12px;border-radius:12px;font-size:11px;">'+r+' <strong>('+reasonMap[r]+')</strong></span>';
+    });
+    h += '</div></div>';
+
+    h += '</div>';
+    return h;
+  }
+  /* ══════════════════════════════════════════════════════════════
+     TAB 3 — RISK ANALYSIS (focused on SUB-2026-1105 as spotlight)
+     ══════════════════════════════════════════════════════════════ */
+  function _p55tabRiskAnalysis() {
+    /* Spotlight: Sunrise Apartment REIT — most complex submission */
+    var spotlight = uwSubmissions[4]; /* SUB-2026-1105 */
+
+    var h = '<div style="padding:0 4px;">';
+
+    /* ── Section header ── */
+    h += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">';
+    h += '<div><strong style="color:#0f172a;font-size:14px;">🔬 Risk Analysis Workbench</strong>';
+    h += '<span style="color:#64748b;font-size:12px;margin-left:8px;">Spotlight: '+spotlight.id+'</span></div>';
+    h += '<div style="display:flex;gap:6px;">';
+    h += '<select style="border:1px solid #e2e8f0;border-radius:6px;padding:5px 10px;font-size:11px;color:#334155;">';
+    uwSubmissions.forEach(function(s){
+      h += '<option'+(s.id===spotlight.id?' selected':'')+'>'+s.id+' — '+s.insured+'</option>';
+    });
+    h += '</select></div></div>';
+
+    /* ── Risk profile card ── */
+    h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;">';
+
+    /* Left: Property characteristics */
+    h += '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">';
+    h += '<div style="background:linear-gradient(90deg,#7c3aed,#1d4ed8);padding:12px 16px;">';
+    h += '<strong style="color:#fff;font-size:13px;">🏢 '+spotlight.insured+'</strong>';
+    h += '<div style="color:rgba(255,255,255,.8);font-size:10px;margin-top:2px;">'+spotlight.id+' · '+spotlight.lob+' · '+spotlight.state+'</div></div>';
+    h += '<div style="padding:14px 16px;">';
+    var propFields = [
+      ['TIV', _p55fmtM(spotlight.tiv)],
+      ['Construction', spotlight.constructionType],
+      ['Occupancy',    spotlight.occupancy],
+      ['Year Built',   spotlight.yearBuilt],
+      ['Stories',      spotlight.stories],
+      ['Sprinklered',  spotlight.sprinklered ? '✅ Yes' : '❌ No'],
+      ['Deductible',   _p55fmt(spotlight.deductible)],
+      ['Pol. Limit',   _p55fmtM(spotlight.policyLimit)],
+      ['NAICS',        spotlight.naicsCode],
+      ['Ind. Premium', _p55fmt(spotlight.premium)]
+    ];
+    propFields.forEach(function(f) {
+      h += '<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f8fafc;">';
+      h += '<span style="font-size:11px;color:#64748b;">'+f[0]+'</span>';
+      h += '<span style="font-size:11px;font-weight:600;color:#0f172a;">'+f[1]+'</span></div>';
+    });
+    h += '</div></div>';
+
+    /* Right: Risk scoring panel */
+    h += '<div style="display:flex;flex-direction:column;gap:10px;">';
+
+    /* Moody score gauge */
+    h += '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:16px;">';
+    h += '<div style="font-size:12px;font-weight:600;color:#0f172a;margin-bottom:10px;">🎯 Moody Analytics Risk Score</div>';
+    h += '<div style="text-align:center;padding:10px 0;">';
+    var sc = spotlight.moodyScore;
+    var scCol = sc >= 80 ? UW55G : sc >= 65 ? UW55Y : UW55R;
+    var scLabel = sc >= 80 ? 'Preferred' : sc >= 65 ? 'Standard' : 'Substandard';
+    h += '<div style="font-size:52px;font-weight:800;color:'+scCol+';">'+sc+'</div>';
+    h += '<div style="font-size:12px;font-weight:600;color:'+scCol+';">'+scLabel+'</div>';
+    h += '<div style="font-size:10px;color:#94a3b8;margin-top:4px;">Out of 100 · Industry percentile: 34th</div>';
+    h += '<div style="background:#f1f5f9;border-radius:20px;height:12px;margin-top:10px;overflow:hidden;">';
+    h += '<div style="background:linear-gradient(90deg,'+UW55R+','+UW55Y+','+UW55G+');height:100%;border-radius:20px;width:100%;position:relative;">';
+    h += '<div style="position:absolute;top:-2px;left:'+sc+'%;transform:translateX(-50%);width:16px;height:16px;background:#fff;border:3px solid #0f172a;border-radius:50%;"></div>';
+    h += '</div></div></div></div>';
+
+    /* Risk factors */
+    h += '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px;">';
+    h += '<div style="font-size:12px;font-weight:600;color:#0f172a;margin-bottom:10px;">⚡ Risk Factors</div>';
+    var riskFactors = [
+      { factor:'CAT Exposure (FL Wind)',   impact:-18, severity:'High'   },
+      { factor:'Seismic Zone (CA-4)',       impact:-14, severity:'High'   },
+      { factor:'Pre-1990 Construction',    impact:-10, severity:'Medium' },
+      { factor:'Wood Frame 5-Story',       impact:-8,  severity:'Medium' },
+      { factor:'Sprinklered — Full',       impact:+12, severity:'Low'    },
+      { factor:'Occupancy: Habitational',  impact:-4,  severity:'Low'    }
+    ];
+    riskFactors.forEach(function(rf) {
+      var impCol = rf.impact > 0 ? UW55G : rf.severity === 'High' ? UW55R : UW55Y;
+      h += '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #f8fafc;">';
+      h += '<span style="font-size:11px;color:#334155;">'+rf.factor+'</span>';
+      h += '<div style="display:flex;align-items:center;gap:6px;">';
+      h += '<span style="background:'+impCol+'18;color:'+impCol+';padding:1px 7px;border-radius:4px;font-size:10px;font-weight:700;">'+(rf.impact>0?'+':'')+rf.impact+'</span>';
+      h += '</div></div>';
+    });
+    h += '</div>';
+    h += '</div>'; /* end right col */
+    h += '</div>'; /* end top grid */
+
+    /* ── Referral reasons + UW checklist ── */
+    h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">';
+
+    /* Referral reasons */
+    h += '<div style="background:#fff;border:1px solid #fca5a5;border-radius:10px;overflow:hidden;">';
+    h += '<div style="background:#fef2f2;padding:12px 16px;border-bottom:1px solid #fca5a5;">';
+    h += '<strong style="color:#dc2626;font-size:13px;">⚠️ Referral Reasons ('+spotlight.referralReasons.length+')</strong></div>';
+    h += '<div style="padding:12px 16px;">';
+    spotlight.referralReasons.forEach(function(r) {
+      h += '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #fef2f2;">';
+      h += '<span style="color:#dc2626;font-size:14px;">⚡</span>';
+      h += '<span style="font-size:12px;color:#334155;">'+r+'</span></div>';
+    });
+    /* Recommended actions */
+    var recActions = ['Require PML study from Verisk/RMS','Obtain flood zone certification','Require loss history 5yr','Senior UW sign-off required','Facultative placement — Swiss Re/Lloyd\'s'];
+    h += '<div style="margin-top:10px;font-size:11px;font-weight:600;color:#64748b;">Recommended Actions:</div>';
+    recActions.forEach(function(a) {
+      h += '<div style="display:flex;align-items:center;gap:6px;padding:4px 0;font-size:11px;color:#334155;">☐ '+a+'</div>';
+    });
+    h += '</div></div>';
+
+    /* UW guidelines / coverage matrix */
+    h += '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">';
+    h += '<div style="padding:12px 16px;border-bottom:1px solid #f1f5f9;"><strong style="color:#0f172a;font-size:13px;">📑 Coverage Eligibility Matrix</strong></div>';
+    h += '<table style="width:100%;border-collapse:collapse;font-size:11px;">';
+    h += '<thead><tr style="background:#f8fafc;"><th style="padding:7px 12px;text-align:left;color:#64748b;font-weight:600;">Coverage</th><th style="padding:7px 12px;text-align:left;color:#64748b;font-weight:600;">Eligibility</th><th style="padding:7px 12px;text-align:left;color:#64748b;font-weight:600;">Condition</th></tr></thead>';
+    h += '<tbody>';
+    var coverages = [
+      { cov:'Building — All Risk',  elig:'✅ Eligible',   cond:'Standard terms' },
+      { cov:'Business Income',      elig:'✅ Eligible',   cond:'12-month EDP' },
+      { cov:'Flood',                elig:'⚠️ Referral',  cond:'FEMA zone check req.' },
+      { cov:'Wind / CAT',           elig:'⚠️ Referral',  cond:'FL-specific deductible' },
+      { cov:'Earthquake',           elig:'🚫 Excluded',  cond:'Seismic zone 4 excl.' },
+      { cov:'Equipment Breakdown',  elig:'✅ Eligible',   cond:'Standard terms' },
+      { cov:'Ordinance / Law',      elig:'⚠️ Referral',  cond:'Pre-1990 limit req.' }
+    ];
+    coverages.forEach(function(cv, i) {
+      h += '<tr style="background:'+(i%2===0?'#fff':'#fafafa')+';border-bottom:1px solid #f1f5f9;">';
+      h += '<td style="padding:7px 12px;color:#334155;">'+cv.cov+'</td>';
+      h += '<td style="padding:7px 12px;">'+cv.elig+'</td>';
+      h += '<td style="padding:7px 12px;color:#64748b;font-size:10px;">'+cv.cond+'</td>';
+      h += '</tr>';
+    });
+    h += '</tbody></table></div>';
+    h += '</div>'; /* end bottom grid */
+
+    h += '</div>';
+    return h;
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     TAB 4 — PRICING WORKBENCH
+     ══════════════════════════════════════════════════════════════ */
+  function _p55tabPricing() {
+    var h = '<div style="padding:0 4px;">';
+
+    /* ── Rate adequacy table ── */
+    h += '<div style="margin-bottom:16px;">';
+    h += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">';
+    h += '<strong style="color:#0f172a;font-size:14px;">💰 Rate Adequacy by Line — Indication vs. Filed</strong>';
+    h += '<span style="font-size:11px;color:#64748b;">YTD 2026 · All states</span></div>';
+
+    var rateData = [
+      { lob:'Commercial Property', filed:8.2,  indicated:11.4, adeq:-3.2, avgRate:0.82, burnCost:0.63, expRatio:32.1 },
+      { lob:'Personal Auto',       filed:6.4,  indicated:9.1,  adeq:-2.7, avgRate:6.20, burnCost:4.98, expRatio:31.4 },
+      { lob:'Homeowners',          filed:5.1,  indicated:4.8,  adeq:+0.3, avgRate:5.80, burnCost:3.82, expRatio:33.2 },
+      { lob:'Workers\' Comp',      filed:-1.2, indicated:3.4,  adeq:-4.6, avgRate:1.84, burnCost:1.64, expRatio:34.8 },
+      { lob:'General Liability',   filed:4.8,  indicated:2.1,  adeq:+2.7, avgRate:4.10, burnCost:2.42, expRatio:30.5 },
+      { lob:'Commercial Auto',     filed:7.2,  indicated:8.9,  adeq:-1.7, avgRate:7.80, burnCost:5.70, expRatio:33.9 }
+    ];
+
+    h += '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">';
+    h += '<table style="width:100%;border-collapse:collapse;font-size:12px;">';
+    h += '<thead><tr style="background:#f8fafc;">';
+    ['Line of Business','Filed Rate Chg %','Indicated %','Adequacy','Avg Rate / $100','Burn Cost','Exp. Ratio','Verdict'].forEach(function(col){
+      h += '<th style="padding:9px 12px;text-align:left;color:#64748b;font-weight:600;border-bottom:1px solid #f1f5f9;white-space:nowrap;">'+col+'</th>';
+    });
+    h += '</tr></thead><tbody>';
+    rateData.forEach(function(r, i) {
+      var bg  = i % 2 === 0 ? '#fff' : '#fafafa';
+      var adCol = r.adeq >= 0 ? UW55G : r.adeq >= -2 ? UW55Y : UW55R;
+      var verdict = r.adeq >= 0 ? '✅ Adequate' : r.adeq >= -2 ? '⚠️ Monitor' : '🚫 Deficient';
+      h += '<tr style="background:'+bg+';border-bottom:1px solid #f1f5f9;">';
+      h += '<td style="padding:9px 12px;font-weight:600;color:#0f172a;">'+r.lob+'</td>';
+      h += '<td style="padding:9px 12px;color:'+(r.filed>=0?UW55G:UW55R)+';font-weight:600;">'+(r.filed>=0?'+':'')+r.filed+'%</td>';
+      h += '<td style="padding:9px 12px;color:#334155;">'+(r.indicated>=0?'+':'')+r.indicated+'%</td>';
+      h += '<td style="padding:9px 12px;"><span style="background:'+adCol+'18;color:'+adCol+';padding:2px 8px;border-radius:4px;font-weight:700;font-size:11px;">'+(r.adeq>=0?'+':'')+r.adeq+'%</span></td>';
+      h += '<td style="padding:9px 12px;color:#334155;">'+r.avgRate.toFixed(2)+'</td>';
+      h += '<td style="padding:9px 12px;color:#334155;">'+r.burnCost.toFixed(2)+'</td>';
+      h += '<td style="padding:9px 12px;color:#334155;">'+r.expRatio+'%</td>';
+      h += '<td style="padding:9px 12px;font-size:11px;">'+verdict+'</td>';
+      h += '</tr>';
+    });
+    h += '</tbody></table></div></div>';
+
+    /* ── Pricing worksheet for spotlight risk ── */
+    h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">';
+
+    /* Pricing build-up */
+    h += '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">';
+    h += '<div style="padding:13px 16px;border-bottom:1px solid #f1f5f9;">';
+    h += '<strong style="color:#0f172a;font-size:13px;">🧮 Premium Build-up — SUB-2026-1105</strong></div>';
+    h += '<div style="padding:14px 16px;">';
+    var buildUp = [
+      { label:'TIV',                  val:'$18,500,000', sub:false },
+      { label:'Base Rate (per $100)', val:'$2.09',       sub:false },
+      { label:'Manual Premium',       val:'$386,650',    sub:false },
+      { label:'Schedule Mod (-8%)',   val:'-$30,932',    sub:true  },
+      { label:'CAT Loading (+12%)',   val:'+$46,398',    sub:false },
+      { label:'Seismic Excl. Credit', val:'-$15,000',    sub:true  },
+      { label:'Deductible Credit',    val:'-$18,500',    sub:true  },
+      { label:'────────────────',     val:'',            sub:false },
+      { label:'Indicated Premium',    val:'$368,616',    sub:false },
+      { label:'Filed Premium',        val:'$387,000',    sub:false },
+      { label:'Rate Adequacy',        val:'+5.0%',       sub:false }
+    ];
+    buildUp.forEach(function(b) {
+      if (b.label.startsWith('─')) {
+        h += '<div style="border-top:2px solid #e2e8f0;margin:8px 0;"></div>';
+        return;
+      }
+      var bold = ['Indicated Premium','Filed Premium','Rate Adequacy'].indexOf(b.label) > -1;
+      var vc = bold ? '#0f172a' : b.sub ? UW55R : '#334155';
+      h += '<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f8fafc;">';
+      h += '<span style="font-size:11px;color:#64748b;'+(bold?'font-weight:600;':'')+'">'+b.label+'</span>';
+      h += '<span style="font-size:11px;font-weight:'+(bold?'700':'500')+';color:'+vc+';">'+b.val+'</span>';
+      h += '</div>';
+    });
+    h += '</div></div>';
+
+    /* Competitor benchmarking */
+    h += '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">';
+    h += '<div style="padding:13px 16px;border-bottom:1px solid #f1f5f9;">';
+    h += '<strong style="color:#0f172a;font-size:13px;">📊 Market Benchmarking</strong></div>';
+    h += '<div style="padding:14px 16px;">';
+    var benchmarks = [
+      { carrier:'Our Indication',  rate:2.09, position:'—',    premium:387000 },
+      { carrier:'Travelers',       rate:2.24, position:'High', premium:414400 },
+      { carrier:'Chubb',           rate:2.18, position:'High', premium:403300 },
+      { carrier:'Hartford',        rate:2.01, position:'Low',  premium:371850 },
+      { carrier:'CNA Financial',   rate:1.96, position:'Low',  premium:362600 },
+      { carrier:'Market Average',  rate:2.12, position:'—',    premium:392200 }
+    ];
+    h += '<div style="font-size:10px;color:#64748b;margin-bottom:10px;">Rate per $100 TIV · Commercial Property · Habitational · 5-story WF</div>';
+    benchmarks.forEach(function(b, i) {
+      var isOurs = i === 0;
+      var bg = isOurs ? '#faf5ff' : '';
+      var posCol = b.position === 'High' ? UW55R : b.position === 'Low' ? UW55G : '#64748b';
+      var barW = Math.round((b.rate / 2.30) * 100);
+      h += '<div style="margin-bottom:8px;background:'+bg+';padding:5px 6px;border-radius:5px;">';
+      h += '<div style="display:flex;justify-content:space-between;margin-bottom:3px;">';
+      h += '<span style="font-size:11px;'+(isOurs?'font-weight:700;color:#7c3aed;':'color:#334155;')+'">'+b.carrier+'</span>';
+      h += '<div style="display:flex;gap:8px;">';
+      h += '<span style="font-size:11px;font-weight:600;color:#0f172a;">$'+b.rate.toFixed(2)+'</span>';
+      if (b.position !== '—') h += '<span style="font-size:10px;color:'+posCol+';font-weight:600;">'+b.position+'</span>';
+      h += '</div></div>';
+      h += '<div style="background:#f1f5f9;border-radius:3px;height:6px;overflow:hidden;">';
+      h += '<div style="background:'+(isOurs?UW55:UW55T)+';height:100%;border-radius:3px;width:'+barW+'%;"></div></div>';
+      h += '</div>';
+    });
+    h += '</div></div>';
+
+    h += '</div>'; /* end pricing grid */
+    h += '</div>';
+    return h;
+  }
+  /* ══════════════════════════════════════════════════════════════
+     TAB 5 — PORTFOLIO VIEW
+     ══════════════════════════════════════════════════════════════ */
+  function _p55tabPortfolio() {
+    var maxGWP = Math.max.apply(null, uwPortfolio.map(function(p){ return p.gwp; }));
+    var totalGWP = uwPortfolio.reduce(function(a,p){ return a+p.gwp; }, 0);
+    var totalTIV = uwPortfolio.reduce(function(a,p){ return a+p.tiv; }, 0);
+    var totalPol = uwPortfolio.reduce(function(a,p){ return a+p.policies; }, 0);
+
+    var h = '<div style="padding:0 4px;">';
+
+    /* ── Portfolio KPI bar ── */
+    h += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;">';
+    var pkpis = [
+      { v:'$'+((totalGWP/1000000).toFixed(1))+'M', l:'Total GWP',         c:UW55   },
+      { v:'$'+((totalTIV/1000000).toFixed(0))+'M', l:'Total TIV Exposed',  c:UW55B  },
+      { v:totalPol.toLocaleString(),               l:'Total Policies',      c:UW55G  },
+      { v:'6',                                     l:'Lines of Business',   c:UW55T  }
+    ];
+    pkpis.forEach(function(k){
+      h += '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px;text-align:center;border-top:3px solid '+k.c+';">';
+      h += '<div style="font-size:24px;font-weight:700;color:'+k.c+';">'+k.v+'</div>';
+      h += '<div style="font-size:11px;color:#64748b;margin-top:2px;">'+k.l+'</div></div>';
+    });
+    h += '</div>';
+
+    /* ── GWP bar chart + LoB detail table ── */
+    h += '<div style="display:grid;grid-template-columns:280px 1fr;gap:16px;margin-bottom:16px;">';
+
+    /* GWP bar chart */
+    h += '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">';
+    h += '<div style="padding:13px 16px;border-bottom:1px solid #f1f5f9;"><strong style="color:#0f172a;font-size:13px;">📊 GWP Mix</strong></div>';
+    h += '<div style="padding:14px 16px;">';
+    var lobColors = [UW55,UW55B,UW55T,UW55R,UW55G,UW55Y];
+    uwPortfolio.forEach(function(p, i) {
+      var barW = Math.round((p.gwp / totalGWP) * 100);
+      var pct  = Math.round((p.gwp / totalGWP) * 100);
+      h += '<div style="margin-bottom:10px;">';
+      h += '<div style="display:flex;justify-content:space-between;margin-bottom:3px;">';
+      h += '<span style="font-size:10px;color:#334155;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px;">'+p.lob+'</span>';
+      h += '<span style="font-size:10px;font-weight:700;color:'+lobColors[i]+';">'+pct+'%</span></div>';
+      h += '<div style="background:#f1f5f9;border-radius:4px;height:10px;overflow:hidden;">';
+      h += '<div style="background:'+lobColors[i]+';height:100%;border-radius:4px;width:'+barW+'%;"></div></div>';
+      h += '</div>';
+    });
+    h += '</div></div>';
+
+    /* LoB detail table */
+    h += '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">';
+    h += '<div style="padding:13px 16px;border-bottom:1px solid #f1f5f9;"><strong style="color:#0f172a;font-size:13px;">📋 Portfolio by Line of Business</strong></div>';
+    h += '<table style="width:100%;border-collapse:collapse;font-size:12px;">';
+    h += '<thead><tr style="background:#f8fafc;">';
+    ['Line','GWP','Policies','Avg Prem','Loss Ratio','Comb. Ratio','CAT Exp.','Retention','YOY Δ','Signal'].forEach(function(col){
+      h += '<th style="padding:8px 10px;text-align:left;color:#64748b;font-weight:600;border-bottom:1px solid #f1f5f9;white-space:nowrap;">'+col+'</th>';
+    });
+    h += '</tr></thead><tbody>';
+    uwPortfolio.forEach(function(p, i) {
+      var bg  = i % 2 === 0 ? '#fff' : '#fafafa';
+      var lrCol = p.lossRatio < 60 ? UW55G : p.lossRatio < 70 ? UW55Y : UW55R;
+      var crCol = p.combinedRatio < 95 ? UW55G : p.combinedRatio < 100 ? UW55Y : UW55R;
+      var gwCol = p.growthYOY >= 0 ? UW55G : UW55R;
+      var signal = p.combinedRatio < 95 ? '🟢' : p.combinedRatio < 100 ? '🟡' : '🔴';
+      h += '<tr style="background:'+bg+';border-bottom:1px solid #f1f5f9;">';
+      h += '<td style="padding:8px 10px;font-weight:600;color:#0f172a;white-space:nowrap;">'+p.lob+'</td>';
+      h += '<td style="padding:8px 10px;font-weight:700;color:'+lobColors[i]+';">$'+((p.gwp/1000000).toFixed(1))+'M</td>';
+      h += '<td style="padding:8px 10px;color:#334155;">'+p.policies.toLocaleString()+'</td>';
+      h += '<td style="padding:8px 10px;color:#334155;">'+_p55fmt(p.avgPremium)+'</td>';
+      h += '<td style="padding:8px 10px;"><span style="color:'+lrCol+';font-weight:700;">'+p.lossRatio+'%</span></td>';
+      h += '<td style="padding:8px 10px;"><span style="color:'+crCol+';font-weight:700;">'+p.combinedRatio+'%</span></td>';
+      h += '<td style="padding:8px 10px;color:#334155;">'+(p.catExposure ? '$'+((p.catExposure/1000000).toFixed(0))+'M' : '—')+'</td>';
+      h += '<td style="padding:8px 10px;color:#334155;">'+p.retentionRate+'%</td>';
+      h += '<td style="padding:8px 10px;"><span style="color:'+gwCol+';font-weight:600;">'+(p.growthYOY>=0?'+':'')+p.growthYOY+'%</span></td>';
+      h += '<td style="padding:8px 10px;font-size:16px;">'+signal+'</td>';
+      h += '</tr>';
+    });
+    h += '</tbody></table></div>';
+    h += '</div>'; /* end chart+table grid */
+
+    /* ── CAT Exposure heatmap ── */
+    h += '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:16px;">';
+    h += '<strong style="color:#0f172a;font-size:13px;">🌪️ CAT Exposure by Geography</strong>';
+    h += '<div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap;">';
+    var catStates = [
+      { state:'FL', exposure:48000000, peril:'Wind/Hurricane', tier:1 },
+      { state:'TX', exposure:22000000, peril:'Hail/Wind',      tier:2 },
+      { state:'CA', exposure:18500000, peril:'Earthquake',      tier:1 },
+      { state:'NY', exposure:8400000,  peril:'Northeast Wind',  tier:2 },
+      { state:'IL', exposure:4200000,  peril:'Tornado',         tier:3 },
+      { state:'NC', exposure:3200000,  peril:'Hurricane',       tier:3 }
+    ];
+    var maxCAT = Math.max.apply(null, catStates.map(function(c){ return c.exposure; }));
+    catStates.forEach(function(c) {
+      var sz = Math.round((c.exposure / maxCAT) * 60) + 60;
+      var tc = c.tier === 1 ? UW55R : c.tier === 2 ? UW55Y : UW55G;
+      h += '<div style="text-align:center;">';
+      h += '<div style="width:'+sz+'px;height:'+sz+'px;border-radius:50%;background:'+tc+'22;border:2px solid '+tc+';display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto;">';
+      h += '<div style="font-weight:800;font-size:16px;color:'+tc+';">'+c.state+'</div>';
+      h += '<div style="font-size:9px;color:'+tc+';font-weight:600;">$'+((c.exposure/1000000).toFixed(1))+'M</div>';
+      h += '</div>';
+      h += '<div style="font-size:9px;color:#64748b;margin-top:4px;max-width:'+sz+'px;">'+c.peril+'</div>';
+      h += '</div>';
+    });
+    h += '</div></div>';
+
+    h += '</div>';
+    return h;
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     TAB 6 — REINSURANCE
+     ══════════════════════════════════════════════════════════════ */
+  function _p55tabReinsurance() {
+    var totalCededPrem = uwReinsurance.reduce(function(a,r){ return a+r.premium; }, 0);
+
+    var h = '<div style="padding:0 4px;">';
+
+    /* ── KPI row ── */
+    h += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;">';
+    var rkpis = [
+      { v: uwReinsurance.length,        l:'Active Treaties',    c: UW55   },
+      { v: _p55fmt(totalCededPrem),      l:'Total Ceded Prem',  c: UW55B  },
+      { v: '$60M',                       l:'Max Capacity',       c: UW55G  },
+      { v: '5 Reinsurers',               l:'Panel Diversity',    c: UW55T  }
+    ];
+    rkpis.forEach(function(k){
+      h += '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px;text-align:center;border-top:3px solid '+k.c+';">';
+      h += '<div style="font-size:20px;font-weight:700;color:'+k.c+';">'+k.v+'</div>';
+      h += '<div style="font-size:11px;color:#64748b;margin-top:2px;">'+k.l+'</div></div>';
+    });
+    h += '</div>';
+
+    /* ── Treaty register table ── */
+    h += '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;margin-bottom:16px;">';
+    h += '<div style="padding:13px 16px;border-bottom:1px solid #f1f5f9;display:flex;justify-content:space-between;align-items:center;">';
+    h += '<strong style="color:#0f172a;font-size:13px;">📜 Reinsurance Treaty Register</strong>';
+    h += '<span style="font-size:11px;color:#64748b;">Program Year 2026</span></div>';
+    h += '<table style="width:100%;border-collapse:collapse;font-size:12px;">';
+    h += '<thead><tr style="background:#f8fafc;">';
+    ['Treaty ID','Type','Line','Reinsurer','Layer / Structure','Ceded Prem','Ceded %','Retention','Limit','Ced. Comm.','Expiry','Status'].forEach(function(col){
+      h += '<th style="padding:8px 10px;text-align:left;color:#64748b;font-weight:600;border-bottom:1px solid #f1f5f9;white-space:nowrap;">'+col+'</th>';
+    });
+    h += '</tr></thead><tbody>';
+    uwReinsurance.forEach(function(r, i) {
+      var bg = i % 2 === 0 ? '#fff' : '#fafafa';
+      h += '<tr style="background:'+bg+';border-bottom:1px solid #f1f5f9;">';
+      h += '<td style="padding:8px 10px;font-family:monospace;font-weight:600;color:#7c3aed;white-space:nowrap;">'+r.treaty+'</td>';
+      h += '<td style="padding:8px 10px;color:#334155;white-space:nowrap;">'+r.type+'</td>';
+      h += '<td style="padding:8px 10px;color:#334155;white-space:nowrap;">'+r.lob+'</td>';
+      h += '<td style="padding:8px 10px;font-weight:600;color:#0f172a;white-space:nowrap;">'+r.reinsurer+'</td>';
+      h += '<td style="padding:8px 10px;color:#334155;white-space:nowrap;">'+r.layer+'</td>';
+      h += '<td style="padding:8px 10px;font-weight:600;color:#0f172a;">'+_p55fmt(r.premium)+'</td>';
+      h += '<td style="padding:8px 10px;color:#334155;">'+(r.cededPct > 0 ? r.cededPct+'%' : '—')+'</td>';
+      h += '<td style="padding:8px 10px;color:#334155;">'+(r.retention > 0 ? _p55fmt(r.retention) : '—')+'</td>';
+      h += '<td style="padding:8px 10px;color:#334155;">'+(r.limit > 0 ? _p55fmtM(r.limit) : '—')+'</td>';
+      h += '<td style="padding:8px 10px;color:#334155;">'+(r.cedingCommission > 0 ? r.cedingCommission+'%' : '—')+'</td>';
+      h += '<td style="padding:8px 10px;color:#334155;white-space:nowrap;">'+r.expiry+'</td>';
+      h += '<td style="padding:8px 10px;">'+_p55badge(r.status)+'</td>';
+      h += '</tr>';
+    });
+    h += '</tbody></table></div>';
+
+    /* ── Program structure visualization ── */
+    h += '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:16px;">';
+    h += '<strong style="color:#0f172a;font-size:13px;">🏗️ Treaty Program Structure — Commercial Property</strong>';
+    h += '<div style="margin-top:16px;position:relative;padding-left:80px;">';
+
+    var layers2 = [
+      { label:'CAT Layer',  desc:'$20M xs $5M · Everest Re',       h:60, col:UW55R,  pct:'CATASTROPHE PROTECTION' },
+      { label:'XL Layer',   desc:'$5M xs $2M · Swiss Re',           h:50, col:UW55Y,  pct:'EXCESS OF LOSS' },
+      { label:'Fac. Layer', desc:'60% of $18.5M · Lloyd\'s 2623',   h:44, col:UW55,   pct:'FACULTATIVE' },
+      { label:'Retention',  desc:'Net retention: $2M per risk',      h:40, col:UW55G,  pct:'RETAINED' }
+    ];
+    layers2.forEach(function(l) {
+      h += '<div style="position:relative;margin-bottom:4px;">';
+      h += '<div style="position:absolute;left:-80px;top:50%;transform:translateY(-50%);font-size:9px;font-weight:700;color:#64748b;width:76px;text-align:right;white-space:nowrap;">'+l.label+'</div>';
+      h += '<div style="background:'+l.col+';color:#fff;border-radius:4px;height:'+l.h+'px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;">';
+      h += '<span style="font-size:10px;font-weight:700;">'+l.pct+'</span>';
+      h += '<span style="font-size:10px;opacity:.9;">'+l.desc+'</span>';
+      h += '</div></div>';
+    });
+    h += '</div></div>';
+
+    h += '</div>';
+    return h;
+  }
+  /* ══════════════════════════════════════════════════════════════
+     BUILD PAGE — 6-TAB RENDERER
+     ══════════════════════════════════════════════════════════════ */
+  function _p55buildPage() {
+    var tabs = [
+      { key:'dashboard',    label:'Dashboard',      icon:'🎛️'  },
+      { key:'submissions',  label:'Submissions',    icon:'📥'  },
+      { key:'risk',         label:'Risk Analysis',  icon:'🔬'  },
+      { key:'pricing',      label:'Pricing',        icon:'💰'  },
+      { key:'portfolio',    label:'Portfolio',      icon:'📊'  },
+      { key:'reinsurance',  label:'Reinsurance',    icon:'🏗️'  }
+    ];
+
+    var kpis = [
+      _p55kpi('10',      'Submissions',        UW55B),
+      _p55kpi('5',       'Open Referrals',     UW55Y),
+      _p55kpi('2',       'Urgent',             UW55R),
+      _p55kpi('$1.29M',  'Ind. Premium Pool',  UW55),
+      _p55kpi('$13.0M',  'Total GWP',          UW55G),
+      _p55kpi('5',       'RI Treaties',        UW55T)
+    ];
+
+    /* Register _p8actions for tab switches */
+    tabs.forEach(function(t) {
+      window._p8actions['p55tab_' + t.key] = function() {
+        window._p55activeTab = t.key;
+        _p55buildPage();
+      };
+    });
+
+    var html = '';
+
+    /* Header */
+    html += '<div style="background:linear-gradient(135deg,'+UW55+' 0%,'+UW55B+' 100%);border-radius:12px 12px 0 0;padding:20px 24px;margin:-20px -20px 0 -20px;">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;">';
+    html += '<div style="display:flex;align-items:center;gap:10px;">';
+    html += '<span style="font-size:28px;">🏛️</span>';
+    html += '<div>';
+    html += '<h2 style="color:#fff;font-size:20px;font-weight:700;margin:0;">P&C Underwriting Workbench</h2>';
+    html += '<p style="color:rgba(255,255,255,.8);font-size:12px;margin:2px 0 0;">Submissions · Risk Analysis · Pricing · Portfolio · Reinsurance</p>';
+    html += '</div></div>';
+    html += '<div style="display:flex;gap:8px;">';
+    html += '<span style="background:rgba(255,255,255,.15);color:#fff;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;border:1px solid rgba(255,255,255,.3);">📅 Jul 17, 2026</span>';
+    html += '<span style="background:#7c3aed;color:#fff;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;border:1px solid #a78bfa;">● UW QUEUE</span>';
+    html += '</div></div></div>';
+
+    /* KPI bar */
+    html += '<div style="display:flex;gap:10px;background:#f8fafc;border:1px solid #e2e8f0;padding:14px 20px;margin:0 -20px;flex-wrap:wrap;">';
+    kpis.forEach(function(k) { html += k; });
+    html += '</div>';
+
+    /* Tab bar */
+    html += '<div style="display:flex;gap:2px;border-bottom:2px solid #e2e8f0;margin:16px 0 0;overflow-x:auto;">';
+    tabs.forEach(function(t) {
+      var active = (window._p55activeTab === t.key);
+      var ts = active
+        ? 'background:#fff;border:2px solid #e2e8f0;border-bottom:2px solid #fff;border-radius:8px 8px 0 0;color:'+UW55+';font-weight:700;margin-bottom:-2px;padding:10px 18px;cursor:pointer;font-size:12px;white-space:nowrap;'
+        : 'background:transparent;border:none;color:#64748b;padding:10px 18px;cursor:pointer;font-size:12px;white-space:nowrap;border-radius:8px 8px 0 0;';
+      html += '<button onclick="_p8run(\'p55tab_'+t.key+'\')" style="'+ts+'">'+t.icon+' '+t.label+'</button>';
+    });
+    html += '</div>';
+
+    /* Tab body */
+    html += '<div style="background:#fff;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 12px 12px;padding:20px;min-height:520px;">';
+    if      (window._p55activeTab === 'dashboard')   html += _p55tabDashboard();
+    else if (window._p55activeTab === 'submissions')  html += _p55tabSubmissions();
+    else if (window._p55activeTab === 'risk')         html += _p55tabRiskAnalysis();
+    else if (window._p55activeTab === 'pricing')      html += _p55tabPricing();
+    else if (window._p55activeTab === 'portfolio')    html += _p55tabPortfolio();
+    else if (window._p55activeTab === 'reinsurance')  html += _p55tabReinsurance();
+    html += '</div>';
+
+    /* Footer */
+    html += '<div style="text-align:center;padding:12px 0 4px;color:#94a3b8;font-size:11px;">';
+    html += 'P&C Underwriting Workbench · Agent360 · Phase 55 · 10 Submissions · $13.0M GWP · 5 RI Treaties';
+    html += '</div>';
+
+    document.getElementById('page-content').innerHTML = html;
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     NAV INJECTION — "Underwriting Workbench" under P&C Platform
+     ══════════════════════════════════════════════════════════════ */
+  function _p55injectNav() {
+    if (document.querySelector('.p55-pc-uw-nav')) return true;
+
+    /* Anchor: prefer P54 ops nav, fallback chain */
+    var anchor = document.querySelector('.p54-pc-ops-nav')
+      || document.querySelector('.p53-pc-claims-nav')
+      || document.querySelector('.p7-nav-group.nav-grp-tpa')
+      || document.querySelector('.mod-roadmap-nav')
+      || document.querySelector('.data-ai-nav');
+    if (!anchor) return false;
+
+    var uwItem = document.createElement('div');
+    uwItem.className = 'p55-pc-uw-nav';
+    uwItem.setAttribute('style',
+      'display:flex;align-items:center;gap:8px;padding:7px 14px 7px 28px;' +
+      'cursor:pointer;border-radius:6px;margin:2px 6px;transition:background .15s;' +
+      'font-size:12px;color:#e2e8f0;');
+    uwItem.innerHTML =
+      '<span style="background:#7c3aed;color:#fff;font-size:9px;font-weight:700;' +
+      'padding:1px 5px;border-radius:3px;letter-spacing:.5px;">P&C</span>' +
+      '<span>Underwriting</span>';
+    uwItem.onmouseenter = function(){ this.style.background='rgba(255,255,255,.08)'; };
+    uwItem.onmouseleave = function(){ this.style.background=''; };
+    uwItem.onclick = function(){ window.navigateTo('pc-underwriting'); };
+
+    if (anchor.nextSibling) {
+      anchor.parentNode.insertBefore(uwItem, anchor.nextSibling);
+    } else {
+      anchor.parentNode.appendChild(uwItem);
+    }
+    return true;
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     navigateTo OVERRIDE
+     ══════════════════════════════════════════════════════════════ */
+  var _p55origNav = window.navigateTo;
+  window.navigateTo = function(page) {
+    if (page === 'pc-underwriting') {
+      _p55buildPage();
+      return;
+    }
+    if (_p55origNav) _p55origNav(page);
+  };
+
+  /* ══════════════════════════════════════════════════════════════
+     INIT — retry + MutationObserver
+     ══════════════════════════════════════════════════════════════ */
+  if (!window._p55activeTab) window._p55activeTab = 'dashboard';
+
+  (function _p55init() {
+    var MAX_MS = 15000, START = Date.now(), obs;
+    function tryInject() {
+      if (_p55injectNav()) { if (obs) obs.disconnect(); return; }
+      if (Date.now() - START > MAX_MS) return;
+      if (typeof MutationObserver !== 'undefined' && !obs) {
+        obs = new MutationObserver(function(){ tryInject(); });
+        obs.observe(document.body || document.documentElement, { childList:true, subtree:true });
+      }
+      setTimeout(tryInject, 600);
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', tryInject);
+    } else {
+      tryInject();
+    }
+  })();
+
+  console.log('[P55] P&C Underwriting Workbench loaded · 10 submissions · 6 tabs · pc-underwriting route');
+})();
