@@ -105938,3 +105938,859 @@ var navigateTo=window.navigateTo;
 
   console.log('[P56] P&C Carrier 360 loaded · 8 carriers · 6 tabs · $55.6B surplus · pc-carrier route');
 })();
+/* PHASE 57 — P&C ANALYTICS HUB (pc-analytics) */
+(function () {
+  'use strict';
+  var AN57='#1e1b4b', AN57B='#4338ca', AN57G='#059669',
+      AN57Y='#d97706', AN57R='#dc2626', AN57T='#0891b2', AN57S='#475569', AN57L='#6366f1';
+
+  /* ── LOSS DEVELOPMENT TRIANGLES (Commercial Auto — AY 2019–2025, 7 dev periods) ── */
+  var lossTriangle = {
+    lob: 'Commercial Auto',
+    accidentYears: [2019, 2020, 2021, 2022, 2023, 2024, 2025],
+    devMonths: [12, 24, 36, 48, 60, 72, 84],
+    paid: [
+      [4820, 7940, 9610, 10280, 10540, 10680, 10740],
+      [4120, 6480, 7920, 8540,  8810,  8940,  null],
+      [5340, 8820, 10640,11480, 11820, null,  null],
+      [6180, 9940, 12060,12980, null,  null,  null],
+      [7240, 11480,13840, null,  null,  null,  null],
+      [8120, 12840, null, null,  null,  null,  null],
+      [9340, null,  null, null,  null,  null,  null]
+    ],
+    incurred: [
+      [10240,10680, 10720,10740, 10740, 10740, 10740],
+      [9180, 9420,  9480, 9500,  9500,  9500,  null],
+      [12140,12480, 12580,12620, 12640, null,  null],
+      [14820,15240, 15420,15480, null,  null,  null],
+      [17640,18120, 18340, null,  null,  null,  null],
+      [19840,20480, null,  null,  null,  null,  null],
+      [24120, null,  null,  null,  null,  null,  null]
+    ],
+    ldfs: [1.618, 1.214, 1.074, 1.026, 1.013, 1.006],
+    tailFactor: 1.004,
+    ultimateLoss: [10740, 9500, 12640, 15480, 18340, 20480, 24120],
+    earnedPremium: [14800,14200,17400,20100,22800,25200,28400]
+  };
+
+  /* ── LoB COMBINED RATIO METRICS (6 LoB × 5 years) ── */
+  var lobMetrics = [
+    { lob:'Commercial Property', gwp:[18400,19200,21800,24600,28200],
+      lr:[54.2,58.4,61.8,57.2,53.6], er:[32.1,32.4,32.8,33.1,32.6],
+      cr:[86.3,90.8,94.6,90.3,86.2], cat:[8.4,12.1,14.2,9.8,7.4],
+      ncat:[45.8,46.3,47.6,47.4,46.2], premium_adequacy:1.08 },
+    { lob:'General Liability', gwp:[22100,23400,25800,28200,31400],
+      lr:[61.4,63.2,64.8,62.4,60.1], er:[33.2,33.4,33.6,33.8,33.2],
+      cr:[94.6,96.6,98.4,96.2,93.3], cat:[1.2,1.4,1.6,1.3,1.1],
+      ncat:[60.2,61.8,63.2,61.1,59.0], premium_adequacy:0.96 },
+    { lob:'Commercial Auto', gwp:[14800,14200,17400,20100,22800],
+      lr:[72.8,74.4,76.2,74.8,72.4], er:[34.1,34.2,34.4,34.6,34.2],
+      cr:[106.9,108.6,110.6,109.4,106.6], cat:[2.1,1.8,2.4,2.2,1.9],
+      ncat:[70.7,72.6,73.8,72.6,70.5], premium_adequacy:0.88 },
+    { lob:'Workers\' Comp', gwp:[16200,15800,16400,17200,18100],
+      lr:[58.4,57.2,56.8,55.4,54.2], er:[31.8,31.4,31.2,30.8,30.4],
+      cr:[90.2,88.6,88.0,86.2,84.6], cat:[0.4,0.3,0.4,0.3,0.2],
+      ncat:[58.0,56.9,56.4,55.1,54.0], premium_adequacy:1.04 },
+    { lob:'Professional Liability', gwp:[8400,9200,10800,12400,14200],
+      lr:[64.8,66.2,68.4,65.8,63.2], er:[34.8,35.1,35.4,35.2,34.8],
+      cr:[99.6,101.3,103.8,101.0,98.0], cat:[0.2,0.1,0.2,0.1,0.1],
+      ncat:[64.6,66.1,68.2,65.7,63.1], premium_adequacy:0.97 },
+    { lob:'Cyber', gwp:[2800,3600,5200,7400,9800],
+      lr:[68.4,72.8,76.2,69.4,63.8], er:[36.2,36.8,37.2,36.4,35.8],
+      cr:[104.6,109.6,113.4,105.8,99.6], cat:[0,0,0,0,0],
+      ncat:[68.4,72.8,76.2,69.4,63.8], premium_adequacy:1.02 }
+  ];
+  var crYears = [2021, 2022, 2023, 2024, 2025];
+
+  /* ── CAT EVENTS (top 10 by incurred loss) ── */
+  var catEvents = [
+    { id:'CAT-2025-04', name:'Hurricane Helene (SE Coast)', date:'Sep 2025', peril:'Hurricane',
+      states:['FL','GA','SC','NC'], gwpExposed:48200000, grossLoss:8420000, netLoss:3840000,
+      ri_recovery:4580000, ibnr:1240000, status:'Open', dev:'+8.4%' },
+    { id:'CAT-2025-11', name:'Texas Hailstorm Sequence', date:'Apr 2025', peril:'Hail',
+      states:['TX'], gwpExposed:22400000, grossLoss:4180000, netLoss:2940000,
+      ri_recovery:1240000, ibnr:380000, status:'Open', dev:'+3.2%' },
+    { id:'CAT-2024-07', name:'Midwest Derecho', date:'Jul 2024', peril:'Wind/Convective',
+      states:['IL','IN','OH','MI'], gwpExposed:18600000, grossLoss:3240000, netLoss:2580000,
+      ri_recovery:660000, ibnr:120000, status:'Closed', dev:'+0.4%' },
+    { id:'CAT-2024-03', name:'Colorado Wildfire (Marshall)', date:'Mar 2024', peril:'Wildfire',
+      states:['CO'], gwpExposed:12400000, grossLoss:2860000, netLoss:1940000,
+      ri_recovery:920000, ibnr:240000, status:'Open', dev:'+6.1%' },
+    { id:'CAT-2023-09', name:'Hurricane Idalia (FL Panhandle)', date:'Aug 2023', peril:'Hurricane',
+      states:['FL'], gwpExposed:31200000, grossLoss:5640000, netLoss:2280000,
+      ri_recovery:3360000, ibnr:0, status:'Closed', dev:'-1.2%' },
+    { id:'CAT-2023-05', name:'Oklahoma Tornado Outbreak', date:'May 2023', peril:'Tornado',
+      states:['OK','KS'], gwpExposed:8400000, grossLoss:1820000, netLoss:1620000,
+      ri_recovery:200000, ibnr:0, status:'Closed', dev:'+0.8%' },
+    { id:'CAT-2022-09', name:'Hurricane Ian (FL West Coast)', date:'Sep 2022', peril:'Hurricane',
+      states:['FL'], gwpExposed:56400000, grossLoss:12840000, netLoss:3640000,
+      ri_recovery:9200000, ibnr:0, status:'Closed', dev:'+2.1%' },
+    { id:'CAT-2022-06', name:'NE Severe Convective Storm', date:'Jun 2022', peril:'Hail/Wind',
+      states:['NY','NJ','CT'], gwpExposed:14200000, grossLoss:2140000, netLoss:1980000,
+      ri_recovery:160000, ibnr:0, status:'Closed', dev:'-0.3%' },
+    { id:'CAT-2021-08', name:'Hurricane Ida (LA/Northeast)', date:'Aug 2021', peril:'Hurricane',
+      states:['LA','MS','NJ','NY','PA'], gwpExposed:42800000, grossLoss:9420000, netLoss:2840000,
+      ri_recovery:6580000, ibnr:0, status:'Closed', dev:'+1.4%' },
+    { id:'CAT-2021-02', name:'Texas Winter Storm Uri', date:'Feb 2021', peril:'Winter Storm',
+      states:['TX'], gwpExposed:24600000, grossLoss:6840000, netLoss:4120000,
+      ri_recovery:2720000, ibnr:0, status:'Closed', dev:'+4.8%' }
+  ];
+
+  /* ── RESERVE DEVELOPMENT BY LoB (6 LoB × prior-year vs. current) ── */
+  var reserveDev = [
+    { lob:'Commercial Auto',       cy_reserve:48400000, py_reserve:44200000, dev:+4200000, devPct:+9.5,  ibnr:12840000, signal:'Adverse' },
+    { lob:'General Liability',     cy_reserve:38200000, py_reserve:37400000, dev:+800000,  devPct:+2.1,  ibnr:9840000,  signal:'Moderate' },
+    { lob:'Commercial Property',   cy_reserve:18400000, py_reserve:18600000, dev:-200000,  devPct:-1.1,  ibnr:4120000,  signal:'Favorable' },
+    { lob:'Workers\' Comp',        cy_reserve:29800000, py_reserve:30200000, dev:-400000,  devPct:-1.3,  ibnr:6840000,  signal:'Favorable' },
+    { lob:'Professional Liability',cy_reserve:22100000, py_reserve:21200000, dev:+900000,  devPct:+4.2,  ibnr:7240000,  signal:'Moderate' },
+    { lob:'Cyber',                 cy_reserve:11400000, py_reserve:9800000,  dev:+1600000, devPct:+16.3, ibnr:4820000,  signal:'Adverse' }
+  ];
+
+  /* ── PROFITABILITY BY ACCOUNT SEGMENT ── */
+  var profitSegments = [
+    { segment:'Large Commercial (>$500K prem)', count:84, gwp:42800000, lr:58.4, er:28.2, cr:86.6, roe:16.8, retention:91.2, trend:'▲' },
+    { segment:'Middle Market ($50K–$500K)',      count:412, gwp:38200000, lr:63.8, er:31.4, cr:95.2, roe:9.4,  retention:86.4, trend:'→' },
+    { segment:'Small Commercial (<$50K)',         count:1840, gwp:18400000, lr:68.2, er:34.8, cr:103.0,roe:-1.8, retention:79.2, trend:'▼' },
+    { segment:'E&S Specialty',                   count:124, gwp:12600000, lr:61.2, er:29.8, cr:91.0, roe:12.4, retention:88.1, trend:'▲' },
+    { segment:'Program Business',                count:18,  gwp:9800000,  lr:72.4, er:26.4, cr:98.8, roe:3.2,  retention:94.8, trend:'→' },
+    { segment:'New Business (0–12 mo)',          count:284, gwp:7200000,  lr:74.8, er:36.2, cr:111.0,roe:-8.4, retention:null,  trend:'▼' }
+  ];
+
+  /* ── HELPERS ── */
+  function _p57kpi(val, label, valColor, bgColor) {
+    return '<div style="flex:1;padding:10px 14px;border-right:1px solid rgba(255,255,255,0.12);background:' + (bgColor||'transparent') + '">'
+      + '<div style="font-size:18px;font-weight:800;color:' + (valColor||'#fff') + '">' + val + '</div>'
+      + '<div style="font-size:10px;color:rgba(255,255,255,0.65);margin-top:2px">' + label + '</div></div>';
+  }
+  function _p57badge(text, bg, fg) {
+    return '<span style="display:inline-block;background:' + bg + ';color:' + (fg||'#fff')
+      + ';border-radius:4px;font-size:10px;font-weight:700;padding:2px 8px">' + text + '</span>';
+  }
+  function _p57signalDot(signal) {
+    var c = signal === 'Adverse' ? AN57R : signal === 'Favorable' ? AN57G : AN57Y;
+    return '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' + c + ';margin-right:5px"></span>';
+  }
+  function _p57bar(pct, color, height) {
+    height = height || '8px';
+    return '<div style="background:#e2e8f0;border-radius:4px;height:' + height + ';overflow:hidden">'
+      + '<div style="background:' + color + ';width:' + Math.min(pct,100).toFixed(1) + '%;height:100%;border-radius:4px"></div></div>';
+  }
+  function _p57fmtM(v) {
+    if (Math.abs(v) >= 1000000000) return '$' + (v/1000000000).toFixed(1) + 'B';
+    if (Math.abs(v) >= 1000000) return '$' + (v/1000000).toFixed(1) + 'M';
+    if (Math.abs(v) >= 1000) return '$' + (v/1000).toFixed(0) + 'K';
+    return '$' + v.toFixed(0);
+  }
+  function _p57pct(v) { return (v >= 0 ? '+' : '') + v.toFixed(1) + '%'; }
+  function _p57crColor(cr) {
+    return cr >= 105 ? AN57R : cr >= 100 ? AN57Y : cr >= 95 ? '#d97706' : AN57G;
+  }
+  /* ── TAB 1 — DASHBOARD ── */
+  function _p57tabDashboard() {
+    /* portfolio-level KPI cards */
+    var kpiCards = [
+      { label:'Portfolio CR',    val:'96.2%', sub:'YTD 2025 · ↘ vs 98.1% PY', color:AN57G, icon:'📉' },
+      { label:'Total GWP',       val:'$129.2M', sub:'+8.4% YoY growth',        color:AN57B, icon:'💰' },
+      { label:'Net Loss Ratio',  val:'63.4%',  sub:'Ex-CAT: 59.8%',            color:AN57Y, icon:'📊' },
+      { label:'IBNR Reserve',    val:'$45.7M', sub:'34.2% of net earned prem', color:AN57L, icon:'🔍' },
+      { label:'CAT Loss Load',   val:'$18.4M',sub:'Net after RI recovery',     color:AN57R, icon:'🌪️' },
+      { label:'Reserve Dev',     val:'+$6.9M', sub:'Adverse (Auto +Cyber)',     color:AN57R, icon:'⚠️' }
+    ];
+    var kpiHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;margin-bottom:24px">'
+      + kpiCards.map(function(k) {
+          return '<div style="background:#fff;border:1px solid #e2e8f0;border-top:3px solid ' + k.color + ';border-radius:8px;padding:14px 16px">'
+            + '<div style="display:flex;justify-content:space-between;align-items:flex-start">'
+            + '<div style="font-size:11px;font-weight:600;color:#64748b">' + k.label + '</div>'
+            + '<span style="font-size:18px">' + k.icon + '</span></div>'
+            + '<div style="font-size:24px;font-weight:800;color:' + k.color + ';margin:6px 0 4px">' + k.val + '</div>'
+            + '<div style="font-size:10px;color:#94a3b8">' + k.sub + '</div></div>';
+        }).join('') + '</div>';
+
+    /* LoB CR sparkline summary */
+    var lobCRrows = lobMetrics.map(function(m) {
+      var cr25 = m.cr[4];
+      var cr24 = m.cr[3];
+      var crColor = _p57crColor(cr25);
+      var chg = cr25 - cr24;
+      var chgStr = (chg >= 0 ? '+' : '') + chg.toFixed(1) + ' pts';
+      var chgColor = chg < 0 ? AN57G : chg > 0 ? AN57R : AN57S;
+      var paColor = m.premium_adequacy >= 1.0 ? AN57G : m.premium_adequacy >= 0.95 ? AN57Y : AN57R;
+      /* mini 5-bar sparkline for CR trend */
+      var maxCR = 120;
+      var spark = m.cr.map(function(c,i) {
+        var h = Math.round(c / maxCR * 32);
+        var bc = _p57crColor(c);
+        return '<div style="display:inline-flex;flex-direction:column;justify-content:flex-end;height:32px;width:8px;margin-right:2px">'
+          + '<div style="background:' + bc + ';height:' + h + 'px;border-radius:2px 2px 0 0"></div></div>';
+      }).join('');
+      return '<tr style="border-bottom:1px solid #f1f5f9">'
+        + '<td style="padding:8px 10px;font-weight:600;font-size:12px;color:#1e1b4b">' + m.lob + '</td>'
+        + '<td style="padding:8px 10px;text-align:right;font-size:12px">' + _p57fmtM(m.gwp[4]*1000) + '</td>'
+        + '<td style="padding:8px 10px;text-align:center"><div style="display:flex;align-items:flex-end;justify-content:center">' + spark + '</div></td>'
+        + '<td style="padding:8px 10px;text-align:center;font-size:14px;font-weight:800;color:' + crColor + '">' + cr25.toFixed(1) + '%</td>'
+        + '<td style="padding:8px 10px;text-align:center;font-size:11px;font-weight:700;color:' + chgColor + '">' + chgStr + '</td>'
+        + '<td style="padding:8px 10px;text-align:center;font-size:11px;font-weight:700;color:' + paColor + '">' + (m.premium_adequacy*100).toFixed(0) + '%</td>'
+        + '</tr>';
+    }).join('');
+
+    var lobTable = '<div style="margin-bottom:24px">'
+      + '<div style="font-size:13px;font-weight:700;color:#1e1b4b;margin-bottom:10px">📊 LoB Combined Ratio Dashboard (2021–2025)</div>'
+      + '<table style="width:100%;border-collapse:collapse;font-size:12px">'
+      + '<thead><tr style="background:#f0f4ff;border-bottom:2px solid #4338ca">'
+      + '<th style="padding:8px 10px;text-align:left;font-size:11px;color:#4338ca">Line of Business</th>'
+      + '<th style="padding:8px 10px;text-align:right;font-size:11px;color:#4338ca">GWP 2025</th>'
+      + '<th style="padding:8px 10px;text-align:center;font-size:11px;color:#4338ca">CR Trend (5yr)</th>'
+      + '<th style="padding:8px 10px;text-align:center;font-size:11px;color:#4338ca">CR 2025</th>'
+      + '<th style="padding:8px 10px;text-align:center;font-size:11px;color:#4338ca">YoY Chg</th>'
+      + '<th style="padding:8px 10px;text-align:center;font-size:11px;color:#4338ca">Prem Adequacy</th>'
+      + '</tr></thead><tbody>' + lobCRrows + '</tbody></table>'
+      + '<div style="margin-top:8px;font-size:11px;color:#64748b">Prem Adequacy: &gt;100% = adequate · Sparkline: green=profitable · red=unprofitable</div></div>';
+
+    /* reserve signal summary */
+    var resSig = reserveDev.map(function(r) {
+      return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f1f5f9">'
+        + _p57signalDot(r.signal)
+        + '<span style="font-size:12px;font-weight:600;color:#1e293b;flex:1">' + r.lob + '</span>'
+        + '<span style="font-size:11px;font-weight:700;color:' + (r.devPct>0?AN57R:AN57G) + '">' + _p57pct(r.devPct) + '</span>'
+        + '<span style="font-size:10px;color:#94a3b8;margin-left:8px">' + r.signal + '</span></div>';
+    }).join('');
+
+    /* CAT summary strip */
+    var openCAT = catEvents.filter(function(e){ return e.status === 'Open'; });
+    var totalNet2025 = catEvents.filter(function(e){ return e.date.indexOf('2025')>-1; }).reduce(function(s,e){ return s+e.netLoss; },0);
+    var catStrip = '<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:12px 16px;margin-bottom:20px">'
+      + '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">'
+      + '<div><span style="font-size:13px;font-weight:700;color:#dc2626">🌪️ CAT Exposure — ' + openCAT.length + ' Open Events</span>'
+      + '<div style="font-size:11px;color:#7f1d1d;margin-top:3px">'
+      + openCAT.map(function(e){ return e.name + ' (' + e.dev + ' dev)'; }).join(' · ')
+      + '</div></div>'
+      + '<div style="text-align:right"><div style="font-size:16px;font-weight:800;color:#dc2626">' + _p57fmtM(totalNet2025) + '</div>'
+      + '<div style="font-size:10px;color:#94a3b8">Net CAT loss 2025 YTD</div></div></div></div>';
+
+    var twoCol = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">'
+      + '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:14px 16px">'
+      + '<div style="font-size:13px;font-weight:700;color:#1e1b4b;margin-bottom:10px">🔍 Reserve Development Signals</div>'
+      + resSig + '</div>'
+      + '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:14px 16px">'
+      + '<div style="font-size:13px;font-weight:700;color:#1e1b4b;margin-bottom:10px">💡 Analytical Alerts</div>'
+      + '<div style="font-size:11px;line-height:1.8">'
+      + '<div style="padding:4px 0;border-bottom:1px solid #f1f5f9">🔴 <b>Commercial Auto CR 106.6%</b> — 3rd consecutive year above 100. Rate action required. Premium adequacy: 88%.</div>'
+      + '<div style="padding:4px 0;border-bottom:1px solid #f1f5f9">🔴 <b>Cyber Reserve Dev +16.3%</b> — Ransomware frequency driving significant IBNR strengthening. Moody\'s flags elevated severity.</div>'
+      + '<div style="padding:4px 0;border-bottom:1px solid #f1f5f9">🟡 <b>New Business Segment CR 111%</b> — Underperforming at inception. Review UW guidelines for accounts &lt;12 months.</div>'
+      + '<div style="padding:4px 0;border-bottom:1px solid #f1f5f9">🟡 <b>GL Premium Adequacy 96%</b> — Social inflation driving claim severity. Rate need +6–8% market-wide.</div>'
+      + '<div style="padding:4px 0">🟢 <b>Workers\' Comp CR improving</b> — 5-yr trend: 90.2% → 84.6%. Reserve release opportunity in mature AYs.</div>'
+      + '</div></div></div>';
+
+    return '<div style="padding:20px">' + kpiHTML + catStrip + lobTable + twoCol + '</div>';
+  }
+
+  /* ── TAB 2 — LOSS DEVELOPMENT ── */
+  function _p57tabLossDevelopment() {
+    var lt = lossTriangle;
+    /* Paid triangle table */
+    function buildTriangle(data, label) {
+      var hdr = '<thead><tr style="background:#f0f4ff;border-bottom:2px solid #4338ca">'
+        + '<th style="padding:7px 10px;text-align:left;font-size:11px;color:#4338ca">AY</th>'
+        + lt.devMonths.map(function(m){ return '<th style="padding:7px 8px;text-align:right;font-size:11px;color:#4338ca">' + m + ' mo</th>'; }).join('')
+        + '<th style="padding:7px 8px;text-align:right;font-size:11px;color:#4338ca">Ultimate</th>'
+        + '</tr></thead>';
+      var rows = lt.accidentYears.map(function(ay, ri) {
+        var ult = lt.ultimateLoss[ri];
+        var ep  = lt.earnedPremium[ri];
+        var cells = lt.devMonths.map(function(m, ci) {
+          var v = data[ri][ci];
+          if (v === null) return '<td style="padding:7px 8px;text-align:right;background:#f8fafc;color:#cbd5e1;font-size:11px">—</td>';
+          var isLatest = (ci === lt.devMonths.length - 1 - ri) && ri > 0;
+          var bg = isLatest ? '#eff6ff' : '#fff';
+          return '<td style="padding:7px 8px;text-align:right;font-size:11px;background:' + bg + ';' + (isLatest?'font-weight:700;color:#1d4ed8':'') + '">' + (v/1000).toFixed(0) + '</td>';
+        }).join('');
+        var lr = ((ult / ep) * 100).toFixed(1);
+        var lrColor = parseFloat(lr) >= 75 ? AN57R : parseFloat(lr) >= 65 ? AN57Y : AN57G;
+        return '<tr style="border-bottom:1px solid #f1f5f9">'
+          + '<td style="padding:7px 10px;font-weight:700;font-size:12px;color:#1e1b4b">' + ay + '</td>'
+          + cells
+          + '<td style="padding:7px 8px;text-align:right;font-weight:800;font-size:12px;color:' + lrColor + '">' + (ult/1000).toFixed(0) + '<br><span style="font-size:9px;color:#94a3b8">LR ' + lr + '%</span></td>'
+          + '</tr>';
+      }).join('');
+      return '<div style="overflow-x:auto;margin-bottom:28px">'
+        + '<div style="font-size:13px;font-weight:700;color:#1e1b4b;margin-bottom:6px">' + label + ' — ' + lt.lob + ' (AY 2019–2025, $000s)</div>'
+        + '<table style="width:100%;border-collapse:collapse;font-size:11px;min-width:680px">'
+        + hdr + '<tbody>' + rows + '</tbody></table>'
+        + '<div style="margin-top:6px;font-size:10px;color:#64748b">Shaded = latest diagonal (current valuation) · Ultimate = chain-ladder projection · LR = Ultimate / Earned Premium</div></div>';
+    }
+
+    /* LDF table */
+    var ldfRows = lt.ldfs.map(function(ldf, i) {
+      var from = lt.devMonths[i];
+      var to   = lt.devMonths[i+1] || (lt.devMonths[i] + 12);
+      return '<tr style="border-bottom:1px solid #f1f5f9">'
+        + '<td style="padding:7px 10px;font-size:12px;color:#374151">' + from + ' → ' + to + ' mo</td>'
+        + '<td style="padding:7px 10px;text-align:center;font-size:13px;font-weight:700;color:#4338ca">' + ldf.toFixed(3) + '</td>'
+        + '<td style="padding:7px 10px">'
+        + _p57bar(((ldf - 1) / 0.8) * 100, AN57B, '10px')
+        + '</td></tr>';
+    }).join('');
+    var ldfTable = '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:14px 16px;margin-bottom:24px">'
+      + '<div style="font-size:13px;font-weight:700;color:#1e1b4b;margin-bottom:10px">📐 Chain-Ladder Development Factors (Paid Basis)</div>'
+      + '<table style="width:100%;border-collapse:collapse;font-size:12px">'
+      + '<thead><tr style="background:#f0f4ff;border-bottom:2px solid #4338ca">'
+      + '<th style="padding:7px 10px;text-align:left;font-size:11px;color:#4338ca">Dev Period</th>'
+      + '<th style="padding:7px 10px;text-align:center;font-size:11px;color:#4338ca">Age-to-Age LDF</th>'
+      + '<th style="padding:7px 10px;text-align:left;font-size:11px;color:#4338ca">Magnitude</th>'
+      + '</tr></thead><tbody>' + ldfRows
+      + '<tr style="background:#f0f4ff;border-top:2px solid #4338ca">'
+      + '<td style="padding:7px 10px;font-size:12px;font-weight:700;color:#1e1b4b">Tail Factor (84+ mo)</td>'
+      + '<td style="padding:7px 10px;text-align:center;font-size:13px;font-weight:800;color:#4338ca">' + lt.tailFactor.toFixed(3) + '</td>'
+      + '<td style="padding:7px 10px;font-size:11px;color:#64748b">Applied to AY 2019 only</td>'
+      + '</tr></tbody></table></div>';
+
+    /* CDF (cumulative) to ultimate */
+    var cdfs = [];
+    var cdf = lt.tailFactor;
+    for (var i = lt.ldfs.length - 1; i >= 0; i--) {
+      cdf = cdf * lt.ldfs[i];
+      cdfs.unshift(cdf);
+    }
+    cdfs.push(lt.tailFactor);
+    var cdfCards = lt.devMonths.map(function(m, i) {
+      return '<div style="background:#f0f4ff;border:1px solid #c7d2fe;border-radius:6px;padding:10px 12px;text-align:center">'
+        + '<div style="font-size:10px;color:#4338ca;font-weight:600;margin-bottom:4px">' + m + ' months</div>'
+        + '<div style="font-size:18px;font-weight:800;color:#1e1b4b">' + cdfs[i].toFixed(3) + '</div>'
+        + '<div style="font-size:9px;color:#94a3b8;margin-top:2px">% Reported: ' + (100/cdfs[i]).toFixed(1) + '%</div></div>';
+    }).join('');
+
+    var cdfGrid = '<div style="margin-bottom:24px">'
+      + '<div style="font-size:13px;font-weight:700;color:#1e1b4b;margin-bottom:10px">📈 Cumulative Development Factors (CDF to Ultimate)</div>'
+      + '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px">' + cdfCards + '</div></div>';
+
+    return '<div style="padding:20px">'
+      + buildTriangle(lt.paid, '💵 Paid Loss Triangle')
+      + buildTriangle(lt.incurred, '📋 Incurred Loss Triangle')
+      + ldfTable + cdfGrid + '</div>';
+  }
+  /* ── TAB 3 — COMBINED RATIO DEEP DIVE ── */
+  function _p57tabCombinedRatio() {
+    /* stacked bar: LR + ER per LoB per year */
+    var selectedYear = 4; /* 2025 index */
+    var crRows = lobMetrics.map(function(m) {
+      var lr = m.lr[selectedYear];
+      var er = m.er[selectedYear];
+      var cr = m.cr[selectedYear];
+      var cat = m.cat[selectedYear];
+      var ncat = m.ncat[selectedYear];
+      var crColor = _p57crColor(cr);
+      var catPct = (cat / cr * 100).toFixed(0);
+      /* stacked bar: ex-CAT LR (ncat) | CAT LR (cat) | ER */
+      var barTotal = Math.max(cr, 100);
+      var ncatW = (ncat / barTotal * 100).toFixed(1);
+      var catW  = (cat  / barTotal * 100).toFixed(1);
+      var erW   = (er   / barTotal * 100).toFixed(1);
+      var bar = '<div style="display:flex;height:14px;border-radius:4px;overflow:hidden;background:#e2e8f0">'
+        + '<div style="width:' + ncatW + '%;background:#4338ca;height:100%" title="Ex-CAT LR ' + ncat + '%"></div>'
+        + '<div style="width:' + catW  + '%;background:#dc2626;height:100%" title="CAT LR ' + cat + '%"></div>'
+        + '<div style="width:' + erW   + '%;background:#94a3b8;height:100%" title="ER ' + er + '%"></div>'
+        + (cr > 100 ? '<div style="flex:1;background:#fef2f2;border-left:2px dashed #dc2626" title="Underwriting loss zone"></div>' : '')
+        + '</div>';
+      /* trend arrow */
+      var cr24 = m.cr[3];
+      var arrow = cr < cr24 ? '↘' : cr > cr24 ? '↗' : '→';
+      var arrowColor = cr < cr24 ? AN57G : cr > cr24 ? AN57R : AN57S;
+      return '<tr style="border-bottom:1px solid #f1f5f9">'
+        + '<td style="padding:8px 10px;font-weight:600;font-size:12px;color:#1e1b4b;white-space:nowrap">' + m.lob + '</td>'
+        + '<td style="padding:8px 10px;text-align:center;font-size:12px">' + ncat.toFixed(1) + '%</td>'
+        + '<td style="padding:8px 10px;text-align:center;font-size:12px;color:#dc2626;font-weight:600">' + cat.toFixed(1) + '%</td>'
+        + '<td style="padding:8px 10px;text-align:center;font-size:12px">' + er.toFixed(1) + '%</td>'
+        + '<td style="padding:8px 10px;text-align:center;font-size:14px;font-weight:800;color:' + crColor + '">' + cr.toFixed(1) + '%</td>'
+        + '<td style="padding:8px 10px;text-align:center;font-size:14px;color:' + arrowColor + ';font-weight:700">' + arrow + ' <span style="font-size:10px">' + cr24.toFixed(1) + '%</span></td>'
+        + '<td style="padding:8px 40px 8px 10px">' + bar + '</td>'
+        + '</tr>';
+    }).join('');
+
+    var crTable = '<div style="overflow-x:auto;margin-bottom:28px">'
+      + '<div style="font-size:13px;font-weight:700;color:#1e1b4b;margin-bottom:10px">📊 Combined Ratio Decomposition by LoB — 2025</div>'
+      + '<table style="width:100%;border-collapse:collapse;font-size:12px">'
+      + '<thead><tr style="background:#f0f4ff;border-bottom:2px solid #4338ca">'
+      + '<th style="padding:8px 10px;text-align:left;font-size:11px;color:#4338ca">Line of Business</th>'
+      + '<th style="padding:8px 10px;text-align:center;font-size:11px;color:#4338ca">Ex-CAT LR</th>'
+      + '<th style="padding:8px 10px;text-align:center;font-size:11px;color:#4338ca">CAT LR</th>'
+      + '<th style="padding:8px 10px;text-align:center;font-size:11px;color:#4338ca">Exp Ratio</th>'
+      + '<th style="padding:8px 10px;text-align:center;font-size:11px;color:#4338ca">CR 2025</th>'
+      + '<th style="padding:8px 10px;text-align:center;font-size:11px;color:#4338ca">vs 2024</th>'
+      + '<th style="padding:8px 10px;text-align:left;font-size:11px;color:#4338ca">Composition</th>'
+      + '</tr></thead><tbody>' + crRows + '</tbody></table>'
+      + '<div style="display:flex;gap:20px;margin-top:8px;font-size:11px">'
+      + '<span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;background:#4338ca;display:inline-block;border-radius:2px"></span>Ex-CAT Loss Ratio</span>'
+      + '<span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;background:#dc2626;display:inline-block;border-radius:2px"></span>CAT Loss Load</span>'
+      + '<span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;background:#94a3b8;display:inline-block;border-radius:2px"></span>Expense Ratio</span>'
+      + '</div></div>';
+
+    /* year-over-year CR trend per LoB — card format */
+    var trendCards = lobMetrics.map(function(m) {
+      var crColor = _p57crColor(m.cr[4]);
+      var best = Math.min.apply(null, m.cr);
+      var worst = Math.max.apply(null, m.cr);
+      var bars = crYears.map(function(y, i) {
+        var c = m.cr[i];
+        var bc = _p57crColor(c);
+        var h = Math.round((c / 120) * 52);
+        return '<div style="display:flex;flex-direction:column;align-items:center;gap:2px">'
+          + '<div style="font-size:9px;font-weight:700;color:' + bc + '">' + c.toFixed(0) + '</div>'
+          + '<div style="display:flex;flex-direction:column;justify-content:flex-end;height:52px">'
+          + '<div style="background:' + bc + ';width:22px;height:' + h + 'px;border-radius:3px 3px 0 0"></div></div>'
+          + '<div style="font-size:9px;color:#94a3b8">' + String(y).slice(2) + '</div></div>';
+      }).join('');
+      return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:12px 14px">'
+        + '<div style="font-size:12px;font-weight:700;color:#1e1b4b;margin-bottom:4px">' + m.lob + '</div>'
+        + '<div style="font-size:10px;color:#94a3b8;margin-bottom:8px">Best: ' + best.toFixed(1) + '% · Worst: ' + worst.toFixed(1) + '%</div>'
+        + '<div style="display:flex;gap:4px;align-items:flex-end;justify-content:space-around">' + bars + '</div>'
+        + '<div style="margin-top:8px;display:flex;justify-content:space-between;font-size:11px">'
+        + '<span style="color:#64748b">2025 CR</span>'
+        + '<span style="font-weight:800;color:' + crColor + '">' + m.cr[4].toFixed(1) + '%</span></div></div>';
+    }).join('');
+
+    var trendGrid = '<div>'
+      + '<div style="font-size:13px;font-weight:700;color:#1e1b4b;margin-bottom:12px">📈 5-Year CR Trend by Line of Business</div>'
+      + '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">'
+      + trendCards + '</div>'
+      + '<div style="margin-top:10px;font-size:11px;color:#64748b">Bar height = CR relative to 120% ceiling · Below 100% = underwriting profit</div></div>';
+
+    return '<div style="padding:20px">' + crTable + trendGrid + '</div>';
+  }
+
+  /* ── TAB 4 — RESERVE ANALYSIS ── */
+  function _p57tabReserveAnalysis() {
+    /* Reserve waterfall cards */
+    var totalCY  = reserveDev.reduce(function(s,r){ return s + r.cy_reserve; }, 0);
+    var totalPY  = reserveDev.reduce(function(s,r){ return s + r.py_reserve; }, 0);
+    var totalDev = reserveDev.reduce(function(s,r){ return s + r.dev; }, 0);
+    var totalIBNR= reserveDev.reduce(function(s,r){ return s + r.ibnr; }, 0);
+    var summaryCards = [
+      { label:'Total Reserve Balance', val:_p57fmtM(totalCY),   sub:'All LoB combined', color:AN57B },
+      { label:'Prior Year Reserve',    val:_p57fmtM(totalPY),   sub:'Beginning of year', color:AN57S },
+      { label:'Net Development',       val:_p57fmtM(totalDev),  sub:'Adverse = reserve strengthening', color:totalDev>0?AN57R:AN57G },
+      { label:'Total IBNR Balance',    val:_p57fmtM(totalIBNR), sub:'Estimated unreported losses', color:AN57L }
+    ];
+    var summCards = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:24px">'
+      + summaryCards.map(function(c) {
+          return '<div style="background:linear-gradient(135deg,' + c.color + '20,' + c.color + '08);border:1px solid ' + c.color + '40;border-radius:8px;padding:14px 16px">'
+            + '<div style="font-size:11px;color:#64748b;margin-bottom:6px">' + c.label + '</div>'
+            + '<div style="font-size:22px;font-weight:800;color:' + c.color + '">' + c.val + '</div>'
+            + '<div style="font-size:10px;color:#94a3b8;margin-top:4px">' + c.sub + '</div></div>';
+        }).join('') + '</div>';
+
+    /* Reserve development table */
+    var devRows = reserveDev.map(function(r) {
+      var sc = r.signal === 'Adverse' ? AN57R : r.signal === 'Favorable' ? AN57G : AN57Y;
+      var devFmt = (r.dev >= 0 ? '+' : '') + _p57fmtM(r.dev);
+      var devColor = r.dev > 0 ? AN57R : AN57G;
+      var ibnrPct = ((r.ibnr / r.cy_reserve) * 100).toFixed(1);
+      return '<tr style="border-bottom:1px solid #f1f5f9">'
+        + '<td style="padding:8px 10px;font-weight:600;font-size:12px;color:#1e1b4b">' + r.lob + '</td>'
+        + '<td style="padding:8px 10px;text-align:right;font-size:12px">' + _p57fmtM(r.py_reserve) + '</td>'
+        + '<td style="padding:8px 10px;text-align:right;font-size:12px;font-weight:700">' + _p57fmtM(r.cy_reserve) + '</td>'
+        + '<td style="padding:8px 10px;text-align:right;font-size:12px;font-weight:800;color:' + devColor + '">' + devFmt + '</td>'
+        + '<td style="padding:8px 10px;text-align:center;font-size:12px;font-weight:700;color:' + devColor + '">' + _p57pct(r.devPct) + '</td>'
+        + '<td style="padding:8px 10px;text-align:right;font-size:12px;color:' + AN57L + ';font-weight:600">' + _p57fmtM(r.ibnr) + ' <span style="font-size:10px;color:#94a3b8">(' + ibnrPct + '%)</span></td>'
+        + '<td style="padding:8px 10px;text-align:center">'
+        + '<span style="display:inline-flex;align-items:center;gap:4px;background:' + sc + '15;color:' + sc + ';border:1px solid ' + sc + '40;border-radius:4px;font-size:10px;font-weight:700;padding:2px 8px">'
+        + _p57signalDot(r.signal) + r.signal + '</span></td>'
+        + '</tr>';
+    }).join('');
+
+    var devTable = '<div style="overflow-x:auto;margin-bottom:28px">'
+      + '<div style="font-size:13px;font-weight:700;color:#1e1b4b;margin-bottom:10px">🔍 Reserve Development by Line of Business (Prior Year vs. Current)</div>'
+      + '<table style="width:100%;border-collapse:collapse;font-size:12px;min-width:700px">'
+      + '<thead><tr style="background:#f0f4ff;border-bottom:2px solid #4338ca">'
+      + '<th style="padding:8px 10px;text-align:left;font-size:11px;color:#4338ca">LoB</th>'
+      + '<th style="padding:8px 10px;text-align:right;font-size:11px;color:#4338ca">PY Reserve</th>'
+      + '<th style="padding:8px 10px;text-align:right;font-size:11px;color:#4338ca">CY Reserve</th>'
+      + '<th style="padding:8px 10px;text-align:right;font-size:11px;color:#4338ca">Development</th>'
+      + '<th style="padding:8px 10px;text-align:center;font-size:11px;color:#4338ca">Dev %</th>'
+      + '<th style="padding:8px 10px;text-align:right;font-size:11px;color:#4338ca">IBNR (% of Rsv)</th>'
+      + '<th style="padding:8px 10px;text-align:center;font-size:11px;color:#4338ca">Signal</th>'
+      + '</tr></thead><tbody>' + devRows + '</tbody></table></div>';
+
+    /* IBNR aging waterfall */
+    var ibnrAging = [
+      { label:'AY 2025 (Immature)', pct:38.4, color:AN57R },
+      { label:'AY 2024',            pct:28.6, color:AN57Y },
+      { label:'AY 2023',            pct:18.2, color:'#d97706' },
+      { label:'AY 2022',            pct:9.4,  color:AN57G },
+      { label:'AY 2021 & Prior',    pct:5.4,  color:AN57B }
+    ];
+    var ibnrWaterfall = '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:14px 16px;margin-bottom:24px">'
+      + '<div style="font-size:13px;font-weight:700;color:#1e1b4b;margin-bottom:14px">💧 IBNR Balance by Accident Year Vintage</div>'
+      + ibnrAging.map(function(a) {
+          return '<div style="margin-bottom:10px">'
+            + '<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px">'
+            + '<span style="font-weight:600;color:#374151">' + a.label + '</span>'
+            + '<span style="font-weight:700;color:' + a.color + '">' + a.pct.toFixed(1) + '%  (' + _p57fmtM(totalIBNR * a.pct / 100) + ')</span></div>'
+            + _p57bar(a.pct, a.color, '12px') + '</div>';
+        }).join('')
+      + '<div style="margin-top:12px;font-size:11px;color:#64748b">Total IBNR: ' + _p57fmtM(totalIBNR) + ' · High vintage concentration in recent AYs indicates developing book</div></div>';
+
+    /* Bornhuetter-Ferguson vs Chain-Ladder comparison */
+    var bfData = [
+      { ay:2021, cl:12640000, bf:12480000, diff:-160000, ep:17400000 },
+      { ay:2022, cl:15480000, bf:15120000, diff:-360000, ep:20100000 },
+      { ay:2023, cl:18340000, bf:17920000, diff:-420000, ep:22800000 },
+      { ay:2024, cl:20480000, bf:19840000, diff:-640000, ep:25200000 },
+      { ay:2025, cl:24120000, bf:22840000, diff:-1280000, ep:28400000 }
+    ];
+    var bfRows = bfData.map(function(r) {
+      var clLR = ((r.cl / r.ep)*100).toFixed(1);
+      var bfLR = ((r.bf / r.ep)*100).toFixed(1);
+      var favBF = r.bf < r.cl;
+      return '<tr style="border-bottom:1px solid #f1f5f9">'
+        + '<td style="padding:7px 10px;font-weight:700;font-size:12px;color:#1e1b4b">' + r.ay + '</td>'
+        + '<td style="padding:7px 10px;text-align:right;font-size:12px">' + _p57fmtM(r.cl) + ' <span style="font-size:10px;color:#64748b">(' + clLR + '%)</span></td>'
+        + '<td style="padding:7px 10px;text-align:right;font-size:12px">' + _p57fmtM(r.bf) + ' <span style="font-size:10px;color:#64748b">(' + bfLR + '%)</span></td>'
+        + '<td style="padding:7px 10px;text-align:right;font-size:12px;font-weight:700;color:' + (favBF?AN57G:AN57R) + '">' + _p57fmtM(r.diff) + '</td>'
+        + '<td style="padding:7px 10px;text-align:center;font-size:11px;color:' + (favBF?AN57G:AN57R) + '">' + (favBF ? '↓ BF favorable' : '↑ CL favorable') + '</td>'
+        + '</tr>';
+    }).join('');
+    var bfTable = '<div>'
+      + '<div style="font-size:13px;font-weight:700;color:#1e1b4b;margin-bottom:10px">⚖️ Actuarial Method Comparison: Chain-Ladder vs. Bornhuetter-Ferguson (Comm Auto)</div>'
+      + '<table style="width:100%;border-collapse:collapse;font-size:12px">'
+      + '<thead><tr style="background:#f0f4ff;border-bottom:2px solid #4338ca">'
+      + '<th style="padding:7px 10px;text-align:left;font-size:11px;color:#4338ca">AY</th>'
+      + '<th style="padding:7px 10px;text-align:right;font-size:11px;color:#4338ca">Chain-Ladder Ultimate</th>'
+      + '<th style="padding:7px 10px;text-align:right;font-size:11px;color:#4338ca">B-F Ultimate</th>'
+      + '<th style="padding:7px 10px;text-align:right;font-size:11px;color:#4338ca">Difference</th>'
+      + '<th style="padding:7px 10px;text-align:center;font-size:11px;color:#4338ca">Indication</th>'
+      + '</tr></thead><tbody>' + bfRows + '</tbody></table>'
+      + '<div style="margin-top:8px;font-size:11px;color:#64748b">B-F method blends experience with a priori LR. Negative difference = B-F produces lower (more conservative) ultimate. Immature AYs show largest divergence.</div></div>';
+
+    return '<div style="padding:20px">' + summCards + devTable + ibnrWaterfall + bfTable + '</div>';
+  }
+  /* ── TAB 5 — CAT EXPOSURE ── */
+  function _p57tabCATExposure() {
+    var openEvts  = catEvents.filter(function(e){ return e.status === 'Open'; });
+    var closedEvts= catEvents.filter(function(e){ return e.status === 'Closed'; });
+    var totalGross = catEvents.reduce(function(s,e){ return s+e.grossLoss; },0);
+    var totalNet   = catEvents.reduce(function(s,e){ return s+e.netLoss; },0);
+    var totalRI    = catEvents.reduce(function(s,e){ return s+e.ri_recovery; },0);
+    var totalIBNR  = catEvents.filter(function(e){ return e.status==='Open'; }).reduce(function(s,e){ return s+e.ibnr; },0);
+
+    var summStrip = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:12px;margin-bottom:24px">'
+      + [
+          { label:'Total CAT Events', val:'10', sub:'5 yr lookback', color:AN57B },
+          { label:'Open Events',      val:String(openEvts.length), sub:'With IBNR development', color:AN57R },
+          { label:'Gross CAT Loss',   val:_p57fmtM(totalGross), sub:'All events combined', color:AN57Y },
+          { label:'Net CAT Loss',     val:_p57fmtM(totalNet),   sub:'After RI recovery', color:AN57R },
+          { label:'RI Recovery',      val:_p57fmtM(totalRI),    sub:'Treaty + Fac',  color:AN57G },
+          { label:'Open IBNR',        val:_p57fmtM(totalIBNR),  sub:'Estimated dev on open events', color:AN57L }
+        ].map(function(c) {
+          return '<div style="background:#fff;border:1px solid #e2e8f0;border-top:3px solid ' + c.color + ';border-radius:8px;padding:12px 14px">'
+            + '<div style="font-size:11px;color:#64748b;margin-bottom:6px">' + c.label + '</div>'
+            + '<div style="font-size:20px;font-weight:800;color:' + c.color + '">' + c.val + '</div>'
+            + '<div style="font-size:10px;color:#94a3b8;margin-top:4px">' + c.sub + '</div></div>';
+        }).join('') + '</div>';
+
+    /* CAT event table */
+    var perilIcon = { Hurricane:'🌀', Hail:'🌨️', 'Wind/Convective':'💨', Wildfire:'🔥',
+                      Tornado:'🌪️', 'Hail/Wind':'⛈️', 'Winter Storm':'❄️' };
+    var catRows = catEvents.map(function(e) {
+      var riPct = e.grossLoss > 0 ? ((e.ri_recovery/e.grossLoss)*100).toFixed(0) : '0';
+      var netColor = e.netLoss > 3000000 ? AN57R : e.netLoss > 1500000 ? AN57Y : AN57G;
+      var devColor = e.dev.charAt(0) === '-' ? AN57G : e.dev === '+0.4%' || e.dev === '+0.8%' ? AN57S : AN57R;
+      return '<tr style="border-bottom:1px solid #f1f5f9">'
+        + '<td style="padding:7px 10px;font-size:11px;font-weight:700;color:#374151;white-space:nowrap">'
+        + (perilIcon[e.peril]||'💥') + ' ' + e.name + '</td>'
+        + '<td style="padding:7px 8px;text-align:center;font-size:11px;color:#64748b">' + e.date + '</td>'
+        + '<td style="padding:7px 8px;text-align:center;font-size:11px;color:#0891b2">' + e.states.join(', ') + '</td>'
+        + '<td style="padding:7px 8px;text-align:right;font-size:11px">' + _p57fmtM(e.grossLoss) + '</td>'
+        + '<td style="padding:7px 8px;text-align:right;font-size:11px;color:#059669">' + _p57fmtM(e.ri_recovery) + ' <span style="font-size:9px;color:#94a3b8">(' + riPct + '%)</span></td>'
+        + '<td style="padding:7px 8px;text-align:right;font-size:12px;font-weight:700;color:' + netColor + '">' + _p57fmtM(e.netLoss) + '</td>'
+        + '<td style="padding:7px 8px;text-align:center;font-size:11px;font-weight:700;color:' + devColor + '">' + e.dev + '</td>'
+        + '<td style="padding:7px 8px;text-align:center">'
+        + '<span style="background:' + (e.status==='Open'?'#fef2f2':'#f0fdf4') + ';color:' + (e.status==='Open'?AN57R:AN57G) + ';border-radius:4px;font-size:10px;font-weight:700;padding:2px 7px">' + e.status + '</span></td>'
+        + '</tr>';
+    }).join('');
+
+    var catTable = '<div style="overflow-x:auto;margin-bottom:28px">'
+      + '<div style="font-size:13px;font-weight:700;color:#1e1b4b;margin-bottom:10px">🌪️ CAT Event Register — 5-Year Lookback (Top 10 Events)</div>'
+      + '<table style="width:100%;border-collapse:collapse;font-size:11px;min-width:780px">'
+      + '<thead><tr style="background:#f0f4ff;border-bottom:2px solid #4338ca">'
+      + '<th style="padding:7px 10px;text-align:left;font-size:10px;color:#4338ca">Event</th>'
+      + '<th style="padding:7px 8px;text-align:center;font-size:10px;color:#4338ca">Date</th>'
+      + '<th style="padding:7px 8px;text-align:center;font-size:10px;color:#4338ca">States</th>'
+      + '<th style="padding:7px 8px;text-align:right;font-size:10px;color:#4338ca">Gross Loss</th>'
+      + '<th style="padding:7px 8px;text-align:right;font-size:10px;color:#4338ca">RI Recovery</th>'
+      + '<th style="padding:7px 8px;text-align:right;font-size:10px;color:#4338ca">Net Loss</th>'
+      + '<th style="padding:7px 8px;text-align:center;font-size:10px;color:#4338ca">Dev</th>'
+      + '<th style="padding:7px 8px;text-align:center;font-size:10px;color:#4338ca">Status</th>'
+      + '</tr></thead><tbody>' + catRows + '</tbody></table></div>';
+
+    /* Peril mix chart (horizontal bars) */
+    var perilTotals = {};
+    catEvents.forEach(function(e) {
+      var p = e.peril;
+      if (!perilTotals[p]) perilTotals[p] = 0;
+      perilTotals[p] += e.netLoss;
+    });
+    var perilArr = Object.keys(perilTotals).map(function(p){ return { peril:p, net:perilTotals[p] }; })
+                        .sort(function(a,b){ return b.net - a.net; });
+    var maxPeril = perilArr[0].net;
+    var perilColors = ['#dc2626','#d97706','#4338ca','#059669','#0891b2','#7c3aed','#ea580c'];
+    var perilBars = perilArr.map(function(p,i) {
+      var pct = (p.net/totalNet*100).toFixed(1);
+      return '<div style="margin-bottom:10px">'
+        + '<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px">'
+        + '<span style="font-weight:600;color:#374151">' + (perilIcon[p.peril]||'💥') + ' ' + p.peril + '</span>'
+        + '<span style="font-weight:700;color:' + perilColors[i%perilColors.length] + '">' + _p57fmtM(p.net) + ' (' + pct + '%)</span></div>'
+        + _p57bar(p.net/maxPeril*100, perilColors[i%perilColors.length], '12px') + '</div>';
+    }).join('');
+
+    /* Geographic heat — state exposure grid */
+    var stateExposure = {};
+    catEvents.forEach(function(e) {
+      e.states.forEach(function(s) {
+        if (!stateExposure[s]) stateExposure[s] = 0;
+        stateExposure[s] += e.netLoss;
+      });
+    });
+    var stateArr = Object.keys(stateExposure).map(function(s){ return { state:s, loss:stateExposure[s] }; })
+                        .sort(function(a,b){ return b.loss - a.loss; });
+    var maxState = stateArr[0].loss;
+    var stateGrid = stateArr.slice(0,12).map(function(s) {
+      var pct = s.loss/maxState;
+      var bg = pct > 0.7 ? '#fef2f2' : pct > 0.4 ? '#fffbeb' : '#f0fdf4';
+      var fc = pct > 0.7 ? AN57R : pct > 0.4 ? AN57Y : AN57G;
+      return '<div style="background:' + bg + ';border:1px solid ' + fc + '40;border-radius:6px;padding:8px 10px;text-align:center">'
+        + '<div style="font-size:16px;font-weight:800;color:' + fc + '">' + s.state + '</div>'
+        + '<div style="font-size:10px;color:#64748b;margin-top:2px">' + _p57fmtM(s.loss) + '</div>'
+        + _p57bar(pct*100, fc, '4px') + '</div>';
+    }).join('');
+
+    var geoSection = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">'
+      + '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:14px 16px">'
+      + '<div style="font-size:13px;font-weight:700;color:#1e1b4b;margin-bottom:12px">🌪️ Net Loss by Peril</div>'
+      + perilBars + '</div>'
+      + '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:14px 16px">'
+      + '<div style="font-size:13px;font-weight:700;color:#1e1b4b;margin-bottom:12px">🗺️ Geographic Exposure (Net Loss by State)</div>'
+      + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">' + stateGrid + '</div></div></div>';
+
+    return '<div style="padding:20px">' + summStrip + catTable + geoSection + '</div>';
+  }
+
+  /* ── TAB 6 — PROFITABILITY ── */
+  function _p57tabProfitability() {
+    /* Segment profitability table */
+    var segRows = profitSegments.map(function(s) {
+      var crColor = _p57crColor(s.cr);
+      var roeColor = s.roe < 0 ? AN57R : s.roe < 8 ? AN57Y : AN57G;
+      var trendColor = s.trend === '▲' ? AN57G : s.trend === '▼' ? AN57R : AN57S;
+      var retStr = s.retention !== null ? s.retention.toFixed(1) + '%' : 'N/A';
+      return '<tr style="border-bottom:1px solid #f1f5f9">'
+        + '<td style="padding:8px 10px;font-weight:600;font-size:12px;color:#1e1b4b">' + s.segment + '</td>'
+        + '<td style="padding:8px 10px;text-align:right;font-size:12px">' + s.count.toLocaleString() + '</td>'
+        + '<td style="padding:8px 10px;text-align:right;font-size:12px;font-weight:600">' + _p57fmtM(s.gwp) + '</td>'
+        + '<td style="padding:8px 10px;text-align:center;font-size:12px">' + s.lr.toFixed(1) + '%</td>'
+        + '<td style="padding:8px 10px;text-align:center;font-size:12px">' + s.er.toFixed(1) + '%</td>'
+        + '<td style="padding:8px 10px;text-align:center;font-size:14px;font-weight:800;color:' + crColor + '">' + s.cr.toFixed(1) + '%</td>'
+        + '<td style="padding:8px 10px;text-align:center;font-size:13px;font-weight:700;color:' + roeColor + '">' + (s.roe >= 0 ? '+' : '') + s.roe.toFixed(1) + '%</td>'
+        + '<td style="padding:8px 10px;text-align:center;font-size:12px">' + retStr + '</td>'
+        + '<td style="padding:8px 10px;text-align:center;font-size:16px;color:' + trendColor + '">' + s.trend + '</td>'
+        + '</tr>';
+    }).join('');
+
+    var segTable = '<div style="overflow-x:auto;margin-bottom:28px">'
+      + '<div style="font-size:13px;font-weight:700;color:#1e1b4b;margin-bottom:10px">💹 Profitability by Account Segment — 2025</div>'
+      + '<table style="width:100%;border-collapse:collapse;font-size:12px;min-width:700px">'
+      + '<thead><tr style="background:#f0f4ff;border-bottom:2px solid #4338ca">'
+      + '<th style="padding:8px 10px;text-align:left;font-size:11px;color:#4338ca">Segment</th>'
+      + '<th style="padding:8px 10px;text-align:right;font-size:11px;color:#4338ca">Count</th>'
+      + '<th style="padding:8px 10px;text-align:right;font-size:11px;color:#4338ca">GWP</th>'
+      + '<th style="padding:8px 10px;text-align:center;font-size:11px;color:#4338ca">Loss Ratio</th>'
+      + '<th style="padding:8px 10px;text-align:center;font-size:11px;color:#4338ca">Exp Ratio</th>'
+      + '<th style="padding:8px 10px;text-align:center;font-size:11px;color:#4338ca">CR</th>'
+      + '<th style="padding:8px 10px;text-align:center;font-size:11px;color:#4338ca">ROE</th>'
+      + '<th style="padding:8px 10px;text-align:center;font-size:11px;color:#4338ca">Retention</th>'
+      + '<th style="padding:8px 10px;text-align:center;font-size:11px;color:#4338ca">Trend</th>'
+      + '</tr></thead><tbody>' + segRows + '</tbody></table></div>';
+
+    /* GWP mix donut-style bars */
+    var totalGWP = profitSegments.reduce(function(s,r){ return s+r.gwp; },0);
+    var mixColors = [AN57B,'#7c3aed',AN57Y,AN57T,AN57G,AN57R];
+    var mixBars = profitSegments.map(function(s,i) {
+      var pct = (s.gwp/totalGWP*100).toFixed(1);
+      return '<div style="margin-bottom:8px">'
+        + '<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px">'
+        + '<span style="font-weight:600;color:#374151">' + s.segment + '</span>'
+        + '<span style="font-weight:700;color:' + mixColors[i] + '">' + pct + '%  (' + _p57fmtM(s.gwp) + ')</span></div>'
+        + _p57bar(parseFloat(pct), mixColors[i], '10px') + '</div>';
+    }).join('');
+
+    /* Action matrix: ROE vs CR quadrant */
+    var quadrantItems = profitSegments.map(function(s) {
+      var q, color, action;
+      if (s.roe >= 10 && s.cr < 100) { q='Invest & Grow'; color=AN57G; action='Expand share, increase limits'; }
+      else if (s.roe >= 5 && s.cr < 105) { q='Maintain'; color=AN57B; action='Hold position, optimize mix'; }
+      else if (s.roe < 0 || s.cr > 108) { q='Exit / Restructure'; color=AN57R; action='Rate +15%+, non-renew selectively'; }
+      else { q='Fix / Improve'; color=AN57Y; action='Rate action +8–12%, tighten UW'; }
+      return '<div style="background:#fff;border:1px solid #e2e8f0;border-left:4px solid ' + color + ';border-radius:6px;padding:10px 14px;margin-bottom:8px">'
+        + '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">'
+        + '<span style="font-size:12px;font-weight:700;color:#1e293b">' + s.segment + '</span>'
+        + '<span style="background:' + color + '20;color:' + color + ';border-radius:4px;font-size:10px;font-weight:700;padding:2px 7px">' + q + '</span></div>'
+        + '<div style="font-size:11px;color:#64748b">CR: <b style="color:#1e293b">' + s.cr.toFixed(1) + '%</b>  ·  ROE: <b style="color:#1e293b">' + (s.roe>=0?'+':'') + s.roe.toFixed(1) + '%</b></div>'
+        + '<div style="font-size:10px;color:#94a3b8;margin-top:3px">⚡ ' + action + '</div></div>';
+    }).join('');
+
+    var twoCol = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">'
+      + '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:14px 16px">'
+      + '<div style="font-size:13px;font-weight:700;color:#1e1b4b;margin-bottom:12px">🍩 GWP Portfolio Mix</div>'
+      + mixBars + '</div>'
+      + '<div><div style="font-size:13px;font-weight:700;color:#1e1b4b;margin-bottom:12px">🎯 Segment Action Matrix</div>'
+      + quadrantItems + '</div></div>';
+
+    return '<div style="padding:20px">' + segTable + twoCol + '</div>';
+  }
+  /* ── BUILD PAGE ── */
+  function _p57buildPage() {
+    var tabs = [
+      { key:'dashboard',    label:'Dashboard',      icon:'📊' },
+      { key:'lossdevel',    label:'Loss Development',icon:'📐' },
+      { key:'combinedratio',label:'Combined Ratio',  icon:'📉' },
+      { key:'reserve',      label:'Reserve Analysis',icon:'🔍' },
+      { key:'cat',          label:'CAT Exposure',    icon:'🌪️' },
+      { key:'profit',       label:'Profitability',   icon:'💹' }
+    ];
+    if (!window._p57activeTab) window._p57activeTab = 'dashboard';
+
+    tabs.forEach(function(t) {
+      window._p8actions['p57tab_' + t.key] = function() {
+        window._p57activeTab = t.key;
+        var mc = document.getElementById('p57-main-content');
+        if (!mc) return;
+        var fn = {
+          dashboard:_p57tabDashboard, lossdevel:_p57tabLossDevelopment,
+          combinedratio:_p57tabCombinedRatio, reserve:_p57tabReserveAnalysis,
+          cat:_p57tabCATExposure, profit:_p57tabProfitability
+        }[t.key];
+        if (fn) mc.innerHTML = fn();
+        var tb = document.getElementById('p57-tab-bar');
+        if (tb) tb.innerHTML = _p57buildTabBar();
+      };
+    });
+
+    var contentFn = {
+      dashboard:_p57tabDashboard, lossdevel:_p57tabLossDevelopment,
+      combinedratio:_p57tabCombinedRatio, reserve:_p57tabReserveAnalysis,
+      cat:_p57tabCATExposure, profit:_p57tabProfitability
+    }[window._p57activeTab] || _p57tabDashboard;
+
+    var kpiBar = '<div style="display:flex;gap:0;background:#1e1b4b;padding:0">'
+      + _p57kpi('96.2%',  'Portfolio CR (YTD)','#a5f3fc')
+      + _p57kpi('$129.2M','Total GWP · +8.4%','#fff')
+      + _p57kpi('63.4%',  'Net Loss Ratio','#fde68a','')
+      + _p57kpi('$45.7M', 'IBNR Reserve','#c4b5fd')
+      + _p57kpi('$18.4M', 'Net CAT Load','#fca5a5')
+      + _p57kpi('+$6.9M', 'Reserve Dev (Adverse)','#fca5a5')
+      + '</div>';
+
+    var hdr = '<div style="background:linear-gradient(135deg,#1e1b4b 0%,#4338ca 60%,#6366f1 100%);padding:18px 20px 14px;color:#fff">'
+      + '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">'
+      + '<div><div style="font-size:20px;font-weight:800;letter-spacing:-0.3px">📊 P&C Analytics Hub</div>'
+      + '<div style="font-size:12px;opacity:.8;margin-top:3px">Loss Development · Combined Ratio · Reserve Analysis · CAT Exposure · Profitability</div></div>'
+      + '<div style="text-align:right;font-size:10px;opacity:.7">Actuarial Vintage: 2021–2025<br>6 LoB · 10 CAT events · CL + B-F methods</div>'
+      + '</div></div>';
+
+    var shell = hdr + kpiBar
+      + '<div id="p57-tab-bar" style="margin-top:0">' + _p57buildTabBar() + '</div>'
+      + '<div id="p57-main-content" style="min-height:500px">' + contentFn() + '</div>'
+      + '<div style="background:#f8fafc;border-top:1px solid #e2e8f0;padding:8px 20px;font-size:10px;color:#94a3b8">'
+      + 'P57 P&C Analytics Hub · Chain-Ladder & B-F reserving · 6 LoB · 10 CAT events · Segment profitability · Data as of Jul 2026</div>';
+
+    return shell;
+  }
+
+  function _p57buildTabBar() {
+    var tabs = [
+      { key:'dashboard',    label:'Dashboard',      icon:'📊' },
+      { key:'lossdevel',    label:'Loss Development',icon:'📐' },
+      { key:'combinedratio',label:'Combined Ratio',  icon:'📉' },
+      { key:'reserve',      label:'Reserve Analysis',icon:'🔍' },
+      { key:'cat',          label:'CAT Exposure',    icon:'🌪️' },
+      { key:'profit',       label:'Profitability',   icon:'💹' }
+    ];
+    if (!window._p57activeTab) window._p57activeTab = 'dashboard';
+    return '<div style="display:flex;gap:0;border-bottom:2px solid #e2e8f0;background:#f8fafc;padding:0 20px;overflow-x:auto">'
+      + tabs.map(function(t) {
+          var active = window._p57activeTab === t.key;
+          return '<button onclick="window._p8run(\'p57tab_' + t.key + '\')" '
+            + 'style="padding:10px 14px;border:none;background:' + (active?'#fff':'transparent')
+            + ';color:' + (active?'#1e1b4b':'#64748b') + ';font-size:12px;font-weight:' + (active?'700':'500')
+            + ';border-bottom:' + (active?'3px solid #4338ca':'3px solid transparent')
+            + ';cursor:pointer;white-space:nowrap;margin-bottom:-2px">'
+            + t.icon + ' ' + t.label + '</button>';
+        }).join('')
+      + '</div>';
+  }
+
+  /* ── NAV INJECTION ── */
+  function _p57injectNav() {
+    if (document.querySelector('.p57-pc-analytics-nav')) return;
+    var nav = document.createElement('div');
+    nav.className = 'p57-pc-analytics-nav';
+    nav.style.cssText = 'padding:4px 12px;cursor:pointer;border-radius:6px;margin:2px 6px;transition:background .15s';
+    nav.innerHTML = '<div style="display:flex;align-items:center;gap:8px;padding:6px 4px">'
+      + '<span style="font-size:14px">📊</span>'
+      + '<span style="font-size:13px;font-weight:600;color:#e2e8f0">Analytics Hub</span>'
+      + '<span style="background:#4338ca;color:#fff;border-radius:10px;font-size:9px;font-weight:700;padding:1px 7px;margin-left:auto">P57</span>'
+      + '</div>';
+    nav.addEventListener('mouseenter', function(){ this.style.background='rgba(255,255,255,0.1)'; });
+    nav.addEventListener('mouseleave', function(){ this.style.background=''; });
+    nav.addEventListener('click', function(){ window.navigateTo('pc-analytics'); });
+
+    var anchors = ['.p56-pc-carrier-nav','.p55-pc-uw-nav','.p54-pc-ops-nav',
+                   '.p53-pc-claims-nav','.p7-nav-group.nav-grp-tpa','.mod-roadmap-nav','.data-ai-nav'];
+    for (var i = 0; i < anchors.length; i++) {
+      var a = document.querySelector(anchors[i]);
+      if (a && a.parentNode) { a.parentNode.insertBefore(nav, a.nextSibling); return; }
+    }
+    var sidebar = document.querySelector('nav, [class*="sidebar"], [class*="Sidebar"], [class*="side-bar"]');
+    if (sidebar) { sidebar.appendChild(nav); return; }
+    document.body.appendChild(nav);
+  }
+
+  /* ── NAVIGATE TO OVERRIDE ── */
+  var _p57origNav = window.navigateTo;
+  window.navigateTo = function(route) {
+    if (route === 'pc-analytics') {
+      var main = document.querySelector('main, [class*="main-content"], [class*="mainContent"], #root > div > div:last-child, .content-area');
+      if (!main) main = document.body;
+      main.innerHTML = _p57buildPage();
+      window.scrollTo(0, 0);
+      return;
+    }
+    if (typeof _p57origNav === 'function') _p57origNav(route);
+  };
+
+  /* ── INIT ── */
+  function _p57init() { _p57injectNav(); }
+
+  var _p57started = false;
+  var _p57observer = new MutationObserver(function() {
+    if (!_p57started && document.body) {
+      _p57started = true;
+      _p57observer.disconnect();
+      setTimeout(_p57init, 650);
+    }
+  });
+
+  var _p57MAX_MS = 15000;
+  var _p57startTs = Date.now();
+  var _p57retry = setInterval(function() {
+    if (document.body && !document.querySelector('.p57-pc-analytics-nav')) _p57injectNav();
+    if (Date.now() - _p57startTs > _p57MAX_MS) clearInterval(_p57retry);
+  }, 700);
+
+  if (document.body) {
+    setTimeout(_p57init, 400);
+  } else {
+    _p57observer.observe(document.documentElement, { childList: true, subtree: true });
+  }
+
+  console.log('[P57] P&C Analytics Hub loaded · 6 LoB · CL+BF triangles · 10 CAT events · pc-analytics route');
+})();
