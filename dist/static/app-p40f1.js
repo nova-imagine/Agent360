@@ -104917,3 +104917,1024 @@ var navigateTo=window.navigateTo;
 
   console.log('[P55] P&C Underwriting Workbench loaded · 10 submissions · 6 tabs · pc-underwriting route');
 })();
+/* PHASE 56 — P&C CARRIER 360 (pc-carrier) */
+(function () {
+  'use strict';
+  var CR56  = '#0c4a6e';   /* deep blue  — primary brand     */
+  var CR56B = '#0369a1';   /* ocean blue — secondary         */
+  var CR56G = '#059669';   /* green      — favorable / active */
+  var CR56Y = '#d97706';   /* amber      — watch / moderate   */
+  var CR56R = '#dc2626';   /* red        — alert / negative   */
+  var CR56P = '#7c3aed';   /* purple     — analytics          */
+  var CR56T = '#0891b2';   /* teal       — market intel       */
+  var CR56S = '#475569';   /* slate      — neutral text       */
+
+  /* ── CARRIER PANEL (8 admitted + E&S carriers) ── */
+  var carrierPanel = [
+    { id:'CXL-001', name:'Travelers Property Casualty',
+      amBest:'A++', sp:'AA', amBestOutlook:'Stable',
+      admitted:true, domicile:'Hartford, CT', licensed:48,
+      lines:['Commercial Property','General Liability','Commercial Auto','Workers\' Comp'],
+      gwp:41200000000, surplus:24800000000, lossRatio:58.4, combinedRatio:91.2,
+      marketShare:8.4, yoyGrowth:6.2,
+      relationship:'Preferred', tier:1, yearOnPanel:12,
+      contactName:'Jennifer Walsh', contactTitle:'Regional VP — Commercial Lines',
+      contactEmail:'j.walsh@travelers.com', contactPhone:'860-277-0111',
+      specialties:['Large Account','CAT Property','Construction'],
+      maxLine:25000000, minPremium:50000,
+      status:'Active', lastReview:'Apr 2026', nps:82 },
+    { id:'CXL-002', name:'Chubb Limited',
+      amBest:'A++', sp:'AA', amBestOutlook:'Stable',
+      admitted:true, domicile:'Zurich / Warren, NJ', licensed:50,
+      lines:['Commercial Property','D&O','Cyber','Management Liability'],
+      gwp:52600000000, surplus:34100000000, lossRatio:55.1, combinedRatio:88.4,
+      marketShare:9.1, yoyGrowth:7.8,
+      relationship:'Preferred', tier:1, yearOnPanel:15,
+      contactName:'Robert Ashford', contactTitle:'National Account Director',
+      contactEmail:'r.ashford@chubb.com', contactPhone:'908-903-2000',
+      specialties:['Executive Risk','Specialty Lines','Global Accounts'],
+      maxLine:50000000, minPremium:100000,
+      status:'Active', lastReview:'Mar 2026', nps:88 },
+    { id:'CXL-003', name:'Hartford Financial Services',
+      amBest:'A+', sp:'A+', amBestOutlook:'Positive',
+      admitted:true, domicile:'Hartford, CT', licensed:50,
+      lines:['Workers\' Comp','Commercial Auto','Small Commercial','GL'],
+      gwp:22400000000, surplus:12600000000, lossRatio:62.8, combinedRatio:94.7,
+      marketShare:4.6, yoyGrowth:4.1,
+      relationship:'Standard', tier:2, yearOnPanel:8,
+      contactName:'Patricia Okafor', contactTitle:'Middle Market Director',
+      contactEmail:'p.okafor@thehartford.com', contactPhone:'860-547-5000',
+      specialties:['Middle Market','Workers\' Comp','Telematics Auto'],
+      maxLine:10000000, minPremium:25000,
+      status:'Active', lastReview:'May 2026', nps:74 },
+    { id:'CXL-004', name:'CNA Financial Corporation',
+      amBest:'A', sp:'A+', amBestOutlook:'Stable',
+      admitted:true, domicile:'Chicago, IL', licensed:50,
+      lines:['Professional Liability','Commercial Property','GL','Healthcare'],
+      gwp:12800000000, surplus:7400000000, lossRatio:64.2, combinedRatio:96.8,
+      marketShare:2.8, yoyGrowth:2.9,
+      relationship:'Standard', tier:2, yearOnPanel:6,
+      contactName:'Marcus Delgado', contactTitle:'Commercial Lines Manager',
+      contactEmail:'m.delgado@cna.com', contactPhone:'312-822-5000',
+      specialties:['Professional Lines','Healthcare GL','Technology E&O'],
+      maxLine:8000000, minPremium:15000,
+      status:'Active', lastReview:'Jun 2026', nps:71 },
+    { id:'CXL-005', name:'Markel Corporation',
+      amBest:'A', sp:'A', amBestOutlook:'Positive',
+      admitted:false, domicile:'Glen Allen, VA', licensed:0,
+      lines:['Excess & Surplus','Specialty Property','Marine','Equine'],
+      gwp:8100000000, surplus:16200000000, lossRatio:52.8, combinedRatio:86.1,
+      marketShare:1.4, yoyGrowth:11.3,
+      relationship:'Preferred', tier:1, yearOnPanel:5,
+      contactName:'Sophia Tran', contactTitle:'E&S Underwriting Director',
+      contactEmail:'s.tran@markel.com', contactPhone:'804-747-0136',
+      specialties:['Hard-to-Place','Distressed Property','Vacant Buildings'],
+      maxLine:15000000, minPremium:5000,
+      status:'Active', lastReview:'Feb 2026', nps:79 },
+    { id:'CXL-006', name:'Everest Re Group',
+      amBest:'A+', sp:'A+', amBestOutlook:'Stable',
+      admitted:false, domicile:'Liberty Corner, NJ', licensed:0,
+      lines:['Property CAT','Reinsurance','Specialty','Marine'],
+      gwp:14300000000, surplus:9800000000, lossRatio:56.2, combinedRatio:90.3,
+      marketShare:2.4, yoyGrowth:9.7,
+      relationship:'Preferred', tier:1, yearOnPanel:7,
+      contactName:'William Cho', contactTitle:'CAT Treaty Manager',
+      contactEmail:'w.cho@everestre.com', contactPhone:'908-604-3000',
+      specialties:['CAT Modeling','Large Property','Treaty RI'],
+      maxLine:30000000, minPremium:75000,
+      status:'Active', lastReview:'Jan 2026', nps:84 },
+    { id:'CXL-007', name:'Swiss Re America',
+      amBest:'A+', sp:'AA-', amBestOutlook:'Stable',
+      admitted:false, domicile:'Armonk, NY', licensed:0,
+      lines:['Property RI','Casualty RI','Life RI','CAT Bonds'],
+      gwp:44800000000, surplus:28600000000, lossRatio:54.9, combinedRatio:89.8,
+      marketShare:7.2, yoyGrowth:5.4,
+      relationship:'Preferred', tier:1, yearOnPanel:10,
+      contactName:'Heidi Strauss', contactTitle:'Client Solutions Director',
+      contactEmail:'h.strauss@swissre.com', contactPhone:'914-828-8000',
+      specialties:['Proportional RI','Non-Proportional','ILS'],
+      maxLine:0, minPremium:0,
+      status:'Active', lastReview:'Mar 2026', nps:91 },
+    { id:'CXL-008', name:'Kingsway Financial (Surplus Lines)',
+      amBest:'B+', sp:'BBB', amBestOutlook:'Negative',
+      admitted:false, domicile:'Wilmington, DE', licensed:0,
+      lines:['Non-Standard Auto','High-Risk Property','Distressed'],
+      gwp:980000000, surplus:420000000, lossRatio:74.8, combinedRatio:108.2,
+      marketShare:0.2, yoyGrowth:-3.4,
+      relationship:'Restricted', tier:3, yearOnPanel:2,
+      contactName:'Gary Phelps', contactTitle:'Surplus Lines Coordinator',
+      contactEmail:'g.phelps@kingsway.com', contactPhone:'302-888-0100',
+      specialties:['Non-Standard Auto','Last Resort Property'],
+      maxLine:2000000, minPremium:2000,
+      status:'Watch', lastReview:'Jun 2026', nps:42 }
+  ];
+
+  /* ── PREMIUM FLOW DATA (by carrier, monthly) ── */
+  var premiumFlow = [
+    { carrier:'Travelers',  q1:3420000, q2:3810000, ytd:7230000, target:14800000, attainment:48.9 },
+    { carrier:'Chubb',      q1:2180000, q2:2540000, ytd:4720000, target:9600000,  attainment:49.2 },
+    { carrier:'Hartford',   q1:1640000, q2:1820000, ytd:3460000, target:7200000,  attainment:48.1 },
+    { carrier:'CNA',        q1:890000,  q2:1010000, ytd:1900000, target:4000000,  attainment:47.5 },
+    { carrier:'Markel',     q1:620000,  q2:780000,  ytd:1400000, target:2800000,  attainment:50.0 },
+    { carrier:'Everest Re', q1:1240000, q2:1380000, ytd:2620000, target:5200000,  attainment:50.4 },
+    { carrier:'Swiss Re',   q1:2860000, q2:3120000, ytd:5980000, target:11600000, attainment:51.6 }
+  ];
+
+  /* ── MARKET INTELLIGENCE FEED ── */
+  var marketIntel = [
+    { date:'Jul 15 2026', source:'AM Best',    type:'Rating Action',
+      headline:'Travelers A++ Affirmed — Stable Outlook on Strong Underwriting',
+      impact:'positive', lob:'Commercial Property', relevance:'high' },
+    { date:'Jul 14 2026', source:'S&P Global', type:'Market Report',
+      headline:'Commercial Property Rates +8.4% YOY — CAT Demand Surge Post-FL Season',
+      impact:'neutral',  lob:'Commercial Property', relevance:'high' },
+    { date:'Jul 12 2026', source:'ISO',        type:'Advisory',
+      headline:'ISO Updates Commercial GL Loss Costs — TX/FL See 4–6% Increase',
+      impact:'negative', lob:'General Liability', relevance:'medium' },
+    { date:'Jul 10 2026', source:'NAIC',       type:'Regulatory',
+      headline:'NAIC Climate Risk Disclosure — Mandatory for Insurers >$100M Premium',
+      impact:'neutral',  lob:'Multi-Line', relevance:'high' },
+    { date:'Jul 08 2026', source:'Moody\'s',   type:'Rating Action',
+      headline:'Kingsway Financial Outlook Revised Negative — Reserve Adequacy Concerns',
+      impact:'negative', lob:'Non-Standard', relevance:'high' },
+    { date:'Jul 07 2026', source:'Reinsurance News', type:'Market Report',
+      headline:'Jan 2027 Renewals — CAT XL Capacity Tightening; +12–15% Rate Expected',
+      impact:'negative', lob:'CAT Reinsurance', relevance:'high' },
+    { date:'Jul 05 2026', source:'Chubb IR',   type:'Earnings',
+      headline:'Chubb Q2 2026 — CR 88.4% · GWP +7.8% · Record Specialty Lines Growth',
+      impact:'positive', lob:'Specialty', relevance:'medium' },
+    { date:'Jul 03 2026', source:'Lloyd\'s',   type:'Market Bulletin',
+      headline:'Lloyd\'s Syndicate 2623 — Capacity Increase +20% for Property CAT 2H 2026',
+      impact:'positive', lob:'Commercial Property', relevance:'medium' }
+  ];
+
+  /* ── HELPERS ── */
+  function _p56kpi(val, lbl, col) {
+    return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;' +
+      'padding:10px 16px;min-width:110px;flex:1;">' +
+      '<div style="font-size:18px;font-weight:700;color:' + col + ';">' + val + '</div>' +
+      '<div style="font-size:10px;color:#64748b;margin-top:1px;">' + lbl + '</div></div>';
+  }
+
+  function _p56tierBadge(tier) {
+    if (tier === 1) return '<span style="background:#f0fdf4;color:#059669;border:1px solid #bbf7d0;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;">★ Tier 1</span>';
+    if (tier === 2) return '<span style="background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;">Tier 2</span>';
+    return '<span style="background:#fef2f2;color:#dc2626;border:1px solid #fca5a5;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;">Tier 3</span>';
+  }
+
+  function _p56ratingBadge(rating) {
+    var col = (rating === 'A++' || rating === 'A+') ? CR56G : rating === 'A' ? CR56B : rating === 'B+' ? CR56Y : CR56R;
+    return '<span style="background:' + col + '18;color:' + col + ';border:1px solid ' + col + '40;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:800;">' + rating + '</span>';
+  }
+
+  function _p56statusBadge(status) {
+    if (status === 'Active')      return '<span style="background:#f0fdf4;color:#059669;border:1px solid #bbf7d0;padding:3px 9px;border-radius:12px;font-size:11px;font-weight:600;">● Active</span>';
+    if (status === 'Watch')       return '<span style="background:#fffbeb;color:#d97706;border:1px solid #fde68a;padding:3px 9px;border-radius:12px;font-size:11px;font-weight:600;">⚠ Watch</span>';
+    if (status === 'Suspended')   return '<span style="background:#fef2f2;color:#dc2626;border:1px solid #fca5a5;padding:3px 9px;border-radius:12px;font-size:11px;font-weight:600;">✕ Suspended</span>';
+    return '<span style="background:#f8fafc;color:#475569;border:1px solid #e2e8f0;padding:3px 9px;border-radius:12px;font-size:11px;font-weight:600;">' + status + '</span>';
+  }
+
+  function _p56impactDot(impact) {
+    if (impact === 'positive') return '<span style="color:' + CR56G + ';font-size:14px;">▲</span>';
+    if (impact === 'negative') return '<span style="color:' + CR56R + ';font-size:14px;">▼</span>';
+    return '<span style="color:#94a3b8;font-size:14px;">●</span>';
+  }
+
+  function _p56fmt(n)  { return '$' + Number(n).toLocaleString(); }
+  function _p56fmtB(n) { return '$' + (n / 1000000000).toFixed(1) + 'B'; }
+  function _p56fmtM(n) { return '$' + (n / 1000000).toFixed(1) + 'M'; }
+  /* ══════════════════════════════════════════════════════════════
+     TAB 1 — CARRIER DASHBOARD
+     ══════════════════════════════════════════════════════════════ */
+  function _p56tabDashboard() {
+    var active     = carrierPanel.filter(function(c){ return c.status === 'Active'; });
+    var watch      = carrierPanel.filter(function(c){ return c.status === 'Watch';  });
+    var tier1      = carrierPanel.filter(function(c){ return c.tier === 1; });
+    var totalYTD   = premiumFlow.reduce(function(a,p){ return a + p.ytd; }, 0);
+    var totalTgt   = premiumFlow.reduce(function(a,p){ return a + p.target; }, 0);
+    var attainPct  = Math.round((totalYTD / totalTgt) * 100);
+    var avgNPS     = Math.round(carrierPanel.reduce(function(a,c){ return a+c.nps; },0) / carrierPanel.length);
+
+    var h = '<div style="padding:0 4px;">';
+
+    /* ── Alert: Kingsway watch ── */
+    h += '<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:11px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;">';
+    h += '<span style="font-size:18px;">⚠️</span>';
+    h += '<div style="flex:1;"><strong style="color:#92400e;font-size:12px;">Carrier Watch Alert</strong>';
+    h += '<span style="color:#78350f;font-size:12px;margin-left:8px;">Kingsway Financial (CXL-008) — AM Best Negative Outlook · CR 108.2% · Recommend panel review</span></div>';
+    h += '<span style="background:#d97706;color:#fff;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;">Review Now</span>';
+    h += '</div>';
+
+    /* ── KPI strip ── */
+    h += '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px;">';
+    [
+      { v: carrierPanel.length,       l: 'Panel Carriers',   c: CR56  },
+      { v: tier1.length,              l: 'Tier 1 Preferred', c: CR56G },
+      { v: watch.length,              l: 'On Watch',         c: CR56Y },
+      { v: _p56fmtM(totalYTD),        l: 'Ceded YTD',        c: CR56B },
+      { v: attainPct + '%',           l: 'Target Attainment',c: CR56P }
+    ].forEach(function(k) {
+      h += '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px;text-align:center;border-top:3px solid '+k.c+';">';
+      h += '<div style="font-size:22px;font-weight:700;color:'+k.c+';">'+k.v+'</div>';
+      h += '<div style="font-size:11px;color:#64748b;margin-top:2px;">'+k.l+'</div></div>';
+    });
+    h += '</div>';
+
+    /* ── Main grid: carrier cards + premium flow ── */
+    h += '<div style="display:grid;grid-template-columns:1fr 340px;gap:16px;margin-bottom:16px;">';
+
+    /* — Carrier card grid — */
+    h += '<div>';
+    h += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">';
+    h += '<strong style="color:#0f172a;font-size:13px;">🏦 Carrier Panel Overview</strong>';
+    h += '<span style="font-size:11px;color:#64748b;">'+carrierPanel.length+' carriers · Avg NPS '+avgNPS+'</span></div>';
+    h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">';
+    carrierPanel.forEach(function(c) {
+      var borderCol = c.tier === 1 ? CR56G : c.tier === 2 ? CR56B : CR56R;
+      var crCol = c.combinedRatio < 92 ? CR56G : c.combinedRatio < 100 ? CR56Y : CR56R;
+      h += '<div style="background:#fff;border:1px solid #e2e8f0;border-left:4px solid '+borderCol+';border-radius:8px;padding:12px 14px;">';
+      h += '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">';
+      h += '<div>';
+      h += '<div style="font-size:11px;font-weight:700;color:#0f172a;margin-bottom:2px;">'+c.name+'</div>';
+      h += '<div style="font-size:10px;color:#64748b;">'+c.id+' · '+(c.admitted?'Admitted':'E&S')+'</div>';
+      h += '</div>';
+      h += _p56statusBadge(c.status)+'</div>';
+      h += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">';
+      h += _p56tierBadge(c.tier);
+      h += _p56ratingBadge(c.amBest);
+      h += '</div>';
+      h += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;font-size:10px;">';
+      h += '<div><div style="color:#94a3b8;">GWP</div><div style="font-weight:700;color:#0f172a;">'+_p56fmtB(c.gwp)+'</div></div>';
+      h += '<div><div style="color:#94a3b8;">CR</div><div style="font-weight:700;color:'+crCol+';">'+c.combinedRatio+'%</div></div>';
+      h += '<div><div style="color:#94a3b8;">NPS</div><div style="font-weight:700;color:'+CR56B+';">'+c.nps+'</div></div>';
+      h += '</div>';
+      h += '<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:3px;">';
+      c.specialties.slice(0,2).forEach(function(s) {
+        h += '<span style="background:#f1f5f9;color:#475569;padding:1px 6px;border-radius:4px;font-size:9px;">'+s+'</span>';
+      });
+      h += '</div></div>';
+    });
+    h += '</div></div>'; /* end card grid + left col */
+
+    /* — Right: Premium flow + market pulse ── */
+    h += '<div style="display:flex;flex-direction:column;gap:12px;">';
+
+    /* Premium attainment bars */
+    h += '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">';
+    h += '<div style="padding:12px 14px;border-bottom:1px solid #f1f5f9;">';
+    h += '<strong style="color:#0f172a;font-size:13px;">💰 Premium Flow — YTD Attainment</strong></div>';
+    h += '<div style="padding:10px 14px;">';
+    premiumFlow.forEach(function(p) {
+      var atCol = p.attainment >= 50 ? CR56G : p.attainment >= 45 ? CR56Y : CR56R;
+      h += '<div style="margin-bottom:9px;">';
+      h += '<div style="display:flex;justify-content:space-between;margin-bottom:3px;">';
+      h += '<span style="font-size:10px;color:#334155;font-weight:500;">'+p.carrier+'</span>';
+      h += '<div style="display:flex;gap:6px;">';
+      h += '<span style="font-size:10px;font-weight:700;color:#0f172a;">'+_p56fmtM(p.ytd)+'</span>';
+      h += '<span style="font-size:10px;color:'+atCol+';font-weight:600;">'+p.attainment+'%</span>';
+      h += '</div></div>';
+      h += '<div style="background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden;">';
+      h += '<div style="background:'+atCol+';height:100%;border-radius:4px;width:'+p.attainment+'%;"></div></div>';
+      h += '</div>';
+    });
+    h += '</div></div>';
+
+    /* Market pulse — latest 4 intel items */
+    h += '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">';
+    h += '<div style="padding:12px 14px;border-bottom:1px solid #f1f5f9;">';
+    h += '<strong style="color:#0f172a;font-size:13px;">📡 Market Pulse</strong></div>';
+    h += '<div style="padding:6px 0;">';
+    marketIntel.slice(0,4).forEach(function(m) {
+      h += '<div style="padding:8px 14px;border-bottom:1px solid #f8fafc;display:flex;align-items:flex-start;gap:8px;">';
+      h += _p56impactDot(m.impact);
+      h += '<div style="flex:1;min-width:0;">';
+      h += '<div style="font-size:10px;font-weight:600;color:#334155;line-height:1.3;">'+m.headline+'</div>';
+      h += '<div style="font-size:9px;color:#94a3b8;margin-top:2px;">'+m.date+' · '+m.source+'</div>';
+      h += '</div></div>';
+    });
+    h += '</div></div>';
+
+    h += '</div>'; /* end right col */
+    h += '</div>'; /* end main grid */
+
+    /* ── Financial snapshot table ── */
+    h += '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">';
+    h += '<div style="padding:13px 16px;border-bottom:1px solid #f1f5f9;">';
+    h += '<strong style="color:#0f172a;font-size:13px;">📊 Panel Financial Snapshot</strong></div>';
+    h += '<table style="width:100%;border-collapse:collapse;font-size:11px;">';
+    h += '<thead><tr style="background:#f8fafc;">';
+    ['Carrier','AM Best','Tier','GWP','Surplus','Loss Ratio','CR','Market Share','YOY Δ','Status'].forEach(function(col){
+      h += '<th style="padding:7px 10px;text-align:left;color:#64748b;font-weight:600;border-bottom:1px solid #f1f5f9;white-space:nowrap;">'+col+'</th>';
+    });
+    h += '</tr></thead><tbody>';
+    carrierPanel.forEach(function(c, i) {
+      var bg = i%2===0?'#fff':'#fafafa';
+      var crCol = c.combinedRatio<92?CR56G:c.combinedRatio<100?CR56Y:CR56R;
+      var gwCol = c.yoyGrowth>=0?CR56G:CR56R;
+      h += '<tr style="background:'+bg+';border-bottom:1px solid #f1f5f9;">';
+      h += '<td style="padding:7px 10px;font-weight:600;color:#0f172a;white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis;">'+c.name+'</td>';
+      h += '<td style="padding:7px 10px;">'+_p56ratingBadge(c.amBest)+'</td>';
+      h += '<td style="padding:7px 10px;">'+_p56tierBadge(c.tier)+'</td>';
+      h += '<td style="padding:7px 10px;font-weight:600;color:#0f172a;">'+_p56fmtB(c.gwp)+'</td>';
+      h += '<td style="padding:7px 10px;color:#334155;">'+_p56fmtB(c.surplus)+'</td>';
+      h += '<td style="padding:7px 10px;color:'+crCol+';font-weight:600;">'+c.lossRatio+'%</td>';
+      h += '<td style="padding:7px 10px;"><span style="color:'+crCol+';font-weight:700;">'+c.combinedRatio+'%</span></td>';
+      h += '<td style="padding:7px 10px;color:#334155;">'+c.marketShare+'%</td>';
+      h += '<td style="padding:7px 10px;"><span style="color:'+gwCol+';font-weight:600;">'+(c.yoyGrowth>=0?'+':'')+c.yoyGrowth+'%</span></td>';
+      h += '<td style="padding:7px 10px;">'+_p56statusBadge(c.status)+'</td>';
+      h += '</tr>';
+    });
+    h += '</tbody></table></div>';
+
+    h += '</div>';
+    return h;
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     TAB 2 — CARRIER PROFILE (spotlight: Chubb — highest NPS)
+     ══════════════════════════════════════════════════════════════ */
+  function _p56tabCarrierProfile() {
+    var c = carrierPanel[1]; /* Chubb — highest NPS, top performer */
+    var pf = premiumFlow[1]; /* Chubb premium flow */
+
+    var h = '<div style="padding:0 4px;">';
+
+    /* Carrier selector */
+    h += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">';
+    h += '<strong style="color:#0f172a;font-size:14px;">🏦 Carrier Profile — 360° View</strong>';
+    h += '<select style="border:1px solid #e2e8f0;border-radius:6px;padding:5px 12px;font-size:11px;color:#334155;">';
+    carrierPanel.forEach(function(x){
+      h += '<option'+(x.id===c.id?' selected':'')+'>'+x.id+' — '+x.name+'</option>';
+    });
+    h += '</select></div>';
+
+    /* ── Header card ── */
+    h += '<div style="background:linear-gradient(135deg,'+CR56+','+CR56B+');border-radius:12px;padding:20px 24px;margin-bottom:16px;">';
+    h += '<div style="display:flex;justify-content:space-between;align-items:flex-start;">';
+    h += '<div>';
+    h += '<div style="font-size:22px;font-weight:800;color:#fff;margin-bottom:4px;">'+c.name+'</div>';
+    h += '<div style="color:rgba(255,255,255,.8);font-size:12px;">'+c.id+' · Domicile: '+c.domicile+'</div>';
+    h += '<div style="display:flex;gap:8px;margin-top:10px;">';
+    h += '<span style="background:rgba(255,255,255,.2);color:#fff;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;">'+_p56ratingBadge(c.amBest)+'</span>';
+    h += '<span style="background:rgba(255,255,255,.15);color:#fff;padding:3px 10px;border-radius:12px;font-size:11px;">S&P: '+c.sp+'</span>';
+    h += '<span style="background:rgba(255,255,255,.15);color:#fff;padding:3px 10px;border-radius:12px;font-size:11px;">'+(c.admitted?'✅ Admitted':'⚡ E&S')+'</span>';
+    h += '<span style="background:rgba(255,255,255,.15);color:#fff;padding:3px 10px;border-radius:12px;font-size:11px;">'+c.yearOnPanel+' yrs on panel</span>';
+    h += '</div></div>';
+    h += '<div style="text-align:right;">';
+    h += '<div style="font-size:42px;font-weight:800;color:#fff;">'+c.nps+'</div>';
+    h += '<div style="color:rgba(255,255,255,.7);font-size:11px;">NPS Score</div>';
+    h += '<div style="margin-top:6px;">'+_p56tierBadge(c.tier)+'</div>';
+    h += '</div></div></div>';
+
+    /* ── 3-col detail grid ── */
+    h += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:16px;">';
+
+    /* Contact card */
+    h += '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">';
+    h += '<div style="padding:11px 14px;border-bottom:1px solid #f1f5f9;background:#f8fafc;">';
+    h += '<strong style="color:#0f172a;font-size:12px;">👤 Primary Contact</strong></div>';
+    h += '<div style="padding:14px;">';
+    h += '<div style="font-size:14px;font-weight:700;color:#0f172a;margin-bottom:2px;">'+c.contactName+'</div>';
+    h += '<div style="font-size:11px;color:#64748b;margin-bottom:10px;">'+c.contactTitle+'</div>';
+    h += '<div style="font-size:11px;color:#334155;margin-bottom:4px;">📧 '+c.contactEmail+'</div>';
+    h += '<div style="font-size:11px;color:#334155;margin-bottom:10px;">📞 '+c.contactPhone+'</div>';
+    h += '<div style="font-size:10px;color:#64748b;">Last Review: <strong>'+c.lastReview+'</strong></div>';
+    h += '<div style="font-size:10px;color:#64748b;margin-top:2px;">Relationship: <strong style="color:'+CR56G+';">'+c.relationship+'</strong></div>';
+    h += '</div></div>';
+
+    /* Financial metrics */
+    h += '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">';
+    h += '<div style="padding:11px 14px;border-bottom:1px solid #f1f5f9;background:#f8fafc;">';
+    h += '<strong style="color:#0f172a;font-size:12px;">📈 Financial Metrics</strong></div>';
+    h += '<div style="padding:12px 14px;">';
+    [
+      ['GWP',           _p56fmtB(c.gwp)],
+      ['Surplus',        _p56fmtB(c.surplus)],
+      ['Loss Ratio',     c.lossRatio+'%'],
+      ['Combined Ratio', c.combinedRatio+'%'],
+      ['Market Share',   c.marketShare+'%'],
+      ['YOY Growth',    (c.yoyGrowth>=0?'+':'')+c.yoyGrowth+'%'],
+      ['AM Best Outlook',c.amBestOutlook]
+    ].forEach(function(f) {
+      var vc = f[0]==='Combined Ratio'?(c.combinedRatio<95?CR56G:c.combinedRatio<100?CR56Y:CR56R):
+               f[0]==='YOY Growth'?(c.yoyGrowth>=0?CR56G:CR56R):'#0f172a';
+      h += '<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f8fafc;">';
+      h += '<span style="font-size:11px;color:#64748b;">'+f[0]+'</span>';
+      h += '<span style="font-size:11px;font-weight:700;color:'+vc+';">'+f[1]+'</span>';
+      h += '</div>';
+    });
+    h += '</div></div>';
+
+    /* Appetite & capacity */
+    h += '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">';
+    h += '<div style="padding:11px 14px;border-bottom:1px solid #f1f5f9;background:#f8fafc;">';
+    h += '<strong style="color:#0f172a;font-size:12px;">🎯 Appetite & Capacity</strong></div>';
+    h += '<div style="padding:12px 14px;">';
+    h += '<div style="margin-bottom:8px;"><div style="font-size:10px;color:#64748b;margin-bottom:4px;">Max Line Size</div>';
+    h += '<div style="font-size:16px;font-weight:800;color:'+CR56B+';">'+_p56fmtM(c.maxLine)+'</div></div>';
+    h += '<div style="margin-bottom:10px;"><div style="font-size:10px;color:#64748b;margin-bottom:4px;">Min Premium</div>';
+    h += '<div style="font-size:13px;font-weight:700;color:#0f172a;">'+_p56fmt(c.minPremium)+'</div></div>';
+    h += '<div style="font-size:10px;color:#64748b;margin-bottom:6px;">Lines of Business:</div>';
+    c.lines.forEach(function(l){
+      h += '<div style="background:#f1f5f9;color:#334155;padding:3px 8px;border-radius:4px;font-size:10px;margin-bottom:3px;">'+l+'</div>';
+    });
+    h += '<div style="font-size:10px;color:#64748b;margin-top:8px;margin-bottom:4px;">Specialties:</div>';
+    c.specialties.forEach(function(s){
+      h += '<span style="background:#ddd6fe;color:#5b21b6;padding:2px 7px;border-radius:4px;font-size:10px;margin-right:4px;margin-bottom:3px;display:inline-block;">'+s+'</span>';
+    });
+    h += '</div></div>';
+    h += '</div>'; /* end 3-col */
+
+    /* ── Premium relationship timeline ── */
+    h += '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:16px;">';
+    h += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">';
+    h += '<strong style="color:#0f172a;font-size:13px;">💰 Premium Relationship — YTD 2026</strong>';
+    h += '<span style="font-size:11px;color:#64748b;">Target: '+_p56fmtM(pf.target)+' | Attainment: '+pf.attainment+'%</span>';
+    h += '</div>';
+    h += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px;">';
+    [
+      { l:'Q1 Ceded',      v: _p56fmtM(pf.q1),    c: CR56B },
+      { l:'Q2 Ceded',      v: _p56fmtM(pf.q2),    c: CR56B },
+      { l:'YTD Total',     v: _p56fmtM(pf.ytd),   c: CR56  },
+      { l:'H2 Remaining',  v: _p56fmtM(pf.target - pf.ytd), c: CR56Y }
+    ].forEach(function(k){
+      h += '<div style="background:#f8fafc;border-radius:8px;padding:12px;text-align:center;">';
+      h += '<div style="font-size:18px;font-weight:700;color:'+k.c+';">'+k.v+'</div>';
+      h += '<div style="font-size:10px;color:#64748b;margin-top:2px;">'+k.l+'</div></div>';
+    });
+    h += '</div>';
+    /* Progress bar */
+    h += '<div style="background:#f1f5f9;border-radius:6px;height:16px;overflow:hidden;position:relative;">';
+    h += '<div style="background:linear-gradient(90deg,'+CR56+','+CR56B+');height:100%;border-radius:6px;width:'+pf.attainment+'%;"></div>';
+    h += '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;">'+pf.attainment+'% of annual target reached</div>';
+    h += '</div></div>';
+
+    h += '</div>';
+    return h;
+  }
+  /* ── TAB 3 — APPETITE GUIDE ── */
+  function _p56tabAppetite() {
+    var lobList = ['Commercial Property','General Liability','Commercial Auto',
+                   'Workers\' Comp','Professional Liability','Cyber','Marine','Surety'];
+    var appetiteMatrix = {
+      'CXL-001':{'Commercial Property':'A','General Liability':'A','Commercial Auto':'A','Workers\' Comp':'A','Professional Liability':'B','Cyber':'B','Marine':'C','Surety':'B'},
+      'CXL-002':{'Commercial Property':'A','General Liability':'A','Commercial Auto':'B','Workers\' Comp':'B','Professional Liability':'A','Cyber':'A','Marine':'A','Surety':'A'},
+      'CXL-003':{'Commercial Property':'A','General Liability':'A','Commercial Auto':'A','Workers\' Comp':'A','Professional Liability':'B','Cyber':'B','Marine':'B','Surety':'C'},
+      'CXL-004':{'Commercial Property':'B','General Liability':'A','Commercial Auto':'A','Workers\' Comp':'A','Professional Liability':'A','Cyber':'B','Marine':'C','Surety':'B'},
+      'CXL-005':{'Commercial Property':'A','General Liability':'A','Commercial Auto':'B','Workers\' Comp':'C','Professional Liability':'A','Cyber':'A','Marine':'B','Surety':'C'},
+      'CXL-006':{'Commercial Property':'A','General Liability':'B','Commercial Auto':'C','Workers\' Comp':'C','Professional Liability':'B','Cyber':'A','Marine':'A','Surety':'C'},
+      'CXL-007':{'Commercial Property':'A','General Liability':'B','Commercial Auto':'C','Workers\' Comp':'C','Professional Liability':'A','Cyber':'A','Marine':'A','Surety':'B'},
+      'CXL-008':{'Commercial Property':'B','General Liability':'B','Commercial Auto':'B','Workers\' Comp':'B','Professional Liability':'C','Cyber':'C','Marine':'C','Surety':'C'}
+    };
+    var appetiteColor = { A:'#059669', B:'#d97706', C:'#dc2626' };
+    var appetiteLabel = { A:'Strong', B:'Selective', C:'Avoid' };
+    var carrierNames = {
+      'CXL-001':'Travelers','CXL-002':'Chubb','CXL-003':'Hartford',
+      'CXL-004':'CNA','CXL-005':'Markel E&S','CXL-006':'Everest Re',
+      'CXL-007':'Swiss Re','CXL-008':'Kingsway'
+    };
+    var stateAvail = [
+      { carrier:'Travelers',   admitted:48, e_s:0,  excludedStates:['AK'] },
+      { carrier:'Chubb',       admitted:50, e_s:50, excludedStates:[] },
+      { carrier:'Hartford',    admitted:47, e_s:3,  excludedStates:['AK','HI','MT'] },
+      { carrier:'CNA',         admitted:48, e_s:12, excludedStates:['AK','HI'] },
+      { carrier:'Markel E&S',  admitted:0,  e_s:50, excludedStates:[] },
+      { carrier:'Everest Re',  admitted:0,  e_s:50, excludedStates:[] },
+      { carrier:'Swiss Re',    admitted:0,  e_s:50, excludedStates:[] },
+      { carrier:'Kingsway',    admitted:22, e_s:28, excludedStates:['CA','FL','TX','LA','NY'] }
+    ];
+    var excluded = [
+      { lob:'Commercial Property', classes:['Frame Construction >3 stories','Vacant Buildings >6 months','Auto Dismantlers','Fireworks Manufacturing'] },
+      { lob:'General Liability',   classes:['Adult Entertainment','Firearms Retailers','Cannabis Operations','Asbestos Remediation'] },
+      { lob:'Commercial Auto',     classes:['Livery / TNC','Ice Road Haulers','Racing Vehicles','Long-Haul Hazmat'] },
+      { lob:'Professional Liability', classes:['Crypto/Digital Asset Advisors','SPACs','Class Action Defendants <3 yrs','Unlicensed Practitioners'] },
+      { lob:'Cyber',               classes:['Healthcare >$500M Revenue','Utilities / SCADA','No MFA Enforced','Ransomware History <2 yrs'] }
+    ];
+    var ids = Object.keys(appetiteMatrix);
+    var matrixRows = ids.map(function(id) {
+      var cells = lobList.map(function(lob) {
+        var grade = appetiteMatrix[id][lob] || 'C';
+        return '<td style="text-align:center;padding:7px 4px;">'
+          + '<span style="display:inline-block;width:66px;padding:3px 0;border-radius:4px;font-size:11px;font-weight:700;color:#fff;background:' + appetiteColor[grade] + '">'
+          + grade + ' — ' + appetiteLabel[grade] + '</span></td>';
+      }).join('');
+      return '<tr style="border-bottom:1px solid #e2e8f0;">'
+        + '<td style="padding:7px 10px;font-weight:600;font-size:12px;white-space:nowrap;color:#0c4a6e">' + carrierNames[id] + '</td>'
+        + cells + '</tr>';
+    }).join('');
+    var matrixHTML = '<div style="overflow-x:auto;margin-bottom:24px">'
+      + '<div style="font-size:13px;font-weight:700;color:#0c4a6e;margin-bottom:10px">📋 Appetite Matrix — Carrier × Line of Business</div>'
+      + '<table style="width:100%;border-collapse:collapse;font-size:12px;min-width:780px">'
+      + '<thead><tr style="background:#f0f9ff;border-bottom:2px solid #0369a1">'
+      + '<th style="padding:8px 10px;text-align:left;font-size:11px;color:#0369a1;white-space:nowrap">Carrier</th>'
+      + lobList.map(function(l){ return '<th style="padding:8px 4px;text-align:center;font-size:10px;color:#0369a1;white-space:nowrap">' + l.replace(' ','<br>') + '</th>'; }).join('')
+      + '</tr></thead><tbody>' + matrixRows + '</tbody></table>'
+      + '<div style="display:flex;gap:16px;margin-top:8px;font-size:11px">'
+      + '<span style="color:#059669;font-weight:700">■ A — Strong Appetite</span>'
+      + '<span style="color:#d97706;font-weight:700">■ B — Selective</span>'
+      + '<span style="color:#dc2626;font-weight:700">■ C — Avoid / Declined</span>'
+      + '</div></div>';
+    var stateRows = stateAvail.map(function(s) {
+      var excl = s.excludedStates.length ? s.excludedStates.join(', ') : '<span style="color:#059669">None</span>';
+      return '<tr style="border-bottom:1px solid #e2e8f0">'
+        + '<td style="padding:7px 10px;font-weight:600;font-size:12px;color:#0c4a6e">' + s.carrier + '</td>'
+        + '<td style="padding:7px 10px;text-align:center;font-size:12px">'
+          + (s.admitted > 0 ? '<span style="color:#059669;font-weight:700">' + s.admitted + ' states</span>' : '<span style="color:#94a3b8">—</span>') + '</td>'
+        + '<td style="padding:7px 10px;text-align:center;font-size:12px">'
+          + (s.e_s > 0 ? '<span style="color:#0369a1;font-weight:700">All 50</span>' : '<span style="color:#94a3b8">—</span>') + '</td>'
+        + '<td style="padding:7px 10px;font-size:11px;color:#dc2626">' + excl + '</td>'
+        + '</tr>';
+    }).join('');
+    var stateHTML = '<div style="margin-bottom:24px">'
+      + '<div style="font-size:13px;font-weight:700;color:#0c4a6e;margin-bottom:10px">🗺️ State Availability & Admitted Status</div>'
+      + '<table style="width:100%;border-collapse:collapse;font-size:12px">'
+      + '<thead><tr style="background:#f0f9ff;border-bottom:2px solid #0369a1">'
+      + '<th style="padding:8px 10px;text-align:left;font-size:11px;color:#0369a1">Carrier</th>'
+      + '<th style="padding:8px 10px;text-align:center;font-size:11px;color:#0369a1">Admitted States</th>'
+      + '<th style="padding:8px 10px;text-align:center;font-size:11px;color:#0369a1">E&S Availability</th>'
+      + '<th style="padding:8px 10px;text-align:left;font-size:11px;color:#0369a1">Excluded / Restricted States</th>'
+      + '</tr></thead><tbody>' + stateRows + '</tbody></table></div>';
+    var exclCards = excluded.map(function(ex) {
+      var tags = ex.classes.map(function(c) {
+        return '<span style="display:inline-block;background:#fef2f2;color:#dc2626;border:1px solid #fecaca;border-radius:4px;font-size:10px;font-weight:600;padding:2px 8px;margin:3px 4px 3px 0">' + c + '</span>';
+      }).join('');
+      return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:12px 14px;margin-bottom:10px">'
+        + '<div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:6px">🚫 ' + ex.lob + '</div>'
+        + tags + '</div>';
+    }).join('');
+    var exclHTML = '<div>'
+      + '<div style="font-size:13px;font-weight:700;color:#0c4a6e;margin-bottom:10px">🚫 Excluded & Restricted Classes (Panel-Wide)</div>'
+      + exclCards + '</div>';
+    return '<div style="padding:20px">' + matrixHTML + stateHTML + exclHTML + '</div>';
+  }
+
+  /* ── TAB 4 — FINANCIALS ── */
+  function _p56tabFinancials() {
+    var surplusData = [
+      { carrier:'Travelers',  y2022:21400, y2023:22900, y2024:24800, growth:8.3, solvency:312, lossReserve:98.4, investYield:3.8, roe:14.2 },
+      { carrier:'Chubb',      y2022:52100, y2023:54800, y2024:57300, growth:4.6, solvency:298, lossReserve:101.2, investYield:4.1, roe:13.8 },
+      { carrier:'Hartford',   y2022:11200, y2023:11800, y2024:12400, growth:5.1, solvency:224, lossReserve:96.8, investYield:3.6, roe:12.1 },
+      { carrier:'CNA',        y2022:9800,  y2023:10200, y2024:10900, growth:6.9, solvency:218, lossReserve:104.1, investYield:3.4, roe:11.7 },
+      { carrier:'Markel',     y2022:13400, y2023:14100, y2024:15200, growth:7.8, solvency:241, lossReserve:99.7, investYield:4.4, roe:15.3 },
+      { carrier:'Everest Re', y2022:8900,  y2023:9400,  y2024:10100, growth:7.4, solvency:235, lossReserve:97.3, investYield:4.2, roe:13.4 },
+      { carrier:'Swiss Re',   y2022:18200, y2023:19100, y2024:20400, growth:6.8, solvency:276, lossReserve:100.1, investYield:4.6, roe:14.8 },
+      { carrier:'Kingsway',   y2022:1100,  y2023:980,   y2024:840,   growth:-14.3, solvency:142, lossReserve:118.6, investYield:2.9, roe:-4.2 }
+    ];
+    var surplusRows = surplusData.map(function(r) {
+      var growthCol = r.growth < 0
+        ? '<span style="color:#dc2626;font-weight:700">' + r.growth.toFixed(1) + '%</span>'
+        : '<span style="color:#059669;font-weight:700">+' + r.growth.toFixed(1) + '%</span>';
+      var solColor = r.solvency < 200 ? '#dc2626' : r.solvency < 220 ? '#d97706' : '#059669';
+      var reserveColor = r.lossReserve > 110 ? '#dc2626' : r.lossReserve > 102 ? '#d97706' : '#059669';
+      var roeColor = r.roe < 0 ? '#dc2626' : r.roe < 10 ? '#d97706' : '#059669';
+      return '<tr style="border-bottom:1px solid #e2e8f0">'
+        + '<td style="padding:8px 10px;font-weight:600;font-size:12px;color:#0c4a6e">' + r.carrier + '</td>'
+        + '<td style="padding:8px 10px;text-align:right;font-size:12px">$' + (r.y2022/1000).toFixed(1) + 'B</td>'
+        + '<td style="padding:8px 10px;text-align:right;font-size:12px">$' + (r.y2023/1000).toFixed(1) + 'B</td>'
+        + '<td style="padding:8px 10px;text-align:right;font-size:12px;font-weight:700">$' + (r.y2024/1000).toFixed(1) + 'B</td>'
+        + '<td style="padding:8px 10px;text-align:center">' + growthCol + '</td>'
+        + '<td style="padding:8px 10px;text-align:center;font-size:12px;font-weight:700;color:' + solColor + '">' + r.solvency + '%</td>'
+        + '<td style="padding:8px 10px;text-align:center;font-size:12px;font-weight:700;color:' + reserveColor + '">' + r.lossReserve + '%</td>'
+        + '<td style="padding:8px 10px;text-align:center;font-size:12px;font-weight:700;color:' + roeColor + '">' + r.roe.toFixed(1) + '%</td>'
+        + '<td style="padding:8px 10px;text-align:center;font-size:12px;color:#0369a1">' + r.investYield.toFixed(1) + '%</td>'
+        + '</tr>';
+    }).join('');
+    var surplusTable = '<div style="overflow-x:auto;margin-bottom:28px">'
+      + '<div style="font-size:13px;font-weight:700;color:#0c4a6e;margin-bottom:10px">📊 Surplus Trends & Solvency Indicators (2022–2024)</div>'
+      + '<table style="width:100%;border-collapse:collapse;font-size:12px;min-width:760px">'
+      + '<thead><tr style="background:#f0f9ff;border-bottom:2px solid #0369a1">'
+      + '<th style="padding:8px 10px;text-align:left;font-size:11px;color:#0369a1">Carrier</th>'
+      + '<th style="padding:8px 10px;text-align:right;font-size:11px;color:#0369a1">Surplus 2022</th>'
+      + '<th style="padding:8px 10px;text-align:right;font-size:11px;color:#0369a1">Surplus 2023</th>'
+      + '<th style="padding:8px 10px;text-align:right;font-size:11px;color:#0369a1">Surplus 2024</th>'
+      + '<th style="padding:8px 10px;text-align:center;font-size:11px;color:#0369a1">YoY Growth</th>'
+      + '<th style="padding:8px 10px;text-align:center;font-size:11px;color:#0369a1">Solvency Ratio</th>'
+      + '<th style="padding:8px 10px;text-align:center;font-size:11px;color:#0369a1">Reserve Adequacy</th>'
+      + '<th style="padding:8px 10px;text-align:center;font-size:11px;color:#0369a1">ROE</th>'
+      + '<th style="padding:8px 10px;text-align:center;font-size:11px;color:#0369a1">Invest Yield</th>'
+      + '</tr></thead><tbody>' + surplusRows + '</tbody></table>'
+      + '<div style="display:flex;gap:20px;margin-top:8px;font-size:11px;color:#64748b">'
+      + '<span>🟢 Solvency &gt;220% = Strong</span><span>🟡 200–220% = Adequate</span><span>🔴 &lt;200% = Monitor</span>'
+      + '<span style="margin-left:16px">Reserve Adequacy: 100% = fully reserved · &gt;110% = over-reserved (potential release)</span></div></div>';
+    var ratioData = [
+      { carrier:'Travelers',  cr2022:95.8, cr2023:94.1, cr2024:91.2, lr:58.4, er:32.8, cat:4.2 },
+      { carrier:'Chubb',      cr2022:91.4, cr2023:89.8, cr2024:87.6, lr:55.1, er:32.5, cat:3.1 },
+      { carrier:'Hartford',   cr2022:99.2, cr2023:97.4, cr2024:94.8, lr:61.2, er:33.6, cat:5.2 },
+      { carrier:'CNA',        cr2022:101.4,cr2023:99.1, cr2024:97.3, lr:63.4, er:33.9, cat:4.8 },
+      { carrier:'Markel',     cr2022:94.1, cr2023:92.8, cr2024:89.4, lr:56.8, er:32.6, cat:6.1 },
+      { carrier:'Everest Re', cr2022:96.4, cr2023:94.2, cr2024:91.8, lr:59.2, er:32.6, cat:8.4 },
+      { carrier:'Swiss Re',   cr2022:97.1, cr2023:95.8, cr2024:93.2, lr:60.1, er:33.1, cat:7.2 },
+      { carrier:'Kingsway',   cr2022:112.4,cr2023:110.8,cr2024:108.2,lr:74.6, er:33.6, cat:11.8 }
+    ];
+    var barMax = 115;
+    var ratioCards = ratioData.map(function(r) {
+      var crColor = r.cr2024 >= 105 ? '#dc2626' : r.cr2024 >= 100 ? '#d97706' : '#059669';
+      var crPct = Math.min(r.cr2024 / barMax * 100, 100);
+      var trend = r.cr2022 > r.cr2024 ? '↘ Improving' : '↗ Deteriorating';
+      var trendColor = r.cr2022 > r.cr2024 ? '#059669' : '#dc2626';
+      return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:14px 16px">'
+        + '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">'
+        + '<div style="font-size:13px;font-weight:700;color:#1e293b">' + r.carrier + '</div>'
+        + '<span style="font-size:11px;font-weight:600;color:' + trendColor + '">' + trend + '</span></div>'
+        + '<div style="font-size:22px;font-weight:800;color:' + crColor + ';margin-bottom:6px">' + r.cr2024.toFixed(1) + '%</div>'
+        + '<div style="background:#e2e8f0;border-radius:4px;height:8px;margin-bottom:8px">'
+        + '<div style="background:' + crColor + ';width:' + crPct.toFixed(1) + '%;height:100%;border-radius:4px"></div></div>'
+        + '<div style="display:flex;gap:12px;font-size:10px;color:#64748b">'
+        + '<span>LR: <b style="color:#1e293b">' + r.lr + '%</b></span>'
+        + '<span>ER: <b style="color:#1e293b">' + r.er + '%</b></span>'
+        + '<span>CAT: <b style="color:#1e293b">' + r.cat + '%</b></span></div>'
+        + '<div style="margin-top:6px;font-size:10px;color:#94a3b8">'
+        + '2022: ' + r.cr2022.toFixed(1) + '% → 2023: ' + r.cr2023.toFixed(1) + '%</div></div>';
+    }).join('');
+    var ratioHTML = '<div style="margin-bottom:24px">'
+      + '<div style="font-size:13px;font-weight:700;color:#0c4a6e;margin-bottom:12px">📉 Combined Ratio Trends — 3-Year Comparison</div>'
+      + '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px">'
+      + ratioCards + '</div>'
+      + '<div style="margin-top:10px;font-size:11px;color:#64748b">LR = Loss Ratio · ER = Expense Ratio · CAT = CAT Loss Load · Combined = LR + ER</div></div>';
+    var ibnrData = [
+      { carrier:'Travelers', ibnr:4820, paidDev:98.1, incurredDev:101.4, prior:0.8 },
+      { carrier:'Chubb', ibnr:7240, paidDev:97.4, incurredDev:100.6, prior:0.4 },
+      { carrier:'Hartford', ibnr:2910, paidDev:99.2, incurredDev:102.8, prior:1.1 },
+      { carrier:'CNA', ibnr:2640, paidDev:100.8, incurredDev:104.7, prior:2.3 },
+      { carrier:'Markel', ibnr:1820, paidDev:97.8, incurredDev:100.2, prior:0.1 },
+      { carrier:'Kingsway', ibnr:420, paidDev:106.4, incurredDev:118.9, prior:8.4 }
+    ];
+    var ibnrRows = ibnrData.map(function(r) {
+      var priorColor = r.prior >= 5 ? '#dc2626' : r.prior >= 2 ? '#d97706' : '#059669';
+      return '<tr style="border-bottom:1px solid #e2e8f0">'
+        + '<td style="padding:7px 10px;font-weight:600;font-size:12px;color:#0c4a6e">' + r.carrier + '</td>'
+        + '<td style="padding:7px 10px;text-align:right;font-size:12px;font-weight:700">$' + _p56fmtM(r.ibnr * 1000000) + '</td>'
+        + '<td style="padding:7px 10px;text-align:center;font-size:12px">' + r.paidDev.toFixed(1) + '%</td>'
+        + '<td style="padding:7px 10px;text-align:center;font-size:12px">' + r.incurredDev.toFixed(1) + '%</td>'
+        + '<td style="padding:7px 10px;text-align:center;font-size:12px;font-weight:700;color:' + priorColor + '">' + (r.prior >= 0 ? '+' : '') + r.prior.toFixed(1) + '%</td>'
+        + '</tr>';
+    }).join('');
+    var ibnrHTML = '<div>'
+      + '<div style="font-size:13px;font-weight:700;color:#0c4a6e;margin-bottom:10px">🔍 IBNR Reserve Adequacy & Loss Development</div>'
+      + '<table style="width:100%;border-collapse:collapse;font-size:12px">'
+      + '<thead><tr style="background:#f0f9ff;border-bottom:2px solid #0369a1">'
+      + '<th style="padding:8px 10px;text-align:left;font-size:11px;color:#0369a1">Carrier</th>'
+      + '<th style="padding:8px 10px;text-align:right;font-size:11px;color:#0369a1">IBNR Balance</th>'
+      + '<th style="padding:8px 10px;text-align:center;font-size:11px;color:#0369a1">Paid Dev%</th>'
+      + '<th style="padding:8px 10px;text-align:center;font-size:11px;color:#0369a1">Incurred Dev%</th>'
+      + '<th style="padding:8px 10px;text-align:center;font-size:11px;color:#0369a1">Prior Yr Develop</th>'
+      + '</tr></thead><tbody>' + ibnrRows + '</tbody></table>'
+      + '<div style="margin-top:8px;font-size:11px;color:#64748b">Prior Yr Develop: adverse development vs. carried reserves · Red &gt;5% = significant deterioration</div></div>';
+    return '<div style="padding:20px">' + surplusTable + ratioHTML + ibnrHTML + '</div>';
+  }
+  /* ── TAB 5 — CONTRACTS ── */
+  function _p56tabContracts() {
+    var agreements = [
+      { id:'AGR-001', carrier:'Travelers', type:'Master Agency Agreement', effective:'Jan 1, 2024',
+        expiry:'Dec 31, 2026', autoRenew:true, status:'Active', bindingAuth:true,
+        maxBind:500000, lines:['Commercial Property','GL','CA','WC'],
+        commBase:12.5, commBonus:2.0, profitShare:'10% above 88% CR',
+        contingent:'Up to 3% on volume >$5M', minPremium:50000,
+        contact:'James Hartwell', territory:'Eastern US', lastAmended:'Mar 2025' },
+      { id:'AGR-002', carrier:'Chubb', type:'Specialty Lines Agreement', effective:'Jul 1, 2023',
+        expiry:'Jun 30, 2026', autoRenew:true, status:'Active', bindingAuth:true,
+        maxBind:1000000, lines:['Professional Liability','Cyber','Marine'],
+        commBase:14.0, commBonus:2.5, profitShare:'12% above 85% CR',
+        contingent:'Up to 4% on volume >$3M', minPremium:75000,
+        contact:'Patricia Monroe', territory:'National', lastAmended:'Jan 2026' },
+      { id:'AGR-003', carrier:'Hartford', type:'Commercial Lines Agreement', effective:'Jan 1, 2025',
+        expiry:'Dec 31, 2027', autoRenew:false, status:'Active', bindingAuth:true,
+        maxBind:250000, lines:['Commercial Property','GL','WC'],
+        commBase:11.5, commBonus:1.5, profitShare:'8% above 90% CR',
+        contingent:'Up to 2.5% on volume >$4M', minPremium:35000,
+        contact:'Robert Chen', territory:'Northeast', lastAmended:'Dec 2024' },
+      { id:'AGR-004', carrier:'CNA', type:'Professional Lines Agreement', effective:'Apr 1, 2024',
+        expiry:'Mar 31, 2027', autoRenew:true, status:'Active', bindingAuth:false,
+        maxBind:0, lines:['Professional Liability','Management Liability','EPLI'],
+        commBase:13.0, commBonus:2.0, profitShare:'10% above 87% CR',
+        contingent:'Up to 3% on volume >$2M', minPremium:25000,
+        contact:'Sarah Blackwood', territory:'National', lastAmended:'Apr 2024' },
+      { id:'AGR-005', carrier:'Markel E&S', type:'E&S Lines Agreement', effective:'Jan 1, 2023',
+        expiry:'Dec 31, 2025', autoRenew:true, status:'Renewal Pending', bindingAuth:true,
+        maxBind:750000, lines:['E&S Property','E&S Casualty','Specialty Cyber'],
+        commBase:15.0, commBonus:3.0, profitShare:'15% above 82% CR',
+        contingent:'Up to 5% on volume >$1.5M', minPremium:10000,
+        contact:'Daniel Frost', territory:'National E&S', lastAmended:'Oct 2024' },
+      { id:'AGR-006', carrier:'Kingsway', type:'Surplus Lines Agreement', effective:'Oct 1, 2022',
+        expiry:'Sep 30, 2025', autoRenew:false, status:'Watch — Review Required', bindingAuth:false,
+        maxBind:0, lines:['Excess Casualty','Hard-to-Place Property'],
+        commBase:10.0, commBonus:0, profitShare:'None',
+        contingent:'None', minPremium:15000,
+        contact:'Mark Tillman', territory:'Select States', lastAmended:'Aug 2023' }
+    ];
+    var statusColor = { 'Active':'#059669', 'Renewal Pending':'#d97706', 'Watch — Review Required':'#dc2626' };
+    var agrCards = agreements.map(function(a) {
+      var sc = statusColor[a.status] || '#64748b';
+      var bindBadge = a.bindingAuth
+        ? '<span style="background:#dbeafe;color:#1d4ed8;border-radius:4px;font-size:10px;font-weight:700;padding:2px 7px">BINDING AUTH $' + (a.maxBind/1000).toFixed(0) + 'K</span>'
+        : '<span style="background:#f1f5f9;color:#64748b;border-radius:4px;font-size:10px;font-weight:600;padding:2px 7px">NO BINDING</span>';
+      return '<div style="background:#fff;border:1px solid #e2e8f0;border-left:4px solid ' + sc + ';border-radius:8px;padding:16px 18px;margin-bottom:14px">'
+        + '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">'
+        + '<div><div style="font-size:14px;font-weight:700;color:#0c4a6e">' + a.carrier + '</div>'
+        + '<div style="font-size:11px;color:#64748b;margin-top:2px">' + a.id + ' · ' + a.type + '</div></div>'
+        + '<div style="text-align:right"><span style="display:inline-block;background:' + sc + '20;color:' + sc + ';border:1px solid ' + sc + '40;border-radius:5px;font-size:11px;font-weight:700;padding:3px 9px">' + a.status + '</span></div></div>'
+        + '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px;font-size:11px">'
+        + '<div><span style="color:#94a3b8">Effective:</span><br><b style="color:#1e293b">' + a.effective + '</b></div>'
+        + '<div><span style="color:#94a3b8">Expiry:</span><br><b style="color:#1e293b">' + a.expiry + '</b></div>'
+        + '<div><span style="color:#94a3b8">Auto-Renew:</span><br><b style="color:' + (a.autoRenew?'#059669':'#dc2626') + '">' + (a.autoRenew?'Yes':'No') + '</b></div>'
+        + '<div><span style="color:#94a3b8">Base Commission:</span><br><b style="color:#1e293b">' + a.commBase + '%</b></div>'
+        + '<div><span style="color:#94a3b8">Bonus Commission:</span><br><b style="color:#059669">+' + a.commBonus + '%</b></div>'
+        + '<div><span style="color:#94a3b8">Contingent:</span><br><b style="color:#0369a1">' + a.contingent + '</b></div>'
+        + '</div>'
+        + '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px">'
+        + bindBadge + ' '
+        + a.lines.map(function(l){ return '<span style="background:#f0f9ff;color:#0369a1;border-radius:4px;font-size:10px;padding:2px 7px">' + l + '</span>'; }).join('')
+        + '</div>'
+        + '<div style="font-size:10px;color:#94a3b8">Profit Share: ' + a.profitShare + ' · Contact: ' + a.contact + ' · Last Amended: ' + a.lastAmended + '</div>'
+        + '</div>';
+    }).join('');
+    var commSummary = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:24px">'
+      + '<div style="background:linear-gradient(135deg,#0c4a6e,#0369a1);border-radius:8px;padding:14px 16px;color:#fff">'
+      + '<div style="font-size:11px;opacity:.8;margin-bottom:4px">Active Agreements</div>'
+      + '<div style="font-size:26px;font-weight:800">6</div>'
+      + '<div style="font-size:10px;opacity:.7;margin-top:2px">4 active · 1 renewal · 1 watch</div></div>'
+      + '<div style="background:linear-gradient(135deg,#059669,#047857);border-radius:8px;padding:14px 16px;color:#fff">'
+      + '<div style="font-size:11px;opacity:.8;margin-bottom:4px">Avg Base Commission</div>'
+      + '<div style="font-size:26px;font-weight:800">12.7%</div>'
+      + '<div style="font-size:10px;opacity:.7;margin-top:2px">Range: 10.0% – 15.0%</div></div>'
+      + '<div style="background:linear-gradient(135deg,#1d4ed8,#1e40af);border-radius:8px;padding:14px 16px;color:#fff">'
+      + '<div style="font-size:11px;opacity:.8;margin-bottom:4px">Carriers w/ Binding Auth</div>'
+      + '<div style="font-size:26px;font-weight:800">4 / 6</div>'
+      + '<div style="font-size:10px;opacity:.7;margin-top:2px">Max single bind: $1.0M (Chubb)</div></div>'
+      + '<div style="background:linear-gradient(135deg,#d97706,#b45309);border-radius:8px;padding:14px 16px;color:#fff">'
+      + '<div style="font-size:11px;opacity:.8;margin-bottom:4px">Renewals Due ≤90 days</div>'
+      + '<div style="font-size:26px;font-weight:800">2</div>'
+      + '<div style="font-size:10px;opacity:.7;margin-top:2px">Markel (Dec 2025) · Kingsway (Sep 2025)</div></div>'
+      + '</div>';
+    return '<div style="padding:20px">'
+      + '<div style="font-size:13px;font-weight:700;color:#0c4a6e;margin-bottom:14px">📄 Agency Agreements & Commission Schedules</div>'
+      + commSummary + agrCards + '</div>';
+  }
+
+  /* ── TAB 6 — MARKET INTEL ── */
+  function _p56tabMarketIntel() {
+    var intel = [
+      { date:'Jul 10, 2026', source:'AM Best', type:'Rating Action', carrier:'Kingsway Financial',
+        headline:'AM Best Downgrades Kingsway to B+ (Negative Outlook)',
+        detail:'AM Best has revised Kingsway\'s FSR from B++ to B+ citing a third consecutive year of adverse reserve development (+8.4% prior-year development in Commercial Auto) and surplus erosion of 14.3% YoY. Outlook changed to Negative.',
+        impact:'High', lob:'Commercial Auto / Property', relevance:96,
+        actionRequired:true, action:'Review placement exposure. Limit new business to <$500K per risk.' },
+      { date:'Jul 8, 2026', source:'S&P Global', type:'Market Report', carrier:'Industry',
+        headline:'Commercial Property Rates Harden 12–18% Q3 2026 Nationally',
+        detail:'S&P Global Ratings reports that post-Hurricane Helene secondary perils are driving a 12–18% rate increase in commercial property nationally. CAT-exposed coastal accounts seeing 22–30% increases. E&S market absorbing overflow from standard lines.',
+        impact:'High', lob:'Commercial Property', relevance:91,
+        actionRequired:false, action:null },
+      { date:'Jul 5, 2026', source:'ISO / Verisk', type:'Regulatory Update', carrier:'All Admitted',
+        headline:'ISO Files GL CG 00 01 Form Revision — Effective Oct 2026',
+        detail:'ISO filed a revision to the Commercial General Liability Coverage Form (CG 00 01 10 01) with a new AI/ML exclusion endorsement and updated cyber sub-limit language. All admitted carriers must adopt by Oct 1, 2026. E&S carriers exempt.',
+        impact:'Medium', lob:'General Liability', relevance:84,
+        actionRequired:true, action:'Confirm adoption timeline with Hartford, Travelers, and CNA by Aug 1.' },
+      { date:'Jul 2, 2026', source:'Chubb IR', type:'Earnings Disclosure', carrier:'Chubb',
+        headline:'Chubb Q2 2026: Combined Ratio 87.6%, GWP +9.4% YoY',
+        detail:'Chubb reported Q2 2026 earnings with combined ratio of 87.6% (vs. 89.4% Q2 2025), GWP of $11.2B (+9.4%), and surplus of $57.3B. CEO noted "disciplined underwriting in Professional Lines and Specialty Cyber driving outperformance."',
+        impact:'Low', lob:'All Lines', relevance:78,
+        actionRequired:false, action:null },
+      { date:'Jun 28, 2026', source:'Moody\'s Analytics', type:'Risk Report', carrier:'Industry',
+        headline:'Cyber Ransomware Claims Surge 38% H1 2026 — Healthcare & Utilities Elevated',
+        detail:'Moody\'s Analytics Cyber Risk Report (H1 2026) shows ransomware frequency up 38% with average extortion demand reaching $4.2M. Healthcare entities >$100M revenue and utilities/SCADA operators flagged as highest-risk classes for cyber insurers.',
+        impact:'High', lob:'Cyber', relevance:93,
+        actionRequired:true, action:'Flag all healthcare >$100M and utility submissions for enhanced UW review. Verify MFA and EDR controls at renewal.' },
+      { date:'Jun 25, 2026', source:'Travelers IR', type:'Earnings Disclosure', carrier:'Travelers',
+        headline:'Travelers Raises Commercial Lines Rate +8.2% Avg Q2 2026',
+        detail:'Travelers Property Casualty reported average commercial lines rate increase of 8.2% in Q2 2026, driven by Property (+14.1%) and Umbrella (+11.3%). Workers\' Comp rate flat (-0.3%). Retention held at 87%.',
+        impact:'Medium', lob:'Commercial Lines', relevance:88,
+        actionRequired:false, action:null },
+      { date:'Jun 20, 2026', source:'NAIC', type:'Regulatory Update', carrier:'All Admitted',
+        headline:'NAIC Adopts Model Law — Climate Risk Disclosure for P&C Carriers >$100M Premium',
+        detail:'NAIC adopted the Climate Risk Disclosure Model Law requiring all P&C admitted carriers writing >$100M annual premium to disclose climate-related financial risks in their Annual Statement supplements beginning year-end 2026. Affects all panel admitted carriers.',
+        impact:'Medium', lob:'All Lines', relevance:72,
+        actionRequired:false, action:null },
+      { date:'Jun 15, 2026', source:'Swiss Re Institute', type:'Market Report', carrier:'Industry',
+        headline:'Global Reinsurance Capacity Tightens 7% for CAT-Exposed Risks at Jul 1 Renewals',
+        detail:'Swiss Re Institute reports July 1 treaty renewals saw a 7% capacity reduction for CAT-exposed property risks globally, with US Southeast and Gulf Coast seeing 12–15% reduction. Risk-adjusted pricing up 9–14%. Implications for XL treaty pricing at year-end 2026.',
+        impact:'High', lob:'Commercial Property / Reinsurance', relevance:89,
+        actionRequired:true, action:'Engage Everest Re and Swiss Re Q3 to secure year-end CAT XL capacity. Evaluate CAT aggregate exposure by geography.' }
+    ];
+    var impactColor = { High:'#dc2626', Medium:'#d97706', Low:'#059669' };
+    var typeIcon = {
+      'Rating Action':'⭐', 'Market Report':'📊', 'Regulatory Update':'⚖️',
+      'Earnings Disclosure':'💰', 'Risk Report':'🔍'
+    };
+    var intelCards = intel.map(function(item, idx) {
+      var ic = impactColor[item.impact] || '#64748b';
+      var relBar = '<div style="display:flex;align-items:center;gap:6px;margin-top:6px">'
+        + '<div style="font-size:10px;color:#94a3b8;width:60px">Relevance</div>'
+        + '<div style="flex:1;background:#e2e8f0;border-radius:3px;height:5px">'
+        + '<div style="background:#0369a1;width:' + item.relevance + '%;height:100%;border-radius:3px"></div></div>'
+        + '<div style="font-size:10px;font-weight:700;color:#0369a1;width:28px">' + item.relevance + '%</div></div>';
+      var actionBanner = item.actionRequired
+        ? '<div style="background:#fef3cd;border:1px solid #fcd34d;border-radius:6px;padding:8px 10px;margin-top:10px;font-size:11px">'
+          + '<b style="color:#92400e">⚡ Action Required:</b> <span style="color:#78350f">' + item.action + '</span></div>'
+        : '';
+      return '<div style="background:#fff;border:1px solid #e2e8f0;border-left:4px solid ' + ic + ';border-radius:8px;padding:14px 16px;margin-bottom:12px">'
+        + '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">'
+        + '<div style="display:flex;gap:8px;align-items:center">'
+        + '<span style="font-size:16px">' + (typeIcon[item.type]||'📋') + '</span>'
+        + '<div><div style="font-size:13px;font-weight:700;color:#0c4a6e;line-height:1.3">' + item.headline + '</div>'
+        + '<div style="font-size:10px;color:#94a3b8;margin-top:2px">' + item.date + ' · ' + item.source
+        + (item.carrier !== 'Industry' && item.carrier !== 'All Admitted' ? ' · <b style="color:#0369a1">' + item.carrier + '</b>' : '') + '</div></div></div>'
+        + '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;margin-left:12px">'
+        + '<span style="background:' + ic + '20;color:' + ic + ';border:1px solid ' + ic + '40;border-radius:4px;font-size:10px;font-weight:700;padding:2px 8px">' + item.impact + ' Impact</span>'
+        + '<span style="background:#f0f9ff;color:#0369a1;border-radius:4px;font-size:10px;padding:2px 7px">' + item.type + '</span>'
+        + '</div></div>'
+        + '<div style="font-size:11px;color:#374151;line-height:1.55;margin-bottom:6px">' + item.detail + '</div>'
+        + '<div style="font-size:10px;color:#0369a1;font-weight:600">LoB: ' + item.lob + '</div>'
+        + relBar + actionBanner + '</div>';
+    }).join('');
+    var filterBar = '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center">'
+      + '<span style="font-size:12px;font-weight:700;color:#0c4a6e">Filter:</span>'
+      + ['All','Rating Action','Market Report','Regulatory Update','Earnings Disclosure','Risk Report'].map(function(f,i) {
+          return '<span style="background:' + (i===0?'#0369a1':'#f0f9ff') + ';color:' + (i===0?'#fff':'#0369a1') + ';border:1px solid #bae6fd;border-radius:20px;font-size:11px;font-weight:600;padding:3px 12px;cursor:pointer">' + f + '</span>';
+        }).join('')
+      + '</div>';
+    var actionItems = intel.filter(function(i){ return i.actionRequired; });
+    var actionSummary = '<div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:14px 16px;margin-bottom:18px">'
+      + '<div style="font-size:13px;font-weight:700;color:#92400e;margin-bottom:10px">⚡ ' + actionItems.length + ' Items Requiring Immediate Action</div>'
+      + actionItems.map(function(a, i) {
+          return '<div style="display:flex;gap:8px;margin-bottom:6px;font-size:11px">'
+            + '<span style="color:#d97706;font-weight:700;flex-shrink:0">' + (i+1) + '.</span>'
+            + '<span style="color:#78350f"><b>' + a.carrier + ':</b> ' + a.action + '</span></div>';
+        }).join('')
+      + '</div>';
+    return '<div style="padding:20px">'
+      + '<div style="font-size:13px;font-weight:700;color:#0c4a6e;margin-bottom:14px">📡 Market Intelligence Feed — Q2/Q3 2026</div>'
+      + actionSummary + filterBar + intelCards + '</div>';
+  }
+  /* ── BUILD PAGE ── */
+  function _p56buildPage() {
+    var tabs = [
+      { key:'dashboard',  label:'Dashboard',      icon:'🏢' },
+      { key:'profile',    label:'Carrier Profile', icon:'🔍' },
+      { key:'appetite',   label:'Appetite Guide',  icon:'📋' },
+      { key:'financials', label:'Financials',       icon:'📊' },
+      { key:'contracts',  label:'Contracts',        icon:'📄' },
+      { key:'marketintel',label:'Market Intel',     icon:'📡' }
+    ];
+    if (!window._p56activeTab) window._p56activeTab = 'dashboard';
+
+    var tabBar = '<div style="display:flex;gap:0;border-bottom:2px solid #e2e8f0;background:#f8fafc;padding:0 20px;overflow-x:auto">'
+      + tabs.map(function(t) {
+          var active = window._p56activeTab === t.key;
+          return '<button onclick="window._p8run(\'p56tab_' + t.key + '\')" '
+            + 'style="padding:10px 16px;border:none;background:' + (active?'#fff':'transparent')
+            + ';color:' + (active?'#0c4a6e':'#64748b') + ';font-size:12px;font-weight:' + (active?'700':'500')
+            + ';border-bottom:' + (active?'3px solid #0369a1':'3px solid transparent')
+            + ';cursor:pointer;white-space:nowrap;margin-bottom:-2px">'
+            + t.icon + ' ' + t.label + '</button>';
+        }).join('')
+      + '</div>';
+
+    tabs.forEach(function(t) {
+      window._p8actions['p56tab_' + t.key] = function() {
+        window._p56activeTab = t.key;
+        var mc = document.getElementById('p56-main-content');
+        if (!mc) return;
+        var fn = { dashboard:_p56tabDashboard, profile:_p56tabCarrierProfile,
+                   appetite:_p56tabAppetite, financials:_p56tabFinancials,
+                   contracts:_p56tabContracts, marketintel:_p56tabMarketIntel }[t.key];
+        if (fn) mc.innerHTML = fn();
+        var tb = document.getElementById('p56-tab-bar');
+        if (tb) {
+          tb.innerHTML = '';
+          var rebuilt = document.createRange().createContextualFragment(_p56buildTabBar());
+          tb.appendChild(rebuilt);
+        }
+      };
+    });
+
+    var contentFn = {
+      dashboard:_p56tabDashboard, profile:_p56tabCarrierProfile,
+      appetite:_p56tabAppetite, financials:_p56tabFinancials,
+      contracts:_p56tabContracts, marketintel:_p56tabMarketIntel
+    }[window._p56activeTab] || _p56tabDashboard;
+
+    var watchAlert = '<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:10px 16px;margin:16px 16px 0;display:flex;align-items:center;gap:10px">'
+      + '<span style="font-size:18px">⚠️</span>'
+      + '<div><span style="font-size:12px;font-weight:700;color:#dc2626">CARRIER WATCH: </span>'
+      + '<span style="font-size:12px;color:#7f1d1d">Kingsway Financial (CXL-008) — AM Best downgrade to B+ (Negative Outlook). Surplus erosion -14.3% YoY. Combined Ratio 108.2%. '
+      + 'Recommend: Limit new placements to &lt;$500K/risk. Review Q3 renewal strategy.</span></div>'
+      + '<button onclick="window._p8run(\'p56tab_marketintel\')" style="flex-shrink:0;background:#dc2626;color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:10px;font-weight:700;cursor:pointer">View Intel</button></div>';
+
+    var kpiBar = '<div style="display:flex;gap:0;background:#0c4a6e;padding:0">'
+      + _p56kpi('8 Carriers','Panel Active','#fff','#bae6fd')
+      + _p56kpi('5 Tier-1','AM Best A+ / A++','#fff','#bae6fd')
+      + _p56kpi('1 Watch','Kingsway B+ Neg','#fca5a5','#fee2e2')
+      + _p56kpi('$27.3M','Ceded YTD','#fff','#bae6fd')
+      + _p56kpi('49%','Attainment H1','#fde68a','#fef3c7')
+      + _p56kpi('12.7%','Avg Base Comm','#fff','#bae6fd')
+      + '</div>';
+
+    var hdr = '<div style="background:linear-gradient(135deg,#0c4a6e 0%,#0369a1 60%,#0284c7 100%);padding:18px 20px 14px;color:#fff">'
+      + '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">'
+      + '<div><div style="font-size:20px;font-weight:800;letter-spacing:-0.3px">🏢 P&C Carrier 360</div>'
+      + '<div style="font-size:12px;opacity:.8;margin-top:3px">Panel Management · AM Best · Financial Health · Contracts · Market Intelligence</div></div>'
+      + '<div style="text-align:right;font-size:10px;opacity:.7">Updated: Jul 2026<br>8 carriers · $55.6B combined surplus</div>'
+      + '</div></div>';
+
+    var shell = hdr + kpiBar + watchAlert
+      + '<div id="p56-tab-bar" style="margin-top:12px">' + _p56buildTabBar() + '</div>'
+      + '<div id="p56-main-content" style="min-height:500px">' + contentFn() + '</div>'
+      + '<div style="background:#f8fafc;border-top:1px solid #e2e8f0;padding:8px 20px;font-size:10px;color:#94a3b8">'
+      + 'P56 P&C Carrier 360 · 8 panel carriers · Ratings: AM Best / S&P · Data as of Jul 2026</div>';
+
+    return shell;
+  }
+
+  function _p56buildTabBar() {
+    var tabs = [
+      { key:'dashboard',  label:'Dashboard',      icon:'🏢' },
+      { key:'profile',    label:'Carrier Profile', icon:'🔍' },
+      { key:'appetite',   label:'Appetite Guide',  icon:'📋' },
+      { key:'financials', label:'Financials',       icon:'📊' },
+      { key:'contracts',  label:'Contracts',        icon:'📄' },
+      { key:'marketintel',label:'Market Intel',     icon:'📡' }
+    ];
+    if (!window._p56activeTab) window._p56activeTab = 'dashboard';
+    return '<div style="display:flex;gap:0;border-bottom:2px solid #e2e8f0;background:#f8fafc;padding:0 20px;overflow-x:auto">'
+      + tabs.map(function(t) {
+          var active = window._p56activeTab === t.key;
+          return '<button onclick="window._p8run(\'p56tab_' + t.key + '\')" '
+            + 'style="padding:10px 16px;border:none;background:' + (active?'#fff':'transparent')
+            + ';color:' + (active?'#0c4a6e':'#64748b') + ';font-size:12px;font-weight:' + (active?'700':'500')
+            + ';border-bottom:' + (active?'3px solid #0369a1':'3px solid transparent')
+            + ';cursor:pointer;white-space:nowrap;margin-bottom:-2px">'
+            + t.icon + ' ' + t.label + '</button>';
+        }).join('')
+      + '</div>';
+  }
+
+  /* ── NAV INJECTION ── */
+  function _p56injectNav() {
+    if (document.querySelector('.p56-pc-carrier-nav')) return;
+    var nav = document.createElement('div');
+    nav.className = 'p56-pc-carrier-nav';
+    nav.style.cssText = 'padding:4px 12px;cursor:pointer;border-radius:6px;margin:2px 6px;transition:background .15s';
+    nav.innerHTML = '<div style="display:flex;align-items:center;gap:8px;padding:6px 4px">'
+      + '<span style="font-size:14px">🏢</span>'
+      + '<span style="font-size:13px;font-weight:600;color:#e2e8f0">Carrier 360</span>'
+      + '<span style="background:#0369a1;color:#fff;border-radius:10px;font-size:9px;font-weight:700;padding:1px 7px;margin-left:auto">P56</span>'
+      + '</div>';
+    nav.addEventListener('mouseenter', function(){ this.style.background='rgba(255,255,255,0.1)'; });
+    nav.addEventListener('mouseleave', function(){ this.style.background=''; });
+    nav.addEventListener('click', function(){ window.navigateTo('pc-carrier'); });
+
+    var anchors = ['.p55-pc-uw-nav','.p54-pc-ops-nav','.p53-pc-claims-nav',
+                   '.p7-nav-group.nav-grp-tpa','.mod-roadmap-nav','.data-ai-nav'];
+    for (var i = 0; i < anchors.length; i++) {
+      var a = document.querySelector(anchors[i]);
+      if (a && a.parentNode) { a.parentNode.insertBefore(nav, a.nextSibling); return; }
+    }
+    var sidebar = document.querySelector('nav, [class*="sidebar"], [class*="Sidebar"], [class*="side-bar"]');
+    if (sidebar) { sidebar.appendChild(nav); return; }
+    document.body.appendChild(nav);
+  }
+
+  /* ── NAVIGATE TO OVERRIDE ── */
+  var _p56origNav = window.navigateTo;
+  window.navigateTo = function(route) {
+    if (route === 'pc-carrier') {
+      var main = document.querySelector('main, [class*="main-content"], [class*="mainContent"], #root > div > div:last-child, .content-area');
+      if (!main) main = document.body;
+      main.innerHTML = _p56buildPage();
+      window.scrollTo(0, 0);
+      return;
+    }
+    if (typeof _p56origNav === 'function') _p56origNav(route);
+  };
+
+  /* ── INIT ── */
+  function _p56init() {
+    _p56injectNav();
+  }
+
+  var _p56started = false;
+  var _p56observer = new MutationObserver(function() {
+    if (!_p56started && document.body) {
+      _p56started = true;
+      _p56observer.disconnect();
+      setTimeout(_p56init, 650);
+    }
+  });
+
+  var _p56MAX_MS = 15000;
+  var _p56startTs = Date.now();
+  var _p56retry = setInterval(function() {
+    if (document.body && !document.querySelector('.p56-pc-carrier-nav')) {
+      _p56injectNav();
+    }
+    if (Date.now() - _p56startTs > _p56MAX_MS) clearInterval(_p56retry);
+  }, 700);
+
+  if (document.body) {
+    setTimeout(_p56init, 400);
+  } else {
+    _p56observer.observe(document.documentElement, { childList: true, subtree: true });
+  }
+
+  console.log('[P56] P&C Carrier 360 loaded · 8 carriers · 6 tabs · $55.6B surplus · pc-carrier route');
+})();
