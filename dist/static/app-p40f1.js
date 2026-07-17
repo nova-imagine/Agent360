@@ -101872,3 +101872,1145 @@ var navigateTo=window.navigateTo;
 
   console.log('[P52] Vector Store enhanced · 8 indexes · carrier-intelligence-idx + provider-quality-idx added · 9 pipeline stages · 10 RAG queries · ~996K docs · 10.0 GB storage');
 })();
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PHASE 53 — P&C CLAIMS CENTER
+   Property & Casualty vertical — Claims lifecycle management
+   Routes: pc-claims
+   Tabs: Dashboard · FNOL Intake · Claims Register · Adjudication ·
+         Fraud & SIU · Subrogation & Recovery · CAT Management
+   ═══════════════════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  /* ── Brand colors ─────────────────────────────────────────────── */
+  var PC53  = '#1d4ed8';   /* P&C primary blue        */
+  var PC53A = '#0891b2';   /* teal accent             */
+  var PC53G = '#059669';   /* green (settled/closed)  */
+  var PC53Y = '#d97706';   /* amber (pending/review)  */
+  var PC53R = '#dc2626';   /* red (fraud/urgent/CAT)  */
+  var PC53P = '#7c3aed';   /* purple (SIU/special)    */
+  var PC53S = '#475569';   /* slate (neutral)         */
+
+  /* ══════════════════════════════════════════════════════════════
+     SAMPLE CLAIM DATA — 8 realistic P&C claims
+     PC-2026-XXXX numbering  ·  spans Auto, HO, WC, Comm Prop
+     ══════════════════════════════════════════════════════════════ */
+  var pcClaimsData = [
+    {
+      id:'PC-2026-0401', insured:'Rivera Construction LLC', lob:'Commercial Property',
+      causeOfLoss:'Fire — Electrical', dateOfLoss:'2026-06-28', reportDate:'2026-06-29',
+      adjuster:'Karen Mitchell', adjusterTitle:'Sr. Commercial Adjuster',
+      reserve:485000, paidToDate:0, recoveryPotential:0,
+      fraudScore:12, status:'Investigation', cycleTime:9, stpEligible:false,
+      catEvent:null, subrogationPotential:false, priority:'urgent',
+      deductible:10000, policyLimit:2000000, coverageType:'Commercial Property All-Risk',
+      carrier:'Travelers', state:'TX', zipCode:'75201',
+      notes:'Total loss assessment pending structural engineer inspection scheduled Jul 14'
+    },
+    {
+      id:'PC-2026-0402', insured:'Jennifer Walsh', lob:'Auto — Bodily Injury',
+      causeOfLoss:'Rear-End Collision', dateOfLoss:'2026-07-01', reportDate:'2026-07-01',
+      adjuster:'Marcus Thompson', adjusterTitle:'Auto BI Adjuster',
+      reserve:32000, paidToDate:0, recoveryPotential:32000,
+      fraudScore:67, status:'SIU Referral', cycleTime:6, stpEligible:false,
+      catEvent:null, subrogationPotential:true, priority:'high',
+      deductible:500, policyLimit:100000, coverageType:'Liability — Bodily Injury',
+      carrier:'Progressive', state:'FL', zipCode:'33101',
+      notes:'Claimant attorney retained. Suspicious prior soft-tissue claim 18 months ago (same attorney)'
+    },
+    {
+      id:'PC-2026-0403', insured:'Thomas & Karen Elliot', lob:'Homeowners',
+      causeOfLoss:'Hail Damage — Roof', dateOfLoss:'2026-06-15', reportDate:'2026-06-16',
+      adjuster:'Sandra Kim', adjusterTitle:'Property Adjuster',
+      reserve:18500, paidToDate:12800, recoveryPotential:0,
+      fraudScore:8, status:'Settlement', cycleTime:21, stpEligible:true,
+      catEvent:'TX-HAI-2026-06', subrogationPotential:false, priority:'medium',
+      deductible:2500, policyLimit:350000, coverageType:'HO-3 Homeowners',
+      carrier:'State Farm', state:'TX', zipCode:'76001',
+      notes:'CAT event TX-HAI-2026-06. Roof replacement estimate approved. Final payment pending contractor completion'
+    },
+    {
+      id:'PC-2026-0404', insured:'AutoParts Direct Inc.', lob:"Workers' Compensation",
+      causeOfLoss:'Forklift Injury — Crush', dateOfLoss:'2026-06-20', reportDate:'2026-06-21',
+      adjuster:'Robert Chen', adjusterTitle:'WC Complex Adjuster',
+      reserve:210000, paidToDate:28400, recoveryPotential:0,
+      fraudScore:31, status:'Active — Indemnity', cycleTime:17, stpEligible:false,
+      catEvent:null, subrogationPotential:false, priority:'high',
+      deductible:0, policyLimit:1000000, coverageType:"Workers' Compensation & EL",
+      carrier:'Liberty Mutual', state:'OH', zipCode:'44101',
+      notes:'Employee on TTD. Orthopedic surgery scheduled Jul 20. MMI estimated Q4 2026'
+    },
+    {
+      id:'PC-2026-0405', insured:'Patricia Nguyen', lob:'Auto — Physical Damage',
+      causeOfLoss:'Comprehensive — Theft', dateOfLoss:'2026-07-03', reportDate:'2026-07-03',
+      adjuster:'Lisa Park', adjusterTitle:'Auto PD Adjuster',
+      reserve:24700, paidToDate:0, recoveryPotential:0,
+      fraudScore:19, status:'FNOL — Assigned', cycleTime:4, stpEligible:true,
+      catEvent:null, subrogationPotential:false, priority:'medium',
+      deductible:500, policyLimit:24700, coverageType:'Comprehensive',
+      carrier:'GEICO', state:'CA', zipCode:'90210',
+      notes:'2024 Toyota Camry stolen from parking garage. Police report filed. ACV pending VIN lookup'
+    },
+    {
+      id:'PC-2026-0406', insured:'Sunrise Bakery Inc.', lob:'General Liability',
+      causeOfLoss:'Slip & Fall — Customer', dateOfLoss:'2026-06-10', reportDate:'2026-06-11',
+      adjuster:'Michael Davis', adjusterTitle:'GL Adjuster',
+      reserve:55000, paidToDate:0, recoveryPotential:55000,
+      fraudScore:45, status:'Review — Liability Dispute', cycleTime:27, stpEligible:false,
+      catEvent:null, subrogationPotential:true, priority:'medium',
+      deductible:1000, policyLimit:500000, coverageType:'Commercial GL — Premises',
+      carrier:'Hartford', state:'NY', zipCode:'10001',
+      notes:'Liability disputed — claimant alleges wet floor; insured disputes no wet floor sign present. Surveillance footage requested'
+    },
+    {
+      id:'PC-2026-0407', insured:'James & Mary Kowalski', lob:'Homeowners',
+      causeOfLoss:'Water Damage — Burst Pipe', dateOfLoss:'2026-07-05', reportDate:'2026-07-05',
+      adjuster:'Sandra Kim', adjusterTitle:'Property Adjuster',
+      reserve:8200, paidToDate:0, recoveryPotential:8200,
+      fraudScore:22, status:'FNOL — Triage', cycleTime:2, stpEligible:true,
+      catEvent:null, subrogationPotential:true, priority:'low',
+      deductible:1000, policyLimit:280000, coverageType:'HO-3 Homeowners',
+      carrier:'Allstate', state:'IL', zipCode:'60601',
+      notes:'Plumber fault confirmed. Subrogation against plumber contractor probable. STP candidate if estimate < $10K'
+    },
+    {
+      id:'PC-2026-0408', insured:'Gulf Coast Marina Corp.', lob:'Commercial Property',
+      causeOfLoss:'Hurricane Ian Resurgence — Wind/Surge', dateOfLoss:'2026-06-30', reportDate:'2026-07-01',
+      adjuster:'David Okafor', adjusterTitle:'CAT Field Adjuster',
+      reserve:1200000, paidToDate:150000, recoveryPotential:0,
+      fraudScore:5, status:'CAT — Field Assessment', cycleTime:7, stpEligible:false,
+      catEvent:'FL-HRN-2026-06', subrogationPotential:false, priority:'urgent',
+      deductible:50000, policyLimit:5000000, coverageType:'Commercial Property — Named Storm',
+      carrier:'Lloyd\'s', state:'FL', zipCode:'33139',
+      notes:'CAT event FL-HRN-2026-06. Dock and warehouse severely damaged. CAT team deployed Jul 3. Advance payment $150K issued'
+    }
+  ];
+
+  /* ══════════════════════════════════════════════════════════════
+     HELPER FUNCTIONS
+     ══════════════════════════════════════════════════════════════ */
+
+  function _p53badge(status) {
+    var map = {
+      'Investigation':           { bg:'#1d4ed815', col:PC53,  brd:'#1d4ed844' },
+      'SIU Referral':            { bg:'#7c3aed15', col:PC53P, brd:'#7c3aed44' },
+      'Settlement':              { bg:'#05966915', col:PC53G, brd:'#05966944' },
+      'Active — Indemnity':      { bg:'#d9770615', col:PC53Y, brd:'#d9770644' },
+      'FNOL — Assigned':         { bg:'#0891b215', col:PC53A, brd:'#0891b244' },
+      'FNOL — Triage':           { bg:'#0891b215', col:PC53A, brd:'#0891b244' },
+      'Review — Liability Dispute':{ bg:'#d9770615', col:PC53Y, brd:'#d9770644' },
+      'CAT — Field Assessment':  { bg:'#dc262615', col:PC53R, brd:'#dc262644' },
+      'Open':                    { bg:'#1d4ed815', col:PC53,  brd:'#1d4ed844' },
+      'Closed':                  { bg:'#47556915', col:PC53S, brd:'#47556944' }
+    };
+    var s = map[status] || { bg:'#47556915', col:PC53S, brd:'#47556944' };
+    return '<span style="background:'+s.bg+';color:'+s.col+';border:1px solid '+s.brd+';border-radius:20px;padding:2px 10px;font-size:11px;font-weight:700;">'+status+'</span>';
+  }
+
+  function _p53lobIcon(lob) {
+    var icons = {
+      'Commercial Property':      'fa-building',
+      'Auto — Bodily Injury':     'fa-car-crash',
+      'Auto — Physical Damage':   'fa-car',
+      'Homeowners':               'fa-home',
+      "Workers' Compensation":    'fa-hard-hat',
+      'General Liability':        'fa-shield-alt',
+      'Auto — Comprehensive':     'fa-car'
+    };
+    return icons[lob] || 'fa-file-alt';
+  }
+
+  function _p53fraudColor(score) {
+    if (score >= 60) return PC53R;
+    if (score >= 35) return PC53Y;
+    return PC53G;
+  }
+
+  function _p53priorityColor(p) {
+    return p === 'urgent' ? PC53R : p === 'high' ? PC53Y : p === 'medium' ? PC53A : PC53S;
+  }
+
+  function _p53kpi(val, lbl, col) {
+    return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px 18px;min-width:130px;flex:1">'
+      +'<div style="font-size:22px;font-weight:800;color:'+col+'">'+val+'</div>'
+      +'<div style="font-size:11px;color:#64748b;margin-top:2px;font-weight:600">'+lbl+'</div>'
+      +'</div>';
+  }
+
+  function _p53fmt(n) {
+    if (!n && n !== 0) return '—';
+    return '$' + n.toLocaleString();
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     TAB 1 — CLAIMS DASHBOARD
+     ══════════════════════════════════════════════════════════════ */
+  function _p53tabDashboard() {
+    var totalReserve = pcClaimsData.reduce(function(a,c){ return a + c.reserve; }, 0);
+    var totalPaid    = pcClaimsData.reduce(function(a,c){ return a + c.paidToDate; }, 0);
+    var catCount     = pcClaimsData.filter(function(c){ return c.catEvent; }).length;
+    var siuCount     = pcClaimsData.filter(function(c){ return c.fraudScore >= 40; }).length;
+    var stpCount     = pcClaimsData.filter(function(c){ return c.stpEligible; }).length;
+    var openCount    = pcClaimsData.filter(function(c){ return c.status !== 'Closed'; }).length;
+
+    /* Kanban columns by LoB */
+    var lobGroups = {};
+    pcClaimsData.forEach(function(c) {
+      var key = c.lob.split(' — ')[0];
+      if (!lobGroups[key]) lobGroups[key] = [];
+      lobGroups[key].push(c);
+    });
+
+    var lobColors = {
+      'Auto':                    { col: PC53A, icon: 'fa-car' },
+      'Homeowners':              { col: PC53G, icon: 'fa-home' },
+      "Workers'":                { col: PC53Y, icon: 'fa-hard-hat' },
+      'Commercial Property':     { col: PC53R, icon: 'fa-building' },
+      'General Liability':       { col: PC53P, icon: 'fa-shield-alt' }
+    };
+
+    var kanbanHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:20px">';
+    Object.keys(lobGroups).forEach(function(lob) {
+      var claims = lobGroups[lob];
+      var lobKey = lob.split(' ')[0];
+      var clr = lobColors[lobKey] || { col: PC53S, icon: 'fa-file' };
+      var totalRes = claims.reduce(function(a,c){ return a + c.reserve; }, 0);
+      kanbanHTML += '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px">'
+        +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">'
+        +'<i class="fas '+clr.icon+'" style="color:'+clr.col+';font-size:14px"></i>'
+        +'<span style="font-size:12px;font-weight:700;color:#1e293b">'+lob+'</span>'
+        +'</div>'
+        +'<div style="font-size:20px;font-weight:800;color:'+clr.col+'">'+claims.length+' claims</div>'
+        +'<div style="font-size:11px;color:#64748b;margin-top:4px">Reserve: '+_p53fmt(totalRes)+'</div>'
+        +'<div style="margin-top:8px">';
+      claims.forEach(function(c) {
+        kanbanHTML += '<div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0;border-top:1px solid #f1f5f9;cursor:pointer" onclick="_p8run(\'p53-tab-adjudication\')">'
+          +'<span style="font-size:10px;color:#1d4ed8;font-weight:600">'+c.id+'</span>'
+          +'<span style="font-size:9px;font-weight:700;color:'+_p53priorityColor(c.priority)+'">'+c.priority.toUpperCase()+'</span>'
+          +'</div>';
+      });
+      kanbanHTML += '</div></div>';
+    });
+    kanbanHTML += '</div>';
+
+    /* AI Alert strip */
+    var alertsHTML = '<div style="background:linear-gradient(135deg,#1d4ed8,#0891b2);border-radius:12px;padding:14px 18px;color:#fff;margin-bottom:20px">'
+      +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">'
+      +'<i class="fas fa-robot" style="font-size:18px;opacity:.9"></i>'
+      +'<span style="font-weight:700;font-size:13px">AI Claims Intelligence — Live Alerts</span>'
+      +'<span style="margin-left:auto;background:rgba(255,255,255,.2);border-radius:8px;padding:2px 10px;font-size:10px;font-weight:700">'+new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'})+'</span>'
+      +'</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px">'
+      +'<div style="background:rgba(220,38,38,.25);border-radius:8px;padding:8px 12px"><i class="fas fa-exclamation-triangle" style="margin-right:6px;color:#fca5a5"></i><strong>PC-2026-0402</strong> — SIU flag: prior BI claim pattern + attorney match</div>'
+      +'<div style="background:rgba(220,38,38,.25);border-radius:8px;padding:8px 12px"><i class="fas fa-hurricane" style="margin-right:6px;color:#fca5a5"></i><strong>CAT FL-HRN-2026-06</strong> — 47 exposed policies · 2 open claims · surge capacity activated</div>'
+      +'<div style="background:rgba(255,255,255,.12);border-radius:8px;padding:8px 12px"><i class="fas fa-bolt" style="margin-right:6px;color:#fde68a"></i><strong>3 STP candidates</strong> ready for straight-through processing (PC-0405, PC-0403, PC-0407)</div>'
+      +'<div style="background:rgba(255,255,255,.12);border-radius:8px;padding:8px 12px"><i class="fas fa-recycle" style="margin-right:6px;color:#86efac"></i><strong>Subrogation</strong>: PC-0407 (plumber liability) · PC-0402 (tortfeasor) · potential recovery $95.2K</div>'
+      +'</div></div>';
+
+    /* Combined ratio gauge */
+    var metricsHTML = '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px">'
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px">'
+      +'<div style="font-size:11px;font-weight:700;color:#64748b;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Combined Ratio</div>'
+      +'<div style="font-size:28px;font-weight:900;color:'+PC53Y+'">94.2%</div>'
+      +'<div style="font-size:10px;color:#64748b;margin-top:2px">Loss 61.4% + Expense 32.8%</div>'
+      +'<div style="margin-top:10px;background:#f1f5f9;border-radius:4px;height:6px">'
+      +'<div style="width:94%;background:linear-gradient(90deg,'+PC53G+','+PC53Y+');border-radius:4px;height:6px"></div>'
+      +'</div></div>'
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px">'
+      +'<div style="font-size:11px;font-weight:700;color:#64748b;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Avg Cycle Time</div>'
+      +'<div style="font-size:28px;font-weight:900;color:'+PC53A+'">11.5 days</div>'
+      +'<div style="font-size:10px;color:#64748b;margin-top:2px">Target: &lt;14 days · YTD trend: ▼ 8%</div>'
+      +'<div style="margin-top:10px;display:flex;gap:4px">'
+      +'<div style="flex:1;background:'+PC53G+';border-radius:4px;height:6px" title="On Track"></div>'
+      +'<div style="flex:1;background:'+PC53G+';border-radius:4px;height:6px"></div>'
+      +'<div style="flex:1;background:'+PC53G+';border-radius:4px;height:6px"></div>'
+      +'<div style="flex:.5;background:#e2e8f0;border-radius:4px;height:6px"></div>'
+      +'</div></div>'
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px">'
+      +'<div style="font-size:11px;font-weight:700;color:#64748b;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">STP Rate</div>'
+      +'<div style="font-size:28px;font-weight:900;color:'+PC53P+'">37.5%</div>'
+      +'<div style="font-size:10px;color:#64748b;margin-top:2px">3 of 8 claims · Target: 40%</div>'
+      +'<div style="margin-top:10px;background:#f1f5f9;border-radius:4px;height:6px">'
+      +'<div style="width:37.5%;background:'+PC53P+';border-radius:4px;height:6px"></div>'
+      +'</div></div>'
+      +'</div>';
+
+    return '<div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:12px">Open Claims by Line of Business</div>'
+      + kanbanHTML
+      + alertsHTML
+      + metricsHTML;
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     TAB 2 — FNOL INTAKE
+     ══════════════════════════════════════════════════════════════ */
+  function _p53tabFNOL() {
+    return '<div style="display:grid;grid-template-columns:1.2fr 1fr;gap:16px">'
+
+      /* Left: digital intake form */
+      +'<div>'
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:14px">'
+      +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">'
+      +'<i class="fas fa-file-medical" style="color:'+PC53+';font-size:18px"></i>'
+      +'<span style="font-weight:700;font-size:14px;color:#1e293b">New FNOL — Digital Intake</span>'
+      +'<span style="margin-left:auto;background:'+PC53+'15;color:'+PC53+';border:1px solid '+PC53+'44;border-radius:8px;padding:2px 10px;font-size:10px;font-weight:700">LIVE AI-ASSISTED</span>'
+      +'</div>'
+
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">'
+      +'<div><label style="font-size:10px;font-weight:700;color:#64748b;display:block;margin-bottom:4px">POLICY NUMBER</label>'
+      +'<input style="width:100%;border:1px solid #e2e8f0;border-radius:6px;padding:7px 10px;font-size:12px;box-sizing:border-box" placeholder="e.g. POL-2024-88821" /></div>'
+      +'<div><label style="font-size:10px;font-weight:700;color:#64748b;display:block;margin-bottom:4px">LINE OF BUSINESS</label>'
+      +'<select style="width:100%;border:1px solid #e2e8f0;border-radius:6px;padding:7px 10px;font-size:12px;box-sizing:border-box">'
+      +'<option>Auto — Physical Damage</option><option>Auto — Bodily Injury</option>'
+      +'<option>Homeowners</option><option>Commercial Property</option>'
+      +'<option>Workers Compensation</option><option>General Liability</option>'
+      +'</select></div>'
+      +'</div>'
+
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">'
+      +'<div><label style="font-size:10px;font-weight:700;color:#64748b;display:block;margin-bottom:4px">DATE OF LOSS</label>'
+      +'<input type="date" style="width:100%;border:1px solid #e2e8f0;border-radius:6px;padding:7px 10px;font-size:12px;box-sizing:border-box" value="2026-07-07" /></div>'
+      +'<div><label style="font-size:10px;font-weight:700;color:#64748b;display:block;margin-bottom:4px">CAUSE OF LOSS</label>'
+      +'<select style="width:100%;border:1px solid #e2e8f0;border-radius:6px;padding:7px 10px;font-size:12px;box-sizing:border-box">'
+      +'<option>Fire</option><option>Collision</option><option>Hail</option>'
+      +'<option>Water Damage</option><option>Theft</option><option>Wind</option>'
+      +'<option>Slip & Fall</option><option>Work Injury</option>'
+      +'</select></div>'
+      +'</div>'
+
+      +'<div style="margin-bottom:10px"><label style="font-size:10px;font-weight:700;color:#64748b;display:block;margin-bottom:4px">LOSS DESCRIPTION</label>'
+      +'<textarea style="width:100%;border:1px solid #e2e8f0;border-radius:6px;padding:7px 10px;font-size:12px;box-sizing:border-box;height:72px;resize:vertical" placeholder="Describe the loss event in detail..."></textarea></div>'
+
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">'
+      +'<div><label style="font-size:10px;font-weight:700;color:#64748b;display:block;margin-bottom:4px">REPORTED BY</label>'
+      +'<input style="width:100%;border:1px solid #e2e8f0;border-radius:6px;padding:7px 10px;font-size:12px;box-sizing:border-box" placeholder="Insured / Agent / Claimant" /></div>'
+      +'<div><label style="font-size:10px;font-weight:700;color:#64748b;display:block;margin-bottom:4px">CONTACT PHONE</label>'
+      +'<input style="width:100%;border:1px solid #e2e8f0;border-radius:6px;padding:7px 10px;font-size:12px;box-sizing:border-box" placeholder="(555) 000-0000" /></div>'
+      +'</div>'
+
+      +'<div style="display:flex;gap:8px;margin-top:4px">'
+      +'<button style="flex:1;background:'+PC53+';color:#fff;border:none;border-radius:8px;padding:10px;font-size:12px;font-weight:700;cursor:pointer"><i class="fas fa-search" style="margin-right:6px"></i>Verify Coverage</button>'
+      +'<button style="flex:1;background:'+PC53G+';color:#fff;border:none;border-radius:8px;padding:10px;font-size:12px;font-weight:700;cursor:pointer"><i class="fas fa-paper-plane" style="margin-right:6px"></i>Submit FNOL</button>'
+      +'</div>'
+      +'</div>'
+
+      /* STP check panel */
+      +'<div style="background:linear-gradient(135deg,#0891b2,#06b6d4);border-radius:12px;padding:16px;color:#fff">'
+      +'<div style="font-weight:700;font-size:13px;margin-bottom:10px"><i class="fas fa-bolt" style="margin-right:8px"></i>STP Eligibility Check</div>'
+      +'<div style="font-size:12px;opacity:.9;margin-bottom:12px">AI evaluates claim for straight-through processing eligibility</div>'
+      +'<div style="display:grid;gap:6px">'
+      +['Coverage confirmed in-force','No prior claims in 24 months','Reserve below $25,000 threshold','No liability dispute indicators','Policy in good standing'].map(function(c,i) {
+        var ok = i < 3;
+        return '<div style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.12);border-radius:6px;padding:6px 10px">'
+          +'<i class="fas '+(ok?'fa-check-circle':'fa-times-circle')+'" style="color:'+(ok?'#86efac':'#fca5a5')+'"></i>'
+          +'<span style="font-size:11px">'+c+'</span>'
+          +'</div>';
+      }).join('')
+      +'</div>'
+      +'<div style="margin-top:12px;background:rgba(255,255,255,.15);border-radius:8px;padding:10px;text-align:center">'
+      +'<div style="font-size:13px;font-weight:700">⚡ STP: CONDITIONAL</div>'
+      +'<div style="font-size:10px;opacity:.85;margin-top:3px">3/5 criteria met — manual review for liability & claim history</div>'
+      +'</div>'
+      +'</div>'
+      +'</div>'
+
+      /* Right: adjuster assignment + queue */
+      +'<div>'
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;margin-bottom:14px">'
+      +'<div style="font-weight:700;font-size:13px;color:#1e293b;margin-bottom:12px"><i class="fas fa-user-tie" style="color:'+PC53+';margin-right:8px"></i>Adjuster Assignment Queue</div>'
+      +[
+        { name:'Sandra Kim',       lob:'Property',  load:7, cap:10, avail:'Available' },
+        { name:'Marcus Thompson',  lob:'Auto BI',   load:9, cap:10, avail:'Near Capacity' },
+        { name:'Lisa Park',        lob:'Auto PD',   load:5, cap:10, avail:'Available' },
+        { name:'Robert Chen',      lob:'Workers Comp', load:8, cap:10, avail:'Busy' },
+        { name:'David Okafor',     lob:'CAT Field', load:6, cap:8,  avail:'CAT Mode' }
+      ].map(function(a) {
+        var pct = Math.round((a.load/a.cap)*100);
+        var bc  = a.avail==='Available' ? PC53G : a.avail==='Near Capacity' ? PC53Y : PC53R;
+        return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid #f1f5f9">'
+          +'<div style="width:32px;height:32px;border-radius:50%;background:'+PC53+'22;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:'+PC53+'">'+a.name.charAt(0)+'</div>'
+          +'<div style="flex:1">'
+          +'<div style="font-size:12px;font-weight:700;color:#1e293b">'+a.name+'</div>'
+          +'<div style="font-size:10px;color:#64748b">'+a.lob+' · '+a.load+'/'+a.cap+' claims</div>'
+          +'<div style="margin-top:3px;background:#f1f5f9;border-radius:4px;height:4px">'
+          +'<div style="width:'+pct+'%;background:'+bc+';border-radius:4px;height:4px"></div>'
+          +'</div></div>'
+          +'<span style="font-size:9px;font-weight:700;color:'+bc+';white-space:nowrap">'+a.avail+'</span>'
+          +'</div>';
+      }).join('')
+      +'</div>'
+
+      /* Recent FNOL submissions */
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px">'
+      +'<div style="font-weight:700;font-size:13px;color:#1e293b;margin-bottom:10px"><i class="fas fa-clock" style="color:'+PC53Y+';margin-right:8px"></i>Recent FNOL — Last 24 Hours</div>'
+      +pcClaimsData.filter(function(c){ return c.cycleTime <= 6; }).map(function(c) {
+        return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-top:1px solid #f1f5f9">'
+          +'<div>'
+          +'<div style="font-size:11px;font-weight:700;color:'+PC53+'">'+c.id+'</div>'
+          +'<div style="font-size:10px;color:#64748b">'+c.insured+' · '+c.lob+'</div>'
+          +'</div>'
+          +'<div style="text-align:right">'
+          +_p53badge(c.status)
+          +'<div style="font-size:9px;color:#64748b;margin-top:3px">Day '+c.cycleTime+'</div>'
+          +'</div>'
+          +'</div>';
+      }).join('')
+      +'</div>'
+      +'</div>'
+
+      +'</div>';
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     TAB 3 — CLAIMS REGISTER
+     ══════════════════════════════════════════════════════════════ */
+  function _p53tabRegister() {
+    var rows = pcClaimsData.map(function(c) {
+      var fraudCol = _p53fraudColor(c.fraudScore);
+      return '<tr style="border-top:1px solid #f1f5f9">'
+        +'<td style="padding:10px 12px;font-size:11px;font-weight:700;color:'+PC53+';white-space:nowrap">'+c.id+'</td>'
+        +'<td style="padding:10px 12px;font-size:11px;color:#1e293b;max-width:140px">'+c.insured+'</td>'
+        +'<td style="padding:10px 12px">'
+        +'<div style="display:flex;align-items:center;gap:6px">'
+        +'<i class="fas '+_p53lobIcon(c.lob)+'" style="color:'+PC53A+';font-size:11px"></i>'
+        +'<span style="font-size:10px;color:#64748b">'+c.lob+'</span>'
+        +'</div></td>'
+        +'<td style="padding:10px 12px;font-size:11px;color:#1e293b">'+c.causeOfLoss+'</td>'
+        +'<td style="padding:10px 12px;font-size:11px;color:#64748b;white-space:nowrap">'+c.dateOfLoss+'</td>'
+        +'<td style="padding:10px 12px;font-size:11px;font-weight:700;color:#1e293b">'+_p53fmt(c.reserve)+'</td>'
+        +'<td style="padding:10px 12px">'+_p53badge(c.status)+'</td>'
+        +'<td style="padding:10px 12px">'
+        +'<div style="display:flex;align-items:center;gap:5px">'
+        +'<div style="width:28px;height:28px;border-radius:50%;border:2px solid '+fraudCol+';display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:'+fraudCol+'">'+c.fraudScore+'</div>'
+        +'</div></td>'
+        +'<td style="padding:10px 12px">'
+        +(c.catEvent ? '<span style="background:'+PC53R+'15;color:'+PC53R+';border:1px solid '+PC53R+'44;border-radius:8px;padding:2px 8px;font-size:9px;font-weight:700"><i class="fas fa-hurricane" style="margin-right:3px"></i>CAT</span>' : '<span style="color:#cbd5e1;font-size:11px">—</span>')
+        +'</td>'
+        +'<td style="padding:10px 12px">'
+        +(c.subrogationPotential ? '<span style="background:'+PC53G+'15;color:'+PC53G+';border:1px solid '+PC53G+'44;border-radius:8px;padding:2px 8px;font-size:9px;font-weight:700"><i class="fas fa-recycle" style="margin-right:3px"></i>SUBRO</span>' : '<span style="color:#cbd5e1;font-size:11px">—</span>')
+        +'</td>'
+        +'<td style="padding:10px 12px">'
+        +'<button onclick="_p8run(\'p53-tab-adjudication\')" style="background:'+PC53+';color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:10px;font-weight:700;cursor:pointer">Detail</button>'
+        +'</td>'
+        +'</tr>';
+    }).join('');
+
+    return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden">'
+      +'<div style="padding:14px 16px;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;gap:12px;flex-wrap:wrap">'
+      +'<span style="font-weight:700;font-size:13px;color:#1e293b"><i class="fas fa-list-alt" style="color:'+PC53+';margin-right:8px"></i>Claims Register — All Open Claims</span>'
+      +'<span style="margin-left:auto;background:#f1f5f9;border-radius:8px;padding:3px 10px;font-size:11px;color:#64748b">8 claims · <span style="color:'+PC53Y+'">2 CAT</span> · <span style="color:'+PC53R+'">1 SIU</span> · <span style="color:'+PC53P+'">3 STP-eligible</span></span>'
+      +'<input style="border:1px solid #e2e8f0;border-radius:6px;padding:5px 10px;font-size:11px" placeholder="Filter claims..." />'
+      +'</div>'
+      +'<div style="overflow-x:auto">'
+      +'<table style="width:100%;border-collapse:collapse;font-family:\'Inter\',sans-serif">'
+      +'<thead><tr style="background:#f8fafc">'
+      +'<th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:#64748b;white-space:nowrap">CLAIM ID</th>'
+      +'<th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:#64748b">INSURED</th>'
+      +'<th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:#64748b">LINE</th>'
+      +'<th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:#64748b">CAUSE OF LOSS</th>'
+      +'<th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:#64748b;white-space:nowrap">DATE OF LOSS</th>'
+      +'<th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:#64748b">RESERVE</th>'
+      +'<th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:#64748b">STATUS</th>'
+      +'<th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:#64748b">FRAUD</th>'
+      +'<th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:#64748b">CAT</th>'
+      +'<th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:#64748b">SUBRO</th>'
+      +'<th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:#64748b"></th>'
+      +'</thead><tbody>'+rows+'</tbody>'
+      +'</table></div></div>';
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     TAB 4 — CLAIM DETAIL / ADJUDICATION
+     ══════════════════════════════════════════════════════════════ */
+  function _p53tabAdjudication() {
+    var c = pcClaimsData[0]; /* lead claim: PC-2026-0401 — Commercial Property Fire */
+    var checklist = [
+      { done:true,  step:'FNOL received + policy verified' },
+      { done:true,  step:'Adjuster assigned (Karen Mitchell)' },
+      { done:true,  step:'Reservation of rights letter issued' },
+      { done:true,  step:'Field inspection scheduled' },
+      { done:false, step:'Structural engineer report received' },
+      { done:false, step:'Contractor estimates (3 required)' },
+      { done:false, step:'Coverage determination letter' },
+      { done:false, step:'Reserve adequacy review' },
+      { done:false, step:'Payment authorization + settlement' }
+    ];
+
+    return '<div style="display:grid;grid-template-columns:1.5fr 1fr;gap:16px">'
+
+      /* Left: claim detail */
+      +'<div>'
+      +'<div style="background:'+PC53+'0a;border:1px solid '+PC53+'44;border-radius:12px;padding:16px;margin-bottom:14px">'
+      +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">'
+      +'<i class="fas fa-building" style="color:'+PC53+';font-size:20px"></i>'
+      +'<div>'
+      +'<div style="font-size:15px;font-weight:800;color:#1e293b">'+c.id+'</div>'
+      +'<div style="font-size:12px;color:#64748b">'+c.insured+' · '+c.carrier+'</div>'
+      +'</div>'
+      +'<div style="margin-left:auto">'+_p53badge(c.status)+'</div>'
+      +'</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;font-size:11px">'
+      +[
+        ['Line of Business', c.lob],
+        ['Cause of Loss', c.causeOfLoss],
+        ['Date of Loss', c.dateOfLoss],
+        ['Coverage Type', c.coverageType],
+        ['Deductible', _p53fmt(c.deductible)],
+        ['Policy Limit', _p53fmt(c.policyLimit)],
+        ['State', c.state],
+        ['Adjuster', c.adjuster],
+        ['Cycle Time', c.cycleTime+' days']
+      ].map(function(f) {
+        return '<div style="background:#fff;border-radius:8px;padding:10px">'
+          +'<div style="font-size:9px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">'+f[0]+'</div>'
+          +'<div style="font-weight:700;color:#1e293b">'+f[1]+'</div>'
+          +'</div>';
+      }).join('')
+      +'</div>'
+      +'<div style="margin-top:10px;background:#fff;border-radius:8px;padding:10px;font-size:11px;color:#64748b">'
+      +'<strong style="color:#1e293b">Notes: </strong>'+c.notes
+      +'</div></div>'
+
+      /* Financial panel */
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;margin-bottom:14px">'
+      +'<div style="font-weight:700;font-size:13px;color:#1e293b;margin-bottom:12px"><i class="fas fa-dollar-sign" style="color:'+PC53G+';margin-right:8px"></i>Financial Summary</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
+      +[
+        ['Current Reserve', _p53fmt(c.reserve), PC53Y],
+        ['Paid to Date', _p53fmt(c.paidToDate)||'—', PC53G],
+        ['Recovery Potential', _p53fmt(c.recoveryPotential)||'—', PC53P],
+        ['Outstanding', _p53fmt(c.reserve - c.paidToDate), PC53R]
+      ].map(function(f) {
+        return '<div style="background:#f8fafc;border-radius:8px;padding:10px;text-align:center">'
+          +'<div style="font-size:16px;font-weight:800;color:'+f[2]+'">'+f[1]+'</div>'
+          +'<div style="font-size:10px;color:#64748b;margin-top:2px">'+f[0]+'</div>'
+          +'</div>';
+      }).join('')
+      +'</div>'
+      +'<div style="margin-top:10px;display:flex;gap:8px">'
+      +'<button style="flex:1;background:'+PC53Y+';color:#fff;border:none;border-radius:6px;padding:7px;font-size:11px;font-weight:700;cursor:pointer"><i class="fas fa-edit" style="margin-right:5px"></i>Adjust Reserve</button>'
+      +'<button style="flex:1;background:'+PC53G+';color:#fff;border:none;border-radius:6px;padding:7px;font-size:11px;font-weight:700;cursor:pointer"><i class="fas fa-check" style="margin-right:5px"></i>Approve Payment</button>'
+      +'</div>'
+      +'</div>'
+      +'</div>'
+
+      /* Right: investigation checklist */
+      +'<div>'
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;margin-bottom:14px">'
+      +'<div style="font-weight:700;font-size:13px;color:#1e293b;margin-bottom:12px"><i class="fas fa-tasks" style="color:'+PC53A+';margin-right:8px"></i>Investigation Checklist</div>'
+      +checklist.map(function(item) {
+        return '<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-top:1px solid #f1f5f9">'
+          +'<i class="fas '+(item.done?'fa-check-circle':'fa-circle')+'" style="color:'+(item.done?PC53G:'#cbd5e1')+';font-size:14px"></i>'
+          +'<span style="font-size:12px;color:'+(item.done?'#1e293b':'#94a3b8')+'">'+item.step+'</span>'
+          +'</div>';
+      }).join('')
+      +'<div style="margin-top:10px;background:#f8fafc;border-radius:8px;padding:8px;text-align:center">'
+      +'<div style="font-size:11px;font-weight:700;color:'+PC53Y+'">4 of 9 steps complete — Est. close: Jul 28, 2026</div>'
+      +'</div></div>'
+
+      /* Coverage determination */
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;margin-bottom:14px">'
+      +'<div style="font-weight:700;font-size:13px;color:#1e293b;margin-bottom:10px"><i class="fas fa-file-contract" style="color:'+PC53P+';margin-right:8px"></i>Coverage Determination</div>'
+      +[
+        { cov:'Building Damage (Fire)',  status:'Covered', limit:'$1,200,000' },
+        { cov:'Business Personal Property', status:'Covered', limit:'$400,000' },
+        { cov:'Business Interruption',  status:'Under Review', limit:'$300,000' },
+        { cov:'Equipment Breakdown',    status:'Excluded', limit:'N/A' }
+      ].map(function(cv) {
+        var col = cv.status==='Covered' ? PC53G : cv.status==='Under Review' ? PC53Y : PC53S;
+        return '<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-top:1px solid #f1f5f9;font-size:11px">'
+          +'<span style="color:#1e293b">'+cv.cov+'</span>'
+          +'<span style="display:flex;align-items:center;gap:8px">'
+          +'<span style="color:'+col+';font-weight:700">'+cv.status+'</span>'
+          +'<span style="color:#64748b">'+cv.limit+'</span>'
+          +'</span>'
+          +'</div>';
+      }).join('')
+      +'</div>'
+
+      /* Quick actions */
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
+      +'<button style="background:'+PC53+';color:#fff;border:none;border-radius:8px;padding:10px;font-size:11px;font-weight:700;cursor:pointer"><i class="fas fa-envelope" style="margin-right:5px"></i>Send Status Letter</button>'
+      +'<button style="background:'+PC53P+';color:#fff;border:none;border-radius:8px;padding:10px;font-size:11px;font-weight:700;cursor:pointer" onclick="_p8run(\'p53-tab-fraud\')"><i class="fas fa-flag" style="margin-right:5px"></i>Refer to SIU</button>'
+      +'<button style="background:'+PC53A+';color:#fff;border:none;border-radius:8px;padding:10px;font-size:11px;font-weight:700;cursor:pointer"><i class="fas fa-user-hard-hat" style="margin-right:5px"></i>Schedule Inspector</button>'
+      +'<button style="background:'+PC53G+';color:#fff;border:none;border-radius:8px;padding:10px;font-size:11px;font-weight:700;cursor:pointer" onclick="_p8run(\'p53-tab-subrogation\')"><i class="fas fa-recycle" style="margin-right:5px"></i>Open Subro File</button>'
+      +'</div>'
+      +'</div>'
+
+      +'</div>';
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     TAB 5 — FRAUD & SIU
+     ══════════════════════════════════════════════════════════════ */
+  function _p53tabFraud() {
+    var siuClaims = pcClaimsData.filter(function(c){ return c.fraudScore >= 30; })
+      .sort(function(a,b){ return b.fraudScore - a.fraudScore; });
+
+    var scoreBar = function(score) {
+      var col = _p53fraudColor(score);
+      return '<div style="display:flex;align-items:center;gap:8px">'
+        +'<div style="flex:1;background:#f1f5f9;border-radius:4px;height:8px">'
+        +'<div style="width:'+score+'%;background:'+col+';border-radius:4px;height:8px"></div>'
+        +'</div>'
+        +'<span style="font-size:12px;font-weight:800;color:'+col+';min-width:28px">'+score+'</span>'
+        +'</div>';
+    };
+
+    return '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">'
+
+      /* Left: SIU referral queue */
+      +'<div>'
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;margin-bottom:14px">'
+      +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">'
+      +'<i class="fas fa-user-secret" style="color:'+PC53P+';font-size:16px"></i>'
+      +'<span style="font-weight:700;font-size:13px;color:#1e293b">SIU Referral Queue — Active Investigations</span>'
+      +'</div>'
+      +siuClaims.map(function(c) {
+        var col = _p53fraudColor(c.fraudScore);
+        return '<div style="background:#f8fafc;border-radius:10px;padding:12px;margin-bottom:10px">'
+          +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'
+          +'<span style="font-size:12px;font-weight:700;color:'+PC53+'">'+c.id+'</span>'
+          +(c.status === 'SIU Referral' ? '<span style="background:'+PC53P+'15;color:'+PC53P+';border:1px solid '+PC53P+'44;border-radius:8px;padding:1px 8px;font-size:9px;font-weight:700">ACTIVE SIU</span>' : _p53badge(c.status))
+          +'</div>'
+          +'<div style="font-size:11px;color:#1e293b;margin-bottom:4px;font-weight:600">'+c.insured+' · '+c.lob+'</div>'
+          +'<div style="font-size:10px;color:#64748b;margin-bottom:6px">'+c.causeOfLoss+'</div>'
+          +'<div style="margin-bottom:6px"><span style="font-size:10px;font-weight:700;color:#64748b">AI Fraud Score: </span>'+scoreBar(c.fraudScore)+'</div>'
+          +'<div style="font-size:10px;color:#64748b;font-style:italic">'+c.notes.substring(0,90)+'...</div>'
+          +'</div>';
+      }).join('')
+      +'</div>'
+
+      /* Signal breakdown */
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px">'
+      +'<div style="font-weight:700;font-size:13px;color:#1e293b;margin-bottom:12px"><i class="fas fa-chart-bar" style="color:'+PC53R+';margin-right:8px"></i>Fraud Signal Distribution</div>'
+      +[
+        { signal:'Prior claim history match', count:3, col:PC53R },
+        { signal:'Attorney involvement at FNOL', count:2, col:PC53Y },
+        { signal:'Inconsistent loss timeline', count:1, col:PC53Y },
+        { signal:'Social media contradiction', count:1, col:PC53P },
+        { signal:'Staged loss indicators', count:1, col:PC53R },
+        { signal:'Medical provider on watch list', count:2, col:PC53R }
+      ].map(function(s) {
+        var pct = Math.round((s.count/3)*100);
+        return '<div style="margin-bottom:8px">'
+          +'<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px">'
+          +'<span style="color:#1e293b">'+s.signal+'</span>'
+          +'<span style="font-weight:700;color:'+s.col+'">'+s.count+' claims</span>'
+          +'</div>'
+          +'<div style="background:#f1f5f9;border-radius:4px;height:6px">'
+          +'<div style="width:'+pct+'%;background:'+s.col+';border-radius:4px;height:6px"></div>'
+          +'</div>'
+          +'</div>';
+      }).join('')
+      +'</div>'
+      +'</div>'
+
+      /* Right: AI fraud analytics */
+      +'<div>'
+      +'<div style="background:linear-gradient(135deg,#7c3aed,#6d28d9);border-radius:12px;padding:16px;color:#fff;margin-bottom:14px">'
+      +'<div style="font-weight:700;font-size:13px;margin-bottom:10px"><i class="fas fa-robot" style="margin-right:8px"></i>AI Fraud Detection — Model Insights</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px">'
+      +'<div style="background:rgba(255,255,255,.12);border-radius:8px;padding:10px;text-align:center">'
+      +'<div style="font-size:24px;font-weight:900">2</div>'
+      +'<div style="font-size:10px;opacity:.85;margin-top:2px">High-risk claims<br>(score &gt;60)</div>'
+      +'</div>'
+      +'<div style="background:rgba(255,255,255,.12);border-radius:8px;padding:10px;text-align:center">'
+      +'<div style="font-size:24px;font-weight:900">$87K</div>'
+      +'<div style="font-size:10px;opacity:.85;margin-top:2px">Avg reserve<br>flagged claims</div>'
+      +'</div>'
+      +'<div style="background:rgba(255,255,255,.12);border-radius:8px;padding:10px;text-align:center">'
+      +'<div style="font-size:24px;font-weight:900">92%</div>'
+      +'<div style="font-size:10px;opacity:.85;margin-top:2px">Model precision<br>YTD</div>'
+      +'</div>'
+      +'<div style="background:rgba(255,255,255,.12);border-radius:8px;padding:10px;text-align:center">'
+      +'<div style="font-size:24px;font-weight:900">$214K</div>'
+      +'<div style="font-size:10px;opacity:.85;margin-top:2px">Losses avoided<br>YTD</div>'
+      +'</div>'
+      +'</div>'
+      +'<div style="margin-top:12px;font-size:11px;opacity:.85"><i class="fas fa-info-circle" style="margin-right:5px"></i>Model: XGBoost v4.2 + LLM narrative analysis · Retrained weekly on ISO ClaimSearch™ + internal SIU disposition data</div>'
+      +'</div>'
+
+      /* Watchlist check */
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;margin-bottom:14px">'
+      +'<div style="font-weight:700;font-size:13px;color:#1e293b;margin-bottom:12px"><i class="fas fa-database" style="color:'+PC53R+';margin-right:8px"></i>ISO ClaimSearch™ Integration</div>'
+      +[
+        { id:'PC-2026-0402', match:'Prior BI claim — FL, 2024-07 — same attorney', severity:'HIGH', iso:'ISO-FL-2024-882' },
+        { id:'PC-2026-0406', match:'Related GL claim — NY, 2025-03 — same premises', severity:'MED', iso:'ISO-NY-2025-244' }
+      ].map(function(m) {
+        var col = m.severity === 'HIGH' ? PC53R : PC53Y;
+        return '<div style="background:#f8fafc;border-radius:8px;padding:10px;margin-bottom:8px">'
+          +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">'
+          +'<span style="font-size:11px;font-weight:700;color:'+PC53+'">'+m.id+'</span>'
+          +'<span style="background:'+col+'15;color:'+col+';border:1px solid '+col+'44;border-radius:8px;padding:1px 8px;font-size:9px;font-weight:700">'+m.severity+'</span>'
+          +'</div>'
+          +'<div style="font-size:11px;color:#1e293b;margin-bottom:3px">'+m.match+'</div>'
+          +'<div style="font-size:10px;color:#64748b">ISO Ref: '+m.iso+'</div>'
+          +'</div>';
+      }).join('')
+      +'</div>'
+
+      /* SIU actions */
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
+      +'<button style="background:'+PC53P+';color:#fff;border:none;border-radius:8px;padding:10px;font-size:11px;font-weight:700;cursor:pointer"><i class="fas fa-search" style="margin-right:5px"></i>Run ISO Search</button>'
+      +'<button style="background:'+PC53R+';color:#fff;border:none;border-radius:8px;padding:10px;font-size:11px;font-weight:700;cursor:pointer"><i class="fas fa-ban" style="margin-right:5px"></i>Deny + Preserve Rights</button>'
+      +'<button style="background:'+PC53Y+';color:#fff;border:none;border-radius:8px;padding:10px;font-size:11px;font-weight:700;cursor:pointer"><i class="fas fa-phone" style="margin-right:5px"></i>Recorded Statement</button>'
+      +'<button style="background:'+PC53A+';color:#fff;border:none;border-radius:8px;padding:10px;font-size:11px;font-weight:700;cursor:pointer"><i class="fas fa-file-alt" style="margin-right:5px"></i>SIU Report</button>'
+      +'</div>'
+      +'</div>'
+
+      +'</div>';
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     TAB 6 — SUBROGATION & RECOVERY
+     ══════════════════════════════════════════════════════════════ */
+  function _p53tabSubrogation() {
+    var subroClaims = pcClaimsData.filter(function(c){ return c.subrogationPotential; });
+    var totalRecovery = subroClaims.reduce(function(a,c){ return a + c.recoveryPotential; }, 0);
+
+    var pipeline = [
+      { stage:'Potential Identified', count:3, col:PC53A },
+      { stage:'Notice of Lien Filed', count:2, col:PC53Y },
+      { stage:'Demand Letter Sent', count:1, col:PC53P },
+      { stage:'Negotiation Active', count:1, col:PC53G },
+      { stage:'Settled / Closed', count:4, col:PC53S }
+    ];
+
+    var arbitrationCases = [
+      { id:'ARB-2026-0031', claim:'PC-2026-0402', respondent:'Progressive Tortfeasor', forum:'AAA', amount:32000, status:'Pending', filed:'2026-07-02', hearing:'2026-09-15' },
+      { id:'ARB-2026-0028', claim:'Prior — HO Water', respondent:'Plumbing Co. LLC', forum:'AAA', amount:9800, status:'Settled — $7,200', filed:'2026-04-10', hearing:'N/A' }
+    ];
+
+    return '<div style="display:grid;grid-template-columns:1.2fr 1fr;gap:16px">'
+
+      /* Left: recovery candidates + pipeline */
+      +'<div>'
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;margin-bottom:14px">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">'
+      +'<span style="font-weight:700;font-size:13px;color:#1e293b"><i class="fas fa-recycle" style="color:'+PC53G+';margin-right:8px"></i>Recovery Candidates</span>'
+      +'<span style="background:'+PC53G+'15;color:'+PC53G+';border:1px solid '+PC53G+'44;border-radius:8px;padding:3px 10px;font-size:11px;font-weight:700">Potential: '+_p53fmt(totalRecovery)+'</span>'
+      +'</div>'
+      +subroClaims.map(function(c) {
+        return '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px;margin-bottom:10px">'
+          +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">'
+          +'<span style="font-size:12px;font-weight:700;color:'+PC53+'">'+c.id+'</span>'
+          +'<span style="font-size:12px;font-weight:800;color:'+PC53G+'">'+_p53fmt(c.recoveryPotential)+'</span>'
+          +'</div>'
+          +'<div style="font-size:11px;color:#1e293b;margin-bottom:3px">'+c.insured+' · '+c.lob+'</div>'
+          +'<div style="font-size:10px;color:#64748b;margin-bottom:8px">'+c.causeOfLoss+' — '+c.adjuster+'</div>'
+          +'<div style="font-size:10px;color:#166534;background:#dcfce7;border-radius:6px;padding:4px 8px">'+c.notes.substring(0,80)+'...</div>'
+          +'</div>';
+      }).join('')
+      +'</div>'
+
+      /* Recovery pipeline */
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px">'
+      +'<div style="font-weight:700;font-size:13px;color:#1e293b;margin-bottom:12px"><i class="fas fa-project-diagram" style="color:'+PC53A+';margin-right:8px"></i>Subrogation Pipeline</div>'
+      +'<div style="display:flex;gap:4px;align-items:stretch">'
+      +pipeline.map(function(p, i) {
+        var isLast = i === pipeline.length - 1;
+        return '<div style="flex:1;text-align:center">'
+          +'<div style="background:'+p.col+';color:#fff;border-radius:8px;padding:8px 6px;font-size:10px;font-weight:700;margin-bottom:4px">'
+          +'<div style="font-size:16px;font-weight:900">'+p.count+'</div>'
+          +'</div>'
+          +'<div style="font-size:9px;color:#64748b;line-height:1.3">'+p.stage.replace(/ /g,'<br>')+'</div>'
+          +(isLast ? '' : '<div style="display:flex;justify-content:flex-end;margin-top:-20px;margin-right:-6px;font-size:14px;color:#cbd5e1">›</div>')
+          +'</div>';
+      }).join('')
+      +'</div>'
+      +'<div style="margin-top:10px;background:#f8fafc;border-radius:8px;padding:10px;font-size:11px;color:#64748b;text-align:center">'
+      +'YTD recovery: <strong style="color:'+PC53G+'">$284,700</strong> · 18 cases closed · 94% success rate'
+      +'</div>'
+      +'</div>'
+      +'</div>'
+
+      /* Right: arbitration tracker + actions */
+      +'<div>'
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;margin-bottom:14px">'
+      +'<div style="font-weight:700;font-size:13px;color:#1e293b;margin-bottom:12px"><i class="fas fa-balance-scale" style="color:'+PC53P+';margin-right:8px"></i>Arbitration Tracker</div>'
+      +arbitrationCases.map(function(a) {
+        var col = a.status.startsWith('Settled') ? PC53G : PC53Y;
+        return '<div style="background:#f8fafc;border-radius:10px;padding:12px;margin-bottom:10px">'
+          +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">'
+          +'<span style="font-size:11px;font-weight:700;color:'+PC53+'">'+a.id+'</span>'
+          +'<span style="background:'+col+'15;color:'+col+';border:1px solid '+col+'44;border-radius:8px;padding:1px 8px;font-size:9px;font-weight:700">'+a.status+'</span>'
+          +'</div>'
+          +'<div style="font-size:10px;color:#64748b;margin-bottom:4px">Claim: <strong>'+a.claim+'</strong> · Forum: '+a.forum+'</div>'
+          +'<div style="font-size:10px;color:#64748b;margin-bottom:4px">vs. '+a.respondent+'</div>'
+          +'<div style="display:flex;justify-content:space-between;font-size:10px">'
+          +'<span style="color:#64748b">Filed: '+a.filed+'</span>'
+          +'<span style="font-weight:700;color:'+PC53G+'">'+_p53fmt(a.amount)+'</span>'
+          +'</div>'
+          +(a.hearing !== 'N/A' ? '<div style="margin-top:5px;background:#fef3c7;border-radius:5px;padding:3px 8px;font-size:10px;color:#92400e"><i class="fas fa-gavel" style="margin-right:4px"></i>Hearing: '+a.hearing+'</div>' : '')
+          +'</div>';
+      }).join('')
+      +'</div>'
+
+      /* Subro metrics */
+      +'<div style="background:linear-gradient(135deg,'+PC53G+',#047857);border-radius:12px;padding:16px;color:#fff;margin-bottom:14px">'
+      +'<div style="font-weight:700;font-size:13px;margin-bottom:10px"><i class="fas fa-chart-line" style="margin-right:8px"></i>Recovery Performance — YTD 2026</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
+      +[['$284K','Recovered YTD'],['18','Cases Closed'],['94%','Success Rate'],['47 days','Avg Cycle']].map(function(m){
+        return '<div style="background:rgba(255,255,255,.15);border-radius:8px;padding:8px;text-align:center">'
+          +'<div style="font-size:18px;font-weight:900">'+m[0]+'</div>'
+          +'<div style="font-size:10px;opacity:.85">'+m[1]+'</div>'
+          +'</div>';
+      }).join('')
+      +'</div></div>'
+
+      /* Actions */
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
+      +'<button style="background:'+PC53G+';color:#fff;border:none;border-radius:8px;padding:10px;font-size:11px;font-weight:700;cursor:pointer"><i class="fas fa-file-signature" style="margin-right:5px"></i>Open Subro File</button>'
+      +'<button style="background:'+PC53P+';color:#fff;border:none;border-radius:8px;padding:10px;font-size:11px;font-weight:700;cursor:pointer"><i class="fas fa-gavel" style="margin-right:5px"></i>File for Arbitration</button>'
+      +'<button style="background:'+PC53A+';color:#fff;border:none;border-radius:8px;padding:10px;font-size:11px;font-weight:700;cursor:pointer"><i class="fas fa-handshake" style="margin-right:5px"></i>Settlement Offer</button>'
+      +'<button style="background:'+PC53Y+';color:#fff;border:none;border-radius:8px;padding:10px;font-size:11px;font-weight:700;cursor:pointer"><i class="fas fa-envelope" style="margin-right:5px"></i>Demand Letter</button>'
+      +'</div>'
+      +'</div>'
+
+      +'</div>';
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     TAB 7 — CAT CLAIMS MANAGEMENT
+     ══════════════════════════════════════════════════════════════ */
+  function _p53tabCAT() {
+    var catClaims = pcClaimsData.filter(function(c){ return c.catEvent; });
+
+    var catEvents = [
+      {
+        id:'FL-HRN-2026-06', name:'Hurricane Ian Resurgence', type:'Named Storm',
+        state:'FL', peril:'Wind + Surge', severity:'Catastrophic',
+        declaredDate:'2026-06-30', exposedPolicies:47, openClaims:2, closedClaims:0,
+        totalReserve:1200000, totalPaid:150000, estIncurred:2800000,
+        adjustersDeployed:8, droneFlights:12, col:PC53R
+      },
+      {
+        id:'TX-HAI-2026-06', name:'North Texas Hailstorm', type:'Hail/Wind',
+        state:'TX', peril:'Hail', severity:'Major',
+        declaredDate:'2026-06-15', exposedPolicies:312, openClaims:1, closedClaims:89,
+        totalReserve:18500, totalPaid:1280000, estIncurred:4200000,
+        adjustersDeployed:24, droneFlights:95, col:PC53Y
+      }
+    ];
+
+    var surgeRoster = [
+      { name:'David Okafor',     specialty:'CAT Field', state:'FL', status:'Deployed', claims:6 },
+      { name:'Patricia Reyes',   specialty:'CAT Field', state:'FL', status:'Deployed', claims:8 },
+      { name:'Carlos Mendez',    specialty:'Structural', state:'TX', status:'Available', claims:0 },
+      { name:'Angela Torres',    specialty:'CAT Field', state:'TX', status:'On-Call', claims:0 },
+      { name:'External: Engle Martin', specialty:'IA Firm', state:'Multi', status:'Contracted', claims:18 }
+    ];
+
+    return '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">'
+
+      /* Left: active CAT events */
+      +'<div>'
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;margin-bottom:14px">'
+      +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">'
+      +'<i class="fas fa-hurricane" style="color:'+PC53R+';font-size:18px"></i>'
+      +'<span style="font-weight:700;font-size:13px;color:#1e293b">Active CAT Events — 2026</span>'
+      +'<span style="margin-left:auto;background:'+PC53R+'15;color:'+PC53R+';border:1px solid '+PC53R+'44;border-radius:8px;padding:2px 10px;font-size:10px;font-weight:700">CAT MODE ACTIVE</span>'
+      +'</div>'
+      +catEvents.map(function(ev) {
+        return '<div style="background:'+ev.col+'08;border:1px solid '+ev.col+'33;border-radius:12px;padding:14px;margin-bottom:12px">'
+          +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'
+          +'<div><div style="font-size:13px;font-weight:800;color:#1e293b">'+ev.name+'</div>'
+          +'<div style="font-size:10px;color:#64748b">'+ev.id+' · '+ev.state+' · '+ev.type+'</div></div>'
+          +'<span style="background:'+ev.col+'15;color:'+ev.col+';border:1px solid '+ev.col+'44;border-radius:8px;padding:2px 10px;font-size:10px;font-weight:700">'+ev.severity+'</span>'
+          +'</div>'
+          +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:8px">'
+          +[
+            ['Exposed Policies', ev.exposedPolicies, PC53A],
+            ['Open Claims', ev.openClaims, PC53Y],
+            ['Est. Incurred', _p53fmt(ev.estIncurred), PC53R],
+            ['Paid to Date', _p53fmt(ev.totalPaid), PC53G]
+          ].map(function(s){
+            return '<div style="background:#fff;border-radius:6px;padding:6px;text-align:center">'
+              +'<div style="font-size:13px;font-weight:800;color:'+s[2]+'">'+s[1]+'</div>'
+              +'<div style="font-size:9px;color:#64748b;margin-top:1px">'+s[0]+'</div>'
+              +'</div>';
+          }).join('')
+          +'</div>'
+          +'<div style="display:flex;gap:8px;font-size:10px">'
+          +'<span style="background:#fff;border-radius:6px;padding:4px 8px;color:#64748b"><i class="fas fa-user-hard-hat" style="margin-right:4px;color:'+ev.col+'"></i>'+ev.adjustersDeployed+' adjusters deployed</span>'
+          +'<span style="background:#fff;border-radius:6px;padding:4px 8px;color:#64748b"><i class="fas fa-drone" style="margin-right:4px;color:'+PC53P+'"></i>'+ev.droneFlights+' drone inspections</span>'
+          +'</div>'
+          +'</div>';
+      }).join('')
+      +'</div>'
+
+      /* Surge adjuster roster */
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px">'
+      +'<div style="font-weight:700;font-size:13px;color:#1e293b;margin-bottom:12px"><i class="fas fa-users" style="color:'+PC53A+';margin-right:8px"></i>CAT Surge Adjuster Roster</div>'
+      +surgeRoster.map(function(a) {
+        var sc = a.status === 'Deployed' ? PC53R : a.status === 'Available' ? PC53G : PC53Y;
+        return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid #f1f5f9">'
+          +'<div style="width:32px;height:32px;border-radius:50%;background:'+PC53R+'22;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:'+PC53R+'">'+a.name.charAt(0)+'</div>'
+          +'<div style="flex:1">'
+          +'<div style="font-size:12px;font-weight:700;color:#1e293b">'+a.name+'</div>'
+          +'<div style="font-size:10px;color:#64748b">'+a.specialty+' · '+a.state+(a.claims>0?' · '+a.claims+' claims':'')+'</div>'
+          +'</div>'
+          +'<span style="font-size:10px;font-weight:700;color:'+sc+'">'+a.status+'</span>'
+          +'</div>';
+      }).join('')
+      +'</div>'
+      +'</div>'
+
+      /* Right: AI CAT analytics + actions */
+      +'<div>'
+      +'<div style="background:linear-gradient(135deg,#1d4ed8,#dc2626);border-radius:12px;padding:16px;color:#fff;margin-bottom:14px">'
+      +'<div style="font-weight:700;font-size:13px;margin-bottom:10px"><i class="fas fa-satellite" style="margin-right:8px"></i>AI CAT Intelligence — Aerial + Telematics</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">'
+      +[
+        ['107','Aerial images processed','fa-camera'],
+        ['312','Properties risk-scored','fa-home'],
+        ['89%','Auto-triage accuracy','fa-robot'],
+        ['2.3 days','Avg field dispatch','fa-clock']
+      ].map(function(m){
+        return '<div style="background:rgba(255,255,255,.15);border-radius:8px;padding:8px">'
+          +'<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">'
+          +'<i class="fas '+m[2]+'" style="font-size:12px;opacity:.8"></i>'
+          +'<span style="font-size:18px;font-weight:900">'+m[0]+'</span>'
+          +'</div>'
+          +'<div style="font-size:10px;opacity:.85">'+m[1]+'</div>'
+          +'</div>';
+      }).join('')
+      +'</div>'
+      +'<div style="font-size:11px;opacity:.9;background:rgba(255,255,255,.12);border-radius:8px;padding:8px">'
+      +'<i class="fas fa-info-circle" style="margin-right:5px"></i>Aerial imagery: Nearmap™ + NOAA post-event. Auto-assignment routes CAT claims to field adjusters within 4 hours of FNOL.'
+      +'</div></div>'
+
+      /* TX HAI detailed breakdown */
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;margin-bottom:14px">'
+      +'<div style="font-weight:700;font-size:13px;color:#1e293b;margin-bottom:10px"><i class="fas fa-chart-pie" style="color:'+PC53Y+';margin-right:8px"></i>TX-HAI-2026-06 — Claims Progress</div>'
+      +'<div style="display:flex;align-items:center;gap:14px;margin-bottom:10px">'
+      +'<div style="flex:1">'
+      +'<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span>Inspections</span><span style="font-weight:700">301/312</span></div>'
+      +'<div style="background:#f1f5f9;border-radius:4px;height:6px"><div style="width:96%;background:'+PC53G+';border-radius:4px;height:6px"></div></div>'
+      +'</div></div>'
+      +'<div style="display:flex;align-items:center;gap:14px;margin-bottom:10px">'
+      +'<div style="flex:1">'
+      +'<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span>Estimates Approved</span><span style="font-weight:700">267/312</span></div>'
+      +'<div style="background:#f1f5f9;border-radius:4px;height:6px"><div style="width:85%;background:'+PC53A+';border-radius:4px;height:6px"></div></div>'
+      +'</div></div>'
+      +'<div style="display:flex;align-items:center;gap:14px">'
+      +'<div style="flex:1">'
+      +'<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span>Payments Issued</span><span style="font-weight:700">89/312</span></div>'
+      +'<div style="background:#f1f5f9;border-radius:4px;height:6px"><div style="width:28%;background:'+PC53Y+';border-radius:4px;height:6px"></div></div>'
+      +'</div></div>'
+      +'</div>'
+
+      /* CAT actions */
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
+      +'<button style="background:'+PC53R+';color:#fff;border:none;border-radius:8px;padding:10px;font-size:11px;font-weight:700;cursor:pointer"><i class="fas fa-broadcast-tower" style="margin-right:5px"></i>Activate CAT Plan</button>'
+      +'<button style="background:'+PC53Y+';color:#fff;border:none;border-radius:8px;padding:10px;font-size:11px;font-weight:700;cursor:pointer"><i class="fas fa-user-plus" style="margin-right:5px"></i>Request IA Firm</button>'
+      +'<button style="background:'+PC53A+';color:#fff;border:none;border-radius:8px;padding:10px;font-size:11px;font-weight:700;cursor:pointer"><i class="fas fa-map-marked-alt" style="margin-right:5px"></i>Exposure Map</button>'
+      +'<button style="background:'+PC53G+';color:#fff;border:none;border-radius:8px;padding:10px;font-size:11px;font-weight:700;cursor:pointer"><i class="fas fa-file-export" style="margin-right:5px"></i>CAT Report</button>'
+      +'</div>'
+      +'</div>'
+
+      +'</div>';
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     MAIN PAGE BUILDER
+     ══════════════════════════════════════════════════════════════ */
+  function _p53buildPage() {
+    if (!window._p53activeTab) window._p53activeTab = 'dashboard';
+
+    var tabs = [
+      { id:'dashboard',    label:'Dashboard',     icon:'fa-tachometer-alt' },
+      { id:'fnol',         label:'FNOL Intake',   icon:'fa-file-medical' },
+      { id:'register',     label:'Claims Register',icon:'fa-list-alt' },
+      { id:'adjudication', label:'Adjudication',  icon:'fa-gavel' },
+      { id:'fraud',        label:'Fraud & SIU',   icon:'fa-user-secret' },
+      { id:'subrogation',  label:'Subrogation',   icon:'fa-recycle' },
+      { id:'cat',          label:'CAT Management',icon:'fa-hurricane' }
+    ];
+
+    /* Register tab actions */
+    tabs.forEach(function(t) {
+      window._p8actions['p53-tab-'+t.id] = function() {
+        window._p53activeTab = t.id;
+        _p53buildPage();
+      };
+    });
+
+    var tabBar = tabs.map(function(t) {
+      var active = window._p53activeTab === t.id;
+      return '<button onclick="_p8run(\'p53-tab-'+t.id+'\')" style="'
+        +'display:flex;align-items:center;gap:7px;padding:8px 14px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:700;transition:all .15s;'
+        +(active
+          ? 'background:'+PC53+';color:#fff;'
+          : 'background:#fff;color:#64748b;border:1px solid #e2e8f0;')
+        +'"><i class="fas '+t.icon+'"></i>'+t.label+'</button>';
+    }).join('');
+
+    /* KPI summary bar */
+    var totalReserve = pcClaimsData.reduce(function(a,c){ return a + c.reserve; }, 0);
+    var totalPaid    = pcClaimsData.reduce(function(a,c){ return a + c.paidToDate; }, 0);
+    var catCount     = pcClaimsData.filter(function(c){ return c.catEvent; }).length;
+    var siuCount     = pcClaimsData.filter(function(c){ return c.fraudScore >= 40; }).length;
+
+    var kpiBar = _p53kpi('8','Open Claims',PC53)
+      + _p53kpi(_p53fmt(totalReserve),'Total Reserves',PC53Y)
+      + _p53kpi(_p53fmt(totalPaid),'Paid to Date',PC53G)
+      + _p53kpi('94.2%','Combined Ratio',PC53A)
+      + _p53kpi(siuCount,'SIU Flagged',PC53P)
+      + _p53kpi(catCount,'CAT Events',PC53R);
+
+    /* Tab body */
+    var body = '';
+    if (window._p53activeTab === 'dashboard')    body = _p53tabDashboard();
+    else if (window._p53activeTab === 'fnol')    body = _p53tabFNOL();
+    else if (window._p53activeTab === 'register') body = _p53tabRegister();
+    else if (window._p53activeTab === 'adjudication') body = _p53tabAdjudication();
+    else if (window._p53activeTab === 'fraud')   body = _p53tabFraud();
+    else if (window._p53activeTab === 'subrogation') body = _p53tabSubrogation();
+    else if (window._p53activeTab === 'cat')     body = _p53tabCAT();
+
+    var html = '<div style="padding:24px;font-family:\'Inter\',system-ui,sans-serif;max-width:1400px">'
+
+      /* ── Header ── */
+      +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">'
+      +'<div style="display:flex;align-items:center;gap:14px">'
+      +'<div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,'+PC53+','+PC53A+');display:flex;align-items:center;justify-content:center">'
+      +'<i class="fas fa-shield-alt" style="color:#fff;font-size:22px"></i></div>'
+      +'<div>'
+      +'<div style="font-size:18px;font-weight:800;color:#1e293b">P&amp;C Claims Center</div>'
+      +'<div style="font-size:12px;color:#64748b">Property &amp; Casualty · FNOL → Adjudication → Settlement · CAT Mode Active</div>'
+      +'</div></div>'
+      +'<div style="display:flex;gap:8px;flex-wrap:wrap">'
+      +'<span style="background:'+PC53+'15;color:'+PC53+';border:1px solid '+PC53+'44;padding:4px 12px;border-radius:8px;font-size:10px;font-weight:700"><i class="fas fa-building" style="margin-right:5px"></i>Commercial Lines</span>'
+      +'<span style="background:'+PC53G+'15;color:'+PC53G+';border:1px solid '+PC53G+'44;padding:4px 12px;border-radius:8px;font-size:10px;font-weight:700"><i class="fas fa-home" style="margin-right:5px"></i>Personal Lines</span>'
+      +'<span style="background:'+PC53R+'15;color:'+PC53R+';border:1px solid '+PC53R+'44;padding:4px 12px;border-radius:8px;font-size:10px;font-weight:700"><i class="fas fa-hurricane" style="margin-right:5px"></i>CAT Active</span>'
+      +'<span style="background:'+PC53P+'15;color:'+PC53P+';border:1px solid '+PC53P+'44;padding:4px 12px;border-radius:8px;font-size:10px;font-weight:700"><i class="fas fa-robot" style="margin-right:5px"></i>AI Fraud Detection</span>'
+      +'</div></div>'
+
+      /* ── KPI bar ── */
+      +'<div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap">'+kpiBar+'</div>'
+
+      /* ── Tab bar ── */
+      +'<div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap">'+tabBar+'</div>'
+
+      /* ── Tab content ── */
+      + body
+
+      /* ── Footer ── */
+      +'<div style="margin-top:20px;background:linear-gradient(135deg,'+PC53+','+PC53A+');border-radius:12px;padding:14px 20px;color:#fff;display:flex;align-items:center;gap:14px">'
+      +'<i class="fas fa-shield-alt" style="font-size:26px;opacity:.9"></i>'
+      +'<div><div style="font-weight:800;font-size:13px">P&amp;C Claims Center — Phase 53 · 8 Claims · 7 Lines of Business · 2 Active CAT Events · AI Fraud Detection · Subrogation Tracking</div>'
+      +'<div style="font-size:11px;opacity:.88;margin-top:3px">FNOL → Triage → Investigation → Adjudication → Settlement → Subrogation · Combined Ratio 94.2% · STP Rate 37.5% · Powered by Insurance AI Agent 360</div>'
+      +'</div></div>'
+
+      +'</div>';
+
+    document.getElementById('page-content').innerHTML = html;
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     NAV INJECTION — "P&C PLATFORM" sidebar section
+     ══════════════════════════════════════════════════════════════ */
+  function _p53injectNav() {
+    if (document.querySelector('.p53-pc-claims-nav')) return; /* idempotent */
+
+    /* Find anchor — append after the last known nav group or .mod-roadmap-nav */
+    var anchor = document.querySelector('.p7-nav-group.nav-grp-tpa')
+      || document.querySelector('.mod-roadmap-nav')
+      || document.querySelector('.data-ai-nav');
+    if (!anchor) {
+      return false; /* retry */
+    }
+
+    /* ── Section divider ── */
+    var divider = document.createElement('div');
+    divider.className = 'p53-pc-divider';
+    divider.style.cssText = 'border-top:1px solid rgba(255,255,255,.12);padding:8px 16px 4px;margin-top:8px;';
+    divider.innerHTML = '<div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#60a5fa;opacity:.9">P&amp;C Platform</div>';
+
+    /* ── Claims Center nav item ── */
+    var item = document.createElement('div');
+    item.className = 'nav-item p53-pc-claims-nav';
+    item.style.cssText = 'display:flex;align-items:center;gap:10px;padding:8px 16px;cursor:pointer;border-radius:6px;margin:1px 6px;transition:background .15s;';
+    item.innerHTML = '<i class="fas fa-shield-alt" style="width:16px;color:#60a5fa;font-size:13px"></i>'
+      +'<span style="font-size:12px;font-weight:600;color:rgba(255,255,255,.85)">Claims Center</span>'
+      +'<span style="margin-left:auto;background:#1d4ed8;color:#fff;border-radius:8px;padding:1px 7px;font-size:9px;font-weight:700">P&amp;C</span>';
+    item.addEventListener('mouseenter', function(){ item.style.background='rgba(255,255,255,.08)'; });
+    item.addEventListener('mouseleave', function(){ item.style.background=item.classList.contains('active')?'rgba(255,255,255,.12)':''; });
+    item.addEventListener('click', function() {
+      document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); n.style.background=''; });
+      item.classList.add('active');
+      item.style.background='rgba(255,255,255,.12)';
+      navigateTo('pc-claims');
+    });
+
+    /* Insert after anchor */
+    var insertAfter = anchor.nodeType === 1 ? anchor : anchor.parentNode.lastChild;
+    if (insertAfter.nextSibling) {
+      insertAfter.parentNode.insertBefore(divider, insertAfter.nextSibling);
+      insertAfter.parentNode.insertBefore(item, divider.nextSibling);
+    } else {
+      insertAfter.parentNode.appendChild(divider);
+      insertAfter.parentNode.appendChild(item);
+    }
+    console.log('[P53] P&C Platform nav injected');
+    return true;
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     navigateTo OVERRIDE
+     ══════════════════════════════════════════════════════════════ */
+  var _p53origNav = window.navigateTo;
+  window.navigateTo = function(page) {
+    if (page === 'pc-claims') {
+      /* Highlight nav item */
+      document.querySelectorAll('.nav-item').forEach(function(el){ el.classList.remove('active'); el.style.background=''; });
+      var pcNav = document.querySelector('.p53-pc-claims-nav');
+      if (pcNav) { pcNav.classList.add('active'); pcNav.style.background='rgba(255,255,255,.12)'; }
+      /* Set title + breadcrumb */
+      var titleEl = document.getElementById('page-title');
+      var bcEl    = document.getElementById('page-breadcrumb');
+      if (titleEl) titleEl.textContent = 'P&C Claims Center';
+      if (bcEl)    bcEl.textContent    = 'Home / P&C Platform / Claims Center';
+      /* Build page */
+      _p53buildPage();
+      return;
+    }
+    if (_p53origNav) _p53origNav(page);
+  };
+
+  /* ══════════════════════════════════════════════════════════════
+     INIT
+     ══════════════════════════════════════════════════════════════ */
+  (function _p53init() {
+    function _tryInject() {
+      if (!_p53injectNav()) {
+        setTimeout(_tryInject, 350);
+      }
+    }
+
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      setTimeout(_tryInject, 700);
+    } else {
+      document.addEventListener('DOMContentLoaded', function(){ setTimeout(_tryInject, 700); });
+    }
+
+    /* MutationObserver for SPA re-renders */
+    var _p53obs = new MutationObserver(function() {
+      if (!document.querySelector('.p53-pc-claims-nav')) {
+        _p53injectNav();
+      }
+    });
+    _p53obs.observe(document.body || document.documentElement, {
+      childList: true, subtree: false
+    });
+    setTimeout(function(){ _p53obs.disconnect(); }, 15000);
+  }());
+
+  if (!window._p53activeTab) window._p53activeTab = 'dashboard';
+
+  console.log('[P53] P&C Claims Center loaded · 8 claims · 7 tabs (Dashboard·FNOL·Register·Adjudication·Fraud/SIU·Subrogation·CAT) · 2 CAT events · ISO ClaimSearch integration · AI fraud detection · STP engine · Subrogation pipeline · P&C nav injected');
+
+})();
