@@ -103014,3 +103014,912 @@ var navigateTo=window.navigateTo;
   console.log('[P53] P&C Claims Center loaded · 8 claims · 7 tabs (Dashboard·FNOL·Register·Adjudication·Fraud/SIU·Subrogation·CAT) · 2 CAT events · ISO ClaimSearch integration · AI fraud detection · STP engine · Subrogation pipeline · P&C nav injected');
 
 })();
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PHASE 54 — P&C OPERATIONS HUB  (pc-ops)
+   Policy Admin · Billing & Payments · Renewals · Compliance · Reports
+   ═══════════════════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  /* ── Brand palette ── */
+  var OPS54  = '#0f766e';  /* teal-700  — ops primary  */
+  var OPS54B = '#0891b2';  /* cyan-600  — billing      */
+  var OPS54G = '#059669';  /* green     — ok/paid      */
+  var OPS54Y = '#d97706';  /* amber     — pending/warn */
+  var OPS54R = '#dc2626';  /* red       — overdue/lapse*/
+  var OPS54P = '#7c3aed';  /* purple    — compliance   */
+  var OPS54N = '#1d4ed8';  /* blue      — reports/nav  */
+  var OPS54S = '#475569';  /* slate     — neutral      */
+
+  /* ══════════════════════════════════════════════════════════════
+     POLICY DATA — 10 active P&C policies
+     ══════════════════════════════════════════════════════════════ */
+  var pcPoliciesData = [
+    { id:'POL-PC-88821', insured:'Rivera Construction LLC',  lob:'Commercial Property', carrier:'Travelers',    state:'TX', premium:48200,  status:'Active',    renewal:'2027-01-15', paidThru:'2026-12-31', payFreq:'Annual',    agent:'Donna Price',     lastChange:'Endorsement — Jul 2, 2026' },
+    { id:'POL-PC-77340', insured:'Jennifer Walsh',           lob:'Personal Auto',       carrier:'Progressive',  state:'FL', premium:1840,   status:'Active',    renewal:'2026-12-01', paidThru:'2026-12-01', payFreq:'Monthly',   agent:'Ray Simmons',     lastChange:'Policy issued — Mar 1, 2026' },
+    { id:'POL-PC-65002', insured:'Thomas & Karen Elliot',   lob:'Homeowners',           carrier:'State Farm',   state:'TX', premium:3200,   status:'Active',    renewal:'2026-10-30', paidThru:'2026-10-30', payFreq:'Annual',    agent:'Donna Price',     lastChange:'Roof endorsement — May 2026' },
+    { id:'POL-PC-54119', insured:'AutoParts Direct Inc.',   lob:"Workers' Comp",        carrier:'Liberty Mutual',state:'OH',premium:82400,  status:'Active',    renewal:'2026-11-01', paidThru:'2026-11-01', payFreq:'Quarterly', agent:'Chris Wu',        lastChange:'Mod factor update — Apr 2026' },
+    { id:'POL-PC-49807', insured:'Patricia Nguyen',          lob:'Personal Auto',       carrier:'GEICO',        state:'CA', premium:1560,   status:'Active',    renewal:'2026-08-15', paidThru:'2026-07-15', payFreq:'Monthly',   agent:'Amy Torres',      lastChange:'New policy — Aug 2025' },
+    { id:'POL-PC-43312', insured:'Sunrise Bakery Inc.',     lob:'General Liability',    carrier:'Hartford',     state:'NY', premium:6800,   status:'Pending Renewal', renewal:'2026-09-01', paidThru:'2026-09-01', payFreq:'Annual', agent:'Ray Simmons',  lastChange:'Renewal quote sent — Jun 20, 2026' },
+    { id:'POL-PC-38876', insured:'James & Mary Kowalski',   lob:'Homeowners',           carrier:'Allstate',     state:'IL', premium:2140,   status:'Active',    renewal:'2026-12-15', paidThru:'2026-12-15', payFreq:'Annual',    agent:'Amy Torres',      lastChange:'Address update — Jan 2026' },
+    { id:'POL-PC-31140', insured:'Gulf Coast Marina Corp.', lob:'Commercial Property',  carrier:"Lloyd's",      state:'FL', premium:124000, status:'Active',    renewal:'2026-07-01', paidThru:'2026-07-01', payFreq:'Annual',    agent:'Chris Wu',        lastChange:'Named storm endorsement — Feb 2026' },
+    { id:'POL-PC-27654', insured:'Metro Delivery Co.',      lob:'Commercial Auto',      carrier:'Nationwide',   state:'GA', premium:31500,  status:'Lapsed',    renewal:'2026-06-01', paidThru:'2026-05-01', payFreq:'Monthly',   agent:'Donna Price',     lastChange:'Non-payment notice — Jun 5, 2026' },
+    { id:'POL-PC-19003', insured:'Green Valley HOA',        lob:'Commercial Property',  carrier:'Chubb',        state:'AZ', premium:18700,  status:'Active',    renewal:'2027-03-01', paidThru:'2027-03-01', payFreq:'Annual',    agent:'Ray Simmons',     lastChange:'Annual renewal completed — Mar 2026' }
+  ];
+
+  /* ══════════════════════════════════════════════════════════════
+     BILLING / PAYMENT DATA
+     ══════════════════════════════════════════════════════════════ */
+  var pcBillingData = [
+    { id:'INV-2026-0881', policy:'POL-PC-77340', insured:'Jennifer Walsh',         amount:153.33, dueDate:'2026-07-15', status:'Due',      method:'ACH',        note:'' },
+    { id:'INV-2026-0879', policy:'POL-PC-49807', insured:'Patricia Nguyen',        amount:130.00, dueDate:'2026-07-15', status:'Due',      method:'Credit Card', note:'Payment scheduled' },
+    { id:'INV-2026-0877', policy:'POL-PC-54119', insured:'AutoParts Direct Inc.',  amount:20600,  dueDate:'2026-07-01', status:'Overdue',   method:'Check',      note:'7 days past due — dunning issued' },
+    { id:'INV-2026-0862', policy:'POL-PC-27654', insured:'Metro Delivery Co.',     amount:2625,   dueDate:'2026-06-01', status:'Lapsed',    method:'Check',      note:'Non-payment lapse — NOTICE issued' },
+    { id:'INV-2026-0858', policy:'POL-PC-43312', insured:'Sunrise Bakery Inc.',    amount:6800,   dueDate:'2026-09-01', status:'Renewal Due',method:'Check',     note:'Renewal invoice pending acceptance' },
+    { id:'INV-2026-0841', policy:'POL-PC-65002', insured:'T & K Elliot',           amount:3200,   dueDate:'2026-10-30', status:'Upcoming',  method:'ACH',        note:'Auto-draft scheduled' },
+    { id:'INV-2026-0830', policy:'POL-PC-88821', insured:'Rivera Construction',    amount:48200,  dueDate:'2027-01-15', status:'Upcoming',  method:'Wire',       note:'Annual premium' },
+    { id:'INV-2026-0801', policy:'POL-PC-31140', insured:'Gulf Coast Marina Corp.',amount:124000, dueDate:'2026-07-01', status:'Paid',      method:'Wire',       note:'Paid Jul 1' }
+  ];
+
+  /* ══════════════════════════════════════════════════════════════
+     RENEWAL PIPELINE
+     ══════════════════════════════════════════════════════════════ */
+  var pcRenewalData = [
+    { id:'POL-PC-27654', insured:'Metro Delivery Co.',    lob:'Commercial Auto',     premium:31500, renewal:'2026-06-01', status:'Lapsed',         action:'Re-underwrite required', daysOut:-36, prob:20 },
+    { id:'POL-PC-49807', insured:'Patricia Nguyen',       lob:'Personal Auto',       premium:1560,  renewal:'2026-08-15', status:'Quote Ready',    action:'Send renewal offer',     daysOut:29,  prob:85 },
+    { id:'POL-PC-43312', insured:'Sunrise Bakery Inc.',   lob:'General Liability',   premium:6800,  renewal:'2026-09-01', status:'Quote Sent',     action:'Follow up Aug 1',       daysOut:46,  prob:70 },
+    { id:'POL-PC-54119', insured:'AutoParts Direct Inc.', lob:"Workers' Comp",       premium:82400, renewal:'2026-11-01', status:'Pre-Renewal',    action:'Loss run request',       daysOut:107, prob:90 },
+    { id:'POL-PC-65002', insured:'T & K Elliot',          lob:'Homeowners',          premium:3200,  renewal:'2026-10-30', status:'Pre-Renewal',    action:'CAT surcharge review',   daysOut:105, prob:88 },
+    { id:'POL-PC-77340', insured:'Jennifer Walsh',        lob:'Personal Auto',       premium:1840,  renewal:'2026-12-01', status:'Auto-Renew',     action:'No action needed',       daysOut:137, prob:97 },
+    { id:'POL-PC-38876', insured:'J & M Kowalski',        lob:'Homeowners',          premium:2140,  renewal:'2026-12-15', status:'Auto-Renew',     action:'No action needed',       daysOut:151, prob:95 },
+    { id:'POL-PC-31140', insured:'Gulf Coast Marina',     lob:'Commercial Property', premium:124000,renewal:'2026-07-01', status:'Renewed',        action:'Closed',                 daysOut:-6,  prob:100 }
+  ];
+
+  /* ══════════════════════════════════════════════════════════════
+     COMPLIANCE ITEMS
+     ══════════════════════════════════════════════════════════════ */
+  var pcComplianceData = [
+    { id:'CMP-001', type:'Filing',      jurisdiction:'FL', item:'Hurricane Mitigation Credits — Annual Certification',  dueDate:'2026-07-31', status:'Due',      priority:'high' },
+    { id:'CMP-002', type:'Regulatory',  jurisdiction:'CA', item:'SB 1234 — AI Underwriting Disclosure Filing',          dueDate:'2026-08-01', status:'In Progress', priority:'high' },
+    { id:'CMP-003', type:'Audit',       jurisdiction:'TX', item:'TDI Market Conduct Exam — Document Production',         dueDate:'2026-07-20', status:'Overdue',  priority:'urgent' },
+    { id:'CMP-004', type:'Filing',      jurisdiction:'NY', item:'DFS Circular Letter 2026-03 — Cyber Acknowledgement',  dueDate:'2026-09-15', status:'Upcoming', priority:'medium' },
+    { id:'CMP-005', type:'Licensing',   jurisdiction:'OH', item:"Workers' Comp Loss Cost Update — NCCI Filing",          dueDate:'2026-08-30', status:'Upcoming', priority:'medium' },
+    { id:'CMP-006', type:'Training',    jurisdiction:'ALL',item:'Claims Handler CE Credits — Biennial Requirement',      dueDate:'2026-12-31', status:'On Track', priority:'low' },
+    { id:'CMP-007', type:'Regulatory',  jurisdiction:'GA', item:'Commercial Auto Rate Filing — OID Approval Pending',    dueDate:'2026-07-15', status:'Pending',  priority:'high' },
+    { id:'CMP-008', type:'Audit',       jurisdiction:'IL', item:'DOI Annual Financial Report Submission',                dueDate:'2026-08-15', status:'In Progress', priority:'medium' }
+  ];
+
+  /* ── helpers ── */
+  function _p54kpi(val, lbl, col) {
+    return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px 18px;min-width:120px;flex:1">'
+      +'<div style="font-size:22px;font-weight:800;color:'+col+'">'+val+'</div>'
+      +'<div style="font-size:11px;color:#64748b;margin-top:2px;font-weight:600">'+lbl+'</div>'
+      +'</div>';
+  }
+
+  function _p54badge(status) {
+    var map = {
+      'Active':          { bg:'#05966915', col:OPS54G, brd:'#05966944' },
+      'Lapsed':          { bg:'#dc262615', col:OPS54R, brd:'#dc262644' },
+      'Pending Renewal': { bg:'#d9770615', col:OPS54Y, brd:'#d9770644' },
+      'Paid':            { bg:'#05966915', col:OPS54G, brd:'#05966944' },
+      'Due':             { bg:'#0891b215', col:OPS54B, brd:'#0891b244' },
+      'Overdue':         { bg:'#dc262615', col:OPS54R, brd:'#dc262644' },
+      'Upcoming':        { bg:'#47556915', col:OPS54S, brd:'#47556944' },
+      'Renewal Due':     { bg:'#d9770615', col:OPS54Y, brd:'#d9770644' },
+      'Quote Ready':     { bg:'#0f766e15', col:OPS54,  brd:'#0f766e44' },
+      'Quote Sent':      { bg:'#0891b215', col:OPS54B, brd:'#0891b244' },
+      'Pre-Renewal':     { bg:'#1d4ed815', col:OPS54N, brd:'#1d4ed844' },
+      'Auto-Renew':      { bg:'#05966915', col:OPS54G, brd:'#05966944' },
+      'Renewed':         { bg:'#05966915', col:OPS54G, brd:'#05966944' },
+      'In Progress':     { bg:'#1d4ed815', col:OPS54N, brd:'#1d4ed844' },
+      'On Track':        { bg:'#05966915', col:OPS54G, brd:'#05966944' },
+      'Pending':         { bg:'#d9770615', col:OPS54Y, brd:'#d9770644' },
+      'Urgent':          { bg:'#dc262615', col:OPS54R, brd:'#dc262644' }
+    };
+    var s = map[status] || { bg:'#47556915', col:OPS54S, brd:'#47556944' };
+    return '<span style="background:'+s.bg+';color:'+s.col+';border:1px solid '+s.brd+';border-radius:20px;padding:2px 10px;font-size:11px;font-weight:700">'+status+'</span>';
+  }
+
+  function _p54fmt(n) { return '$' + Number(n).toLocaleString(); }
+
+  function _p54priorityCol(p) {
+    return p==='urgent'?OPS54R : p==='high'?OPS54Y : p==='medium'?OPS54B : OPS54S;
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     TAB 1 — OPERATIONS OVERVIEW
+     ══════════════════════════════════════════════════════════════ */
+  function _p54tabOverview() {
+    var totalPrem   = pcPoliciesData.reduce(function(a,p){ return a + p.premium; }, 0);
+    var activeCount = pcPoliciesData.filter(function(p){ return p.status === 'Active'; }).length;
+    var lapsedCount = pcPoliciesData.filter(function(p){ return p.status === 'Lapsed'; }).length;
+    var overdueInv  = pcBillingData.filter(function(b){ return b.status === 'Overdue'; }).length;
+    var urgentComp  = pcComplianceData.filter(function(c){ return c.priority === 'urgent'; }).length;
+    var renewalRisk = pcRenewalData.filter(function(r){ return r.daysOut > 0 && r.daysOut <= 60 && r.prob < 90; }).length;
+
+    /* LoB premium breakdown */
+    var lobPrem = {};
+    pcPoliciesData.forEach(function(p) {
+      var key = p.lob.split(' ')[0] === 'Commercial' ? p.lob : p.lob.split(' ')[0];
+      lobPrem[p.lob] = (lobPrem[p.lob] || 0) + p.premium;
+    });
+    var lobEntries = Object.keys(lobPrem).sort(function(a,b){ return lobPrem[b]-lobPrem[a]; });
+    var lobColors  = { 'Commercial Property':OPS54R,'Personal Auto':OPS54B,'Workers\' Comp':OPS54Y,'Homeowners':OPS54G,'General Liability':OPS54P,'Commercial Auto':OPS54N };
+
+    var lobBar = '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;margin-bottom:14px">'
+      +'<div style="font-weight:700;font-size:13px;color:#1e293b;margin-bottom:12px"><i class="fas fa-chart-bar" style="color:'+OPS54+';margin-right:8px"></i>Written Premium by Line of Business</div>'
+      +'<div style="display:grid;gap:8px">'
+      + lobEntries.map(function(lob) {
+          var prem = lobPrem[lob];
+          var pct  = Math.round((prem/totalPrem)*100);
+          var col  = lobColors[lob] || OPS54S;
+          return '<div style="display:flex;align-items:center;gap:10px">'
+            +'<span style="font-size:11px;color:#1e293b;min-width:160px">'+lob+'</span>'
+            +'<div style="flex:1;background:#f1f5f9;border-radius:4px;height:8px">'
+            +'<div style="width:'+pct+'%;background:'+col+';border-radius:4px;height:8px"></div>'
+            +'</div>'
+            +'<span style="font-size:11px;font-weight:700;color:'+col+';min-width:80px;text-align:right">'+_p54fmt(prem)+'</span>'
+            +'</div>';
+        }).join('')
+      +'</div></div>';
+
+    /* Recent activity feed */
+    var actFeed = '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px">'
+      +'<div style="font-weight:700;font-size:13px;color:#1e293b;margin-bottom:10px"><i class="fas fa-stream" style="color:'+OPS54B+';margin-right:8px"></i>Recent Activity</div>'
+      +[
+        { icon:'fa-file-alt',   col:OPS54G, time:'Jul 7, 9:14 AM',  msg:'POL-PC-88821 — Endorsement processed: Rivera Construction building limit +$200K' },
+        { icon:'fa-exclamation-triangle', col:OPS54R, time:'Jul 7, 8:30 AM', msg:'POL-PC-27654 — Metro Delivery Co. policy LAPSED — non-payment (2nd notice)' },
+        { icon:'fa-sync-alt',   col:OPS54B, time:'Jul 6, 4:45 PM',  msg:'POL-PC-31140 — Gulf Coast Marina annual renewal completed — premium $124,000' },
+        { icon:'fa-clock',      col:OPS54Y, time:'Jul 6, 2:10 PM',  msg:'INV-2026-0877 — AutoParts Direct overdue by 7 days — dunning letter dispatched' },
+        { icon:'fa-shield-alt', col:OPS54P, time:'Jul 5, 11:00 AM', msg:'CMP-003 — TDI Market Conduct Exam — TX — overdue: document production required' },
+        { icon:'fa-check-circle',col:OPS54G,time:'Jul 5, 9:00 AM',  msg:'POL-PC-49807 — Patricia Nguyen renewal quote generated — 29 days to renewal' }
+      ].map(function(a) {
+        return '<div style="display:flex;gap:10px;padding:8px 0;border-top:1px solid #f1f5f9">'
+          +'<i class="fas '+a.icon+'" style="color:'+a.col+';font-size:13px;margin-top:2px;min-width:14px"></i>'
+          +'<div><div style="font-size:11px;color:#1e293b">'+a.msg+'</div>'
+          +'<div style="font-size:10px;color:#94a3b8;margin-top:2px">'+a.time+'</div>'
+          +'</div></div>';
+      }).join('')
+      +'</div>';
+
+    /* Alert banners */
+    var alerts = '<div style="display:grid;gap:8px;margin-bottom:14px">'
+      +(urgentComp>0 ? '<div style="background:'+OPS54R+'12;border:1px solid '+OPS54R+'44;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px"><i class="fas fa-gavel" style="color:'+OPS54R+'"></i><span style="font-size:12px;color:#1e293b"><strong>Urgent:</strong> TDI Market Conduct Exam (TX) — document production overdue. Deadline Jul 20.</span></div>' : '')
+      +(lapsedCount>0 ? '<div style="background:'+OPS54Y+'12;border:1px solid '+OPS54Y+'44;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px"><i class="fas fa-ban" style="color:'+OPS54Y+'"></i><span style="font-size:12px;color:#1e293b"><strong>1 lapsed policy</strong> — Metro Delivery Co. Commercial Auto — reinstatement window closes Jul 15.</span></div>' : '')
+      +(overdueInv>0 ? '<div style="background:'+OPS54B+'12;border:1px solid '+OPS54B+'44;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px"><i class="fas fa-file-invoice-dollar" style="color:'+OPS54B+'"></i><span style="font-size:12px;color:#1e293b"><strong>'+overdueInv+' overdue invoice</strong> — AutoParts Direct $20,600 — dunning issued.</span></div>' : '')
+      +'</div>';
+
+    /* Agent scorecard */
+    var agentData = [
+      { name:'Donna Price',  policies:3, premium:83900, renewalRate:88 },
+      { name:'Ray Simmons',  policies:3, premium:149500, renewalRate:78 },
+      { name:'Chris Wu',     policies:2, premium:206400, renewalRate:92 },
+      { name:'Amy Torres',   policies:2, premium:3700,   renewalRate:95 }
+    ];
+    var agentCard = '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;margin-bottom:14px">'
+      +'<div style="font-weight:700;font-size:13px;color:#1e293b;margin-bottom:12px"><i class="fas fa-users" style="color:'+OPS54N+';margin-right:8px"></i>Agent Portfolio Scorecard</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">'
+      +agentData.map(function(a) {
+        var rrCol = a.renewalRate>=90?OPS54G:a.renewalRate>=80?OPS54Y:OPS54R;
+        return '<div style="background:#f8fafc;border-radius:10px;padding:12px">'
+          +'<div style="font-size:12px;font-weight:700;color:#1e293b;margin-bottom:6px">'+a.name+'</div>'
+          +'<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px">'
+          +'<span style="color:#64748b">Policies</span><span style="font-weight:700;color:#1e293b">'+a.policies+'</span>'
+          +'</div>'
+          +'<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:6px">'
+          +'<span style="color:#64748b">Written Prem</span><span style="font-weight:700;color:'+OPS54+'">' +_p54fmt(a.premium)+'</span>'
+          +'</div>'
+          +'<div><div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:2px">'
+          +'<span style="color:#64748b">Renewal Rate</span><span style="font-weight:700;color:'+rrCol+'">'+a.renewalRate+'%</span>'
+          +'</div>'
+          +'<div style="background:#e2e8f0;border-radius:4px;height:5px"><div style="width:'+a.renewalRate+'%;background:'+rrCol+';border-radius:4px;height:5px"></div></div>'
+          +'</div></div>';
+      }).join('')
+      +'</div></div>';
+
+    return '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">'
+      +'<div>'+alerts+lobBar+agentCard+'</div>'
+      +'<div>'+actFeed+'</div>'
+      +'</div>';
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     TAB 2 — POLICY ADMINISTRATION
+     ══════════════════════════════════════════════════════════════ */
+  function _p54tabPolicyAdmin() {
+    var rows = pcPoliciesData.map(function(p) {
+      return '<tr style="border-top:1px solid #f1f5f9">'
+        +'<td style="padding:9px 12px;font-size:11px;font-weight:700;color:'+OPS54N+';white-space:nowrap">'+p.id+'</td>'
+        +'<td style="padding:9px 12px;font-size:11px;color:#1e293b">'+p.insured+'</td>'
+        +'<td style="padding:9px 12px;font-size:10px;color:#64748b">'+p.lob+'</td>'
+        +'<td style="padding:9px 12px;font-size:11px;color:#64748b">'+p.carrier+'</td>'
+        +'<td style="padding:9px 12px;font-size:11px;font-weight:700;text-align:right;color:#1e293b">'+_p54fmt(p.premium)+'</td>'
+        +'<td style="padding:9px 12px">'+_p54badge(p.status)+'</td>'
+        +'<td style="padding:9px 12px;font-size:10px;color:#64748b;white-space:nowrap">'+p.renewal+'</td>'
+        +'<td style="padding:9px 12px;font-size:10px;color:#64748b">'+p.payFreq+'</td>'
+        +'<td style="padding:9px 12px;font-size:10px;color:#64748b">'+p.agent+'</td>'
+        +'<td style="padding:9px 12px">'
+        +'<div style="display:flex;gap:4px">'
+        +'<button style="background:'+OPS54+'15;color:'+OPS54+';border:1px solid '+OPS54+'44;border-radius:5px;padding:3px 8px;font-size:10px;font-weight:700;cursor:pointer">View</button>'
+        +'<button style="background:'+OPS54Y+'15;color:'+OPS54Y+';border:1px solid '+OPS54Y+'44;border-radius:5px;padding:3px 8px;font-size:10px;font-weight:700;cursor:pointer">Endorse</button>'
+        +'</div></td>'
+        +'</tr>';
+    }).join('');
+
+    /* Endorsement panel */
+    var endorsePanel = '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;margin-top:16px">'
+      +'<div style="font-weight:700;font-size:13px;color:#1e293b;margin-bottom:12px"><i class="fas fa-pen" style="color:'+OPS54Y+';margin-right:8px"></i>Quick Endorsement — POL-PC-88821 (Rivera Construction)</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px">'
+      +['Building Limit Change','Additional Insured Add','Named Storm Deductible','Equipment Floater','Builders Risk Extension','Loss Payee Update'].map(function(e) {
+        return '<button style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px;font-size:11px;color:#1e293b;cursor:pointer;text-align:left">'
+          +'<i class="fas fa-plus-circle" style="color:'+OPS54+';margin-right:6px"></i>'+e+'</button>';
+      }).join('')
+      +'</div>'
+      +'<div style="display:flex;gap:8px">'
+      +'<button style="background:'+OPS54+';color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:12px;font-weight:700;cursor:pointer"><i class="fas fa-paper-plane" style="margin-right:6px"></i>Submit Endorsement</button>'
+      +'<button style="background:#f1f5f9;color:#64748b;border:none;border-radius:8px;padding:9px 18px;font-size:12px;font-weight:700;cursor:pointer">Cancel</button>'
+      +'</div></div>';
+
+    return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;margin-bottom:0">'
+      +'<div style="padding:12px 16px;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;gap:12px">'
+      +'<span style="font-weight:700;font-size:13px;color:#1e293b"><i class="fas fa-file-contract" style="color:'+OPS54+';margin-right:8px"></i>Policy Administration — All Policies</span>'
+      +'<span style="margin-left:auto;background:#f1f5f9;border-radius:8px;padding:3px 10px;font-size:11px;color:#64748b">10 policies · 9 active · 1 lapsed</span>'
+      +'<input style="border:1px solid #e2e8f0;border-radius:6px;padding:5px 10px;font-size:11px" placeholder="Search policies..." />'
+      +'</div>'
+      +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">'
+      +'<thead><tr style="background:#f8fafc">'
+      +'<th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:#64748b">POLICY</th>'
+      +'<th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:#64748b">INSURED</th>'
+      +'<th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:#64748b">LINE</th>'
+      +'<th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:#64748b">CARRIER</th>'
+      +'<th style="padding:8px 12px;text-align:right;font-size:10px;font-weight:700;color:#64748b">PREMIUM</th>'
+      +'<th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:#64748b">STATUS</th>'
+      +'<th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:#64748b">RENEWAL</th>'
+      +'<th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:#64748b">FREQUENCY</th>'
+      +'<th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:#64748b">AGENT</th>'
+      +'<th style="padding:8px 12px;font-size:10px;font-weight:700;color:#64748b"></th>'
+      +'</tr></thead><tbody>'+rows+'</tbody></table></div>'
+      +'</div>'
+      + endorsePanel;
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     TAB 3 — BILLING & PAYMENTS
+     ══════════════════════════════════════════════════════════════ */
+  function _p54tabBilling() {
+    var totalOutstanding = pcBillingData.filter(function(b){ return ['Due','Overdue','Renewal Due'].indexOf(b.status)>=0; }).reduce(function(a,b){ return a+b.amount; },0);
+    var overdueAmt  = pcBillingData.filter(function(b){ return b.status==='Overdue'||b.status==='Lapsed'; }).reduce(function(a,b){ return a+b.amount; },0);
+
+    var rows = pcBillingData.map(function(b) {
+      var statCol = b.status==='Paid'?OPS54G:b.status==='Due'?OPS54B:b.status==='Overdue'||b.status==='Lapsed'?OPS54R:OPS54Y;
+      return '<tr style="border-top:1px solid #f1f5f9">'
+        +'<td style="padding:9px 12px;font-size:11px;font-weight:700;color:'+OPS54B+'">'+b.id+'</td>'
+        +'<td style="padding:9px 12px;font-size:10px;color:#1d4ed8">'+b.policy+'</td>'
+        +'<td style="padding:9px 12px;font-size:11px;color:#1e293b">'+b.insured+'</td>'
+        +'<td style="padding:9px 12px;font-size:12px;font-weight:800;color:#1e293b;text-align:right">'+_p54fmt(b.amount)+'</td>'
+        +'<td style="padding:9px 12px;font-size:11px;color:#64748b;white-space:nowrap">'+b.dueDate+'</td>'
+        +'<td style="padding:9px 12px">'+_p54badge(b.status)+'</td>'
+        +'<td style="padding:9px 12px;font-size:10px;color:#64748b">'+b.method+'</td>'
+        +'<td style="padding:9px 12px;font-size:10px;color:#64748b;max-width:180px">'+b.note+'</td>'
+        +'<td style="padding:9px 12px">'
+        +(b.status!=='Paid'?'<button style="background:'+OPS54G+'15;color:'+OPS54G+';border:1px solid '+OPS54G+'44;border-radius:5px;padding:3px 8px;font-size:10px;font-weight:700;cursor:pointer">Post Pmt</button>':'<i class="fas fa-check" style="color:'+OPS54G+'"></i>')
+        +'</td></tr>';
+    }).join('');
+
+    /* Payment method breakdown */
+    var methodData = [
+      { method:'ACH / EFT',    pct:42, col:OPS54G },
+      { method:'Wire Transfer', pct:31, col:OPS54B },
+      { method:'Check',        pct:19, col:OPS54Y },
+      { method:'Credit Card',  pct:8,  col:OPS54P }
+    ];
+
+    var methodBreak = '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;margin-top:14px">'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">'
+      +'<div>'
+      +'<div style="font-weight:700;font-size:13px;color:#1e293b;margin-bottom:10px"><i class="fas fa-credit-card" style="color:'+OPS54B+';margin-right:8px"></i>Payment Method Mix</div>'
+      +methodData.map(function(m) {
+        return '<div style="margin-bottom:8px">'
+          +'<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px">'
+          +'<span style="color:#1e293b">'+m.method+'</span>'
+          +'<span style="font-weight:700;color:'+m.col+'">'+m.pct+'%</span>'
+          +'</div>'
+          +'<div style="background:#f1f5f9;border-radius:4px;height:6px">'
+          +'<div style="width:'+m.pct+'%;background:'+m.col+';border-radius:4px;height:6px"></div>'
+          +'</div></div>';
+      }).join('')
+      +'</div>'
+      +'<div>'
+      +'<div style="font-weight:700;font-size:13px;color:#1e293b;margin-bottom:10px"><i class="fas fa-exclamation-circle" style="color:'+OPS54R+';margin-right:8px"></i>Collections Summary</div>'
+      +[
+        ['Outstanding (Due)',  _p54fmt(totalOutstanding), OPS54Y],
+        ['Overdue / Lapsed',   _p54fmt(overdueAmt),       OPS54R],
+        ['Paid This Month',    '$127,200',                 OPS54G],
+        ['Auto-Draft Scheduled','$51,400',                 OPS54B]
+      ].map(function(r) {
+        return '<div style="display:flex;justify-content:space-between;padding:6px 0;border-top:1px solid #f1f5f9;font-size:11px">'
+          +'<span style="color:#64748b">'+r[0]+'</span>'
+          +'<span style="font-weight:700;color:'+r[2]+'">'+r[1]+'</span>'
+          +'</div>';
+      }).join('')
+      +'<div style="margin-top:10px;display:flex;gap:8px">'
+      +'<button style="flex:1;background:'+OPS54R+';color:#fff;border:none;border-radius:7px;padding:8px;font-size:11px;font-weight:700;cursor:pointer"><i class="fas fa-bell" style="margin-right:5px"></i>Send Dunning</button>'
+      +'<button style="flex:1;background:'+OPS54G+';color:#fff;border:none;border-radius:7px;padding:8px;font-size:11px;font-weight:700;cursor:pointer"><i class="fas fa-check-double" style="margin-right:5px"></i>Batch Post</button>'
+      +'</div>'
+      +'</div></div></div>';
+
+    return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden">'
+      +'<div style="padding:12px 16px;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;gap:12px">'
+      +'<span style="font-weight:700;font-size:13px;color:#1e293b"><i class="fas fa-file-invoice-dollar" style="color:'+OPS54B+';margin-right:8px"></i>Billing & Payments — Invoice Register</span>'
+      +'<span style="margin-left:auto;font-size:11px;color:'+OPS54R+';font-weight:700"><i class="fas fa-exclamation-triangle" style="margin-right:4px"></i>1 overdue · 1 lapsed</span>'
+      +'</div>'
+      +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">'
+      +'<thead><tr style="background:#f8fafc">'
+      +'<th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:#64748b">INVOICE</th>'
+      +'<th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:#64748b">POLICY</th>'
+      +'<th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:#64748b">INSURED</th>'
+      +'<th style="padding:8px 12px;text-align:right;font-size:10px;font-weight:700;color:#64748b">AMOUNT</th>'
+      +'<th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:#64748b">DUE DATE</th>'
+      +'<th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:#64748b">STATUS</th>'
+      +'<th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:#64748b">METHOD</th>'
+      +'<th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:#64748b">NOTES</th>'
+      +'<th style="padding:8px 12px;font-size:10px;font-weight:700;color:#64748b"></th>'
+      +'</tr></thead><tbody>'+rows+'</tbody></table></div>'
+      +'</div>'
+      + methodBreak;
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     TAB 4 — RENEWALS
+     ══════════════════════════════════════════════════════════════ */
+  function _p54tabRenewals() {
+    var renewRows = pcRenewalData.map(function(r) {
+      var daysColor = r.daysOut < 0 ? OPS54S : r.daysOut <= 30 ? OPS54R : r.daysOut <= 60 ? OPS54Y : OPS54G;
+      var daysLabel = r.daysOut < 0 ? Math.abs(r.daysOut)+' days ago' : r.daysOut+' days';
+      var probCol   = r.prob>=90?OPS54G:r.prob>=70?OPS54Y:OPS54R;
+      return '<tr style="border-top:1px solid #f1f5f9">'
+        +'<td style="padding:9px 12px;font-size:11px;font-weight:700;color:'+OPS54N+'">'+r.id+'</td>'
+        +'<td style="padding:9px 12px;font-size:11px;color:#1e293b">'+r.insured+'</td>'
+        +'<td style="padding:9px 12px;font-size:10px;color:#64748b">'+r.lob+'</td>'
+        +'<td style="padding:9px 12px;font-size:11px;font-weight:700;text-align:right;color:#1e293b">'+_p54fmt(r.premium)+'</td>'
+        +'<td style="padding:9px 12px;font-size:11px;color:'+daysColor+';font-weight:700;white-space:nowrap">'+daysLabel+'</td>'
+        +'<td style="padding:9px 12px">'+_p54badge(r.status)+'</td>'
+        +'<td style="padding:9px 12px;font-size:10px;color:#64748b">'+r.action+'</td>'
+        +'<td style="padding:9px 12px">'
+        +'<div style="display:flex;align-items:center;gap:6px">'
+        +'<div style="flex:1;background:#f1f5f9;border-radius:4px;height:6px">'
+        +'<div style="width:'+r.prob+'%;background:'+probCol+';border-radius:4px;height:6px"></div>'
+        +'</div>'
+        +'<span style="font-size:11px;font-weight:700;color:'+probCol+'">'+r.prob+'%</span>'
+        +'</div></td>'
+        +'<td style="padding:9px 12px">'
+        +(r.status!=='Renewed'&&r.status!=='Lapsed'?'<button style="background:'+OPS54+'15;color:'+OPS54+';border:1px solid '+OPS54+'44;border-radius:5px;padding:3px 8px;font-size:10px;font-weight:700;cursor:pointer">Action</button>':'')
+        +'</td></tr>';
+    }).join('');
+
+    /* Renewal pipeline funnel */
+    var funnelData = [
+      { stage:'All Renewals',     count:8, col:OPS54S },
+      { stage:'Pre-Renewal',      count:5, col:OPS54N },
+      { stage:'Quote Issued',     count:3, col:OPS54B },
+      { stage:'Accepted',         count:2, col:OPS54G },
+      { stage:'Lapsed',           count:1, col:OPS54R }
+    ];
+
+    var funnel = '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;margin-top:14px">'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">'
+      +'<div>'
+      +'<div style="font-weight:700;font-size:13px;color:#1e293b;margin-bottom:12px"><i class="fas fa-funnel-dollar" style="color:'+OPS54+';margin-right:8px"></i>Renewal Funnel — Next 180 Days</div>'
+      +'<div style="display:flex;flex-direction:column;gap:6px">'
+      +funnelData.map(function(f) {
+        var w = Math.round((f.count/8)*100);
+        return '<div style="display:flex;align-items:center;gap:8px">'
+          +'<span style="font-size:11px;color:#1e293b;min-width:120px">'+f.stage+'</span>'
+          +'<div style="flex:1;background:#f1f5f9;border-radius:4px;height:10px">'
+          +'<div style="width:'+w+'%;background:'+f.col+';border-radius:4px;height:10px"></div>'
+          +'</div>'
+          +'<span style="font-size:12px;font-weight:800;color:'+f.col+';min-width:24px;text-align:right">'+f.count+'</span>'
+          +'</div>';
+      }).join('')
+      +'</div>'
+      +'</div>'
+      +'<div>'
+      +'<div style="font-weight:700;font-size:13px;color:#1e293b;margin-bottom:12px"><i class="fas fa-dollar-sign" style="color:'+OPS54G+';margin-right:8px"></i>Renewal Premium at Stake</div>'
+      +[
+        ['At-Risk (≤60 days,<90%)', _p54fmt(8360),  OPS54R],
+        ['Highly Likely (≥90%)',    _p54fmt(217840), OPS54G],
+        ['Total Renewal Book',      _p54fmt(253340), OPS54N],
+        ['Lost YTD (Lapsed)',       _p54fmt(31500),  OPS54S]
+      ].map(function(r) {
+        return '<div style="display:flex;justify-content:space-between;padding:7px 0;border-top:1px solid #f1f5f9;font-size:12px">'
+          +'<span style="color:#64748b">'+r[0]+'</span>'
+          +'<span style="font-weight:700;color:'+r[2]+'">'+r[1]+'</span>'
+          +'</div>';
+      }).join('')
+      +'<div style="margin-top:10px;display:flex;gap:8px">'
+      +'<button style="flex:1;background:'+OPS54+';color:#fff;border:none;border-radius:7px;padding:8px;font-size:11px;font-weight:700;cursor:pointer"><i class="fas fa-robot" style="margin-right:5px"></i>AI Renewal Score</button>'
+      +'<button style="flex:1;background:'+OPS54B+';color:#fff;border:none;border-radius:7px;padding:8px;font-size:11px;font-weight:700;cursor:pointer"><i class="fas fa-envelope" style="margin-right:5px"></i>Batch Quotes</button>'
+      +'</div>'
+      +'</div></div></div>';
+
+    return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden">'
+      +'<div style="padding:12px 16px;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;gap:12px">'
+      +'<span style="font-weight:700;font-size:13px;color:#1e293b"><i class="fas fa-sync-alt" style="color:'+OPS54+';margin-right:8px"></i>Renewal Pipeline — Upcoming 180 Days</span>'
+      +'<span style="margin-left:auto;font-size:11px;color:'+OPS54Y+';font-weight:700">2 renewals within 60 days · 1 lapsed</span>'
+      +'</div>'
+      +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">'
+      +'<thead><tr style="background:#f8fafc">'
+      +'<th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:#64748b">POLICY</th>'
+      +'<th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:#64748b">INSURED</th>'
+      +'<th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:#64748b">LINE</th>'
+      +'<th style="padding:8px 12px;text-align:right;font-size:10px;font-weight:700;color:#64748b">PREMIUM</th>'
+      +'<th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:#64748b">RENEWAL IN</th>'
+      +'<th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:#64748b">STATUS</th>'
+      +'<th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:#64748b">NEXT ACTION</th>'
+      +'<th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:#64748b">PROBABILITY</th>'
+      +'<th style="padding:8px 12px;font-size:10px;font-weight:700;color:#64748b"></th>'
+      +'</tr></thead><tbody>'+renewRows+'</tbody></table></div>'
+      +'</div>'
+      + funnel;
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     TAB 5 — COMPLIANCE & REGULATORY
+     ══════════════════════════════════════════════════════════════ */
+  function _p54tabCompliance() {
+    var overdue = pcComplianceData.filter(function(c){ return c.status === 'Overdue'; });
+    var dueSoon = pcComplianceData.filter(function(c){ return c.status === 'Due Soon'; });
+    var inProg  = pcComplianceData.filter(function(c){ return c.status === 'In Progress'; });
+    var complt  = pcComplianceData.filter(function(c){ return c.status === 'Complete'; });
+
+    var statusColor = function(s) {
+      if (s === 'Overdue')     return 'background:#fef2f2;color:#dc2626;border:1px solid #fca5a5;';
+      if (s === 'Due Soon')    return 'background:#fffbeb;color:#d97706;border:1px solid #fde68a;';
+      if (s === 'In Progress') return 'background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;';
+      if (s === 'Complete')    return 'background:#f0fdf4;color:#059669;border:1px solid #bbf7d0;';
+      return 'background:#f8fafc;color:#475569;border:1px solid #e2e8f0;';
+    };
+    var typeIcon = function(t) {
+      if (t === 'Filing')       return '📋';
+      if (t === 'Licensing')    return '🪪';
+      if (t === 'Rate Filing')  return '📊';
+      if (t === 'Exam')         return '🔍';
+      if (t === 'Audit')        return '🗂️';
+      if (t === 'Reporting')    return '📤';
+      return '⚙️';
+    };
+
+    /* — Jurisdiction heat map data — */
+    var jurisdictions = [
+      { state:'TX', filings:4, issues:1, riskLevel:'Medium' },
+      { state:'FL', filings:6, issues:2, riskLevel:'High'   },
+      { state:'CA', filings:5, issues:0, riskLevel:'Low'    },
+      { state:'NY', filings:3, issues:1, riskLevel:'Medium' },
+      { state:'IL', filings:2, issues:0, riskLevel:'Low'    },
+      { state:'OH', filings:2, issues:0, riskLevel:'Low'    }
+    ];
+    var riskCol = function(r) {
+      if (r === 'High')   return '#dc2626';
+      if (r === 'Medium') return '#d97706';
+      return '#059669';
+    };
+
+    /* — Upcoming regulatory deadlines — */
+    var deadlines = [
+      { date:'Jul 31 2026', item:'TX HB 1234 — Windstorm Rate Adjustment Filing', dept:'TDI', priority:'high'   },
+      { date:'Aug 15 2026', item:'FL Annual Market Conduct Report Submission',     dept:'OIR', priority:'high'   },
+      { date:'Aug 31 2026', item:'NY DFS Workers\' Comp Loss Cost Revisions',      dept:'DFS', priority:'medium' },
+      { date:'Sep 15 2026', item:'CA CDI Annual Report — Homeowners Line',         dept:'CDI', priority:'medium' },
+      { date:'Oct 01 2026', item:'NAIC Own Risk and Solvency Assessment (ORSA)',   dept:'Multi',priority:'high'  },
+      { date:'Oct 31 2026', item:'IL DOI Triennial Market Conduct Exam Prep',      dept:'IDOI',priority:'low'   }
+    ];
+
+    var h = '<div style="padding:0 4px;">';
+
+    /* ── Alert banner ── */
+    if (overdue.length > 0) {
+      h += '<div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;">';
+      h += '<span style="font-size:20px;">⚠️</span>';
+      h += '<div><strong style="color:#dc2626;">'+overdue.length+' Overdue Compliance Item'+(overdue.length>1?'s':'')+'</strong>';
+      h += '<span style="color:#b91c1c;font-size:13px;margin-left:8px;">Immediate action required — regulatory penalties may apply</span></div></div>';
+    }
+
+    /* ── KPI strip ── */
+    h += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">';
+    var ckpis = [
+      { v: overdue.length,  l: 'Overdue',      c: '#dc2626' },
+      { v: dueSoon.length,  l: 'Due Soon',      c: '#d97706' },
+      { v: inProg.length,   l: 'In Progress',   c: '#1d4ed8' },
+      { v: complt.length,   l: 'Complete',      c: '#059669' }
+    ];
+    ckpis.forEach(function(k) {
+      h += '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px;text-align:center;border-top:3px solid '+k.c+';">';
+      h += '<div style="font-size:26px;font-weight:700;color:'+k.c+';">'+k.v+'</div>';
+      h += '<div style="font-size:11px;color:#64748b;margin-top:2px;">'+k.l+'</div></div>';
+    });
+    h += '</div>';
+
+    /* ── Main grid: Compliance items table + Jurisdiction panel ── */
+    h += '<div style="display:grid;grid-template-columns:1fr 320px;gap:16px;margin-bottom:20px;">';
+
+    /* — Compliance items table — */
+    h += '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">';
+    h += '<div style="padding:14px 16px;border-bottom:1px solid #f1f5f9;display:flex;justify-content:space-between;align-items:center;">';
+    h += '<strong style="color:#0f172a;font-size:14px;">📋 Compliance Register</strong>';
+    h += '<span style="background:#eff6ff;color:#1d4ed8;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;">'+pcComplianceData.length+' items</span></div>';
+    h += '<table style="width:100%;border-collapse:collapse;font-size:12px;">';
+    h += '<thead><tr style="background:#f8fafc;">';
+    ['ID','Type','Jurisdiction','Item','Due Date','Priority','Status'].forEach(function(col){
+      h += '<th style="padding:8px 12px;text-align:left;color:#64748b;font-weight:600;border-bottom:1px solid #f1f5f9;white-space:nowrap;">'+col+'</th>';
+    });
+    h += '</tr></thead><tbody>';
+    pcComplianceData.forEach(function(c, i) {
+      var bg = i % 2 === 0 ? '#fff' : '#fafafa';
+      var pCol = c.priority === 'high' ? '#dc2626' : c.priority === 'medium' ? '#d97706' : '#059669';
+      h += '<tr style="background:'+bg+';border-bottom:1px solid #f1f5f9;">';
+      h += '<td style="padding:9px 12px;color:#334155;font-weight:600;font-family:monospace;">'+c.id+'</td>';
+      h += '<td style="padding:9px 12px;color:#334155;">'+typeIcon(c.type)+' '+c.type+'</td>';
+      h += '<td style="padding:9px 12px;"><span style="background:#eff6ff;color:#1d4ed8;padding:2px 8px;border-radius:4px;font-weight:600;font-size:11px;">'+c.jurisdiction+'</span></td>';
+      h += '<td style="padding:9px 12px;color:#334155;max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="'+c.item+'">'+c.item+'</td>';
+      h += '<td style="padding:9px 12px;color:#334155;white-space:nowrap;">'+c.dueDate+'</td>';
+      h += '<td style="padding:9px 12px;"><span style="background:'+pCol+'18;color:'+pCol+';padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;text-transform:uppercase;">'+c.priority+'</span></td>';
+      h += '<td style="padding:9px 12px;"><span style="padding:3px 9px;border-radius:12px;font-size:11px;font-weight:600;'+statusColor(c.status)+'">'+c.status+'</span></td>';
+      h += '</tr>';
+    });
+    h += '</tbody></table></div>';
+
+    /* — Jurisdiction risk panel — */
+    h += '<div style="display:flex;flex-direction:column;gap:12px;">';
+    h += '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">';
+    h += '<div style="padding:12px 14px;border-bottom:1px solid #f1f5f9;"><strong style="color:#0f172a;font-size:13px;">🗺️ Jurisdiction Risk</strong></div>';
+    h += '<div style="padding:10px 14px;">';
+    jurisdictions.forEach(function(j) {
+      var rc = riskCol(j.riskLevel);
+      h += '<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid #f8fafc;">';
+      h += '<div style="display:flex;align-items:center;gap:8px;">';
+      h += '<span style="background:'+rc+'18;color:'+rc+';font-weight:700;font-size:12px;padding:3px 8px;border-radius:4px;min-width:32px;text-align:center;">'+j.state+'</span>';
+      h += '<div><div style="font-size:11px;color:#334155;">'+j.filings+' filings</div>';
+      h += '<div style="font-size:10px;color:#94a3b8;">'+j.issues+' open issue'+(j.issues!==1?'s':'')+'</div></div></div>';
+      h += '<span style="background:'+rc+'18;color:'+rc+';padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;">'+j.riskLevel+'</span>';
+      h += '</div>';
+    });
+    h += '</div></div>';
+    h += '</div>'; /* end right col */
+    h += '</div>'; /* end main grid */
+
+    /* ── Upcoming regulatory deadlines ── */
+    h += '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">';
+    h += '<div style="padding:14px 16px;border-bottom:1px solid #f1f5f9;"><strong style="color:#0f172a;font-size:14px;">📅 Upcoming Regulatory Deadlines</strong></div>';
+    h += '<div style="padding:4px 0;">';
+    deadlines.forEach(function(d) {
+      var pc = d.priority === 'high' ? '#dc2626' : d.priority === 'medium' ? '#d97706' : '#059669';
+      h += '<div style="display:flex;align-items:center;gap:14px;padding:10px 16px;border-bottom:1px solid #f8fafc;">';
+      h += '<div style="min-width:90px;font-size:11px;font-weight:700;color:#334155;white-space:nowrap;">'+d.date+'</div>';
+      h += '<div style="flex:1;font-size:12px;color:#334155;">'+d.item+'</div>';
+      h += '<span style="background:#e0f2fe;color:#0369a1;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;white-space:nowrap;">'+d.dept+'</span>';
+      h += '<span style="background:'+pc+'18;color:'+pc+';padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;text-transform:uppercase;white-space:nowrap;">'+d.priority+'</span>';
+      h += '</div>';
+    });
+    h += '</div></div>';
+
+    h += '</div>'; /* end outer div */
+    return h;
+  }
+  /* ══════════════════════════════════════════════════════════════
+     TAB 6 — OPERATIONAL REPORTS
+     ══════════════════════════════════════════════════════════════ */
+  function _p54tabReports() {
+    /* — Monthly loss ratio trend (6 months) — */
+    var lrTrend = [
+      { mo:'Jan', premium:1820000, losses:1056000, lr:58.0, cr:93.1 },
+      { mo:'Feb', premium:1950000, losses:1131000, lr:58.0, cr:92.4 },
+      { mo:'Mar', premium:2100000, losses:1270000, lr:60.5, cr:95.2 },
+      { mo:'Apr', premium:2080000, losses:1287000, lr:61.9, cr:96.8 },
+      { mo:'May', premium:2210000, losses:1350000, lr:61.1, cr:96.1 },
+      { mo:'Jun', premium:2340000, losses:1379000, lr:58.9, cr:94.2 }
+    ];
+    var maxPrem = Math.max.apply(null, lrTrend.map(function(r){ return r.premium; }));
+
+    /* — Premium by LoB (YTD) — */
+    var lobYTD = [
+      { lob:'Commercial Property', premium:4280000, growth: 8.2, lr:62.1, policies:312 },
+      { lob:'Personal Auto',        premium:2640000, growth: 5.4, lr:66.8, policies:1847 },
+      { lob:'Homeowners',           premium:2210000, growth: 4.1, lr:55.3, policies:921  },
+      { lob:'Workers\' Comp',       premium:1890000, growth:-1.2, lr:70.4, policies:204  },
+      { lob:'General Liability',    premium:1450000, growth: 6.7, lr:48.9, policies:389  },
+      { lob:'Commercial Auto',      premium:1030000, growth: 3.9, lr:61.2, policies:278  }
+    ];
+    var maxPremYTD = Math.max.apply(null, lobYTD.map(function(l){ return l.premium; }));
+
+    /* — Operational KPIs — */
+    var opKPIs = [
+      { label:'NWP (YTD)',          value:'$12.5M',  change:'+5.8%',  up:true  },
+      { label:'Earned Premium',     value:'$11.8M',  change:'+4.2%',  up:true  },
+      { label:'Incurred Losses',    value:'$7.03M',  change:'+6.1%',  up:false },
+      { label:'LAE Ratio',          value:'8.3%',    change:'-0.4pp', up:true  },
+      { label:'Combined Ratio',     value:'94.2%',   change:'-1.1pp', up:true  },
+      { label:'Policy Count',       value:'3,951',   change:'+112',   up:true  },
+      { label:'Avg Premium/Policy', value:'$2,988',  change:'+$142',  up:true  },
+      { label:'Retention Rate',     value:'87.4%',   change:'+1.2pp', up:true  }
+    ];
+
+    /* — Agent performance table — */
+    var agentRpt = [
+      { name:'Sandra Voss',    nwp:3210000, policies:621, retention:91.2, newBiz:84, crRatio:91.8 },
+      { name:'Marcus Reid',    nwp:2870000, policies:548, retention:88.7, newBiz:72, crRatio:94.1 },
+      { name:'Linda Park',     nwp:2540000, policies:489, retention:86.4, newBiz:68, crRatio:96.2 },
+      { name:'David Chen',     nwp:2190000, policies:421, retention:84.9, newBiz:61, crRatio:97.5 },
+      { name:'Angela Torres',  nwp:1690000, policies:324, retention:83.1, newBiz:53, crRatio:98.8 }
+    ];
+
+    var fmt = function(n){ return '$'+Number(n).toLocaleString(); };
+    var lrColor = function(lr){ return lr < 60 ? '#059669' : lr < 70 ? '#d97706' : '#dc2626'; };
+
+    var h = '<div style="padding:0 4px;">';
+
+    /* ── Operational KPI cards ── */
+    h += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;">';
+    opKPIs.forEach(function(k) {
+      var chCol = k.up ? '#059669' : '#dc2626';
+      var chBg  = k.up ? '#f0fdf4' : '#fef2f2';
+      h += '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px 16px;">';
+      h += '<div style="font-size:11px;color:#64748b;margin-bottom:4px;">'+k.label+'</div>';
+      h += '<div style="font-size:22px;font-weight:700;color:#0f172a;">'+k.value+'</div>';
+      h += '<div style="margin-top:4px;"><span style="background:'+chBg+';color:'+chCol+';padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;">'+k.change+'</span></div>';
+      h += '</div>';
+    });
+    h += '</div>';
+
+    /* ── Chart section: Loss Ratio trend + Premium by LoB side-by-side ── */
+    h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">';
+
+    /* — Loss Ratio / Combined Ratio trend bar chart — */
+    h += '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">';
+    h += '<div style="padding:14px 16px;border-bottom:1px solid #f1f5f9;">';
+    h += '<strong style="color:#0f172a;font-size:13px;">📉 Loss Ratio Trend — 6 Months</strong></div>';
+    h += '<div style="padding:16px;">';
+    /* bar chart area */
+    h += '<div style="display:flex;align-items:flex-end;gap:10px;height:140px;margin-bottom:8px;">';
+    lrTrend.forEach(function(r) {
+      var barH = Math.round((r.premium / maxPrem) * 120);
+      var lossH = Math.round((r.losses / maxPrem) * 120);
+      var lrCol = lrColor(r.lr);
+      h += '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;">';
+      h += '<div style="font-size:9px;color:'+lrCol+';font-weight:700;">'+r.lr.toFixed(1)+'%</div>';
+      h += '<div style="width:100%;display:flex;gap:2px;align-items:flex-end;height:120px;">';
+      h += '<div style="flex:1;background:#bfdbfe;border-radius:3px 3px 0 0;height:'+barH+'px;" title="Premium: '+fmt(r.premium)+'"></div>';
+      h += '<div style="flex:1;background:'+lrCol+';border-radius:3px 3px 0 0;height:'+lossH+'px;opacity:.85;" title="Losses: '+fmt(r.losses)+'"></div>';
+      h += '</div>';
+      h += '<div style="font-size:10px;color:#64748b;margin-top:4px;">'+r.mo+'</div>';
+      h += '</div>';
+    });
+    h += '</div>';
+    /* legend */
+    h += '<div style="display:flex;gap:16px;font-size:11px;color:#64748b;">';
+    h += '<span><span style="display:inline-block;width:10px;height:10px;background:#bfdbfe;border-radius:2px;margin-right:4px;"></span>Premium</span>';
+    h += '<span><span style="display:inline-block;width:10px;height:10px;background:#d97706;border-radius:2px;margin-right:4px;"></span>Losses</span>';
+    h += '<span style="margin-left:auto;">LR target: ≤62%</span>';
+    h += '</div>';
+    /* CR summary strip */
+    h += '<div style="margin-top:10px;display:flex;gap:6px;">';
+    lrTrend.forEach(function(r) {
+      var crCol = r.cr < 95 ? '#059669' : r.cr < 100 ? '#d97706' : '#dc2626';
+      h += '<div style="flex:1;text-align:center;font-size:9px;"><div style="color:'+crCol+';font-weight:700;">'+r.cr+'</div><div style="color:#94a3b8;">CR</div></div>';
+    });
+    h += '</div>';
+    h += '</div></div>';
+
+    /* — Premium by LoB horizontal bars — */
+    h += '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">';
+    h += '<div style="padding:14px 16px;border-bottom:1px solid #f1f5f9;">';
+    h += '<strong style="color:#0f172a;font-size:13px;">📊 NWP by Line of Business — YTD</strong></div>';
+    h += '<div style="padding:12px 16px;">';
+    lobYTD.forEach(function(l) {
+      var barW = Math.round((l.premium / maxPremYTD) * 100);
+      var lrCol = lrColor(l.lr);
+      var growCol = l.growth >= 0 ? '#059669' : '#dc2626';
+      h += '<div style="margin-bottom:12px;">';
+      h += '<div style="display:flex;justify-content:space-between;margin-bottom:4px;">';
+      h += '<span style="font-size:11px;color:#334155;font-weight:500;">'+l.lob+'</span>';
+      h += '<div style="display:flex;gap:8px;align-items:center;">';
+      h += '<span style="font-size:11px;color:#0f172a;font-weight:600;">'+fmt(l.premium)+'</span>';
+      h += '<span style="font-size:10px;color:'+growCol+';font-weight:600;">'+(l.growth>=0?'+':'')+l.growth+'%</span>';
+      h += '<span style="font-size:10px;color:'+lrCol+';background:'+lrCol+'18;padding:1px 6px;border-radius:4px;font-weight:600;">LR '+l.lr+'%</span>';
+      h += '</div></div>';
+      h += '<div style="background:#f1f5f9;border-radius:4px;height:10px;overflow:hidden;">';
+      h += '<div style="background:'+OPS54B+';height:100%;border-radius:4px;width:'+barW+'%;transition:width .3s;"></div></div>';
+      h += '</div>';
+    });
+    h += '</div></div>';
+
+    h += '</div>'; /* end chart grid */
+
+    /* ── Agent Performance Table ── */
+    h += '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">';
+    h += '<div style="padding:14px 16px;border-bottom:1px solid #f1f5f9;display:flex;justify-content:space-between;align-items:center;">';
+    h += '<strong style="color:#0f172a;font-size:14px;">👤 Agent Performance — YTD Rankings</strong>';
+    h += '<span style="font-size:11px;color:#64748b;">Sorted by NWP</span></div>';
+    h += '<table style="width:100%;border-collapse:collapse;font-size:12px;">';
+    h += '<thead><tr style="background:#f8fafc;">';
+    ['Rank','Agent','NWP','Policies','Retention','New Biz','CR Ratio'].forEach(function(col){
+      h += '<th style="padding:8px 14px;text-align:left;color:#64748b;font-weight:600;border-bottom:1px solid #f1f5f9;">'+col+'</th>';
+    });
+    h += '</tr></thead><tbody>';
+    agentRpt.forEach(function(a, i) {
+      var bg = i % 2 === 0 ? '#fff' : '#fafafa';
+      var medal = ['🥇','🥈','🥉','',''][i] || '';
+      var crCol = a.crRatio < 95 ? '#059669' : a.crRatio < 100 ? '#d97706' : '#dc2626';
+      var retCol = a.retention >= 90 ? '#059669' : a.retention >= 85 ? '#d97706' : '#dc2626';
+      h += '<tr style="background:'+bg+';border-bottom:1px solid #f1f5f9;">';
+      h += '<td style="padding:10px 14px;font-size:18px;">'+medal+(medal?'':'#'+(i+1))+'</td>';
+      h += '<td style="padding:10px 14px;font-weight:600;color:#0f172a;">'+a.name+'</td>';
+      h += '<td style="padding:10px 14px;font-weight:700;color:#0f766e;">'+fmt(a.nwp)+'</td>';
+      h += '<td style="padding:10px 14px;color:#334155;">'+a.policies.toLocaleString()+'</td>';
+      h += '<td style="padding:10px 14px;"><span style="color:'+retCol+';font-weight:600;">'+a.retention+'%</span></td>';
+      h += '<td style="padding:10px 14px;color:#334155;">'+a.newBiz+'</td>';
+      h += '<td style="padding:10px 14px;"><span style="color:'+crCol+';font-weight:700;">'+a.crRatio+'%</span></td>';
+      h += '</tr>';
+    });
+    h += '</tbody></table></div>';
+
+    h += '</div>'; /* end outer */
+    return h;
+  }
+  /* ══════════════════════════════════════════════════════════════
+     BUILD PAGE — 6-TAB RENDERER
+     ══════════════════════════════════════════════════════════════ */
+  function _p54buildPage() {
+    var tabs = [
+      { key:'overview',    label:'Overview',     icon:'🏢' },
+      { key:'policy',      label:'Policy Admin', icon:'📄' },
+      { key:'billing',     label:'Billing',      icon:'💳' },
+      { key:'renewals',    label:'Renewals',     icon:'🔄' },
+      { key:'compliance',  label:'Compliance',   icon:'⚖️'  },
+      { key:'reports',     label:'Reports',      icon:'📊' }
+    ];
+
+    /* -- KPI bar data -- */
+    var kpis = [
+      _p54kpi('3,951',  'Active Policies',    OPS54),
+      _p54kpi('$12.5M', 'NWP YTD',            OPS54B),
+      _p54kpi('94.2%',  'Combined Ratio',     OPS54G),
+      _p54kpi('87.4%',  'Retention Rate',     OPS54Y),
+      _p54kpi('$2.1M',  'Premiums Due 30d',   OPS54P),
+      _p54kpi('2',      'Overdue Compliance', OPS54R)
+    ];
+
+    /* -- Register _p8actions for tab switches -- */
+    tabs.forEach(function(t) {
+      window._p8actions['p54tab_' + t.key] = function() {
+        window._p54activeTab = t.key;
+        _p54buildPage();
+      };
+    });
+
+    /* -- Build HTML -- */
+    var html = '';
+
+    /* Header */
+    html += '<div style="background:linear-gradient(135deg,'+OPS54+' 0%,'+OPS54B+' 100%);border-radius:12px 12px 0 0;padding:20px 24px;margin:-20px -20px 0 -20px;">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;">';
+    html += '<div>';
+    html += '<div style="display:flex;align-items:center;gap:10px;">';
+    html += '<span style="font-size:28px;">🏢</span>';
+    html += '<div>';
+    html += '<h2 style="color:#fff;font-size:20px;font-weight:700;margin:0;">P&C Operations Hub</h2>';
+    html += '<p style="color:rgba(255,255,255,.8);font-size:12px;margin:2px 0 0;">Policy Administration · Billing · Renewals · Compliance · Reporting</p>';
+    html += '</div></div></div>';
+    html += '<div style="display:flex;gap:8px;">';
+    html += '<span style="background:rgba(255,255,255,.15);color:#fff;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;border:1px solid rgba(255,255,255,.3);">📅 Jul 17, 2026</span>';
+    html += '<span style="background:#059669;color:#fff;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;">● LIVE</span>';
+    html += '</div></div></div>';
+
+    /* KPI bar */
+    html += '<div style="display:flex;gap:10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:0;padding:14px 20px;margin:0 -20px;flex-wrap:wrap;">';
+    kpis.forEach(function(k) { html += k; });
+    html += '</div>';
+
+    /* Tab bar */
+    html += '<div style="display:flex;gap:2px;border-bottom:2px solid #e2e8f0;margin:16px 0 0;overflow-x:auto;">';
+    tabs.forEach(function(t) {
+      var active = (window._p54activeTab === t.key);
+      var ts = active
+        ? 'background:#fff;border:2px solid #e2e8f0;border-bottom:2px solid #fff;border-radius:8px 8px 0 0;color:'+OPS54+';font-weight:700;margin-bottom:-2px;padding:10px 18px;cursor:pointer;font-size:12px;white-space:nowrap;'
+        : 'background:transparent;border:none;color:#64748b;padding:10px 18px;cursor:pointer;font-size:12px;white-space:nowrap;border-radius:8px 8px 0 0;';
+      html += '<button onclick="_p8run(\'p54tab_'+t.key+'\')" style="'+ts+'">'+t.icon+' '+t.label+'</button>';
+    });
+    html += '</div>';
+
+    /* Tab body */
+    html += '<div style="background:#fff;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 12px 12px;padding:20px;min-height:520px;">';
+    if      (window._p54activeTab === 'overview')   html += _p54tabOverview();
+    else if (window._p54activeTab === 'policy')     html += _p54tabPolicyAdmin();
+    else if (window._p54activeTab === 'billing')    html += _p54tabBilling();
+    else if (window._p54activeTab === 'renewals')   html += _p54tabRenewals();
+    else if (window._p54activeTab === 'compliance') html += _p54tabCompliance();
+    else if (window._p54activeTab === 'reports')    html += _p54tabReports();
+    html += '</div>';
+
+    /* Footer */
+    html += '<div style="text-align:center;padding:12px 0 4px;color:#94a3b8;font-size:11px;">';
+    html += 'P&C Operations Hub · Agent360 · Phase 54 · 3,951 Policies · $12.5M NWP YTD';
+    html += '</div>';
+
+    document.getElementById('page-content').innerHTML = html;
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     NAV INJECTION — "Operations Hub" under P&C Platform section
+     ══════════════════════════════════════════════════════════════ */
+  function _p54injectNav() {
+    if (document.querySelector('.p54-pc-ops-nav')) return true;
+
+    /* Anchor: prefer the Claims nav item injected by P53 */
+    var anchor = document.querySelector('.p53-pc-claims-nav')
+      || document.querySelector('.p7-nav-group.nav-grp-tpa')
+      || document.querySelector('.mod-roadmap-nav')
+      || document.querySelector('.data-ai-nav');
+    if (!anchor) return false;
+
+    var opsItem = document.createElement('div');
+    opsItem.className = 'p54-pc-ops-nav';
+    opsItem.setAttribute('style',
+      'display:flex;align-items:center;gap:8px;padding:7px 14px 7px 28px;' +
+      'cursor:pointer;border-radius:6px;margin:2px 6px;transition:background .15s;' +
+      'font-size:12px;color:#e2e8f0;');
+    opsItem.innerHTML =
+      '<span style="background:#0f766e;color:#fff;font-size:9px;font-weight:700;' +
+      'padding:1px 5px;border-radius:3px;letter-spacing:.5px;">P&C</span>' +
+      '<span>Operations Hub</span>';
+    opsItem.onmouseenter = function(){ this.style.background='rgba(255,255,255,.08)'; };
+    opsItem.onmouseleave = function(){ this.style.background=''; };
+    opsItem.onclick = function(){ window.navigateTo('pc-ops'); };
+
+    /* Insert after Claims nav item; fallback: insertAfter anchor */
+    if (anchor.nextSibling) {
+      anchor.parentNode.insertBefore(opsItem, anchor.nextSibling);
+    } else {
+      anchor.parentNode.appendChild(opsItem);
+    }
+    return true;
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     navigateTo OVERRIDE
+     ══════════════════════════════════════════════════════════════ */
+  var _p54origNav = window.navigateTo;
+  window.navigateTo = function(page) {
+    if (page === 'pc-ops') {
+      _p54buildPage();
+      return;
+    }
+    if (_p54origNav) _p54origNav(page);
+  };
+
+  /* ══════════════════════════════════════════════════════════════
+     INIT — retry + MutationObserver
+     ══════════════════════════════════════════════════════════════ */
+  if (!window._p54activeTab) window._p54activeTab = 'overview';
+
+  (function _p54init() {
+    var MAX_MS = 15000, START = Date.now(), obs;
+    function tryInject() {
+      if (_p54injectNav()) { if (obs) obs.disconnect(); return; }
+      if (Date.now() - START > MAX_MS) return;
+      if (typeof MutationObserver !== 'undefined' && !obs) {
+        obs = new MutationObserver(function(){ tryInject(); });
+        obs.observe(document.body || document.documentElement, { childList:true, subtree:true });
+      }
+      setTimeout(tryInject, 600);
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', tryInject);
+    } else {
+      tryInject();
+    }
+  })();
+
+  console.log('[P54] P&C Operations Hub loaded · 3,951 policies · 6 tabs · pc-ops route');
+})();
