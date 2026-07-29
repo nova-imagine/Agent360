@@ -106794,3 +106794,611 @@ var navigateTo=window.navigateTo;
 
   console.log('[P57] P&C Analytics Hub loaded · 6 LoB · CL+BF triangles · 10 CAT events · pc-analytics route');
 })();
+/* ============================================================
+   PHASE 58 — ONTOLOGY & KG VISUAL REDESIGN (5th slide style)
+   White/light background · Violet brand · OWL stats cards
+   vis-network force graph · Labeled edges · 5 tabs
+   Overrides _p22buildPage (supersedes P49 dark canvas)
+   ============================================================ */
+(function () {
+  'use strict';
+
+  /* ── Brand colors (5th slide: violet purple theme) ──────── */
+  var KG58  = '#7c3aed';   /* primary violet */
+  var KG58B = '#6d28d9';   /* darker violet */
+  var KG58L = '#8b5cf6';   /* lighter violet */
+  var KG58T = '#ede9fe';   /* violet tint bg */
+  var KG58S = '#f5f3ff';   /* very light violet surface */
+  var TEAL  = '#0d9488';
+  var AMBER = '#d97706';
+  var ROSE  = '#e11d48';
+  var GRN   = '#059669';
+  var BLUE  = '#2563eb';
+  var PUR   = '#7c3aed';
+  var ORG   = '#ea580c';
+
+  /* ── 15 KG nodes matching 5th slide palette ─────────────── */
+  var _p58nodes = [
+    { id:'N01', label:'Advisor Chen',      type:'Advisor',     color:ORG,   x:52, y:18, size:22 },
+    { id:'N02', label:'Sylvia Torres',     type:'Client',      color:PUR,   x:32, y:22, size:20 },
+    { id:'N03', label:'Margaret Chen',     type:'Client',      color:PUR,   x:50, y:52, size:22 },
+    { id:'N04', label:'Robert Kincaid',    type:'Client',      color:PUR,   x:72, y:30, size:20 },
+    { id:'N05', label:'LTC Policy P-3',    type:'Policy',      color:ROSE,  x:64, y:48, size:20 },
+    { id:'N06', label:'LTC Policy P-2',    type:'Policy',      color:ROSE,  x:34, y:60, size:19 },
+    { id:'N07', label:'Dorothy Harrin',    type:'Client',      color:PUR,   x:22, y:72, size:18 },
+    { id:'N08', label:'Care Provider',     type:'Provider',    color:GRN,   x:20, y:50, size:19 },
+    { id:'N09', label:'Care Provider',     type:'Provider',    color:GRN,   x:76, y:72, size:18 },
+    { id:'N10', label:'Claim CLM-041',     type:'Claim',       color:AMBER, x:24, y:36, size:19 },
+    { id:'N11', label:'Benefit LTC-00',    type:'Benefit',     color:BLUE,  x:50, y:70, size:18 },
+    { id:'N12', label:'Care Episode 1',    type:'CareEvent',   color:TEAL,  x:36, y:82, size:17 },
+    { id:'N13', label:'HAL Life P-301',    type:'HALPolicy',   color:TEAL,  x:82, y:52, size:18 },
+    { id:'N14', label:'Annuity P-361',     type:'Annuity',     color:TEAL,  x:76, y:86, size:17 },
+    { id:'N15', label:'Frank & Gloria',    type:'Client',      color:PUR,   x:62, y:80, size:18 }
+  ];
+
+  /* ── 14 edges with relationship labels ──────────────────── */
+  var _p58edges = [
+    { from:'N01', to:'N02', label:'managedBy' },
+    { from:'N01', to:'N03', label:'managedBy' },
+    { from:'N01', to:'N04', label:'managedBy' },
+    { from:'N04', to:'N05', label:'isClaiman\u2026' },
+    { from:'N03', to:'N05', label:'hasClaim' },
+    { from:'N03', to:'N06', label:'hasClaim' },
+    { from:'N06', to:'N08', label:'providedBy' },
+    { from:'N06', to:'N11', label:'hasClaim' },
+    { from:'N11', to:'N06', label:'coveredBy' },
+    { from:'N07', to:'N06', label:'coveredBy' },
+    { from:'N07', to:'N12', label:'relatedCareFrom' },
+    { from:'N11', to:'N12', label:'isEligibleFor' },
+    { from:'N15', to:'N13', label:'holdsPolicies' },
+    { from:'N15', to:'N14', label:'holdsPolicies' }
+  ];
+
+  /* ── OWL Class definitions ───────────────────────────────── */
+  var _p58owlClasses = [
+    { name:'Person',           sub:['Claimant','PolicyHolder','Agent','Beneficiary'],   props:['firstName','lastName','dob','taxId'],       desc:'Root class for all natural persons in the ontology' },
+    { name:'Claimant',         sub:['LTCClaimant','HALClaimant'],                       props:['claimantId','adlScore','mmseScore'],         desc:'Person actively receiving benefit payments under a policy' },
+    { name:'PolicyHolder',     sub:['LTCPolicyHolder','HALPolicyHolder'],               props:['policyHolderId','premiumStatus'],            desc:'Person who owns and pays premiums for an insurance policy' },
+    { name:'Agent',            sub:['LicensedAgent','ProducingAgent'],                  props:['agentId','npn','licenseState'],              desc:'Licensed financial professional managing client relationships' },
+    { name:'Policy',           sub:['LTCPolicy','HALPolicy','AnnuityPolicy'],           props:['policyId','issueDate','premium','status'],   desc:'Abstract insurance contract issued by a carrier' },
+    { name:'LTCPolicy',        sub:[],                                                  props:['dailyBenefit','eliminationPeriod','inflationRider'], desc:'Long-term care insurance policy with ADL-based triggers' },
+    { name:'HALPolicy',        sub:['LifePolicy','DisabilityPolicy'],                   props:['faceAmount','csvAmount','deathBenefit'],     desc:'Health, Annuity & Life policy class hierarchy' },
+    { name:'Claim',            sub:['LTCClaim','HALClaim','DIClaim'],                   props:['claimId','filedDate','status','amount'],     desc:'Formal demand for benefits under a policy' },
+    { name:'CareEvent',        sub:['NursingHomeStay','HomeCareVisit','ALFAdmission'],  props:['eventId','startDate','provider','cost'],     desc:'Discrete care delivery event tied to a LTC claim' },
+    { name:'Provider',         sub:['SNFProvider','HomeCareAgency','ALFProvider'],      props:['npi','name','licenseState','taxonomy'],      desc:'Healthcare or care services organization' },
+    { name:'Benefit',          sub:['LTCBenefit','RiderBenefit'],                       props:['benefitId','dailyMax','poolAmount','paid'],  desc:'Contractual benefit entitlement from a policy' },
+    { name:'Carrier',          sub:['LTCCarrier','LifeCarrier'],                        props:['naic','name','rating','hq'],                desc:'Insurance company underwriting and administering policies' }
+  ];
+
+  /* ── Object properties ───────────────────────────────────── */
+  var _p58properties = [
+    { name:'hasClaim',        domain:'Policy',      range:'Claim',      card:'0..*', desc:'Links a policy to its associated claims' },
+    { name:'managedBy',       domain:'PolicyHolder',range:'Agent',      card:'1..1', desc:'Associates a client with their licensed advisor' },
+    { name:'providedBy',      domain:'CareEvent',   range:'Provider',   card:'1..1', desc:'Connects a care event to the delivering provider' },
+    { name:'coveredBy',       domain:'CareEvent',   range:'Policy',     card:'1..1', desc:'Links a care episode to the covering policy' },
+    { name:'isClaiman\u2026', domain:'Claim',       range:'Claimant',   card:'1..1', desc:'Identifies the beneficiary of a claim' },
+    { name:'holdsPolicies',   domain:'PolicyHolder',range:'Policy',     card:'0..*', desc:'Enumerates all policies owned by a person' },
+    { name:'isEligibleFor',   domain:'Claimant',    range:'Benefit',    card:'0..*', desc:'SWRL-derived — fires when ADL ≥ 2 triggers LTC benefit' },
+    { name:'relatedCareFrom', domain:'Claimant',    range:'CareEvent',  card:'0..*', desc:'Chains care episodes to the claimant timeline' },
+    { name:'underwrittenBy',  domain:'Policy',      range:'Carrier',    card:'1..1', desc:'Associates each policy with its issuing carrier' },
+    { name:'filedBy',         domain:'Claim',       range:'Agent',      card:'0..1', desc:'Agent who submitted the claim on behalf of client' }
+  ];
+
+  /* ── SWRL Rules ──────────────────────────────────────────── */
+  var _p58swrlRules = [
+    {
+      id:'SWRL-01', name:'LTC Benefit Trigger', priority:'Critical', fires:847,
+      condition:'Person(?p) ∧ hasPolicy(?p,?pol) ∧ LTCPolicy(?pol) ∧ adlScore(?p,?adl) ∧ swrlb:greaterThanOrEqual(?adl,2)',
+      conclusion:'isEligibleFor(?p,?benefit) ∧ benefitStatus(?pol,"ACTIVE")',
+      description:'Fires when a claimant reaches ADL impairment threshold of 2+. Automatically activates LTC benefit status and notifies the care management team within 4 hours.',
+      tags:['LTC','ADL','Benefit','Auto-Activate']
+    },
+    {
+      id:'SWRL-02', name:'Lapse Risk Alert', priority:'High', fires:312,
+      condition:'Person(?p) ∧ hasPolicy(?p,?pol) ∧ LTCPolicy(?pol) ∧ daysSinceLastContact(?p,?d) ∧ swrlb:greaterThan(?d,90)',
+      conclusion:'lapseRisk(?pol,"HIGH") ∧ sendAlert(?p,"LapseWarning")',
+      description:'Triggers when a claimant has had no contact for over 90 days during active claim. Fires outreach sequence to prevent unintended policy lapse.',
+      tags:['LTC','Lapse','Alert','Outreach']
+    },
+    {
+      id:'SWRL-03', name:'Cross-Sell Priority', priority:'Medium', fires:194,
+      condition:'Person(?p) ∧ hasPolicy(?p,?pol) ∧ LTCPolicy(?pol) ∧ hasNOPolicy(?p,"AnnuityPolicy") ∧ age(?p,?a) ∧ swrlb:greaterThan(?a,55)',
+      conclusion:'crossSellPriority(?p,"ANNUITY") ∧ notifyAgent(?p)',
+      description:'Identifies LTC policyholders over 55 without an annuity. Fires agent notification for income-gap conversation at next review.',
+      tags:['Cross-Sell','Annuity','Age-55+','Agent-Alert']
+    },
+    {
+      id:'SWRL-04', name:'Compliance Flag', priority:'High', fires:89,
+      condition:'Claim(?c) ∧ filedDate(?c,?fd) ∧ lastAcknowledgment(?c,?la) ∧ swrlb:daysDiff(?fd,?la,?diff) ∧ swrlb:greaterThan(?diff,15)',
+      conclusion:'slaBreachRisk(?c,"BREACH") ∧ escalateTo(?c,"ComplianceTeam")',
+      description:'Fires when claim acknowledgment exceeds 15-day statutory window per NY Ins Law §3224-a. Auto-escalates to compliance team with regulatory filing prep.',
+      tags:['SLA','Compliance','NY-Law','Auto-Escalate']
+    }
+  ];
+  /* ── Relationship Paths ──────────────────────────────────── */
+  var _p58relPaths = [
+    {
+      name:'LTC Benefit Activation Path', hops:4,
+      path:['PolicyHolder','→ holdsPolicies →','LTCPolicy','→ hasClaim →','LTCClaim','→ isClaiman\u2026 →','Claimant','→ isEligibleFor →','LTCBenefit'],
+      gremlin:"g.V().hasLabel('PolicyHolder').out('holdsPolicies').hasLabel('LTCPolicy').out('hasClaim').out('isClaimant').out('isEligibleFor')",
+      ms:'8ms', useCase:'Activate benefit and notify care team when ADL threshold met'
+    },
+    {
+      name:'Care Episode Provider Chain', hops:3,
+      path:['Claimant','→ relatedCareFrom →','CareEvent','→ providedBy →','Provider','→ coveredBy →','LTCPolicy'],
+      gremlin:"g.V().hasLabel('Claimant').out('relatedCareFrom').out('providedBy').path()",
+      ms:'6ms', useCase:'Validate provider NPI and billing against active policy coverage'
+    },
+    {
+      name:'Agent Portfolio Full View', hops:2,
+      path:['Agent','← managedBy ←','PolicyHolder','→ holdsPolicies →','Policy'],
+      gremlin:"g.V().hasLabel('Agent').in('managedBy').out('holdsPolicies').dedup()",
+      ms:'5ms', useCase:'Aggregate all client policies for advisor book-of-business reporting'
+    },
+    {
+      name:'Cross-Carrier Compliance Check', hops:3,
+      path:['Policy','→ underwrittenBy →','Carrier','→ hasClaim →','Claim','→ slaBreachRisk →','ComplianceAlert'],
+      gremlin:"g.V().hasLabel('Policy').out('underwrittenBy').out('hasClaim').has('slaBreachRisk','BREACH')",
+      ms:'11ms', useCase:'Multi-carrier SLA compliance sweep for regulatory reporting'
+    },
+    {
+      name:'Income Gap Cross-Sell Path', hops:2,
+      path:['PolicyHolder','→ crossSellPriority →','ANNUITY','← notifyAgent →','Agent'],
+      gremlin:"g.V().hasLabel('PolicyHolder').has('crossSellPriority','ANNUITY').out('managedBy')",
+      ms:'4ms', useCase:'Surface annuity cross-sell opportunities to agents via SWRL-03'
+    }
+  ];
+
+  /* ── Build Guide Steps ──────────────────────────────────── */
+  var _p58buildSteps = [
+    { step:1, title:'Define OWL 2 DL Ontology', icon:'fa-sitemap', color:KG58,
+      tools:['Protégé 5.6','OWL 2 DL','Manchester Syntax'],
+      desc:'Author 12 OWL classes with subclass hierarchies, 10 object/datatype properties with cardinality constraints. Validate with HermiT reasoner. Export as RDF/XML for Purview ingestion.',
+      artifact:'ontology.owl (RDF/XML) · 12 classes · 10 properties · 4 SWRL rules · HermiT validated' },
+    { step:2, title:'Provision Cosmos DB Gremlin API', icon:'fa-database', color:BLUE,
+      tools:['Azure Cosmos DB','Gremlin API','ARM Template'],
+      desc:'Create Cosmos DB account with Gremlin API. Configure throughput (400 RU/s dev, 4000 RU/s prod). Create graph database "AgentKG" with container "entities" and partition key /entityType.',
+      artifact:'cosmos-db.bicep · Graph: AgentKG · Container: entities · Partition: /entityType' },
+    { step:3, title:'Ingest Vertices & Edges', icon:'fa-upload', color:GRN,
+      tools:['Python gremlinpython','Azure Data Factory','dbt'],
+      desc:'Map OWL classes → Gremlin vertex labels. Map OWL properties → edge labels. Bulk ingest 15 vertices + 14 edges from dbt Gold layer using gremlinpython. Validate traversal queries.',
+      artifact:'ingest_kg.py · 15 vertices · 14 edges · dbt source binding confirmed' },
+    { step:4, title:'Register in Microsoft Purview', icon:'fa-book', color:'#742774',
+      tools:['Microsoft Purview','Data Map','Schema Registry'],
+      desc:'Connect Purview to Cosmos DB Gremlin endpoint via Azure IR. Auto-discover graph schema. Map OWL ontology classes to Purview entity types. Enable lineage from dbt → Cosmos DB.',
+      artifact:'Purview Data Map: 12 entity types · 10 lineage paths · dbt lineage active · sub-12ms scan' },
+    { step:5, title:'Deploy SWRL Inference Engine', icon:'fa-gavel', color:AMBER,
+      tools:['Apache Jena','SWRL API','Azure Functions'],
+      desc:'Package SWRL rules as Azure Function triggers. Wire Cosmos DB change feed → Function → Jena OWL reasoner → write inferred triples back to graph. Monitor rule firing metrics in App Insights.',
+      artifact:'swrl-engine.zip · 4 rules deployed · 847+312+194+89 daily firings · App Insights dashboard' },
+    { step:6, title:'Expose Gremlin Query API', icon:'fa-code', color:TEAL,
+      tools:['Hono + Cloudflare Workers','gremlinpython','Azure API Management'],
+      desc:'Build REST API on Hono/Workers that translates frontend traversal requests into Gremlin queries. Secure with Azure AD OAuth 2.0. Cache hot traversals in Cloudflare KV (5-minute TTL).',
+      artifact:'workers/kg-api.ts · 5 traversal endpoints · KV cache 5min TTL · <12ms P50 · APIM policy' }
+  ];
+
+  /* ── node type → color lookup ────────────────────────────── */
+  function _p58nodeColor(type) {
+    var map = {
+      Advisor:ORG, Client:PUR, Policy:ROSE, LTCPolicy:ROSE, HALPolicy:TEAL,
+      Provider:GRN, Agent:ORG, Claim:AMBER, CareEvent:TEAL, Benefit:BLUE,
+      Carrier:'#1e3a5f', Annuity:TEAL, HALPolicy:TEAL
+    };
+    return map[type] || '#64748b';
+  }
+
+  /* ── Knowledge Graph tab — vis-network style interactive SVG */
+  function _p58graphTab() {
+    var W = 720, H = 500;
+
+    /* compute pixel positions */
+    var nodePos = {};
+    _p58nodes.forEach(function(n){
+      nodePos[n.id] = { x: n.x / 100 * W, y: n.y / 100 * H };
+    });
+
+    /* draw edges first (behind nodes) */
+    var edgeSvg = _p58edges.map(function(e) {
+      var fp = nodePos[e.from], tp = nodePos[e.to];
+      if (!fp || !tp) return '';
+      /* midpoint for label, offset slightly above the line */
+      var mx = (fp.x + tp.x) / 2;
+      var my = (fp.y + tp.y) / 2 - 7;
+      /* shorten line by node radius to avoid overlap with node circle */
+      var dx = tp.x - fp.x, dy = tp.y - fp.y;
+      var len = Math.sqrt(dx*dx + dy*dy) || 1;
+      var r = 16;
+      var sx = fp.x + dx/len*r, sy = fp.y + dy/len*r;
+      var ex = tp.x - dx/len*r, ey = tp.y - dy/len*r;
+      return '<line x1="'+sx+'" y1="'+sy+'" x2="'+ex+'" y2="'+ey+'"'
+        +' stroke="#cbd5e1" stroke-width="1.4" marker-end="url(#arr58)" opacity="0.8"/>  '
+        +'<rect x="'+(mx-e.label.length*3.1)+'" y="'+(my-7)+'" width="'+(e.label.length*6.2+4)+'" height="11" rx="3" fill="rgba(255,255,255,0.85)"/>'
+        +'<text x="'+mx+'" y="'+my+'" text-anchor="middle" font-size="7.5" fill="#7c3aed"'
+        +' font-family="Inter,sans-serif" font-weight="600" font-style="italic">'+e.label+'</text>';
+    }).join('');
+
+    /* draw nodes */
+    var nodeSvg = _p58nodes.map(function(n) {
+      var p = nodePos[n.id];
+      var col = _p58nodeColor(n.type);
+      var r = n.size || 18;
+      var k = 'p58-node-'+n.id;
+      window._p8actions[k] = function(){ _p58showNodeDetail(n); };
+      var shortLabel = n.label.length > 15 ? n.label.slice(0,14)+'…' : n.label;
+      return '<g onclick="_p8run(\''+k+'\')" style="cursor:pointer" class="p58-node">'
+        +'<circle cx="'+p.x+'" cy="'+p.y+'" r="'+(r+5)+'" fill="'+col+'" opacity="0.12"/>'
+        +'<circle cx="'+p.x+'" cy="'+p.y+'" r="'+r+'" fill="'+col+'" stroke="#ffffff" stroke-width="2.5"/>'
+        +'<text x="'+p.x+'" y="'+(p.y+4)+'" text-anchor="middle" font-size="7" fill="#fff"'
+        +' font-weight="700" font-family="Inter,sans-serif">'+n.type.slice(0,4).toUpperCase()+'</text>'
+        +'<text x="'+p.x+'" y="'+(p.y+r+13)+'" text-anchor="middle" font-size="8.5" fill="#374151"'
+        +' font-weight="600" font-family="Inter,sans-serif">'+shortLabel+'</text>'
+        +'</g>';
+    }).join('');
+
+    /* legend row */
+    var legendTypes = ['Advisor','Client','Policy','Provider','Claim','Benefit','CareEvent','Annuity'];
+    var legendSvg = legendTypes.map(function(t){
+      return '<div style="display:flex;align-items:center;gap:5px;font-size:10px;color:#475569;font-weight:500">'
+        +'<div style="width:11px;height:11px;border-radius:50%;background:'+_p58nodeColor(t)+';flex-shrink:0"></div>'+t+'</div>';
+    }).join('');
+
+    return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06)">'
+      +'<div style="padding:12px 18px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;background:#fafafa">'
+      +'<span style="font-size:13px;font-weight:700;color:#0f172a">'
+      +'<i class="fas fa-project-diagram" style="color:'+KG58+';margin-right:8px"></i>'
+      +'Knowledge Graph Explorer — 15 nodes · 14 edges · Cosmos DB Gremlin API</span>'
+      +'<span style="font-size:11px;color:#94a3b8">Click any node to explore</span>'
+      +'</div>'
+      +'<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:'+H+'px;background:#f8fafc">'
+      +'<defs>'
+      +'<marker id="arr58" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">'
+      +'<path d="M0,0.5 L6,3.5 L0,6.5 Z" fill="#94a3b8"/></marker>'
+      +'</defs>'
+      +'<rect width="100%" height="100%" fill="#f8fafc"/>'
+      +edgeSvg
+      +nodeSvg
+      +'</svg>'
+      +'<div style="padding:10px 18px;border-top:1px solid #f1f5f9;background:#fafafa;display:flex;gap:10px;flex-wrap:wrap;align-items:center">'
+      +'<span style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;margin-right:4px">LEGEND</span>'
+      +legendSvg
+      +'</div>'
+      +'</div>';
+  }
+  /* ── Node detail side drawer ─────────────────────────────── */
+  function _p58showNodeDetail(n) {
+    var existing = document.getElementById('_p58drawer');
+    if (existing) existing.remove();
+    var col = _p58nodeColor(n.type);
+    var drawer = document.createElement('div');
+    drawer.id = '_p58drawer';
+    drawer.style.cssText = 'position:fixed;top:0;right:0;width:340px;height:100vh;background:#fff;'
+      +'box-shadow:-4px 0 24px rgba(0,0,0,0.14);z-index:9999;overflow-y:auto;font-family:Inter,sans-serif;'
+      +'border-left:3px solid '+col;
+    drawer.innerHTML =
+      '<div style="background:'+col+';padding:16px 20px;display:flex;align-items:center;justify-content:space-between">'
+      +'<div style="display:flex;align-items:center;gap:10px">'
+      +'<div style="width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,0.2);'
+      +'display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff">⬤</div>'
+      +'<div><div style="font-size:15px;font-weight:800;color:#fff">'+n.label+'</div>'
+      +'<div style="font-size:11px;color:rgba(255,255,255,0.8)">'+n.type+' · '+n.id+'</div></div>'
+      +'</div>'
+      +'<button onclick="document.getElementById(\'_p58drawer\').remove()" '
+      +'style="background:rgba(255,255,255,0.2);border:none;border-radius:6px;width:30px;height:30px;'
+      +'color:#fff;cursor:pointer;font-size:14px">✕</button>'
+      +'</div>'
+      +'<div style="padding:16px 20px">'
+      +'<div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">NODE INFORMATION</div>'
+      +'<table style="width:100%;border-collapse:collapse;font-size:12px">'
+      +'<tr><td style="padding:5px 0;color:#94a3b8;width:40%">ID</td><td style="color:#0f172a;font-weight:600;text-align:right">'+n.id+'</td></tr>'
+      +'<tr><td style="padding:5px 0;color:#94a3b8">Label</td><td style="color:#0f172a;font-weight:600;text-align:right">'+n.label+'</td></tr>'
+      +'<tr><td style="padding:5px 0;color:#94a3b8">Type</td><td style="text-align:right"><span style="background:'+col+'22;color:'+col+';border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700">'+n.type.toUpperCase()+'</span></td></tr>'
+      +'</table>'
+      +'<div style="margin-top:14px;padding:12px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0">'
+      +'<div style="font-size:11px;font-weight:700;color:'+col+';margin-bottom:6px"><i class="fas fa-code-branch" style="margin-right:4px"></i>GREMLIN TRAVERSAL</div>'
+      +'<code style="font-size:10px;color:#374151;line-height:1.6;display:block">g.V(\''+n.id+'\').bothE().otherV().path()</code>'
+      +'</div>'
+      +'<div style="margin-top:12px;display:flex;gap:8px">'
+      +'<button onclick="document.getElementById(\'_p58drawer\').remove()" '
+      +'style="flex:1;background:'+col+';color:#fff;border:none;border-radius:8px;padding:9px;font-size:11px;font-weight:700;cursor:pointer">'
+      +'<i class="fas fa-external-link-alt" style="margin-right:4px"></i>View 360°</button>'
+      +'<button onclick="document.getElementById(\'_p58drawer\').remove()" '
+      +'style="flex:1;background:#f1f5f9;color:#475569;border:none;border-radius:8px;padding:9px;font-size:11px;font-weight:700;cursor:pointer">'
+      +'<i class="fas fa-project-diagram" style="margin-right:4px"></i>Traverse</button>'
+      +'</div>'
+      +'</div>';
+    document.body.appendChild(drawer);
+    /* close on outside click */
+    setTimeout(function(){
+      document.addEventListener('click', function _closeDrawer(ev){
+        var d = document.getElementById('_p58drawer');
+        if (d && !d.contains(ev.target)) { d.remove(); document.removeEventListener('click',_closeDrawer); }
+      });
+    }, 200);
+  }
+
+  /* ── OWL Ontology tab ─────────────────────────────────────── */
+  function _p58owlTab() {
+    var classCards = _p58owlClasses.map(function(cls, i){
+      var colors = [KG58, BLUE, GRN, TEAL, ROSE, AMBER, KG58B, KG58L, ORG, '#6366f1', '#be185d', '#0f766e'];
+      var col = colors[i % colors.length];
+      return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px;border-left:3px solid '+col+'">'
+        +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">'
+        +'<span style="font-size:13px;font-weight:800;color:#0f172a">'+cls.name+'</span>'
+        +'<span style="background:'+col+'15;color:'+col+';border-radius:4px;padding:1px 7px;font-size:10px;font-weight:700">OWL Class</span>'
+        +'</div>'
+        +'<div style="font-size:11px;color:#64748b;margin-bottom:8px">'+cls.desc+'</div>'
+        +(cls.sub.length ? '<div style="font-size:10px;color:#94a3b8;margin-bottom:4px"><strong style="color:#475569">Subclasses:</strong> '+cls.sub.join(', ')+'</div>' : '')
+        +'<div style="font-size:10px;color:#94a3b8"><strong style="color:#475569">Properties:</strong> '+cls.props.join(', ')+'</div>'
+        +'</div>';
+    }).join('');
+
+    var propRows = _p58properties.map(function(p){
+      return '<tr style="border-bottom:1px solid #f1f5f9">'
+        +'<td style="padding:8px 12px;font-size:12px;font-weight:700;color:'+KG58+'">'+p.name+'</td>'
+        +'<td style="padding:8px 12px;font-size:11px;color:#374151">'+p.domain+'</td>'
+        +'<td style="padding:8px 12px;font-size:11px;color:#374151">'+p.range+'</td>'
+        +'<td style="padding:8px 12px;font-size:11px;color:#94a3b8">'+p.card+'</td>'
+        +'<td style="padding:8px 12px;font-size:11px;color:#64748b">'+p.desc+'</td>'
+        +'</tr>';
+    }).join('');
+
+    return '<div style="display:flex;flex-direction:column;gap:16px">'
+      +'<div>'
+      +'<div style="font-size:13px;font-weight:700;color:#0f172a;margin-bottom:10px"><i class="fas fa-sitemap" style="color:'+KG58+';margin-right:6px"></i>OWL 2 DL Class Hierarchy — 12 Named Classes</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px">'+classCards+'</div>'
+      +'</div>'
+      +'<div>'
+      +'<div style="font-size:13px;font-weight:700;color:#0f172a;margin-bottom:10px"><i class="fas fa-arrows-alt-h" style="color:'+BLUE+';margin-right:6px"></i>Object & Datatype Properties — 10 Properties</div>'
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden">'
+      +'<table style="width:100%;border-collapse:collapse">'
+      +'<thead><tr style="background:#f8fafc">'
+      +'<th style="padding:9px 12px;font-size:11px;font-weight:700;color:#94a3b8;text-align:left">Property</th>'
+      +'<th style="padding:9px 12px;font-size:11px;font-weight:700;color:#94a3b8;text-align:left">Domain</th>'
+      +'<th style="padding:9px 12px;font-size:11px;font-weight:700;color:#94a3b8;text-align:left">Range</th>'
+      +'<th style="padding:9px 12px;font-size:11px;font-weight:700;color:#94a3b8;text-align:left">Cardinality</th>'
+      +'<th style="padding:9px 12px;font-size:11px;font-weight:700;color:#94a3b8;text-align:left">Description</th>'
+      +'</tr></thead>'
+      +'<tbody>'+propRows+'</tbody>'
+      +'</table>'
+      +'</div>'
+      +'</div>'
+      +'</div>';
+  }
+
+  /* ── SWRL Rules tab ───────────────────────────────────────── */
+  function _p58rulesTab() {
+    var priorityColor = { Critical:ROSE, High:AMBER, Medium:GRN };
+    var ruleCards = _p58swrlRules.map(function(r){
+      var pc = priorityColor[r.priority] || '#64748b';
+      return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:18px;border-left:4px solid '+pc+'">'
+        +'<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px">'
+        +'<div>'
+        +'<div style="font-size:10px;font-weight:700;color:#94a3b8;margin-bottom:3px">'+r.id+'</div>'
+        +'<div style="font-size:14px;font-weight:800;color:#0f172a">'+r.name+'</div>'
+        +'</div>'
+        +'<div style="display:flex;gap:6px;align-items:center">'
+        +'<span style="background:'+pc+'15;color:'+pc+';border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700">'+r.priority+'</span>'
+        +'<span style="background:#f1f5f9;color:#475569;border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700"><i class="fas fa-bolt" style="margin-right:3px;font-size:8px"></i>'+r.fires.toLocaleString()+'/day</span>'
+        +'</div>'
+        +'</div>'
+        +'<div style="font-size:11px;color:#64748b;margin-bottom:12px;line-height:1.5">'+r.description+'</div>'
+        +'<div style="background:#f8fafc;border-radius:8px;padding:10px;margin-bottom:10px">'
+        +'<div style="font-size:10px;font-weight:700;color:#7c3aed;margin-bottom:4px">IF (Condition)</div>'
+        +'<code style="font-size:9.5px;color:#374151;line-height:1.6;display:block;white-space:pre-wrap">'+r.condition+'</code>'
+        +'</div>'
+        +'<div style="background:#f0fdf4;border-radius:8px;padding:10px;margin-bottom:10px">'
+        +'<div style="font-size:10px;font-weight:700;color:#059669;margin-bottom:4px">THEN (Conclusion)</div>'
+        +'<code style="font-size:9.5px;color:#374151;line-height:1.6;display:block">'+r.conclusion+'</code>'
+        +'</div>'
+        +'<div style="display:flex;gap:5px;flex-wrap:wrap">'+r.tags.map(function(t){
+          return '<span style="background:'+KG58+'15;color:'+KG58+';border-radius:4px;padding:1px 7px;font-size:9px;font-weight:700">'+t+'</span>';
+        }).join('')+'</div>'
+        +'</div>';
+    }).join('');
+
+    return '<div style="display:flex;flex-direction:column;gap:12px">'
+      +'<div style="background:'+KG58T+';border:1px solid #ddd6fe;border-radius:10px;padding:14px;display:flex;gap:12px;align-items:flex-start">'
+      +'<i class="fas fa-info-circle" style="color:'+KG58+';font-size:18px;margin-top:2px"></i>'
+      +'<div><div style="font-size:13px;font-weight:700;color:#3730a3;margin-bottom:3px">SWRL Rule Engine — Apache Jena + Azure Functions</div>'
+      +'<div style="font-size:11px;color:#4338ca;line-height:1.5">4 rules deployed · 1,442 total daily firings · Triggered via Cosmos DB change feed · Results written back as inferred edges · App Insights monitoring active</div>'
+      +'</div>'
+      +'</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px">'+ruleCards+'</div>'
+      +'</div>';
+  }
+  /* ── Build Guide tab ─────────────────────────────────────── */
+  function _p58buildGuideTab() {
+    var stepCards = _p58buildSteps.map(function(s, i){
+      var toolTags = s.tools.map(function(t){
+        return '<span style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;border-radius:4px;padding:1px 7px;font-size:9.5px;font-weight:600">'+t+'</span>';
+      }).join('');
+      return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;position:relative;overflow:hidden">'
+        +'<div style="position:absolute;top:12px;right:14px;font-size:36px;font-weight:900;color:'+s.color+'10;line-height:1">0'+s.step+'</div>'
+        +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'
+        +'<div style="width:34px;height:34px;border-radius:8px;background:'+s.color+';display:flex;align-items:center;justify-content:center;flex-shrink:0">'
+        +'<i class="fas '+s.icon+'" style="color:#fff;font-size:14px"></i></div>'
+        +'<div>'
+        +'<div style="font-size:10px;font-weight:700;color:#94a3b8">STEP '+s.step+'</div>'
+        +'<div style="font-size:13px;font-weight:800;color:#0f172a">'+s.title+'</div>'
+        +'</div>'
+        +'</div>'
+        +'<div style="font-size:11px;color:#64748b;line-height:1.55;margin-bottom:10px">'+s.desc+'</div>'
+        +'<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px">'+toolTags+'</div>'
+        +'<div style="background:#f8fafc;border-radius:6px;padding:8px 10px;border-left:3px solid '+s.color+'">'
+        +'<div style="font-size:9px;font-weight:700;color:'+s.color+';text-transform:uppercase;margin-bottom:2px">Artifact</div>'
+        +'<div style="font-size:9.5px;color:#475569">'+s.artifact+'</div>'
+        +'</div>'
+        +'</div>';
+    }).join('');
+
+    return '<div style="display:flex;flex-direction:column;gap:14px">'
+      +'<div style="background:linear-gradient(135deg,'+KG58+','+KG58B+');border-radius:12px;padding:18px;color:#fff">'
+      +'<div style="font-size:15px;font-weight:800;margin-bottom:4px"><i class="fas fa-hard-hat" style="margin-right:8px"></i>Agent 360 Knowledge Graph — Build Runbook</div>'
+      +'<div style="font-size:12px;opacity:.88">6-step deployment guide · OWL → Cosmos DB Gremlin → Purview · Azure Functions SWRL engine · Hono/Workers API layer</div>'
+      +'</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px">'+stepCards+'</div>'
+      +'<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:14px">'
+      +'<div style="font-size:12px;font-weight:700;color:#0f172a;margin-bottom:8px"><i class="fas fa-clock" style="color:'+AMBER+';margin-right:6px"></i>Build Timeline</div>'
+      +'<div style="display:flex;gap:0;align-items:stretch;overflow-x:auto">'
+      +['OWL Ontology<br>Week 1','Cosmos DB<br>Week 1','Ingest<br>Week 2','Purview<br>Week 2-3','SWRL Engine<br>Week 3-4','API Layer<br>Week 4'].map(function(label, i){
+        var cols = [KG58, BLUE, GRN, '#742774', AMBER, TEAL];
+        return '<div style="flex:1;min-width:90px;background:'+cols[i]+'15;border:1px solid '+cols[i]+'30;padding:10px;text-align:center">'
+          +'<div style="width:28px;height:28px;border-radius:50%;background:'+cols[i]+';color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;margin:0 auto 6px">'+(i+1)+'</div>'
+          +'<div style="font-size:10px;color:#475569;font-weight:600">'+label+'</div>'
+          +'</div>';
+      }).join('')
+      +'</div>'
+      +'</div>'
+      +'</div>';
+  }
+
+  /* ── Relationship Paths tab ───────────────────────────────── */
+  function _p58relPathsTab() {
+    var pathCards = _p58relPaths.map(function(rp, i){
+      var cols = [KG58, BLUE, GRN, ROSE, AMBER];
+      var col = cols[i % cols.length];
+      var pathHtml = rp.path.map(function(step, si){
+        var isArrow = step.startsWith('→') || step.startsWith('←');
+        if (isArrow) {
+          return '<span style="font-size:10px;color:'+col+';font-weight:700;font-style:italic;padding:0 4px">'+step+'</span>';
+        }
+        return '<span style="background:'+col+'15;color:'+col+';border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700">'+step+'</span>';
+      }).join('');
+      return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px">'
+        +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'
+        +'<div style="font-size:13px;font-weight:800;color:#0f172a">'+rp.name+'</div>'
+        +'<div style="display:flex;gap:6px">'
+        +'<span style="background:'+col+'15;color:'+col+';border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700">'+rp.hops+' hops</span>'
+        +'<span style="background:#f0fdf4;color:#059669;border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700"><i class="fas fa-bolt" style="font-size:8px;margin-right:2px"></i>'+rp.ms+'</span>'
+        +'</div>'
+        +'</div>'
+        +'<div style="font-size:11px;color:#64748b;margin-bottom:10px">'+rp.useCase+'</div>'
+        +'<div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-bottom:10px;background:#f8fafc;border-radius:8px;padding:8px 10px">'+pathHtml+'</div>'
+        +'<div style="background:#0f172a;border-radius:8px;padding:10px">'
+        +'<div style="font-size:9px;font-weight:700;color:#94a3b8;margin-bottom:4px;text-transform:uppercase">Gremlin Query</div>'
+        +'<code style="font-size:10px;color:#a5f3fc;line-height:1.6;display:block;white-space:pre-wrap;word-break:break-all">'+rp.gremlin+'</code>'
+        +'</div>'
+        +'</div>';
+    }).join('');
+
+    return '<div style="display:flex;flex-direction:column;gap:12px">'
+      +'<div style="background:'+KG58T+';border:1px solid #ddd6fe;border-radius:10px;padding:14px;display:flex;gap:12px;align-items:flex-start">'
+      +'<i class="fas fa-route" style="color:'+KG58+';font-size:18px;margin-top:2px"></i>'
+      +'<div><div style="font-size:13px;font-weight:700;color:#3730a3;margin-bottom:3px">5 Pre-Optimized Traversal Paths — Cosmos DB Gremlin API</div>'
+      +'<div style="font-size:11px;color:#4338ca;line-height:1.5">All paths P50 &lt; 12ms · Azure Cosmos DB provisioned throughput 4,000 RU/s · Cached in Cloudflare KV for hot traversals · APIM rate-limited at 1,000 req/min</div>'
+      +'</div>'
+      +'</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px">'+pathCards+'</div>'
+      +'</div>';
+  }
+
+  /* ── Cosmos DB connection indicator (top-right button) ────── */
+  function _p58cosmosBtn() {
+    var k58cos = 'p58-cosmos-connect';
+    window._p8actions[k58cos] = function(){
+      var t = document.getElementById('_p58cosmos-status');
+      if (t) { t.innerHTML = '<i class="fas fa-check-circle" style="color:#059669;margin-right:4px"></i>Connected · wss://agentkg.gremlin.cosmos.azure.com:443/'; }
+    };
+    return '<div style="display:flex;gap:8px;align-items:center">'
+      +'<div id="_p58cosmos-status" style="font-size:10px;color:#7c3aed;font-weight:600">'
+      +'<i class="fas fa-circle" style="color:#d97706;margin-right:4px;font-size:8px"></i>Cosmos DB Gremlin</div>'
+      +'<button onclick="_p8run(\''+k58cos+'\')" style="display:flex;align-items:center;gap:6px;padding:6px 12px;'
+      +'background:'+KG58+';color:#fff;border:none;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer">'
+      +'<i class="fas fa-plug" style="font-size:10px"></i>Cosmos DB Gremlin</button>'
+      +'<button onclick="alert(\'Graph preview: 15 nodes · 14 edges · Cosmos DB Gremlin API\')" '
+      +'style="width:30px;height:30px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:8px;cursor:pointer;color:#475569;font-size:12px">'
+      +'<i class="fas fa-eye"></i></button>'
+      +'</div>';
+  }
+  /* ── Main buildPage override ─────────────────────────────── */
+  var _p58origBuild = window._p22buildPage || function(){};
+  window._p22buildPage = function() {
+    var tabs = ['ontology','graph','rules','build-guide','rel-paths'];
+    var tabLabels = { ontology:'OWL Ontology', graph:'Knowledge Graph', rules:'SWRL Rules', 'build-guide':'Build Guide', 'rel-paths':'Relationship Paths' };
+    var tabIcons  = { ontology:'fas fa-sitemap', graph:'fas fa-project-diagram', rules:'fas fa-gavel', 'build-guide':'fas fa-tools', 'rel-paths':'fas fa-route' };
+
+    var _p58activeTab = window._p58activeTabStore || 'graph';
+
+    /* register tab actions */
+    tabs.forEach(function(t){
+      var k = 'p58-tab-'+t;
+      window._p8actions[k] = function(){ window._p58activeTabStore = t; window._p22buildPage(); };
+    });
+
+    /* tab bar */
+    var tabBar = tabs.map(function(t){
+      var active = t === _p58activeTab;
+      return '<button onclick="_p8run(\'p58-tab-'+t+'\')" style="'
+        +'display:inline-flex;align-items:center;gap:6px;'
+        +'padding:8px 16px;border:2px solid '+(active ? KG58 : '#e2e8f0')+';'
+        +'border-radius:8px;background:'+(active ? KG58 : '#fff')+';'
+        +'color:'+(active ? '#fff' : '#64748b')+';'
+        +'font-weight:700;font-size:12px;cursor:pointer;transition:all .15s">'
+        +'<i class="'+tabIcons[t]+'" style="font-size:11px"></i>'+tabLabels[t]
+        +'</button>';
+    }).join('');
+
+    /* tab body */
+    var body;
+    if      (_p58activeTab === 'graph')       body = _p58graphTab();
+    else if (_p58activeTab === 'ontology')    body = _p58owlTab();
+    else if (_p58activeTab === 'rules')       body = _p58rulesTab();
+    else if (_p58activeTab === 'build-guide') body = _p58buildGuideTab();
+    else if (_p58activeTab === 'rel-paths')   body = _p58relPathsTab();
+    else                                      body = _p58graphTab();
+
+    /* stats card row — matches 5th reference image exactly */
+    var statsCards = [
+      { v:'12', label:'OWL Classes',  color:KG58 },
+      { v:'10', label:'Properties',   color:BLUE },
+      { v:'15', label:'KG Nodes',     color:GRN  },
+      { v:'14', label:'KG Edges',     color:TEAL },
+      { v:'4',  label:'SWRL Rules',   color:AMBER },
+      { v:'5',  label:'C360 Clients', color:ROSE  }
+    ].map(function(s){
+      return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px 18px;flex:1;min-width:80px">'
+        +'<div style="font-size:26px;font-weight:900;color:'+s.color+';line-height:1.1">'+s.v+'</div>'
+        +'<div style="font-size:11px;color:#64748b;margin-top:3px">'+s.label+'</div>'
+        +'</div>';
+    }).join('');
+
+    document.getElementById('page-content').innerHTML =
+      '<div style="padding:20px 24px;background:#f8fafc;min-height:100vh;font-family:Inter,sans-serif">'
+      /* ── Header row ── */
+      +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:12px">'
+      +'<div style="display:flex;align-items:center;gap:12px">'
+      +'<div style="width:40px;height:40px;background:'+KG58+';border-radius:10px;display:flex;align-items:center;justify-content:center">'
+      +'<i class="fas fa-project-diagram" style="color:#fff;font-size:18px"></i></div>'
+      +'<div>'
+      +'<div style="font-size:20px;font-weight:900;color:#0f172a">Ontology &amp; Knowledge Graph</div>'
+      +'<div style="font-size:11px;color:#94a3b8;margin-top:2px">OWL 2 DL ontology · Azure Cosmos DB Gremlin API · Microsoft Purview · 15 nodes · 14 edges · 4 SWRL rules</div>'
+      +'</div>'
+      +'</div>'
+      +_p58cosmosBtn()
+      +'</div>'
+      /* ── Stats cards row ── */
+      +'<div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap">'+statsCards+'</div>'
+      /* ── Tab bar ── */
+      +'<div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap">'+tabBar+'</div>'
+      /* ── Tab body ── */
+      +body
+      /* ── Footer banner ── */
+      +'<div style="margin-top:20px;background:linear-gradient(135deg,'+KG58+','+KG58B+');border-radius:12px;padding:16px 20px;color:#fff;display:flex;align-items:center;gap:16px">'
+      +'<i class="fas fa-project-diagram" style="font-size:28px;opacity:.9"></i>'
+      +'<div>'
+      +'<div style="font-weight:800;font-size:13px">Knowledge Graph — 15 Nodes · 14 Edges · 12 OWL Classes · 4 SWRL Rules</div>'
+      +'<div style="font-size:11px;opacity:.88;margin-top:3px">Azure Cosmos DB Gremlin API · Microsoft Purview · sub-12ms P50 traversal · 5 optimized Gremlin paths · 1,442 daily SWRL firings</div>'
+      +'</div>'
+      +'</div>'
+      +'</div>';
+
+    /* ensure active tab state persists */
+    if (!window._p58activeTabStore) window._p58activeTabStore = 'graph';
+  };
+
+  /* ── Initialize ─────────────────────────────────────────── */
+  if (!window._p58activeTabStore) window._p58activeTabStore = 'graph';
+  /* keep the existing p22 navigateTo hook intact — no nav change needed */
+
+  console.log('[P58] KG redesign loaded · white bg · violet brand · vis-network SVG · labeled edges · 5 tabs · OWL stats cards');
+})();
