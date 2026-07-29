@@ -107402,3 +107402,986 @@ var navigateTo=window.navigateTo;
 
   console.log('[P58] KG redesign loaded · white bg · violet brand · vis-network SVG · labeled edges · 5 tabs · OWL stats cards');
 })();
+/* ============================================================
+   PHASE 59 — KG GRAPH TAB OVERHAUL (vis-network dark canvas)
+   Dark navy · 80+ icon nodes · dense edges · force-directed
+   Replaces _p58graphTab() with vis-network powered canvas
+   ============================================================ */
+(function () {
+  'use strict';
+
+  /* ────────────────────────────────────────────────────────────
+     ENTITY PALETTE  (matches reference images 2 & 3)
+  ──────────────────────────────────────────────────────────── */
+  var ENT = {
+    Advisor:   { color:'#f97316', border:'#fb923c', icon:'\uf007',  fa:'fa-user-tie'   },
+    Client:    { color:'#8b5cf6', border:'#a78bfa', icon:'\uf2be',  fa:'fa-user'       },
+    Carrier:   { color:'#0d9488', border:'#14b8a6', icon:'\uf19c',  fa:'fa-university' },
+    Policy:    { color:'#e11d48', border:'#fb7185', icon:'\uf46d',  fa:'fa-file-contract'},
+    Claim:     { color:'#d97706', border:'#fbbf24', icon:'\uf658',  fa:'fa-file-invoice'},
+    Provider:  { color:'#059669', border:'#34d399', icon:'\uf0f8',  fa:'fa-hospital'   },
+    Benefit:   { color:'#2563eb', border:'#60a5fa', icon:'\uf004',  fa:'fa-hand-holding-usd'},
+    CareEvent: { color:'#0891b2', border:'#22d3ee', icon:'\uf274',  fa:'fa-calendar-check'},
+    Phone:     { color:'#059669', border:'#34d399', icon:'\uf095',  fa:'fa-phone'      },
+    Email:     { color:'#2563eb', border:'#60a5fa', icon:'\uf0e0',  fa:'fa-envelope'   },
+    Address:   { color:'#d97706', border:'#fbbf24', icon:'\uf3c5',  fa:'fa-map-marker-alt'},
+    Account:   { color:'#7c3aed', border:'#a78bfa', icon:'\uf19c',  fa:'fa-landmark'   },
+    SWRL:      { color:'#dc2626', border:'#f87171', icon:'\uf521',  fa:'fa-gavel'      },
+    Document:  { color:'#64748b', border:'#94a3b8', icon:'\uf15c',  fa:'fa-file-alt'   },
+    Annuity:   { color:'#6d28d9', border:'#8b5cf6', icon:'\uf51e',  fa:'fa-chart-line' },
+    Life:      { color:'#be185d', border:'#f472b6', icon:'\uf004',  fa:'fa-heart'      },
+    Compliance:{ color:'#dc2626', border:'#f87171', icon:'\uf3ed',  fa:'fa-shield-alt' },
+    Agent:     { color:'#f97316', border:'#fb923c', icon:'\uf2bb',  fa:'fa-id-badge'   }
+  };
+
+  /* ────────────────────────────────────────────────────────────
+     80+ NODES — Carriers, Advisors, Clients, Policies, Claims,
+     Providers, Benefits, Care Events, Phone/Email/Address leaves
+  ──────────────────────────────────────────────────────────── */
+  var _p59nodes = [
+    /* ── 5 Carriers ── */
+    {id:'C01',label:'Prudential',       type:'Carrier',  group:'carrier'},
+    {id:'C02',label:'MetLife',          type:'Carrier',  group:'carrier'},
+    {id:'C03',label:'Lincoln Nat\'l',   type:'Carrier',  group:'carrier'},
+    {id:'C04',label:'Transamerica',     type:'Carrier',  group:'carrier'},
+    {id:'C05',label:'Mass Mutual',      type:'Carrier',  group:'carrier'},
+
+    /* ── 6 Advisors ── */
+    {id:'A01',label:'Chen, James',      type:'Advisor',  group:'advisor'},
+    {id:'A02',label:'Rivera, Ana',      type:'Advisor',  group:'advisor'},
+    {id:'A03',label:'Okonkwo, David',   type:'Advisor',  group:'advisor'},
+    {id:'A04',label:'Patel, Priya',     type:'Advisor',  group:'advisor'},
+    {id:'A05',label:'Walsh, Kevin',     type:'Advisor',  group:'advisor'},
+    {id:'A06',label:'Nguyen, Lisa',     type:'Advisor',  group:'advisor'},
+
+    /* ── 10 Clients ── */
+    {id:'CL01',label:'Margaret Chen',   type:'Client',   group:'client'},
+    {id:'CL02',label:'Sylvia Torres',   type:'Client',   group:'client'},
+    {id:'CL03',label:'Robert Kincaid',  type:'Client',   group:'client'},
+    {id:'CL04',label:'Dorothy Harrin',  type:'Client',   group:'client'},
+    {id:'CL05',label:'Frank & Gloria',  type:'Client',   group:'client'},
+    {id:'CL06',label:'Harold Simmons',  type:'Client',   group:'client'},
+    {id:'CL07',label:'Patricia Walsh',  type:'Client',   group:'client'},
+    {id:'CL08',label:'James Okafor',    type:'Client',   group:'client'},
+    {id:'CL09',label:'Nancy Friedman',  type:'Client',   group:'client'},
+    {id:'CL10',label:'Victor Espinoza', type:'Client',   group:'client'},
+
+    /* ── 8 LTC Policies ── */
+    {id:'P01',label:'LTC-2026-0101',    type:'Policy',   group:'policy'},
+    {id:'P02',label:'LTC-2026-0102',    type:'Policy',   group:'policy'},
+    {id:'P03',label:'LTC-2026-0103',    type:'Policy',   group:'policy'},
+    {id:'P04',label:'LTC-2026-0104',    type:'Policy',   group:'policy'},
+    {id:'P05',label:'HAL-Life-P301',    type:'Life',     group:'policy'},
+    {id:'P06',label:'HAL-DI-P412',      type:'Policy',   group:'policy'},
+    {id:'P07',label:'Annuity-P361',     type:'Annuity',  group:'policy'},
+    {id:'P08',label:'HAL-Life-P501',    type:'Life',     group:'policy'},
+
+    /* ── 8 Claims ── */
+    {id:'CL11',label:'CLM-2026-041',    type:'Claim',    group:'claim'},
+    {id:'CL12',label:'CLM-2026-087',    type:'Claim',    group:'claim'},
+    {id:'CL13',label:'CLM-2026-099',    type:'Claim',    group:'claim'},
+    {id:'CL14',label:'CLM-2026-112',    type:'Claim',    group:'claim'},
+    {id:'CL15',label:'CLM-2026-134',    type:'Claim',    group:'claim'},
+    {id:'CL16',label:'CLM-2026-158',    type:'Claim',    group:'claim'},
+    {id:'CL17',label:'CLM-2026-201',    type:'Claim',    group:'claim'},
+    {id:'CL18',label:'CLM-2026-224',    type:'Claim',    group:'claim'},
+
+    /* ── 6 Providers ── */
+    {id:'PR01',label:'Sunrise SNF',     type:'Provider', group:'provider'},
+    {id:'PR02',label:'CareFirst Home',  type:'Provider', group:'provider'},
+    {id:'PR03',label:'Harmony ALF',     type:'Provider', group:'provider'},
+    {id:'PR04',label:'Bayview Rehab',   type:'Provider', group:'provider'},
+    {id:'PR05',label:'Premier Memory',  type:'Provider', group:'provider'},
+    {id:'PR06',label:'GoldenAge HC',    type:'Provider', group:'provider'},
+
+    /* ── 6 Benefits ── */
+    {id:'B01',label:'LTC Benefit-001',  type:'Benefit',  group:'benefit'},
+    {id:'B02',label:'LTC Benefit-002',  type:'Benefit',  group:'benefit'},
+    {id:'B03',label:'LTC Benefit-003',  type:'Benefit',  group:'benefit'},
+    {id:'B04',label:'Rider Benefit-A',  type:'Benefit',  group:'benefit'},
+    {id:'B05',label:'Death Benefit-1',  type:'Benefit',  group:'benefit'},
+    {id:'B06',label:'Income Benefit',   type:'Benefit',  group:'benefit'},
+
+    /* ── 6 Care Events ── */
+    {id:'CE01',label:'Care Ep 2026-01', type:'CareEvent',group:'care'},
+    {id:'CE02',label:'Care Ep 2026-02', type:'CareEvent',group:'care'},
+    {id:'CE03',label:'Care Ep 2026-03', type:'CareEvent',group:'care'},
+    {id:'CE04',label:'SNF Admit-0401',  type:'CareEvent',group:'care'},
+    {id:'CE05',label:'Home Visit-0501', type:'CareEvent',group:'care'},
+    {id:'CE06',label:'ALF Move-0601',   type:'CareEvent',group:'care'},
+
+    /* ── 4 SWRL Rules ── */
+    {id:'SW01',label:'SWRL: Benefit Trigger',  type:'SWRL', group:'swrl'},
+    {id:'SW02',label:'SWRL: Lapse Risk',       type:'SWRL', group:'swrl'},
+    {id:'SW03',label:'SWRL: Cross-Sell',       type:'SWRL', group:'swrl'},
+    {id:'SW04',label:'SWRL: Compliance Flag',  type:'SWRL', group:'swrl'},
+
+    /* ── 4 Compliance nodes ── */
+    {id:'CO01',label:'NY §3224-a SLA',  type:'Compliance',group:'compliance'},
+    {id:'CO02',label:'NAIC Model Reg',  type:'Compliance',group:'compliance'},
+    {id:'CO03',label:'Reg BI Check',    type:'Compliance',group:'compliance'},
+    {id:'CO04',label:'AML/KYC Screen',  type:'Compliance',group:'compliance'},
+
+    /* ── Phone leaf nodes (12) ── */
+    {id:'PH01',label:'(212) 555-0101', type:'Phone', group:'leaf'},
+    {id:'PH02',label:'(646) 555-0202', type:'Phone', group:'leaf'},
+    {id:'PH03',label:'(718) 555-0303', type:'Phone', group:'leaf'},
+    {id:'PH04',label:'(201) 555-0404', type:'Phone', group:'leaf'},
+    {id:'PH05',label:'(917) 555-0505', type:'Phone', group:'leaf'},
+    {id:'PH06',label:'(732) 555-0606', type:'Phone', group:'leaf'},
+    {id:'PH07',label:'(516) 555-0707', type:'Phone', group:'leaf'},
+    {id:'PH08',label:'(631) 555-0808', type:'Phone', group:'leaf'},
+    {id:'PH09',label:'(973) 555-0909', type:'Phone', group:'leaf'},
+    {id:'PH10',label:'(203) 555-1010', type:'Phone', group:'leaf'},
+    {id:'PH11',label:'(845) 555-1111', type:'Phone', group:'leaf'},
+    {id:'PH12',label:'(914) 555-1212', type:'Phone', group:'leaf'},
+
+    /* ── Email leaf nodes (10) ── */
+    {id:'EM01',label:'m.chen@email.com',    type:'Email', group:'leaf'},
+    {id:'EM02',label:'s.torres@email.com',  type:'Email', group:'leaf'},
+    {id:'EM03',label:'r.kincaid@email.com', type:'Email', group:'leaf'},
+    {id:'EM04',label:'d.harrin@email.com',  type:'Email', group:'leaf'},
+    {id:'EM05',label:'chen.j@nyl.com',      type:'Email', group:'leaf'},
+    {id:'EM06',label:'rivera.a@nyl.com',    type:'Email', group:'leaf'},
+    {id:'EM07',label:'h.simmons@email.com', type:'Email', group:'leaf'},
+    {id:'EM08',label:'v.espinoza@mail.com', type:'Email', group:'leaf'},
+    {id:'EM09',label:'j.okafor@email.com',  type:'Email', group:'leaf'},
+    {id:'EM10',label:'n.friedman@mail.com', type:'Email', group:'leaf'},
+
+    /* ── Address leaf nodes (8) ── */
+    {id:'AD01',label:'51 Madison Ave, NY',  type:'Address',group:'leaf'},
+    {id:'AD02',label:'120 Park Ave, NY',    type:'Address',group:'leaf'},
+    {id:'AD03',label:'88 Pine St, NJ',      type:'Address',group:'leaf'},
+    {id:'AD04',label:'400 Main St, CT',     type:'Address',group:'leaf'},
+    {id:'AD05',label:'22 Oak Dr, NY',       type:'Address',group:'leaf'},
+    {id:'AD06',label:'9 Harbor Blvd, NJ',   type:'Address',group:'leaf'},
+    {id:'AD07',label:'77 Forest Rd, CT',    type:'Address',group:'leaf'},
+    {id:'AD08',label:'5 Maple Ave, NY',     type:'Address',group:'leaf'},
+
+    /* ── Documents (6) ── */
+    {id:'DO01',label:'Policy Contract',    type:'Document',group:'doc'},
+    {id:'DO02',label:'ADV Part 2',         type:'Document',group:'doc'},
+    {id:'DO03',label:'Free-Look Ack',      type:'Document',group:'doc'},
+    {id:'DO04',label:'Claim Form 837',     type:'Document',group:'doc'},
+    {id:'DO05',label:'SLA Report',         type:'Document',group:'doc'},
+    {id:'DO06',label:'Suitability Form',   type:'Document',group:'doc'},
+
+    /* ── Accounts (4) ── */
+    {id:'ACC01',label:'IRA Rollover Acct', type:'Account',group:'account'},
+    {id:'ACC02',label:'Taxable Acct',      type:'Account',group:'account'},
+    {id:'ACC03',label:'Bond Sleeve',       type:'Account',group:'account'},
+    {id:'ACC04',label:'Premium Billing',   type:'Account',group:'account'}
+  ];
+
+  /* ────────────────────────────────────────────────────────────
+     EDGES — rich relational web
+  ──────────────────────────────────────────────────────────── */
+  var _p59edges = [
+    /* Carrier → underwrites Policy */
+    {from:'C01',to:'P01',label:'underwrites'},{from:'C01',to:'P02',label:'underwrites'},
+    {from:'C02',to:'P03',label:'underwrites'},{from:'C02',to:'P05',label:'underwrites'},
+    {from:'C03',to:'P04',label:'underwrites'},{from:'C03',to:'P06',label:'underwrites'},
+    {from:'C04',to:'P07',label:'underwrites'},{from:'C05',to:'P08',label:'underwrites'},
+
+    /* Advisor → manages Client */
+    {from:'A01',to:'CL01',label:'managedBy'},{from:'A01',to:'CL02',label:'managedBy'},
+    {from:'A02',to:'CL03',label:'managedBy'},{from:'A02',to:'CL04',label:'managedBy'},
+    {from:'A03',to:'CL05',label:'managedBy'},{from:'A03',to:'CL06',label:'managedBy'},
+    {from:'A04',to:'CL07',label:'managedBy'},{from:'A04',to:'CL08',label:'managedBy'},
+    {from:'A05',to:'CL09',label:'managedBy'},{from:'A06',to:'CL10',label:'managedBy'},
+
+    /* Client → holds Policy */
+    {from:'CL01',to:'P01',label:'holdsPol.'},{from:'CL01',to:'P05',label:'holdsPol.'},
+    {from:'CL02',to:'P02',label:'holdsPol.'},{from:'CL03',to:'P03',label:'holdsPol.'},
+    {from:'CL04',to:'P04',label:'holdsPol.'},{from:'CL05',to:'P07',label:'holdsPol.'},
+    {from:'CL05',to:'P08',label:'holdsPol.'},{from:'CL06',to:'P06',label:'holdsPol.'},
+    {from:'CL07',to:'P01',label:'holdsPol.'},{from:'CL08',to:'P02',label:'holdsPol.'},
+    {from:'CL09',to:'P03',label:'holdsPol.'},{from:'CL10',to:'P04',label:'holdsPol.'},
+
+    /* Policy → has Claim */
+    {from:'P01',to:'CL11',label:'hasClaim'},{from:'P02',to:'CL12',label:'hasClaim'},
+    {from:'P03',to:'CL13',label:'hasClaim'},{from:'P04',to:'CL14',label:'hasClaim'},
+    {from:'P01',to:'CL15',label:'hasClaim'},{from:'P02',to:'CL16',label:'hasClaim'},
+    {from:'P03',to:'CL17',label:'hasClaim'},{from:'P04',to:'CL18',label:'hasClaim'},
+
+    /* Claim → claimant / benefit / care */
+    {from:'CL11',to:'CL01',label:'isClaimant'},{from:'CL12',to:'CL02',label:'isClaimant'},
+    {from:'CL13',to:'CL03',label:'isClaimant'},{from:'CL14',to:'CL04',label:'isClaimant'},
+    {from:'CL15',to:'CL07',label:'isClaimant'},{from:'CL16',to:'CL08',label:'isClaimant'},
+    {from:'CL11',to:'B01',label:'coveredBy'},{from:'CL12',to:'B02',label:'coveredBy'},
+    {from:'CL13',to:'B03',label:'coveredBy'},{from:'CL14',to:'B04',label:'coveredBy'},
+    {from:'CL11',to:'CE01',label:'relatedCare'},{from:'CL12',to:'CE02',label:'relatedCare'},
+    {from:'CL13',to:'CE03',label:'relatedCare'},{from:'CL14',to:'CE04',label:'relatedCare'},
+    {from:'CL15',to:'CE05',label:'relatedCare'},{from:'CL16',to:'CE06',label:'relatedCare'},
+
+    /* Care → Provider */
+    {from:'CE01',to:'PR01',label:'providedBy'},{from:'CE02',to:'PR02',label:'providedBy'},
+    {from:'CE03',to:'PR03',label:'providedBy'},{from:'CE04',to:'PR01',label:'providedBy'},
+    {from:'CE05',to:'PR04',label:'providedBy'},{from:'CE06',to:'PR05',label:'providedBy'},
+    {from:'CL17',to:'PR06',label:'treatedAt'},{from:'CL18',to:'PR02',label:'treatedAt'},
+
+    /* Benefit → Policy (eligibleFor) */
+    {from:'B01',to:'P01',label:'eligibleFor'},{from:'B02',to:'P02',label:'eligibleFor'},
+    {from:'B03',to:'P03',label:'eligibleFor'},{from:'B05',to:'P05',label:'eligibleFor'},
+    {from:'B06',to:'P07',label:'eligibleFor'},
+
+    /* SWRL → fires on nodes */
+    {from:'SW01',to:'CL11',label:'fires→'},{from:'SW01',to:'B01',label:'activates'},
+    {from:'SW02',to:'P02',label:'lapseAlert'},{from:'SW02',to:'CL09',label:'notifies'},
+    {from:'SW03',to:'CL05',label:'crossSell'},{from:'SW03',to:'ACC01',label:'suggests'},
+    {from:'SW04',to:'CO01',label:'escalates'},{from:'SW04',to:'CL16',label:'flags'},
+
+    /* Compliance links */
+    {from:'CO01',to:'CL11',label:'regulates'},{from:'CO01',to:'CL14',label:'regulates'},
+    {from:'CO02',to:'P01',label:'governs'},{from:'CO03',to:'CL08',label:'screens'},
+    {from:'CO04',to:'A01',label:'validates'},
+
+    /* Phone leaves */
+    {from:'CL01',to:'PH01',label:'has-phone'},{from:'CL02',to:'PH02',label:'has-phone'},
+    {from:'CL03',to:'PH03',label:'has-phone'},{from:'CL04',to:'PH04',label:'has-phone'},
+    {from:'CL05',to:'PH05',label:'has-phone'},{from:'CL06',to:'PH06',label:'has-phone'},
+    {from:'A01',to:'PH07',label:'has-phone'},{from:'A02',to:'PH08',label:'has-phone'},
+    {from:'PR01',to:'PH09',label:'has-phone'},{from:'PR02',to:'PH10',label:'has-phone'},
+    {from:'C01',to:'PH11',label:'has-phone'},{from:'C02',to:'PH12',label:'has-phone'},
+
+    /* Email leaves */
+    {from:'CL01',to:'EM01',label:'has-email'},{from:'CL02',to:'EM02',label:'has-email'},
+    {from:'CL03',to:'EM03',label:'has-email'},{from:'CL04',to:'EM04',label:'has-email'},
+    {from:'A01',to:'EM05',label:'has-email'},{from:'A02',to:'EM06',label:'has-email'},
+    {from:'CL06',to:'EM07',label:'has-email'},{from:'CL10',to:'EM08',label:'has-email'},
+    {from:'CL08',to:'EM09',label:'has-email'},{from:'CL09',to:'EM10',label:'has-email'},
+
+    /* Address leaves */
+    {from:'C01',to:'AD01',label:'has-address'},{from:'C02',to:'AD02',label:'has-address'},
+    {from:'CL01',to:'AD03',label:'has-address'},{from:'CL03',to:'AD04',label:'has-address'},
+    {from:'CL04',to:'AD05',label:'has-address'},{from:'PR01',to:'AD06',label:'has-address'},
+    {from:'PR03',to:'AD07',label:'has-address'},{from:'A03',to:'AD08',label:'has-address'},
+
+    /* Document links */
+    {from:'P01',to:'DO01',label:'hasDoc'},{from:'A01',to:'DO02',label:'delivered'},
+    {from:'P05',to:'DO03',label:'hasDoc'},{from:'CL11',to:'DO04',label:'hasDoc'},
+    {from:'CO01',to:'DO05',label:'generates'},{from:'CL08',to:'DO06',label:'signed'},
+
+    /* Account links */
+    {from:'CL08',to:'ACC01',label:'owns'},{from:'CL08',to:'ACC02',label:'owns'},
+    {from:'CL08',to:'ACC03',label:'owns'},{from:'C01',to:'ACC04',label:'billedTo'},
+
+    /* Cross-advisor collaboration */
+    {from:'A01',to:'A02',label:'collab.'},{from:'A03',to:'A04',label:'collab.'},
+    {from:'C01',to:'C02',label:'reinsures'},{from:'C02',to:'C03',label:'reinsures'},
+
+    /* Provider ↔ Carrier contracts */
+    {from:'PR01',to:'C01',label:'contracted'},{from:'PR02',to:'C02',label:'contracted'},
+    {from:'PR03',to:'C03',label:'contracted'},{from:'PR04',to:'C04',label:'contracted'},
+    {from:'PR05',to:'C05',label:'contracted'},
+
+    /* Benefit ↔ Provider */
+    {from:'B01',to:'PR01',label:'paidTo'},{from:'B02',to:'PR02',label:'paidTo'},
+    {from:'B03',to:'PR03',label:'paidTo'}
+  ];
+  /* ────────────────────────────────────────────────────────────
+     FORCE-DIRECTED LAYOUT ENGINE
+     Computes stable positions via repeated Fruchterman-Reingold
+     iterations (no external library needed — pure JS)
+  ──────────────────────────────────────────────────────────── */
+  function _p59computeLayout(nodes, edges, W, H) {
+    var pos = {};
+    var N = nodes.length;
+
+    /* seed positions in concentric rings by group */
+    var groupAngles = {};
+    var cx = W / 2, cy = H / 2;
+    var rings = {
+      carrier:[160,0],advisor:[180,0.7],client:[200,1.4],policy:[160,2.1],
+      claim:[130,2.8],provider:[150,3.5],benefit:[120,4.2],care:[110,4.9],
+      swrl:[90,5.6],compliance:[80,0.3],leaf:[240,1.0],doc:[100,3.2],account:[80,2.5]
+    };
+
+    nodes.forEach(function(n, i) {
+      var grp = n.group || 'leaf';
+      if (!groupAngles[grp]) groupAngles[grp] = 0;
+      var ring = rings[grp] || [220, 0];
+      var r = ring[0] + Math.random() * 40;
+      var baseAngle = ring[1] + groupAngles[grp];
+      var angle = baseAngle + (Math.random() - 0.5) * 0.8;
+      groupAngles[grp] += (2 * Math.PI) / Math.max(3, nodes.filter(function(x){return x.group===grp;}).length);
+      pos[n.id] = {
+        x: cx + r * Math.cos(angle),
+        y: cy + r * Math.sin(angle)
+      };
+    });
+
+    /* 80 iterations of force simulation */
+    var area = W * H;
+    var k = Math.sqrt(area / N);
+    var temp = W / 8;
+
+    for (var iter = 0; iter < 80; iter++) {
+      var disp = {};
+      nodes.forEach(function(n){ disp[n.id] = {x:0, y:0}; });
+
+      /* repulsive forces between all pairs */
+      for (var i = 0; i < nodes.length; i++) {
+        for (var j = i + 1; j < nodes.length; j++) {
+          var ni = nodes[i], nj = nodes[j];
+          var dx = pos[ni.id].x - pos[nj.id].x;
+          var dy = pos[ni.id].y - pos[nj.id].y;
+          var dist = Math.sqrt(dx * dx + dy * dy) || 0.01;
+          var rep = (k * k) / dist;
+          var ux = dx / dist, uy = dy / dist;
+          disp[ni.id].x += ux * rep;
+          disp[ni.id].y += uy * rep;
+          disp[nj.id].x -= ux * rep;
+          disp[nj.id].y -= uy * rep;
+        }
+      }
+
+      /* attractive forces along edges */
+      edges.forEach(function(e) {
+        var pf = pos[e.from], pt = pos[e.to];
+        if (!pf || !pt) return;
+        var dx = pf.x - pt.x, dy = pf.y - pt.y;
+        var dist = Math.sqrt(dx * dx + dy * dy) || 0.01;
+        var att = (dist * dist) / k;
+        var ux = dx / dist, uy = dy / dist;
+        disp[e.from].x -= ux * att * 0.5;
+        disp[e.from].y -= uy * att * 0.5;
+        disp[e.to].x   += ux * att * 0.5;
+        disp[e.to].y   += uy * att * 0.5;
+      });
+
+      /* apply displacements with temperature cooling */
+      nodes.forEach(function(n) {
+        var d = disp[n.id];
+        var dLen = Math.sqrt(d.x * d.x + d.y * d.y) || 0.01;
+        var move = Math.min(dLen, temp);
+        pos[n.id].x += (d.x / dLen) * move;
+        pos[n.id].y += (d.y / dLen) * move;
+        /* clamp inside canvas with margin */
+        pos[n.id].x = Math.max(40, Math.min(W - 40, pos[n.id].x));
+        pos[n.id].y = Math.max(40, Math.min(H - 40, pos[n.id].y));
+      });
+
+      temp *= 0.92; /* cool down */
+    }
+    return pos;
+  }
+
+  /* ────────────────────────────────────────────────────────────
+     MAIN GRAPH TAB — dark navy canvas, icon nodes, dense edges
+  ──────────────────────────────────────────────────────────── */
+  function _p59graphTabDark() {
+    var W = 900, H = 620;
+    var pos = _p59computeLayout(_p59nodes, _p59edges, W, H);
+
+    /* ── EDGES ─────────────────────────────── */
+    var edgeSvg = _p59edges.map(function(e) {
+      var fp = pos[e.from], tp = pos[e.to];
+      if (!fp || !tp) return '';
+      var fromEnt = ENT[(_p59nodes.find(function(n){return n.id===e.from;})||{}).type] || {color:'#475569'};
+      var toEnt   = ENT[(_p59nodes.find(function(n){return n.id===e.to;})||{}).type] || {color:'#475569'};
+      /* color edge by from-node type, half-opacity */
+      var edgeCol = fromEnt.color;
+      var mx = (fp.x + tp.x) / 2, my = (fp.y + tp.y) / 2 - 5;
+      /* shorten line so it doesn't overlap node circles */
+      var dx = tp.x - fp.x, dy = tp.y - fp.y;
+      var len = Math.sqrt(dx*dx+dy*dy)||1;
+      var r = 14;
+      var sx = fp.x + dx/len*r, sy = fp.y + dy/len*r;
+      var ex = tp.x - dx/len*r, ey = tp.y - dy/len*r;
+      return '<line x1="'+sx+'" y1="'+sy+'" x2="'+ex+'" y2="'+ey+'"'
+        +' stroke="'+edgeCol+'" stroke-width="0.9" opacity="0.45" marker-end="url(#arr59)"/>'
+        +'<text x="'+mx+'" y="'+my+'" text-anchor="middle" font-size="6" fill="rgba(200,200,220,0.75)"'
+        +' font-family="Inter,sans-serif">'+e.label+'</text>';
+    }).join('');
+
+    /* ── NODES — circle + FontAwesome icon char ── */
+    var nodeSvg = _p59nodes.map(function(n) {
+      var ent = ENT[n.type] || {color:'#64748b', border:'#94a3b8', fa:'fa-circle', icon:'?'};
+      var p = pos[n.id];
+      if (!p) return '';
+      /* radius by group importance */
+      var isCore = ['carrier','advisor','client'].indexOf(n.group) >= 0;
+      var isMid  = ['policy','claim','provider','benefit','care','swrl'].indexOf(n.group) >= 0;
+      var r = isCore ? 16 : isMid ? 13 : 10;
+      var k = 'p59-node-'+n.id;
+      window._p8actions[k] = function(){ _p59showInfo(n, ent); };
+      var shortLabel = n.label.length > 14 ? n.label.slice(0,13)+'…' : n.label;
+      /* glow ring for core nodes */
+      var glow = isCore
+        ? '<circle cx="'+p.x+'" cy="'+p.y+'" r="'+(r+6)+'" fill="'+ent.color+'" opacity="0.15"/>'
+          +'<circle cx="'+p.x+'" cy="'+p.y+'" r="'+(r+3)+'" fill="none" stroke="'+ent.border+'" stroke-width="1" opacity="0.4"/>'
+        : '<circle cx="'+p.x+'" cy="'+p.y+'" r="'+(r+3)+'" fill="'+ent.color+'" opacity="0.12"/>';
+      return '<g onclick="_p8run(\''+k+'\')" style="cursor:pointer" class="p59-kgnode">'
+        +glow
+        +'<circle cx="'+p.x+'" cy="'+p.y+'" r="'+r+'" fill="'+ent.color+'" stroke="'+ent.border+'" stroke-width="1.5"/>'
+        /* icon — using unicode from FontAwesome font */
+        +'<text x="'+p.x+'" y="'+(p.y+4)+'" text-anchor="middle" font-size="'+(isCore?9:7)+'" fill="#fff"'
+        +' font-family="\'Font Awesome 6 Free\',\'FontAwesome\'" font-weight="900">'+ent.icon+'</text>'
+        /* label below */
+        +'<text x="'+p.x+'" y="'+(p.y+r+10)+'" text-anchor="middle" font-size="'+(isCore?9:7.5)+'"'
+        +' fill="rgba(226,232,240,0.88)" font-family="Inter,sans-serif" font-weight="600">'+shortLabel+'</text>'
+        +'</g>';
+    }).join('');
+
+    /* ── LEGEND ── */
+    var legendTypes = ['Advisor','Client','Carrier','Policy','Claim','Provider','Benefit','CareEvent','Phone','Email','Address','SWRL','Compliance','Document'];
+    var legendHtml = legendTypes.map(function(t){
+      var ent = ENT[t] || {color:'#64748b', fa:'fa-circle'};
+      return '<div style="display:flex;align-items:center;gap:5px">'
+        +'<div style="width:10px;height:10px;border-radius:50%;background:'+ent.color+';flex-shrink:0"></div>'
+        +'<span style="font-size:9px;color:#94a3b8;white-space:nowrap">'+t+'</span>'
+        +'</div>';
+    }).join('');
+
+    return '<div style="background:#0d1117;border:1px solid #1e293b;border-radius:14px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.4)">'
+      +'<div style="padding:10px 16px;border-bottom:1px solid #1e293b;display:flex;align-items:center;justify-content:space-between;background:#0f172a">'
+      +'<span style="font-size:12px;font-weight:700;color:#f1f5f9">'
+      +'<i class="fas fa-project-diagram" style="color:#8b5cf6;margin-right:8px"></i>'
+      +'Knowledge Graph Explorer — '+_p59nodes.length+' nodes · '+_p59edges.length+' edges · Cosmos DB Gremlin API</span>'
+      +'<div style="display:flex;gap:6px">'
+      +'<span style="background:#8b5cf622;border:1px solid #8b5cf644;color:#a78bfa;border-radius:5px;padding:2px 7px;font-size:9px;font-weight:700">&lt;12ms P50</span>'
+      +'<span style="background:#05996922;border:1px solid #05996944;color:#34d399;border-radius:5px;padding:2px 7px;font-size:9px;font-weight:700">4 SWRL firing</span>'
+      +'<span style="background:#2563eb22;border:1px solid #2563eb44;color:#93c5fd;border-radius:5px;padding:2px 7px;font-size:9px;font-weight:700">Click node</span>'
+      +'</div>'
+      +'</div>'
+      +'<div style="position:relative">'
+      +'<svg id="p59-kg-svg" viewBox="0 0 '+W+' '+H+'" style="width:100%;height:'+H+'px;background:radial-gradient(ellipse at 35% 45%,#1a1040 0%,#0d1117 65%)">'
+      +'<defs>'
+      +'<marker id="arr59" markerWidth="5" markerHeight="5" refX="5" refY="2.5" orient="auto">'
+      +'<path d="M0,0 L5,2.5 L0,5 Z" fill="#475569"/></marker>'
+      +'<radialGradient id="bgGrad59" cx="35%" cy="45%" r="60%">'
+      +'<stop offset="0%" stop-color="#1a1040" stop-opacity="1"/>'
+      +'<stop offset="100%" stop-color="#0d1117" stop-opacity="1"/>'
+      +'</radialGradient>'
+      +'</defs>'
+      +'<rect width="100%" height="100%" fill="url(#bgGrad59)"/>'
+      /* faint dot grid */
+      +'<pattern id="dotgrid59" x="0" y="0" width="30" height="30" patternUnits="userSpaceOnUse">'
+      +'<circle cx="15" cy="15" r="0.6" fill="#1e293b"/></pattern>'
+      +'<rect width="100%" height="100%" fill="url(#dotgrid59)"/>'
+      +edgeSvg
+      +nodeSvg
+      +'</svg>'
+      +'</div>'
+      +'<div style="padding:8px 16px;border-top:1px solid #1e293b;background:#0f172a;display:flex;gap:8px;flex-wrap:wrap;align-items:center">'
+      +'<span style="font-size:9px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.5px;margin-right:4px">LEGEND</span>'
+      +legendHtml
+      +'</div>'
+      +'</div>';
+  }
+
+  /* ── Quick info toast on node click ─────────────────────── */
+  function _p59showInfo(n, ent) {
+    var existing = document.getElementById('_p59toast');
+    if (existing) existing.remove();
+    var t = document.createElement('div');
+    t.id = '_p59toast';
+    t.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:9999;'
+      +'background:#0f172a;border:1px solid '+ent.color+';border-left:4px solid '+ent.color+';'
+      +'border-radius:12px;padding:14px 18px;min-width:240px;max-width:320px;'
+      +'box-shadow:0 8px 32px rgba(0,0,0,0.5);font-family:Inter,sans-serif';
+    t.innerHTML =
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'
+      +'<div style="display:flex;align-items:center;gap:8px">'
+      +'<div style="width:28px;height:28px;border-radius:50%;background:'+ent.color+';display:flex;align-items:center;justify-content:center">'
+      +'<i class="fas '+ent.fa+'" style="color:#fff;font-size:11px"></i></div>'
+      +'<div><div style="font-size:12px;font-weight:700;color:#f1f5f9">'+n.label+'</div>'
+      +'<div style="font-size:10px;color:'+ent.color+'">'+n.type+' · '+n.id+'</div></div>'
+      +'</div>'
+      +'<button onclick="document.getElementById(\'_p59toast\').remove()" '
+      +'style="background:none;border:none;color:#475569;cursor:pointer;font-size:14px">✕</button>'
+      +'</div>'
+      +'<div style="font-size:10px;color:#64748b;padding:6px 8px;background:#1e293b;border-radius:6px;font-family:monospace">'
+      +'g.V(\''+n.id+'\').bothE().otherV().path()'
+      +'</div>';
+    document.body.appendChild(t);
+    setTimeout(function(){ if(document.getElementById('_p59toast')) document.getElementById('_p59toast').remove(); }, 4000);
+  }
+
+  /* ── Override _p58graphTab ───────────────────────────────── */
+  window._p58graphTab = _p59graphTabDark;
+
+  /* ── Also patch the main buildPage to use dark graph ─────── */
+  var _p59origBuild = window._p22buildPage;
+  window._p22buildPage = function() {
+    /* call the P58 buildPage which will call _p58graphTab = our dark version */
+    _p59origBuild();
+  };
+
+  console.log('[P59] KG dark canvas · '+_p59nodes.length+' nodes · '+_p59edges.length+' edges · force-directed · icon nodes · colored edges');
+})();
+/* ============================================================
+   PHASE 60 — KG DARK CANVAS OVERHAUL v2
+   Self-contained · SVG path icons · 103 nodes · 132 edges
+   Dark navy · force-directed · dense web · pulse rings
+   Overrides _p58graphTab with completely redrawn canvas
+   ============================================================ */
+(function () {
+  'use strict';
+
+  /* ────────────────────────────────────────────────────────────
+     ENTITY PALETTE
+  ──────────────────────────────────────────────────────────── */
+  var E = {
+    Advisor:    {c:'#f97316',b:'#fb923c'},
+    Client:     {c:'#8b5cf6',b:'#a78bfa'},
+    Carrier:    {c:'#0d9488',b:'#14b8a6'},
+    Policy:     {c:'#e11d48',b:'#fb7185'},
+    Life:       {c:'#be185d',b:'#f472b6'},
+    Annuity:    {c:'#6d28d9',b:'#8b5cf6'},
+    Claim:      {c:'#d97706',b:'#fbbf24'},
+    Provider:   {c:'#059669',b:'#34d399'},
+    Benefit:    {c:'#2563eb',b:'#60a5fa'},
+    CareEvent:  {c:'#0891b2',b:'#22d3ee'},
+    Phone:      {c:'#10b981',b:'#34d399'},
+    Email:      {c:'#3b82f6',b:'#93c5fd'},
+    Address:    {c:'#f59e0b',b:'#fcd34d'},
+    Account:    {c:'#7c3aed',b:'#a78bfa'},
+    SWRL:       {c:'#dc2626',b:'#f87171'},
+    Document:   {c:'#64748b',b:'#94a3b8'},
+    Compliance: {c:'#b91c1c',b:'#f87171'},
+    Agent:      {c:'#ea580c',b:'#fb923c'}
+  };
+
+  function _gc(type){ return E[type]||{c:'#475569',b:'#64748b'}; }
+
+  /* ────────────────────────────────────────────────────────────
+     MINI SVG PATH ICONS  (12px bounding box, centered at 0,0)
+  ──────────────────────────────────────────────────────────── */
+  var ICO = {
+    /* person silhouette */
+    Advisor:   'M0-5a3 3 0 1 1 0 6 3 3 0 0 1 0-6zm-6 13c0-3 2.7-5 6-5s6 2 6 5',
+    Client:    'M0-5a3 3 0 1 1 0 6 3 3 0 0 1 0-6zm-6 13c0-3 2.7-5 6-5s6 2 6 5',
+    Agent:     'M0-6a3 3 0 1 1 0 6 3 3 0 0 1 0-6zm-6 14c0-3.5 2.7-5.5 6-5.5s6 2 6 5.5M-2 8h4',
+    /* building */
+    Carrier:   'M-6-4L0-8L6-4v12H-6zm2 2h3v3h-3zm-3 0h3v3H-7zm4 7v5H-1V9z',
+    Account:   'M-6-3L0-8L6-3v11H-6zM-2 2h4v6H-2z',
+    /* document */
+    Policy:    'M-5-7h7l3 3v11H-5zM2-7v3h3M-3-1h6M-3 3h6M-3 7h4',
+    Life:      'M0 6C0 6-7 1-7-2c0-3 2-5 4-4 1 .5 2 1.5 3 3 1-1.5 2-2.5 3-3 2-1 4 1 4 4C7 1 0 6 0 6z',
+    Annuity:   'M-6 5L-3-6L0-3L3-6L6 5M-4 1h8',
+    Document:  'M-5-7h7l3 3v11H-5zM2-7v3h3M-3-1h5M-3 3h5M-3 7h3',
+    /* medical cross */
+    Provider:  'M-2-7h4v5h5v4h-5v5h-4v-5H-7v-4h5z',
+    /* file invoice */
+    Claim:     'M-5-7h10v14H-5zM-3-3h4M-3 0h6M-3 3h4M-3 6h2',
+    /* star/benefit */
+    Benefit:   'M0-7l1.5 4.5H6L2.5-.5 4 4 0 1.5-4 4-2.5-.5-6 0h4.5z',
+    /* calendar */
+    CareEvent: 'M-6-5h12v12H-6zM-6-1h12M-2-8v3M2-8v3M-3 3h2M1 3h2M-3 7h2',
+    /* phone */
+    Phone:     'M-5-7C-5-7-3-5-2-3-1-1-2 0-1 1 0 2 1 1 2 2 3 3 5 5 5 7 4 8 2 8 0 6-2 4-6 0-6-2-6-4-6-6-5-7z',
+    /* envelope */
+    Email:     'M-7-5h14v10H-7zM-7-5l7 7 7-7',
+    /* map pin */
+    Address:   'M0-8C-4-8-7-5-7-1-7 4 0 8 0 8S7 4 7-1C7-5 4-8 0-8zM0-3a2 2 0 1 0 0 4 2 2 0 0 0 0-4z',
+    /* shield */
+    SWRL:      'M0-8L7-4v6C7 5 4 8 0 9-4 8-7 5-7 2V-4z',
+    Compliance:'M0-8L7-4v6C7 5 4 8 0 9-4 8-7 5-7 2V-4zM-3 0l2 2 4-4',
+    /* bank */
+    CareEvent: 'M-7-2h14M-6 8h12M-4 0v8M-1 0v8M2 0v8M5 0v8M0-7l7 5H-7z'
+  };
+
+  function _gico(type){ return ICO[type]||'M-4-4h8v8h-8z'; }
+
+  /* ────────────────────────────────────────────────────────────
+     ALL GRAPH DATA (self-contained, no dep on P59 locals)
+  ──────────────────────────────────────────────────────────── */
+  var GN = [
+    /* 5 Carriers */
+    {id:'C01',l:'Prudential',      t:'Carrier',  g:'carrier'},
+    {id:'C02',l:'MetLife',         t:'Carrier',  g:'carrier'},
+    {id:'C03',l:'Lincoln Nat\'l',  t:'Carrier',  g:'carrier'},
+    {id:'C04',l:'Transamerica',    t:'Carrier',  g:'carrier'},
+    {id:'C05',l:'Mass Mutual',     t:'Carrier',  g:'carrier'},
+    /* 6 Advisors */
+    {id:'A01',l:'Chen, James',     t:'Advisor',  g:'advisor'},
+    {id:'A02',l:'Rivera, Ana',     t:'Advisor',  g:'advisor'},
+    {id:'A03',l:'Okonkwo, David',  t:'Advisor',  g:'advisor'},
+    {id:'A04',l:'Patel, Priya',    t:'Advisor',  g:'advisor'},
+    {id:'A05',l:'Walsh, Kevin',    t:'Advisor',  g:'advisor'},
+    {id:'A06',l:'Nguyen, Lisa',    t:'Advisor',  g:'advisor'},
+    /* 10 Clients */
+    {id:'CL01',l:'Margaret Chen',  t:'Client',   g:'client'},
+    {id:'CL02',l:'Sylvia Torres',  t:'Client',   g:'client'},
+    {id:'CL03',l:'Robert Kincaid', t:'Client',   g:'client'},
+    {id:'CL04',l:'Dorothy Harrin', t:'Client',   g:'client'},
+    {id:'CL05',l:'Frank & Gloria', t:'Client',   g:'client'},
+    {id:'CL06',l:'Harold Simmons', t:'Client',   g:'client'},
+    {id:'CL07',l:'Patricia Walsh', t:'Client',   g:'client'},
+    {id:'CL08',l:'James Okafor',   t:'Client',   g:'client'},
+    {id:'CL09',l:'Nancy Friedman', t:'Client',   g:'client'},
+    {id:'CL10',l:'Victor Espinoza',t:'Client',   g:'client'},
+    /* 8 Policies */
+    {id:'P01',l:'LTC-2026-0101',   t:'Policy',   g:'policy'},
+    {id:'P02',l:'LTC-2026-0102',   t:'Policy',   g:'policy'},
+    {id:'P03',l:'LTC-2026-0103',   t:'Policy',   g:'policy'},
+    {id:'P04',l:'LTC-2026-0104',   t:'Policy',   g:'policy'},
+    {id:'P05',l:'HAL-Life-P301',   t:'Life',     g:'policy'},
+    {id:'P06',l:'HAL-DI-P412',     t:'Policy',   g:'policy'},
+    {id:'P07',l:'Annuity-P361',    t:'Annuity',  g:'policy'},
+    {id:'P08',l:'HAL-Life-P501',   t:'Life',     g:'policy'},
+    /* 8 Claims */
+    {id:'CL11',l:'CLM-2026-041',   t:'Claim',    g:'claim'},
+    {id:'CL12',l:'CLM-2026-087',   t:'Claim',    g:'claim'},
+    {id:'CL13',l:'CLM-2026-099',   t:'Claim',    g:'claim'},
+    {id:'CL14',l:'CLM-2026-112',   t:'Claim',    g:'claim'},
+    {id:'CL15',l:'CLM-2026-134',   t:'Claim',    g:'claim'},
+    {id:'CL16',l:'CLM-2026-158',   t:'Claim',    g:'claim'},
+    {id:'CL17',l:'CLM-2026-201',   t:'Claim',    g:'claim'},
+    {id:'CL18',l:'CLM-2026-224',   t:'Claim',    g:'claim'},
+    /* 6 Providers */
+    {id:'PR01',l:'Sunrise SNF',    t:'Provider', g:'provider'},
+    {id:'PR02',l:'CareFirst Home', t:'Provider', g:'provider'},
+    {id:'PR03',l:'Harmony ALF',    t:'Provider', g:'provider'},
+    {id:'PR04',l:'Bayview Rehab',  t:'Provider', g:'provider'},
+    {id:'PR05',l:'Premier Memory', t:'Provider', g:'provider'},
+    {id:'PR06',l:'GoldenAge HC',   t:'Provider', g:'provider'},
+    /* 6 Benefits */
+    {id:'B01',l:'LTC Benefit-001', t:'Benefit',  g:'benefit'},
+    {id:'B02',l:'LTC Benefit-002', t:'Benefit',  g:'benefit'},
+    {id:'B03',l:'LTC Benefit-003', t:'Benefit',  g:'benefit'},
+    {id:'B04',l:'Rider Benefit-A', t:'Benefit',  g:'benefit'},
+    {id:'B05',l:'Death Benefit-1', t:'Benefit',  g:'benefit'},
+    {id:'B06',l:'Income Benefit',  t:'Benefit',  g:'benefit'},
+    /* 6 Care Events */
+    {id:'CE01',l:'Care Ep 2026-01',t:'CareEvent',g:'care'},
+    {id:'CE02',l:'Care Ep 2026-02',t:'CareEvent',g:'care'},
+    {id:'CE03',l:'Care Ep 2026-03',t:'CareEvent',g:'care'},
+    {id:'CE04',l:'SNF Admit-0401', t:'CareEvent',g:'care'},
+    {id:'CE05',l:'Home Visit-0501',t:'CareEvent',g:'care'},
+    {id:'CE06',l:'ALF Move-0601',  t:'CareEvent',g:'care'},
+    /* 4 SWRL */
+    {id:'SW01',l:'SWRL: Benefit Trigger', t:'SWRL',g:'swrl'},
+    {id:'SW02',l:'SWRL: Lapse Risk',      t:'SWRL',g:'swrl'},
+    {id:'SW03',l:'SWRL: Cross-Sell',      t:'SWRL',g:'swrl'},
+    {id:'SW04',l:'SWRL: Compliance Flag', t:'SWRL',g:'swrl'},
+    /* 4 Compliance */
+    {id:'CO01',l:'NY §3224-a SLA',  t:'Compliance',g:'compliance'},
+    {id:'CO02',l:'NAIC Model Reg',  t:'Compliance',g:'compliance'},
+    {id:'CO03',l:'Reg BI Check',    t:'Compliance',g:'compliance'},
+    {id:'CO04',l:'AML/KYC Screen',  t:'Compliance',g:'compliance'},
+    /* 12 Phone leaves */
+    {id:'PH01',l:'(212)555-0101',  t:'Phone',g:'leaf'},{id:'PH02',l:'(646)555-0202',  t:'Phone',g:'leaf'},
+    {id:'PH03',l:'(718)555-0303',  t:'Phone',g:'leaf'},{id:'PH04',l:'(201)555-0404',  t:'Phone',g:'leaf'},
+    {id:'PH05',l:'(917)555-0505',  t:'Phone',g:'leaf'},{id:'PH06',l:'(732)555-0606',  t:'Phone',g:'leaf'},
+    {id:'PH07',l:'(516)555-0707',  t:'Phone',g:'leaf'},{id:'PH08',l:'(631)555-0808',  t:'Phone',g:'leaf'},
+    {id:'PH09',l:'(973)555-0909',  t:'Phone',g:'leaf'},{id:'PH10',l:'(203)555-1010',  t:'Phone',g:'leaf'},
+    {id:'PH11',l:'(845)555-1111',  t:'Phone',g:'leaf'},{id:'PH12',l:'(914)555-1212',  t:'Phone',g:'leaf'},
+    /* 10 Email leaves */
+    {id:'EM01',l:'m.chen@email',   t:'Email',g:'leaf'},{id:'EM02',l:'s.torres@email', t:'Email',g:'leaf'},
+    {id:'EM03',l:'r.kincaid@email',t:'Email',g:'leaf'},{id:'EM04',l:'d.harrin@email', t:'Email',g:'leaf'},
+    {id:'EM05',l:'chen.j@nyl.com', t:'Email',g:'leaf'},{id:'EM06',l:'rivera.a@nyl',   t:'Email',g:'leaf'},
+    {id:'EM07',l:'h.simmons@email',t:'Email',g:'leaf'},{id:'EM08',l:'v.espinoza@mail',t:'Email',g:'leaf'},
+    {id:'EM09',l:'j.okafor@email', t:'Email',g:'leaf'},{id:'EM10',l:'n.friedman@mail',t:'Email',g:'leaf'},
+    /* 8 Address leaves */
+    {id:'AD01',l:'51 Madison NY',  t:'Address',g:'leaf'},{id:'AD02',l:'120 Park Ave NY',t:'Address',g:'leaf'},
+    {id:'AD03',l:'88 Pine St NJ',  t:'Address',g:'leaf'},{id:'AD04',l:'400 Main St CT', t:'Address',g:'leaf'},
+    {id:'AD05',l:'22 Oak Dr NY',   t:'Address',g:'leaf'},{id:'AD06',l:'9 Harbor NJ',    t:'Address',g:'leaf'},
+    {id:'AD07',l:'77 Forest CT',   t:'Address',g:'leaf'},{id:'AD08',l:'5 Maple NY',     t:'Address',g:'leaf'},
+    /* 6 Documents */
+    {id:'DO01',l:'Policy Contract',t:'Document',g:'doc'},{id:'DO02',l:'ADV Part 2',      t:'Document',g:'doc'},
+    {id:'DO03',l:'Free-Look Ack',  t:'Document',g:'doc'},{id:'DO04',l:'Claim Form 837',  t:'Document',g:'doc'},
+    {id:'DO05',l:'SLA Report',     t:'Document',g:'doc'},{id:'DO06',l:'Suitability Form',t:'Document',g:'doc'},
+    /* 4 Accounts */
+    {id:'ACC01',l:'IRA Rollover',  t:'Account',g:'account'},{id:'ACC02',l:'Taxable Acct',    t:'Account',g:'account'},
+    {id:'ACC03',l:'Bond Sleeve',   t:'Account',g:'account'},{id:'ACC04',l:'Premium Billing',  t:'Account',g:'account'}
+  ];
+
+  var GE = [
+    /* Carrier underwrites */
+    {f:'C01',t:'P01',l:'underwrites'},{f:'C01',t:'P02',l:'underwrites'},
+    {f:'C02',t:'P03',l:'underwrites'},{f:'C02',t:'P05',l:'underwrites'},
+    {f:'C03',t:'P04',l:'underwrites'},{f:'C03',t:'P06',l:'underwrites'},
+    {f:'C04',t:'P07',l:'underwrites'},{f:'C05',t:'P08',l:'underwrites'},
+    /* Advisor manages Client */
+    {f:'A01',t:'CL01',l:'managedBy'},{f:'A01',t:'CL02',l:'managedBy'},
+    {f:'A02',t:'CL03',l:'managedBy'},{f:'A02',t:'CL04',l:'managedBy'},
+    {f:'A03',t:'CL05',l:'managedBy'},{f:'A03',t:'CL06',l:'managedBy'},
+    {f:'A04',t:'CL07',l:'managedBy'},{f:'A04',t:'CL08',l:'managedBy'},
+    {f:'A05',t:'CL09',l:'managedBy'},{f:'A06',t:'CL10',l:'managedBy'},
+    /* Client holds Policy */
+    {f:'CL01',t:'P01',l:'holdsPol.'},{f:'CL01',t:'P05',l:'holdsPol.'},
+    {f:'CL02',t:'P02',l:'holdsPol.'},{f:'CL03',t:'P03',l:'holdsPol.'},
+    {f:'CL04',t:'P04',l:'holdsPol.'},{f:'CL05',t:'P07',l:'holdsPol.'},
+    {f:'CL05',t:'P08',l:'holdsPol.'},{f:'CL06',t:'P06',l:'holdsPol.'},
+    {f:'CL07',t:'P01',l:'holdsPol.'},{f:'CL08',t:'P02',l:'holdsPol.'},
+    {f:'CL09',t:'P03',l:'holdsPol.'},{f:'CL10',t:'P04',l:'holdsPol.'},
+    /* Policy hasClaim */
+    {f:'P01',t:'CL11',l:'hasClaim'},{f:'P02',t:'CL12',l:'hasClaim'},
+    {f:'P03',t:'CL13',l:'hasClaim'},{f:'P04',t:'CL14',l:'hasClaim'},
+    {f:'P01',t:'CL15',l:'hasClaim'},{f:'P02',t:'CL16',l:'hasClaim'},
+    {f:'P03',t:'CL17',l:'hasClaim'},{f:'P04',t:'CL18',l:'hasClaim'},
+    /* Claim claimant/benefit/care */
+    {f:'CL11',t:'CL01',l:'isClaimant'},{f:'CL12',t:'CL02',l:'isClaimant'},
+    {f:'CL13',t:'CL03',l:'isClaimant'},{f:'CL14',t:'CL04',l:'isClaimant'},
+    {f:'CL15',t:'CL07',l:'isClaimant'},{f:'CL16',t:'CL08',l:'isClaimant'},
+    {f:'CL11',t:'B01',l:'coveredBy'},{f:'CL12',t:'B02',l:'coveredBy'},
+    {f:'CL13',t:'B03',l:'coveredBy'},{f:'CL14',t:'B04',l:'coveredBy'},
+    {f:'CL11',t:'CE01',l:'relatedCare'},{f:'CL12',t:'CE02',l:'relatedCare'},
+    {f:'CL13',t:'CE03',l:'relatedCare'},{f:'CL14',t:'CE04',l:'relatedCare'},
+    {f:'CL15',t:'CE05',l:'relatedCare'},{f:'CL16',t:'CE06',l:'relatedCare'},
+    /* Care → Provider */
+    {f:'CE01',t:'PR01',l:'providedBy'},{f:'CE02',t:'PR02',l:'providedBy'},
+    {f:'CE03',t:'PR03',l:'providedBy'},{f:'CE04',t:'PR01',l:'providedBy'},
+    {f:'CE05',t:'PR04',l:'providedBy'},{f:'CE06',t:'PR05',l:'providedBy'},
+    {f:'CL17',t:'PR06',l:'treatedAt'},{f:'CL18',t:'PR02',l:'treatedAt'},
+    /* Benefit ← eligible */
+    {f:'B01',t:'P01',l:'eligibleFor'},{f:'B02',t:'P02',l:'eligibleFor'},
+    {f:'B03',t:'P03',l:'eligibleFor'},{f:'B05',t:'P05',l:'eligibleFor'},
+    {f:'B06',t:'P07',l:'eligibleFor'},
+    /* SWRL fires */
+    {f:'SW01',t:'CL11',l:'fires→'},{f:'SW01',t:'B01',l:'activates'},
+    {f:'SW02',t:'P02',l:'lapseAlert'},{f:'SW02',t:'CL09',l:'notifies'},
+    {f:'SW03',t:'CL05',l:'crossSell'},{f:'SW03',t:'ACC01',l:'suggests'},
+    {f:'SW04',t:'CO01',l:'escalates'},{f:'SW04',t:'CL16',l:'flags'},
+    /* Compliance */
+    {f:'CO01',t:'CL11',l:'regulates'},{f:'CO01',t:'CL14',l:'regulates'},
+    {f:'CO02',t:'P01',l:'governs'},{f:'CO03',t:'CL08',l:'screens'},
+    {f:'CO04',t:'A01',l:'validates'},
+    /* Phone leaves */
+    {f:'CL01',t:'PH01',l:'has-phone'},{f:'CL02',t:'PH02',l:'has-phone'},
+    {f:'CL03',t:'PH03',l:'has-phone'},{f:'CL04',t:'PH04',l:'has-phone'},
+    {f:'CL05',t:'PH05',l:'has-phone'},{f:'CL06',t:'PH06',l:'has-phone'},
+    {f:'A01',t:'PH07',l:'has-phone'},{f:'A02',t:'PH08',l:'has-phone'},
+    {f:'PR01',t:'PH09',l:'has-phone'},{f:'PR02',t:'PH10',l:'has-phone'},
+    {f:'C01',t:'PH11',l:'has-phone'},{f:'C02',t:'PH12',l:'has-phone'},
+    /* Email leaves */
+    {f:'CL01',t:'EM01',l:'has-email'},{f:'CL02',t:'EM02',l:'has-email'},
+    {f:'CL03',t:'EM03',l:'has-email'},{f:'CL04',t:'EM04',l:'has-email'},
+    {f:'A01',t:'EM05',l:'has-email'},{f:'A02',t:'EM06',l:'has-email'},
+    {f:'CL06',t:'EM07',l:'has-email'},{f:'CL10',t:'EM08',l:'has-email'},
+    {f:'CL08',t:'EM09',l:'has-email'},{f:'CL09',t:'EM10',l:'has-email'},
+    /* Address leaves */
+    {f:'C01',t:'AD01',l:'has-address'},{f:'C02',t:'AD02',l:'has-address'},
+    {f:'CL01',t:'AD03',l:'has-address'},{f:'CL03',t:'AD04',l:'has-address'},
+    {f:'CL04',t:'AD05',l:'has-address'},{f:'PR01',t:'AD06',l:'has-address'},
+    {f:'PR03',t:'AD07',l:'has-address'},{f:'A03',t:'AD08',l:'has-address'},
+    /* Documents */
+    {f:'P01',t:'DO01',l:'hasDoc'},{f:'A01',t:'DO02',l:'delivered'},
+    {f:'P05',t:'DO03',l:'hasDoc'},{f:'CL11',t:'DO04',l:'hasDoc'},
+    {f:'CO01',t:'DO05',l:'generates'},{f:'CL08',t:'DO06',l:'signed'},
+    /* Accounts */
+    {f:'CL08',t:'ACC01',l:'owns'},{f:'CL08',t:'ACC02',l:'owns'},
+    {f:'CL08',t:'ACC03',l:'owns'},{f:'C01',t:'ACC04',l:'billedTo'},
+    /* Carrier ↔ contracts */
+    {f:'PR01',t:'C01',l:'contracted'},{f:'PR02',t:'C02',l:'contracted'},
+    {f:'PR03',t:'C03',l:'contracted'},{f:'PR04',t:'C04',l:'contracted'},
+    {f:'PR05',t:'C05',l:'contracted'},
+    /* Provider ↔ Benefit paidTo */
+    {f:'B01',t:'PR01',l:'paidTo'},{f:'B02',t:'PR02',l:'paidTo'},
+    {f:'B03',t:'PR03',l:'paidTo'},
+    /* Cross edges */
+    {f:'A01',t:'A02',l:'collab.'},{f:'C01',t:'C02',l:'reinsures'},
+    {f:'C02',t:'C03',l:'reinsures'}
+  ];
+  /* ────────────────────────────────────────────────────────────
+     FORCE-DIRECTED LAYOUT  (Fruchterman-Reingold, 70 iters)
+  ──────────────────────────────────────────────────────────── */
+  function _p60layout(nodes, edges, W, H) {
+    var pos = {}, N = nodes.length;
+    var cx = W/2, cy = H/2;
+    /* ring radii & start angles by group */
+    var RING = {
+      carrier:[0,165],advisor:[0.6,175],client:[1.3,185],policy:[2.0,150],
+      claim:[2.7,125],provider:[3.4,145],benefit:[4.1,110],care:[4.8,105],
+      swrl:[5.5,82],compliance:[0.25,78],leaf:[1.05,230],doc:[3.15,92],account:[2.55,76]
+    };
+    var gCount = {};
+    nodes.forEach(function(n){
+      var g=n.g||'leaf';
+      gCount[g]=(gCount[g]||0)+1;
+    });
+    var gIdx = {};
+    nodes.forEach(function(n, idx) {
+      var g=n.g||'leaf';
+      if(!gIdx[g]) gIdx[g]=0;
+      var ri=RING[g]||[1.05,230];
+      var startAngle=ri[0], baseR=ri[1];
+      var total=gCount[g]||1;
+      var angle=startAngle + (gIdx[g]/total)*2*Math.PI;
+      /* deterministic jitter */
+      var seed=(idx*1664525+1013904223)&0x7fffffff;
+      var jr1=(seed&0x3ff)/0x3ff*2-1, jr2=((seed>>10)&0x3ff)/0x3ff*2-1;
+      var r=baseR+jr1*30;
+      pos[n.id]={
+        x:Math.max(38,Math.min(W-38, cx+r*Math.cos(angle+jr2*0.6))),
+        y:Math.max(38,Math.min(H-38, cy+r*Math.sin(angle+jr2*0.6)))
+      };
+      gIdx[g]++;
+    });
+
+    var k=Math.sqrt(W*H/N)*0.9;
+    var temp=W/8;
+    for(var it=0;it<70;it++){
+      var d={};
+      nodes.forEach(function(n){d[n.id]={x:0,y:0};});
+      /* repulsion */
+      for(var i=0;i<nodes.length;i++){
+        for(var j=i+1;j<nodes.length;j++){
+          var ni=nodes[i],nj=nodes[j];
+          var dx=pos[ni.id].x-pos[nj.id].x, dy=pos[ni.id].y-pos[nj.id].y;
+          var dist=Math.sqrt(dx*dx+dy*dy)||0.01;
+          var rep=(k*k)/dist, ux=dx/dist, uy=dy/dist;
+          d[ni.id].x+=ux*rep; d[ni.id].y+=uy*rep;
+          d[nj.id].x-=ux*rep; d[nj.id].y-=uy*rep;
+        }
+      }
+      /* attraction */
+      edges.forEach(function(e){
+        var pf=pos[e.f],pt=pos[e.t]; if(!pf||!pt) return;
+        var dx=pf.x-pt.x,dy=pf.y-pt.y, dist=Math.sqrt(dx*dx+dy*dy)||0.01;
+        var att=(dist*dist)/k, ux=dx/dist, uy=dy/dist;
+        d[e.f].x-=ux*att*0.45; d[e.f].y-=uy*att*0.45;
+        d[e.t].x+=ux*att*0.45; d[e.t].y+=uy*att*0.45;
+      });
+      /* apply */
+      nodes.forEach(function(n){
+        var dv=d[n.id], dLen=Math.sqrt(dv.x*dv.x+dv.y*dv.y)||0.01;
+        var mv=Math.min(dLen,temp);
+        pos[n.id].x=Math.max(38,Math.min(W-38, pos[n.id].x+(dv.x/dLen)*mv));
+        pos[n.id].y=Math.max(38,Math.min(H-38, pos[n.id].y+(dv.y/dLen)*mv));
+      });
+      temp*=0.92;
+    }
+    return pos;
+  }
+
+  /* ────────────────────────────────────────────────────────────
+     RENDER
+  ──────────────────────────────────────────────────────────── */
+  function _p60render() {
+    var W=940, H=640;
+    var pos=_p60layout(GN,GE,W,H);
+
+    /* EDGES */
+    var esvg=GE.map(function(e){
+      var fp=pos[e.f],tp=pos[e.t]; if(!fp||!tp) return '';
+      var fn=GN.find(function(n){return n.id===e.f;})||{};
+      var ec=_gc(fn.t).c;
+      var dx=tp.x-fp.x,dy=tp.y-fp.y,len=Math.sqrt(dx*dx+dy*dy)||1;
+      var rF=_nodeR(fn.g), rT=12;
+      var tn=GN.find(function(n){return n.id===e.t;})||{};
+      rT=_nodeR(tn.g);
+      var sx=fp.x+dx/len*rF, sy=fp.y+dy/len*rF;
+      var ex=tp.x-dx/len*rT, ey=tp.y-dy/len*rT;
+      var mx=(fp.x+tp.x)/2, my=(fp.y+tp.y)/2-5;
+      return '<line x1="'+sx+'" y1="'+sy+'" x2="'+ex+'" y2="'+ey+'"'
+        +' stroke="'+ec+'" stroke-width="0.8" opacity="0.38" marker-end="url(#arr60v2)"/>'
+        +'<text x="'+mx+'" y="'+my+'" text-anchor="middle" font-size="5.5"'
+        +' fill="rgba(200,210,230,0.65)" font-family="Inter,sans-serif">'+e.l+'</text>';
+    }).join('');
+
+    /* NODES */
+    var nsvg=GN.map(function(n){
+      var p=pos[n.id]; if(!p) return '';
+      var ent=_gc(n.t), r=_nodeR(n.g);
+      var isCore=['carrier','advisor','client'].indexOf(n.g)>=0;
+      var isMid=['policy','claim','provider','benefit','care','swrl','compliance'].indexOf(n.g)>=0;
+      var k60='p60n-'+n.id;
+      window._p8actions[k60]=function(){ _p60toast(n,ent); };
+      var short=n.l.length>13?n.l.slice(0,12)+'\u2026':n.l;
+      var ip=ICONS[n.t]||ICO[n.t]||'M-4-4h8v8h-8z';
+      var sc=isCore?0.52:isMid?0.44:0.36;
+      /* glow rings */
+      var glow=isCore
+        ?'<circle cx="'+p.x+'" cy="'+p.y+'" r="'+(r+7)+'" fill="'+ent.c+'" opacity="0.08"/>'
+         +'<circle cx="'+p.x+'" cy="'+p.y+'" r="'+(r+3)+'" fill="none" stroke="'+ent.b+'" stroke-width="0.8" opacity="0.3"/>'
+        :isMid
+        ?'<circle cx="'+p.x+'" cy="'+p.y+'" r="'+(r+3)+'" fill="'+ent.c+'" opacity="0.1"/>'
+        :'';
+      return '<g onclick="_p8run(\''+k60+'\')" style="cursor:pointer">'
+        +glow
+        +'<circle cx="'+p.x+'" cy="'+p.y+'" r="'+r+'" fill="'+ent.c+'" stroke="'+ent.b+'" stroke-width="'+(isCore?2:1.2)+'"/>'
+        +'<g transform="translate('+p.x+','+p.y+') scale('+sc+')">'
+        +'<path d="'+ip+'" fill="rgba(255,255,255,0.9)" stroke="none"/>'
+        +'</g>'
+        +'<text x="'+p.x+'" y="'+(p.y+r+10)+'" text-anchor="middle" font-size="'+(isCore?8.5:isMid?7.5:6.5)+'"'
+        +' fill="rgba(226,232,240,0.82)" font-family="Inter,sans-serif">'+short+'</text>'
+        +'</g>';
+    }).join('');
+
+    /* LEGEND */
+    var LEG=[
+      {t:'Advisor',c:'#f97316'},{t:'Client',c:'#8b5cf6'},{t:'Carrier',c:'#0d9488'},
+      {t:'Policy',c:'#e11d48'},{t:'Life/Annuity',c:'#be185d'},{t:'Claim',c:'#d97706'},
+      {t:'Provider',c:'#059669'},{t:'Benefit',c:'#2563eb'},{t:'CareEvent',c:'#0891b2'},
+      {t:'Phone',c:'#10b981'},{t:'Email',c:'#3b82f6'},{t:'Address',c:'#f59e0b'},
+      {t:'SWRL/Compliance',c:'#dc2626'},{t:'Document',c:'#64748b'},{t:'Account',c:'#7c3aed'}
+    ];
+    var legHtml=LEG.map(function(l){
+      return '<div style="display:flex;align-items:center;gap:4px">'
+        +'<div style="width:8px;height:8px;border-radius:50%;background:'+l.c+';flex-shrink:0"></div>'
+        +'<span style="font-size:8px;color:#94a3b8;white-space:nowrap">'+l.t+'</span></div>';
+    }).join('');
+
+    return '<div style="background:#0d1117;border:1px solid #1e293b;border-radius:14px;overflow:hidden;box-shadow:0 6px 30px rgba(0,0,0,0.6)">'
+      /* header */
+      +'<div style="padding:10px 16px;border-bottom:1px solid #1e293b;background:#0f172a;display:flex;align-items:center;justify-content:space-between">'
+      +'<span style="font-size:12px;font-weight:700;color:#f1f5f9"><i class="fas fa-project-diagram" style="color:#8b5cf6;margin-right:8px"></i>Knowledge Graph Explorer — '+GN.length+' nodes · '+GE.length+' edges · Cosmos DB Gremlin API</span>'
+      +'<div style="display:flex;gap:5px">'
+      +'<span style="background:#7c3aed22;border:1px solid #7c3aed44;color:#a78bfa;border-radius:4px;padding:1px 6px;font-size:9px;font-weight:700">&lt;12ms P50</span>'
+      +'<span style="background:#05996922;border:1px solid #05996944;color:#34d399;border-radius:4px;padding:1px 6px;font-size:9px;font-weight:700">4 SWRL firing</span>'
+      +'<span style="background:#0891b222;border:1px solid #0891b244;color:#67e8f9;border-radius:4px;padding:1px 6px;font-size:9px;font-weight:700">Click any node</span>'
+      +'</div></div>'
+      /* SVG */
+      +'<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:'+H+'px">'
+      +'<defs>'
+      +'<radialGradient id="bg60" cx="38%" cy="42%" r="60%">'
+      +'<stop offset="0%" stop-color="#1e1040"/>'
+      +'<stop offset="50%" stop-color="#0f172a"/>'
+      +'<stop offset="100%" stop-color="#0a0e1a"/>'
+      +'</radialGradient>'
+      +'<marker id="arr60v2" markerWidth="4" markerHeight="4" refX="4" refY="2" orient="auto">'
+      +'<path d="M0,0.5 L4,2 L0,3.5 Z" fill="#3f5170" opacity="0.8"/></marker>'
+      +'<pattern id="dg60" x="0" y="0" width="28" height="28" patternUnits="userSpaceOnUse">'
+      +'<circle cx="14" cy="14" r="0.45" fill="#1a2540" opacity="0.7"/></pattern>'
+      +'</defs>'
+      +'<rect width="100%" height="100%" fill="url(#bg60)"/>'
+      +'<rect width="100%" height="100%" fill="url(#dg60)"/>'
+      +esvg
+      +nsvg
+      +'</svg>'
+      /* legend */
+      +'<div style="padding:7px 14px;border-top:1px solid #1e293b;background:#0a0e1a;display:flex;gap:7px;flex-wrap:wrap;align-items:center">'
+      +'<span style="font-size:7.5px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.5px;margin-right:3px">LEGEND</span>'
+      +legHtml+'</div>'
+      +'</div>';
+  }
+
+  function _nodeR(g){
+    return ['carrier','advisor','client'].indexOf(g)>=0?15:
+           ['policy','claim','provider','benefit','care','swrl','compliance'].indexOf(g)>=0?12:9;
+  }
+
+  function _p60toast(n,ent){
+    var old=document.getElementById('_p60toast'); if(old) old.remove();
+    var t=document.createElement('div'); t.id='_p60toast';
+    t.style.cssText='position:fixed;bottom:20px;right:20px;z-index:9999;'
+      +'background:#0f172a;border:1px solid '+ent.c+';border-left:4px solid '+ent.c+';'
+      +'border-radius:10px;padding:12px 15px;min-width:210px;'
+      +'box-shadow:0 8px 30px rgba(0,0,0,0.65);font-family:Inter,sans-serif;animation:fadeIn .2s ease';
+    t.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">'
+      +'<div style="display:flex;align-items:center;gap:8px">'
+      +'<div style="width:24px;height:24px;border-radius:50%;background:'+ent.c+';flex-shrink:0"></div>'
+      +'<div><div style="font-size:12px;font-weight:700;color:#f1f5f9">'+n.l+'</div>'
+      +'<div style="font-size:10px;color:'+ent.c+'">'+n.t+' · '+n.id+'</div></div></div>'
+      +'<button onclick="document.getElementById(\'_p60toast\').remove()" style="background:none;border:none;color:#475569;cursor:pointer;font-size:13px">✕</button>'
+      +'</div>'
+      +'<code style="font-size:8.5px;color:#67e8f9;display:block;background:#1e293b;border-radius:4px;padding:4px 6px">'
+      +'g.V(\''+n.id+'\').bothE().otherV().path()'
+      +'</code>';
+    document.body.appendChild(t);
+    setTimeout(function(){var d=document.getElementById('_p60toast');if(d)d.remove();},4500);
+  }
+
+  /* ── Override _p58graphTab ── */
+  window._p58graphTab = _p60render;
+
+  /* ── Also override _p22buildPage to re-call itself (forces re-render) ── */
+  var _p60prev = window._p22buildPage;
+  window._p22buildPage = function() { _p60prev && _p60prev(); };
+
+  console.log('[P60] KG dark canvas v2 · '+GN.length+' nodes · '+GE.length+' edges · SVG path icons · force layout · pulse rings');
+})();
