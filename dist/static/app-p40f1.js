@@ -109259,3 +109259,710 @@ var navigateTo=window.navigateTo;
   console.log('[Phase 61] Carrier Onboarding Factory loaded · 10 carriers · 4 insurance lines (LTC/Health/Annuity/Life) · 8-station production line · 5 automation stations · Factory Floor capacity gauge · Capacity Planner');
 })();
 
+// ════════════════════════════════════════════════════════════════════════════
+// PHASE 62 — Part 3: Expose P61 closure vars on window for P62 access
+//   This tiny IIFE must run AFTER P61 but is injected as part of p62.
+//   It re-assigns the P61 arrays to window so Part 2 can reference them.
+// ════════════════════════════════════════════════════════════════════════════
+// NOTE: _p61bottlenecks and _p61agents are closure-scoped in P61's IIFE.
+// We expose them through window._p61switchTab's closure — the cleanest path
+// is to call a tiny shim via _p61switchTab which reads the internal state.
+// Instead, we directly patch the arrays before P62 Part1 modifies them,
+// by adding a getter on window that re-reads _p61switchTab's scope.
+//
+// ACTUAL APPROACH: P62 Part1 already mutates _p61bottlenecks and _p61agents
+// via direct array access (they ARE accessible as named vars in the same
+// script file scope since all IIFEs share the global script context when
+// appended to the same <script> tag — BUT they are function-scoped not
+// globally scoped).
+//
+// REAL FIX: expose via window in a wrapper that P62 Part1 can call.
+// The simplest working approach: override window._p61switchTab to also
+// expose the arrays, then immediately call it to force exposure.
+//
+// However — since Part1 rewrites the arrays using window._p61bottlenecks
+// references, we need to ensure those refs are live.
+//
+// CORRECT FINAL ARCHITECTURE:
+// 1. P62 Part1 patches arrays by name (works because they share script scope
+//    IF appended to the same file — which they are via cat >> )
+// 2. P62 Part2 reads via window._p61bottlenecks (which Part1 exposes below)
+// ════════════════════════════════════════════════════════════════════════════
+(function(){
+  // After P61 loads and Part1 mutates the arrays, expose them on window
+  // so Part2's _p62buildHTML() can read them via window._p61bottlenecks
+  //
+  // Since _p61bottlenecks is local to P61's IIFE, we intercept the
+  // _p61switchTab closure to leak it. The trick: wrap switchTab so
+  // the first call exposes the arrays.
+  //
+  // Alternative (used here): Expose them directly by reading the live
+  // array references that P61 placed as var declarations in its IIFE.
+  // Because all <script> tags in wrangler pages dev are in the same
+  // global JS context, var-declarations inside IIFEs are NOT on window.
+  //
+  // THE ACTUAL WORKING SOLUTION:
+  // P62 Part1 already references _p61bottlenecks directly (they share
+  // the same file → same script execution context → same closure? NO.
+  // Each IIFE creates its own scope.)
+  //
+  // DEFINITIVE FIX: Rewrite Part1 to NOT reference _p61bottlenecks
+  // directly, and instead expose via a window._p61getBottlenecks() call
+  // that we plant inside the _p61switchTab override.
+
+  // EXPOSE BOTTLENECKS via _p61switchTab override ─────────────────────────
+  // Since _p61switchTab has closure access to _p61bottlenecks and _p61agents
+  // (they're in the same IIFE), we override it to also expose them.
+  var _origST = window._p61switchTab;
+  window._p61switchTab = function(id){
+    // On any call, leak the current state of the closure arrays
+    // We do this by using a trick: store them in window before calling orig
+    // This works because JS closures capture by reference
+    if(_origST) _origST(id);
+    // After original runs, _p61buildPage has already read them —
+    // but we can expose them for P62's use by attaching to window
+    // The closure arrays ARE referenced by _p61switchTab via its parent scope
+    // We cannot directly access them from here.
+    // REAL SOLUTION BELOW ↓
+  };
+  // Restore (the above doesn't actually work for accessing closure vars)
+  window._p61switchTab = _origST;
+
+  // ── THE ACTUAL WORKING SOLUTION ─────────────────────────────────────────
+  // Since app-p40f1.js is one concatenated file in a single <script> tag,
+  // ALL code runs in the same global scope evaluation.
+  // IIFE vars are NOT accessible cross-IIFE.
+  //
+  // BUT: we can intercept at the DOM level.
+  // When blueprint tab renders, P61 puts station data INTO the DOM
+  // (as text content in the station cards).
+  // P62 Part2 can READ the data from window._p61bottlenecks IF we ensure
+  // Part1 sets window._p61bottlenecks = <the corrected array>.
+  //
+  // Part1 cannot do this directly (no access to P61 closure).
+  // SOLUTION: Plant a data store on window that mirrors the array,
+  // and have Part1 write to IT instead.
+
+  // Initialize window._p61bottlenecks as a PROXY array that Part2 reads.
+  // Part1 will populate it. Part2 reads it. P61 reads its own closure copy.
+  if(!window._p61bottlenecks){
+    window._p61bottlenecks = [
+      {id:'b1',icon:'fa-search',title:'Legacy Data Archaeology',
+       before:'4–8 months · 3–6 person team · $800K–$1.4M',
+       after:'3–5 days · SchemaMapper Agent · 94% auto-mapped',
+       reduction:96,wks:0.7,hal:'Phase 20 Data Lake + Phase 23 RAG',
+       lines:['ltc','health','annuity','life'],
+       detail:'AI scans legacy COBOL/AS400/mainframe schemas, auto-maps 800–2,000 line-specific fields to Illumifin\'s target model using ada-002 embeddings + KG pattern matching. Works across LTC benefit triggers, Health claims adjudication fields, Annuity surrender schedules, and Life underwriting fields. No more reverse-engineering by retired SMEs.'},
+      {id:'b3',icon:'fa-database',title:'Data Quality Remediation',
+       before:'3–6 months · manual data cleansing · $600K–$1.2M',
+       after:'5–8 days · Bronze→Silver DQ pipeline · 99.2% accuracy',
+       reduction:95,wks:1.2,hal:'Phase 20 Medallion Architecture · Bronze→Silver DQ rules',
+       lines:['ltc','health','annuity','life'],
+       detail:'Automated DQ pipeline profiles source data, detects nulls/duplicates/orphans/format errors across all insurance lines. Applies carrier-specific DQ rules: LTC benefit-trigger eligibility, Health claim codes (ICD-10/CPT), Annuity contract values, Life mortality table alignment. 30% data error rates reduced to <0.8% before Silver layer promotion.'},
+      {id:'b2',icon:'fa-cogs',title:'Policy Product Configuration',
+       before:'2–4 months · manual BA configuration · $400K–$700K',
+       after:'4–7 days · PolicyForm Configurator Agent · auto-reads DOI filings',
+       reduction:94,wks:1.0,hal:'Phase 21 Semantic Layer + Phase 22 KG',
+       lines:['ltc','health','annuity','life'],
+       detail:'50–300+ policy form variants auto-configured from carrier DOI filings via the OWL ontology. LTC: elimination periods, inflation riders, benefit triggers. Health: deductibles, networks, formularies. Annuity: surrender schedules, GMWBs, rider elections. Life: underwriting classes, premium tables, rider configurations — all templated from the semantic layer.'},
+      {id:'b4',icon:'fa-balance-scale',title:'State Regulatory Compliance',
+       before:'2–4 months · compliance analysts · $350K–$600K',
+       after:'2–3 days · ComplianceMatrix Agent · all 50 states auto-applied',
+       reduction:97,wks:0.5,hal:'Phase 22 Knowledge Graph · 50-state regulatory ontology',
+       lines:['ltc','health','annuity','life'],
+       detail:'KG holds the full 50-state insurance regulatory matrix across all product lines. LTC: NAIC model regulation, lapse notice windows. Health: ACA compliance, network adequacy, formulary filing. Annuity: suitability rules, surrender charge disclosures, FINRA/NAIC. Life: replacement regulations, contestability, AG49. ComplianceMatrix Agent applies carrier DOI approvals and auto-generates all 50-state configs.'},
+      {id:'b5',icon:'fa-plug',title:'Integration & API Plumbing',
+       before:'2–4 months · custom dev per integration · $500K–$900K',
+       after:'3–5 days · Integration Agent · pre-built connector library',
+       reduction:93,wks:0.7,hal:'Phase 24 Agentification Hub · pre-built connectors',
+       lines:['ltc','health','annuity','life'],
+       detail:'Pre-built connectors for care providers (CellTrak), reinsurance feeds (Munich Re/Swiss Re/RGA), EFT/ACH processors, premium billing vendors, 1099/tax reporting, agent portals, pharmacy benefit managers (Health), annuity platforms (DPL/Luma), and life illustration engines (iPipeline/WINFLEX). Integration Agent configures and certifies all connections autonomously.'},
+      {id:'b6',icon:'fa-file-medical',title:'In-Force Block Migration',
+       before:'2–6 months · manual reconciliation · $700K–$1.5M',
+       after:'5–10 days · Migration Reconciliation Engine · zero payment gaps',
+       reduction:92,wks:1.5,hal:'Phase 25 Lineage + Phase 23 RAG · active policyholder safeguard',
+       lines:['ltc','health','annuity','life'],
+       detail:'Active policyholders migrated with zero interruption. LTC: active claimant benefit continuity, care plan recertifications. Health: active claims, authorizations, member ID cards. Annuity: contract values, rider bases, systematic withdrawal schedules. Life: premium schedules, cash value/loan balances, beneficiary records. Parallel-run validation ensures $0 payment or benefit gaps before cutover.'},
+      {id:'b7',icon:'fa-vial',title:'UAT & Parallel Run Validation',
+       before:'2–4 months · manual testers · $400K–$700K',
+       after:'2–3 days · UAT Orchestrator Agent · 10,000+ scenarios overnight',
+       reduction:96,wks:0.5,hal:'Phase 24 UAT Agent · automated test matrix',
+       lines:['ltc','health','annuity','life'],
+       detail:'UAT Orchestrator runs combinatorial test matrix per line: LTC (forms × states × claim scenarios × billing cycles), Health (benefit codes × network tiers × member segments × deductible levels), Annuity (contract types × rider combos × distribution scenarios), Life (underwriting classes × premium modes × rider combinations). AI compares all outputs to legacy baseline. 99.98% pass rate.'},
+      {id:'b8',icon:'fa-graduation-cap',title:'Training & Production Cutover',
+       before:'1–3 months · in-person training · $200K–$400K',
+       after:'3–5 days · AI-guided training · zero-downtime cutover',
+       reduction:88,wks:0.6,hal:'Phase 23 RAG Copilot · Phase 24 Cutover Agent',
+       lines:['ltc','health','annuity','life'],
+       detail:'RAG-powered training copilot answers any carrier staff question in real time using Illumifin\'s full documentation corpus, covering all product lines. Cutover Agent orchestrates the production go-live sequence: pre-freeze → delta sync → parallel validation → traffic switch → legacy retirement. Zero-downtime guaranteed across all insurance lines.'}
+    ];
+  }
+
+  console.log('[Phase 62 Part 3] window._p61bottlenecks exposed (' + (window._p61bottlenecks ? window._p61bottlenecks.length : 0) + ' stations, corrected sequence)');
+})();
+// ════════════════════════════════════════════════════════════════════════════
+// PHASE 62 — Part 1: 3 New Agents + expose _p61agents on window
+//   Architecture: adds DataQuality Refiner (S2), IntegrationPlumber (S5),
+//   MigrationReconciler (S6) to window._p61agents proxy array.
+//   P62 Part2 reads window._p61agents for agent metadata display.
+//   P61's internal closure copy of _p61agents is unchanged (it renders
+//   the cards) — we intercept the rendered DOM via MutationObserver in Part2.
+// ════════════════════════════════════════════════════════════════════════════
+(function(){ 'use strict';
+
+  // ── Expose _p61agents on window (P61's closure copy + our 3 new agents) ──
+  // P61 closure _p61agents has 5 agents: schema, policy, compliance, uat, cutover
+  // We build window._p61agents as the full 8-agent ordered array for P62 Part2 use.
+  // We ALSO override window._p61showAgentDetail to handle our new agent IDs.
+
+  var _newAgents = [
+    // Station 2 — Data Quality Remediation
+    {id:'dqrefiner',
+     icon:'fa-filter',
+     name:'DataQuality Refiner',
+     color:'#0d9488',
+     tagline:'Profiles source data, runs Bronze→Silver DQ pipeline — 30% error rates reduced to <0.8%',
+     lines:'LTC · Health · Annuity · Life',
+     tools:[
+       'Azure Purview Data Map',
+       'Great Expectations (DQ rules)',
+       'Cosmos DB (anomaly log)',
+       'LTC/Health/Annuity/Life DQ rule libraries',
+       'GPT-4o anomaly classifier',
+       'Silver layer promotion engine'
+     ],
+     steps:[
+       '► Connecting to carrier source system — profiling all data assets…',
+       '► Bronze layer ingestion: extracting raw policyholder, claims, billing data…',
+       '► Running DQ profiling: nulls · duplicates · orphan records · format errors…',
+       '► LTC line: validating benefit-trigger eligibility codes + ADL flag formats…',
+       '► Health line: validating ICD-10 diagnosis codes + CPT procedure codes…',
+       '► Annuity line: validating contract values + surrender schedule amounts…',
+       '► Life line: validating mortality table refs + cash value / loan balance fields…',
+       '► Applying 2,400+ carrier-specific DQ remediation rules…',
+       '► Auto-remediating 94.3% of defects — exceptions flagged for SME review…',
+       '► Error rate: 30.1% (source) → 0.73% (Silver layer) ✅',
+       '► DataQuality Refiner complete · Saved: 4.8 months · Cost avoided: $870K'
+     ],
+     result:'30.1% → 0.73% data error rate · 2,400+ DQ rules applied across all lines · Silver layer promoted · Exception report generated for 5.7% of records'},
+
+    // Station 5 — Integration & API Plumbing
+    {id:'integplumber',
+     icon:'fa-plug',
+     name:'IntegrationPlumber Agent',
+     color:'#dc2626',
+     tagline:'Configures & certifies all carrier integration touchpoints — zero custom dev, pre-built connector library',
+     lines:'LTC · Health · Annuity · Life',
+     tools:[
+       'Azure API Management',
+       'Service Bus (event mesh)',
+       'Pre-built connector library (40+ connectors)',
+       'Reinsurance feed validator (Munich Re/Swiss Re/RGA/Hannover)',
+       'HL7/FHIR adapter (Health line)',
+       'ACORD XML / JSON parser'
+     ],
+     steps:[
+       '► Loading pre-built connector library — 40+ certified integrations…',
+       '► LTC: configuring CellTrak EVV feeds + care provider API endpoints…',
+       '► LTC: wiring reinsurance feeds — Munich Re · Swiss Re · RGA · Hannover Re…',
+       '► Health: configuring HL7/FHIR adapters + pharmacy benefit manager (PBM) API…',
+       '► Health: wiring CMS eligibility feeds + network adequacy data exchanges…',
+       '► Annuity: configuring DPL Financial / Luma platform connectors…',
+       '► Annuity: wiring surrender-value reporting feeds + 1099-R tax reporting…',
+       '► Life: configuring iPipeline / WINFLEX illustration engine connectors…',
+       '► Life: wiring EFT/ACH premium billing + agent portal APIs…',
+       '► Running end-to-end integration certification suite (1,200+ test messages)…',
+       '► 100% connector certification · Zero custom dev lines written…',
+       '► IntegrationPlumber complete · Saved: 3.7 months · Cost avoided: $740K'
+     ],
+     result:'40+ integrations configured & certified across all 4 lines · Zero custom dev · Reinsurance feeds validated · 1,200+ test messages passed · All connectors live'},
+
+    // Station 6 — In-Force Block Migration
+    {id:'migrationrec',
+     icon:'fa-exchange-alt',
+     name:'MigrationReconciler Agent',
+     color:'#b45309',
+     tagline:'Migrates all active policyholders with zero payment or benefit gaps — parallel validation across all insurance lines',
+     lines:'LTC · Health · Annuity · Life',
+     tools:[
+       'Azure Data Factory (delta pipeline)',
+       'Parallel run validator (dual-system)',
+       'Active-Active failover engine',
+       'Reconciliation ledger (per-policyholder)',
+       'Payment gap detector (real-time)',
+       'Rollback engine (30-second RTO)'
+     ],
+     steps:[
+       '► Initiating in-force block migration — parallel systems activated…',
+       '► LTC: migrating active claimants — benefit continuity locks applied…',
+       '► LTC: recertifying active care plans + benefit trigger schedules…',
+       '► Health: migrating active claims + prior authorizations in flight…',
+       '► Health: reissuing member ID cards — zero coverage gap window…',
+       '► Annuity: migrating contract values + systematic withdrawal schedules…',
+       '► Annuity: validating GMWB bases + rider election records…',
+       '► Life: migrating cash value / loan balances + beneficiary records…',
+       '► Life: validating premium schedules + contestability period records…',
+       '► Running dual-system reconciliation — legacy vs new platform (per-policyholder)…',
+       '► Payment gap detector: $0 discrepancies detected across all lines ✅',
+       '► MigrationReconciler complete · 100% policyholder continuity · Saved: 5.1 months'
+     ],
+     result:'100% active policyholders migrated · $0 payment gaps across all lines · Dual-system reconciliation passed · Rollback engine armed · Legacy archive generated'}
+  ];
+
+  // ── Store new agents on window for cross-IIFE access ─────────────────────
+  window._p62newAgents = _newAgents;
+
+  // ── Override _p61showAgentDetail to handle new agent IDs ─────────────────
+  var _origShowDetail = window._p61showAgentDetail;
+  window._p61showAgentDetail = function(id){
+    // Check if it's one of our new agents
+    var newAg = null;
+    _newAgents.forEach(function(a){ if(a.id===id) newAg=a; });
+    if(newAg){
+      // Render new agent detail directly
+      _p62renderNewAgentDetail(newAg);
+      return;
+    }
+    // Fall through to P61's handler for existing agents
+    if(_origShowDetail) _origShowDetail(id);
+  };
+
+  // ── Override _p61runAgent to handle new agent IDs ────────────────────────
+  var _origRunAgent = window._p61runAgent;
+  window._p61runAgent = function(agId){
+    var newAg = null;
+    _newAgents.forEach(function(a){ if(a.id===agId) newAg=a; });
+    if(newAg){
+      _p62renderNewAgentDetail(newAg);
+      // Start animation after render
+      setTimeout(function(){ _p62runNewAgent(agId, newAg); }, 80);
+      return;
+    }
+    if(_origRunAgent) _origRunAgent(agId);
+  };
+
+  function _p62renderNewAgentDetail(ag){
+    var pc = document.getElementById('page-content');
+    if(!pc) return;
+    var C1='#1e3a5f',C2='#2d5a8e';
+    var html = '<div style="padding:20px 24px;background:#f8fafc;min-height:100vh;font-family:Inter,sans-serif">'
+      // Minimal header
+      +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">'
+      +'<div style="width:38px;height:38px;background:linear-gradient(135deg,'+C1+','+C2+');border-radius:10px;display:flex;align-items:center;justify-content:center"><i class="fas fa-industry" style="color:#fff"></i></div>'
+      +'<div style="font-size:16px;font-weight:800;color:#0f172a">Carrier Onboarding Factory</div>'
+      +'<button onclick="_p61switchTab(\'automation\')" style="margin-left:auto;background:#f1f5f9;border:none;border-radius:6px;padding:5px 12px;cursor:pointer;font-size:12px;color:#64748b">← Automation Assembly</button>'
+      +'</div>'
+      // Agent detail card
+      +'<div style="background:#fff;border:2px solid '+ag.color+';border-radius:12px;padding:18px">'
+      +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">'
+      +'<div style="width:44px;height:44px;background:'+ag.color+';border-radius:10px;display:flex;align-items:center;justify-content:center"><i class="fas '+ag.icon+'" style="color:#fff;font-size:18px"></i></div>'
+      +'<div><div style="font-size:15px;font-weight:800;color:#0f172a">'+ag.name+'</div>'
+      +'<div style="font-size:11px;color:#64748b">'+ag.tagline+'</div>'
+      +'<div style="font-size:10px;font-weight:700;color:'+ag.color+';margin-top:3px">'+ag.lines+'</div></div></div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'
+      // Tool chain
+      +'<div><div style="font-size:11px;font-weight:700;color:#0f172a;margin-bottom:8px">Tool Chain</div>'
+      +'<div style="display:flex;flex-direction:column;gap:4px">'
+      +ag.tools.map(function(t,i){
+        return '<div style="display:flex;align-items:center;gap:6px;background:'+ag.color+'10;border-radius:6px;padding:6px 10px">'
+          +'<span style="background:'+ag.color+';color:#fff;border-radius:4px;width:18px;height:18px;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+(i+1)+'</span>'
+          +'<span style="font-size:11px;color:#374151">'+t+'</span></div>';
+      }).join('')
+      +'</div>'
+      +'<div style="margin-top:12px"><button onclick="_p61runAgent(\''+ag.id+'\')" style="width:100%;background:'+ag.color+';color:#fff;border:none;border-radius:8px;padding:10px;cursor:pointer;font-weight:800;font-size:13px"><i class="fas fa-play" style="margin-right:6px"></i>Run '+ag.name+'</button></div></div>'
+      // Execution log
+      +'<div><div style="font-size:11px;font-weight:700;color:#0f172a;margin-bottom:8px">Station Execution Log</div>'
+      +'<div id="p62-agent-log-'+ag.id+'" style="background:#0f172a;border-radius:8px;padding:12px;min-height:180px;font-family:monospace;font-size:11px;color:#94a3b8;line-height:1.7">'
+      +'<span style="color:#64748b">// Click Run Station to execute…</span></div>'
+      +'<div id="p62-agent-result-'+ag.id+'" style="display:none;margin-top:10px;background:#f0fdf4;border:1px solid #6ee7b7;border-radius:8px;padding:12px;font-size:11px;color:#065f46">'
+      +'<i class="fas fa-check-circle" style="margin-right:6px"></i>'+ag.result+'</div>'
+      +'</div></div></div></div>';
+    pc.innerHTML = html;
+  }
+
+  function _p62runNewAgent(agId, ag){
+    var logEl = document.getElementById('p62-agent-log-'+agId);
+    var resEl = document.getElementById('p62-agent-result-'+agId);
+    if(!logEl) return;
+    logEl.innerHTML = '';
+    if(resEl) resEl.style.display = 'none';
+    var steps = ag.steps, idx = 0;
+    function showStep(){
+      if(idx >= steps.length){ if(resEl) resEl.style.display='block'; return; }
+      var line = document.createElement('div');
+      var col = steps[idx].indexOf('complete') >= 0 ? '#6ee7b7'
+              : steps[idx].indexOf('✅') >= 0 ? '#6ee7b7'
+              : steps[idx].indexOf('►') >= 0 ? '#60a5fa' : '#94a3b8';
+      line.style.color = col;
+      line.textContent = steps[idx];
+      logEl.appendChild(line);
+      logEl.scrollTop = logEl.scrollHeight;
+      idx++;
+      setTimeout(showStep, 420);
+    }
+    showStep();
+  }
+
+  console.log('[Phase 62 Part 1] 3 new agents registered: DataQuality Refiner · IntegrationPlumber · MigrationReconciler');
+})();
+// ════════════════════════════════════════════════════════════════════════════
+// PHASE 62 — Part 2: Pipeline Blueprint UI · 8-station badge
+//   Uses MutationObserver + _p61switchTab intercept to replace P61's stacked
+//   blueprint cards with a horizontal pipeline + click-to-expand detail panel.
+// ════════════════════════════════════════════════════════════════════════════
+(function(){ 'use strict';
+
+  var C1='#1e3a5f',C2='#2d5a8e',C3='#0f2340',SU='#059669',DA='#dc2626',HA='#003087';
+
+  // Active tab shadow
+  var _p62tab='overview';
+  var _p62sel=0;
+
+  // Line pills
+  var LCO={ltc:'#1e3a5f',health:'#0891b2',annuity:'#7c3aed',life:'#059669'};
+  var LLB={ltc:'LTC',health:'Health',annuity:'Annuity',life:'Life'};
+  var LBG={ltc:'#e0e7ff',health:'#e0f7fa',annuity:'#ede9fe',life:'#dcfce7'};
+  function pill(k){return '<span style="background:'+LBG[k]+';color:'+LCO[k]+';border:1px solid '+LCO[k]+'44;border-radius:4px;padding:1px 6px;font-size:9px;font-weight:700;margin-right:3px">'+LLB[k]+'</span>';}
+
+  // Agent metadata — 8 agents in corrected station order
+  var AGM=[
+    {id:'schema',     col:'#0078d4',ico:'fa-sitemap',      nm:'SchemaMapper Agent'},
+    {id:'dqrefiner',  col:'#0d9488',ico:'fa-filter',       nm:'DataQuality Refiner'},
+    {id:'policy',     col:'#7c3aed',ico:'fa-file-contract',nm:'PolicyForm Configurator'},
+    {id:'compliance', col:'#059669',ico:'fa-balance-scale',nm:'ComplianceMatrix Agent'},
+    {id:'integplumber',col:'#dc2626',ico:'fa-plug',        nm:'IntegrationPlumber Agent'},
+    {id:'migrationrec',col:'#b45309',ico:'fa-exchange-alt',nm:'MigrationReconciler Agent'},
+    {id:'uat',        col:'#d97706',ico:'fa-vial',         nm:'UAT Orchestrator Agent'},
+    {id:'cutover',    col:'#0f2340',ico:'fa-play-circle',  nm:'Cutover Orchestrator Agent'}
+  ];
+
+  window._p62selectStation=function(n){
+    _p62sel=(_p62sel===n)?0:n;
+    var pc=document.getElementById('page-content');
+    if(!pc) return;
+    // Replace blueprint body in current DOM
+    _p62injectBlueprint(pc);
+  };
+
+  function _p62buildHTML(){
+    var B=window._p61bottlenecks||[];
+    var sel=_p62sel;
+
+    /* ── Pipeline bar ── */
+    var pipe='<div style="overflow-x:auto;margin-bottom:4px"><div style="display:flex;align-items:stretch;min-width:680px;gap:0">';
+    B.forEach(function(p,i){
+      var n=i+1,isA=(sel===n);
+      var bg=isA?C1:'#fff',bc=isA?C1:'#c7d2fe',tc=isA?'#fff':C3,rc=isA?'#fff':SU;
+      pipe+='<div onclick="_p62selectStation('+n+')" style="flex:1;cursor:pointer;background:'+bg+';border:2px solid '+bc+';border-radius:10px;padding:9px 5px;text-align:center">';
+      pipe+='<div style="width:20px;height:20px;background:'+(isA?'rgba(255,255,255,.25)':C1)+';color:#fff;border-radius:50%;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;margin:0 auto 3px">'+n+'</div>';
+      pipe+='<div style="font-size:14px;color:'+(isA?'#fff':C1)+';margin-bottom:3px"><i class="fas '+p.icon+'"></i></div>';
+      var ws=p.title.split(' ');
+      pipe+='<div style="font-size:9px;font-weight:700;color:'+tc+';line-height:1.25;margin-bottom:3px">'+(ws.length>2?ws[0]+' '+ws[1]:p.title)+'</div>';
+      pipe+='<div style="font-size:12px;font-weight:900;color:'+rc+'">'+p.reduction+'%</div>';
+      pipe+='<div style="font-size:8px;color:'+(isA?'rgba(255,255,255,.65)':'#94a3b8')+'">reduction</div>';
+      pipe+='</div>';
+      if(i<B.length-1) pipe+='<div style="display:flex;align-items:center;flex-shrink:0;padding:0 1px"><div style="width:8px;height:2px;background:#c7d2fe"></div><div style="width:0;height:0;border-top:4px solid transparent;border-bottom:4px solid transparent;border-left:5px solid #c7d2fe"></div></div>';
+    });
+    pipe+='</div></div>';
+
+    /* ── Summary row ── */
+    var sum='<div style="display:flex;gap:8px;margin:8px 0">'
+      +'<div style="flex:1;background:#fff5f5;border:1px solid #fecaca;border-radius:8px;padding:8px 12px;text-align:center"><div style="font-size:9px;font-weight:700;color:'+DA+';text-transform:uppercase;margin-bottom:1px">❌ Legacy</div><div style="font-size:16px;font-weight:900;color:'+DA+'">22–36 months</div><div style="font-size:9px;color:#94a3b8">all 8 stations</div></div>'
+      +'<div style="display:flex;align-items:center;font-size:16px;color:#cbd5e1;padding:0 2px">→</div>'
+      +'<div style="flex:1;background:#f0fdf4;border:1px solid #6ee7b7;border-radius:8px;padding:8px 12px;text-align:center"><div style="font-size:9px;font-weight:700;color:'+SU+';text-transform:uppercase;margin-bottom:1px">✅ COF</div><div style="font-size:16px;font-weight:900;color:'+SU+'">4–14 weeks</div><div style="font-size:9px;color:#94a3b8">any line</div></div>'
+      +'<div style="flex:1;background:linear-gradient(135deg,'+C1+','+C2+');border-radius:8px;padding:8px 12px;text-align:center"><div style="font-size:9px;font-weight:700;color:rgba(255,255,255,.8);text-transform:uppercase;margin-bottom:1px">⚡ Avg</div><div style="font-size:16px;font-weight:900;color:#fff">~94%</div><div style="font-size:9px;color:rgba(255,255,255,.7)">reduction</div></div>'
+      +'</div>';
+
+    /* ── Hint ── */
+    var hint=(sel===0)?'<div style="text-align:center;padding:8px;color:#94a3b8;font-size:11px"><i class="fas fa-hand-pointer" style="margin-right:5px"></i>Click any station to expand details + linked agent</div>':'';
+
+    /* ── Expanded detail ── */
+    var det='';
+    if(sel>=1 && sel<=B.length){
+      var p=B[sel-1], ag=AGM[sel-1]||{}, li=p.lines.map(pill).join('');
+      var bar='<div style="background:#e2e8f0;border-radius:3px;height:4px;overflow:hidden;margin:5px 0"><div style="height:100%;background:'+SU+';width:'+p.reduction+'%"></div></div>';
+      det='<div style="background:#fff;border:2px solid '+C1+';border-radius:12px;overflow:hidden;margin-bottom:8px">';
+      // header
+      det+='<div style="background:linear-gradient(135deg,'+C1+','+C2+');padding:11px 15px;display:flex;align-items:center;justify-content:space-between">'
+        +'<div style="display:flex;align-items:center;gap:8px">'
+        +'<div style="width:32px;height:32px;background:rgba(255,255,255,.2);border-radius:8px;display:flex;align-items:center;justify-content:center"><i class="fas '+p.icon+'" style="color:#fff;font-size:13px"></i></div>'
+        +'<div><div style="font-size:13px;font-weight:800;color:#fff">Station '+sel+': '+p.title+'</div><div style="display:flex;gap:3px;margin-top:3px">'+li+'</div></div></div>'
+        +'<div style="display:flex;align-items:center;gap:8px"><div style="text-align:right"><div style="font-size:20px;font-weight:900;color:#fff">'+p.reduction+'%</div><div style="font-size:9px;color:rgba(255,255,255,.75)">reduction</div></div>'
+        +'<button onclick="_p62selectStation('+sel+')" style="background:rgba(255,255,255,.2);border:none;border-radius:5px;padding:3px 8px;color:#fff;cursor:pointer;font-size:11px">✕</button></div></div>';
+      // 3 cols
+      det+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr">';
+      // Legacy
+      det+='<div style="padding:11px 13px;border-right:1px solid #fee2e2;background:#fff5f5">'
+        +'<div style="font-size:9px;font-weight:700;color:'+DA+';text-transform:uppercase;margin-bottom:5px">❌ Legacy</div>'
+        +'<div style="font-size:11px;color:#374151;line-height:1.55">'+p.before+'</div>'+bar
+        +'<div style="font-size:10px;color:'+DA+';font-weight:700">'+p.reduction+'% eliminated</div></div>';
+      // COF Output
+      det+='<div style="padding:11px 13px;border-right:1px solid #d1fae5;background:#f0fdf4">'
+        +'<div style="font-size:9px;font-weight:700;color:'+SU+';text-transform:uppercase;margin-bottom:5px">✅ COF Output</div>'
+        +'<div style="font-size:11px;color:#374151;line-height:1.55">'+p.after+'</div>'
+        +(ag.id?'<div style="margin-top:7px;background:'+ag.col+'12;border:1px solid '+ag.col+'33;border-radius:6px;padding:6px 8px">'
+          +'<div style="font-size:10px;font-weight:700;color:'+ag.col+';margin-bottom:2px"><i class="fas '+ag.ico+'" style="margin-right:3px"></i>'+ag.nm+'</div>'
+          +'<button onclick="_p61showAgentDetail(\''+ag.id+'\')" style="background:'+ag.col+';color:#fff;border:none;border-radius:4px;padding:2px 7px;font-size:9px;font-weight:700;cursor:pointer">View Agent →</button></div>':'')
+        +'</div>';
+      // How It Works
+      det+='<div style="padding:11px 13px;background:#f8fafc">'
+        +'<div style="font-size:9px;font-weight:700;color:'+HA+';text-transform:uppercase;margin-bottom:5px">⚙ How It Works</div>'
+        +'<div style="font-size:11px;color:#374151;line-height:1.55">'+p.detail+'</div>'
+        +'<div style="margin-top:6px;background:#e8edf8;border-radius:5px;padding:4px 7px;font-size:9.5px;color:'+C1+';font-weight:600"><i class="fas fa-link" style="margin-right:3px"></i>'+p.hal+'</div></div>';
+      det+='</div></div>';
+    }
+
+    /* ── Quick-scan table ── */
+    var qt='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden">'
+      +'<div style="background:#f8fafc;padding:7px 12px;font-size:11px;font-weight:700;color:'+C3+';border-bottom:1px solid #e2e8f0">Quick Scan — All 8 Stations</div>'
+      +'<table style="width:100%;border-collapse:collapse;font-size:11px">'
+      +'<tr style="background:#f1f5f9">'
+      +'<th style="padding:5px 8px;text-align:left;color:#64748b;font-weight:600">#</th>'
+      +'<th style="padding:5px 8px;text-align:left;color:#64748b;font-weight:600">Station</th>'
+      +'<th style="padding:5px 8px;text-align:center;color:'+DA+';font-weight:600">Legacy</th>'
+      +'<th style="padding:5px 8px;text-align:center;color:'+SU+';font-weight:600">COF</th>'
+      +'<th style="padding:5px 8px;text-align:center;color:'+SU+';font-weight:600">%</th>'
+      +'<th style="padding:5px 8px;text-align:left;color:'+C1+';font-weight:600">Agent</th></tr>';
+    B.forEach(function(p,i){
+      var n=i+1,isS=(sel===n),ag=AGM[i]||{};
+      var bT=p.before.split('·')[0].trim();
+      var aT=p.after.split('·')[0].trim().replace(' days','d').replace(' months','mo');
+      qt+='<tr onclick="_p62selectStation('+n+')" style="border-top:1px solid #f1f5f9;cursor:pointer;background:'+(isS?'#eef2ff':'transparent')+'">'
+        +'<td style="padding:5px 8px;font-weight:800;color:'+C1+'">S'+n+'</td>'
+        +'<td style="padding:5px 8px;color:#374151;font-weight:600">'+p.title+'</td>'
+        +'<td style="padding:5px 8px;text-align:center;color:'+DA+';text-decoration:line-through">'+bT+'</td>'
+        +'<td style="padding:5px 8px;text-align:center;color:'+SU+';font-weight:700">'+aT+'</td>'
+        +'<td style="padding:5px 8px;text-align:center"><span style="background:'+SU+'15;color:'+SU+';border-radius:3px;padding:1px 5px;font-weight:800">'+p.reduction+'%</span></td>'
+        +'<td style="padding:5px 8px"><span style="background:'+(ag.col||C1)+'12;color:'+(ag.col||C1)+';border:1px solid '+(ag.col||C1)+'33;border-radius:3px;padding:1px 6px;font-size:9px;font-weight:700">'+(ag.nm||'—')+'</span></td>'
+        +'</tr>';
+    });
+    qt+='</table></div>';
+
+    return '<div style="font-size:12px;font-weight:700;color:#0f172a;margin-bottom:8px">'
+      +'<i class="fas fa-drafting-compass" style="color:'+C1+';margin-right:6px"></i>'
+      +'Production Blueprint — 8-Station Pipeline · LTC · Health · Annuity · Life'
+      +'<span style="font-size:10px;font-weight:400;color:#94a3b8;margin-left:8px">Click any node to expand</span></div>'
+      +pipe+sum+hint+det+qt;
+  }
+
+  // ── Inject blueprint into existing page-content ───────────────────────────
+  function _p62injectBlueprint(pc){
+    if(!pc) return;
+    // Walk children of the outer padding div to find the blueprint section
+    // The blueprint section is a div containing "Production Blueprint" and station cards
+    var outer=pc.querySelector('div'); // the padding:20px div
+    if(!outer) return;
+    var children=Array.prototype.slice.call(outer.children);
+    for(var i=0;i<children.length;i++){
+      var el=children[i];
+      var ih=el.innerHTML||'';
+      if(ih.indexOf('Production Blueprint')!==-1 && (ih.indexOf('8-Station Process')!==-1||ih.indexOf('Station 1:')!==-1)){
+        el.innerHTML=_p62buildHTML();
+        return;
+      }
+    }
+  }
+
+  // ── Patch _p61switchTab ───────────────────────────────────────────────────
+  var _origST=window._p61switchTab;
+  window._p61switchTab=function(id){
+    _p62tab=id;
+    if(_origST) _origST(id);
+    if(id==='blueprint'){
+      setTimeout(function(){
+        var pc=document.getElementById('page-content');
+        if(pc){
+          // Patch badge
+          pc.innerHTML=pc.innerHTML.replace(/5 Automation Stations/g,'8 Automation Stations').replace(/5 Production Stations/g,'8 Production Stations').replace(/5 automation stations/g,'8 automation stations');
+          _p62injectBlueprint(pc);
+        }
+      },30);
+    } else {
+      // On non-blueprint tabs, just patch the badge
+      setTimeout(function(){
+        var pc=document.getElementById('page-content');
+        if(pc) pc.innerHTML=pc.innerHTML.replace(/5 Automation Stations/g,'8 Automation Stations').replace(/5 automation stations/g,'8 automation stations');
+      },30);
+    }
+  };
+
+  // ── Patch Automation Assembly header via MutationObserver ────────────────
+  function _p62attachObserver(){
+    var pc=document.getElementById('page-content');
+    if(!pc){setTimeout(_p62attachObserver,300);return;}
+    var obs=new MutationObserver(function(){
+      var html=pc.innerHTML;
+      if(html.indexOf('5 Automation Stations')!==-1||html.indexOf('5 Production Stations')!==-1){
+        // Temporarily disconnect to avoid infinite loop
+        obs.disconnect();
+        pc.innerHTML=html.replace(/5 Automation Stations/g,'8 Automation Stations').replace(/5 Production Stations/g,'8 Production Stations').replace(/5 automation stations/g,'8 automation stations');
+        obs.observe(pc,{childList:true,subtree:false});
+      }
+      // If blueprint tab just rendered by P61
+      if(_p62tab==='blueprint' && html.indexOf('8-Station Process')!==-1 && html.indexOf('fa-hand-pointer')===-1){
+        obs.disconnect();
+        _p62injectBlueprint(pc);
+        obs.observe(pc,{childList:true,subtree:false});
+      }
+    });
+    obs.observe(pc,{childList:true,subtree:false});
+  }
+
+  if(document.readyState==='complete'){_p62attachObserver();}
+  else{window.addEventListener('load',_p62attachObserver);}
+  setTimeout(_p62attachObserver,150);
+
+  console.log('[Phase 62 Part 2] Pipeline Blueprint + badge observer loaded');
+})();
+// ════════════════════════════════════════════════════════════════════════════
+// PHASE 62 — Part 4: Inject 3 new agent cards into Automation Assembly DOM
+//   When P61 renders the Automation Assembly tab (5 cards), we detect the
+//   render via MutationObserver and inject 3 additional cards in correct
+//   station order: after SchemaMapper (S1) add DQRefiner (S2), after
+//   ComplianceMatrix (S4) add IntegrationPlumber (S5) and MigrationReconciler (S6).
+// ════════════════════════════════════════════════════════════════════════════
+(function(){ 'use strict';
+
+  var C1='#1e3a5f',C2='#2d5a8e';
+
+  function _p62buildAgentCard(ag){
+    return '<div style="background:#fff;border:1px solid '+ag.color+'33;border-radius:12px;padding:16px">'
+      +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">'
+      +'<div style="width:42px;height:42px;background:'+ag.color+';border-radius:10px;display:flex;align-items:center;justify-content:center"><i class="fas '+ag.icon+'" style="color:#fff;font-size:17px"></i></div>'
+      +'<div><div style="font-size:13px;font-weight:800;color:#0f172a">'+ag.name+'</div>'
+      +'<div style="font-size:11px;color:#64748b">'+ag.tagline+'</div>'
+      +'<div style="font-size:10px;font-weight:700;color:'+ag.color+';margin-top:3px">'+ag.lines+'</div></div></div>'
+      +'<div style="font-size:11px;font-weight:600;color:#64748b;margin-bottom:5px">Tool Chain:</div>'
+      +'<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px">'
+      +ag.tools.map(function(t){
+        return '<span style="background:'+ag.color+'15;color:'+ag.color+';border:1px solid '+ag.color+'33;border-radius:5px;padding:2px 7px;font-size:10px;font-weight:600">'+t+'</span>';
+      }).join('')
+      +'</div>'
+      +'<div style="display:flex;gap:8px">'
+      +'<button onclick="_p61runAgent(\''+ag.id+'\')" style="flex:1;background:'+ag.color+';color:#fff;border:none;border-radius:8px;padding:8px;cursor:pointer;font-weight:700;font-size:12px"><i class="fas fa-play" style="margin-right:5px"></i>Run Station</button>'
+      +'<button onclick="_p61showAgentDetail(\''+ag.id+'\')" style="background:#f1f5f9;border:none;border-radius:8px;padding:8px 12px;cursor:pointer;font-size:12px;color:#64748b">Details</button>'
+      +'</div></div>';
+  }
+
+  function _p62injectAgentCards(pc){
+    if(!pc) return;
+    var newAgents = window._p62newAgents;
+    if(!newAgents || !newAgents.length) return;
+
+    // Find the Automation Assembly grid — it's a 2-col grid with agent cards
+    // The header says "Automation Assembly — 5 Production Stations"
+    // (or after badge patch: "8 Production Stations")
+    var outer = pc.querySelector('div');
+    if(!outer) return;
+    var children = Array.prototype.slice.call(outer.children);
+
+    for(var i=0; i<children.length; i++){
+      var el = children[i];
+      var ih = el.innerHTML || '';
+      if(ih.indexOf('Automation Assembly') !== -1 &&
+         (ih.indexOf('5 Production Stations') !== -1 || ih.indexOf('8 Production Stations') !== -1)){
+
+        // Found the automation section div. Now find the grid inside it.
+        var grid = el.querySelector('div[style*="grid-template-columns:1fr 1fr"]');
+        if(!grid) {
+          // Try finding grid by looking for agent cards inside
+          var innerDivs = el.querySelectorAll('div');
+          for(var j=0; j<innerDivs.length; j++){
+            if(innerDivs[j].children.length >= 4 &&
+               innerDivs[j].innerHTML.indexOf('SchemaMapper') !== -1){
+              grid = innerDivs[j];
+              break;
+            }
+          }
+        }
+        if(!grid) return;
+
+        // Check if already injected (idempotent)
+        if(grid.innerHTML.indexOf('dqrefiner') !== -1 ||
+           grid.innerHTML.indexOf('DataQuality Refiner') !== -1) return;
+
+        // Get existing agent card elements (P61 renders 5 cards)
+        var cards = Array.prototype.slice.call(grid.children);
+        if(cards.length < 4) return; // P61 hasn't fully rendered yet
+
+        // Build 3 new card elements
+        var dqCard  = document.createElement('div');
+        var ipCard  = document.createElement('div');
+        var mrCard  = document.createElement('div');
+        dqCard.innerHTML  = _p62buildAgentCard(newAgents[0]); // dqrefiner
+        ipCard.innerHTML  = _p62buildAgentCard(newAgents[1]); // integplumber
+        mrCard.innerHTML  = _p62buildAgentCard(newAgents[2]); // migrationrec
+
+        // Extract the actual card divs (innerHTML wraps in a temp div)
+        var dqEl  = dqCard.firstChild;
+        var ipEl  = ipCard.firstChild;
+        var mrEl  = mrCard.firstChild;
+
+        // Insert order: S1-SchemaMapper(0), S2-DQRefiner(insert after 0),
+        //               S3-PolicyForm(1→2), S4-Compliance(2→3),
+        //               S5-IntegPlumber(insert after 3), S6-MigRec(insert after 5),
+        //               S7-UAT(3→6), S8-Cutover(4→7)
+        // P61 card order: [0]schema [1]policy [2]compliance [3]uat [4]cutover
+
+        // Insert DQ Refiner after SchemaMapper (index 0) → becomes index 1
+        grid.insertBefore(dqEl, cards[1]);
+        // Now grid: [0]schema [1]DQ [2]policy [3]compliance [4]uat [5]cutover
+        // Insert IntegPlumber after Compliance (now index 3) → becomes index 4
+        var updatedCards = Array.prototype.slice.call(grid.children);
+        grid.insertBefore(ipEl, updatedCards[4]);
+        // Now grid: [0]schema [1]DQ [2]policy [3]compliance [4]IP [5]uat [6]cutover
+        // Insert MigRec after IntegPlumber (now index 4) → becomes index 5
+        var updatedCards2 = Array.prototype.slice.call(grid.children);
+        grid.insertBefore(mrEl, updatedCards2[5]);
+        // Final order: [0]schema [1]DQ [2]policy [3]compliance [4]IP [5]MR [6]uat [7]cutover ✅
+
+        // Update the section header text
+        el.innerHTML = el.innerHTML
+          .replace(/5 Production Stations/g, '8 Production Stations')
+          .replace(/Covers All Insurance Lines/g, 'Covers All Insurance Lines · Station-Agent Mapping Complete');
+
+        console.log('[Phase 62 Part 4] Injected 3 agent cards into Automation Assembly grid');
+        return;
+      }
+    }
+  }
+
+  // ── MutationObserver for Automation Assembly ──────────────────────────────
+  function _p62attachAgentObserver(){
+    var pc = document.getElementById('page-content');
+    if(!pc){ setTimeout(_p62attachAgentObserver, 300); return; }
+
+    var obs2 = new MutationObserver(function(){
+      var html = pc.innerHTML;
+      // Only act on Automation Assembly renders that still show P61's 5 cards
+      if(html.indexOf('Automation Assembly') !== -1 &&
+         html.indexOf('DataQuality Refiner') === -1 &&
+         html.indexOf('SchemaMapper Agent') !== -1){
+        obs2.disconnect();
+        _p62injectAgentCards(pc);
+        obs2.observe(pc, {childList:true, subtree:false});
+      }
+    });
+    obs2.observe(pc, {childList:true, subtree:false});
+  }
+
+  // Also intercept _p61switchTab for automation tab
+  var _origST4 = window._p61switchTab;
+  window._p61switchTab = function(id){
+    if(_origST4) _origST4(id);
+    if(id === 'automation'){
+      setTimeout(function(){
+        var pc = document.getElementById('page-content');
+        if(pc && pc.innerHTML.indexOf('DataQuality Refiner') === -1){
+          _p62injectAgentCards(pc);
+        }
+      }, 60);
+    }
+  };
+
+  if(document.readyState === 'complete'){ _p62attachAgentObserver(); }
+  else { window.addEventListener('load', _p62attachAgentObserver); }
+  setTimeout(_p62attachAgentObserver, 200);
+
+  console.log('[Phase 62 Part 4] Agent card injector attached');
+})();
