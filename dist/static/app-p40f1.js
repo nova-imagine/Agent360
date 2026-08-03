@@ -109966,3 +109966,935 @@ var navigateTo=window.navigateTo;
 
   console.log('[Phase 62 Part 4] Agent card injector attached');
 })();
+
+// ════════════════════════════════════════════════════════════════════════════
+// PHASE 63 — AI Migration Hub (Accelerating Conversion)
+//   6th tab in COF · 3-phase × 9-swimlane grid · 5 complexity drivers
+//   BA/DEV/MIG/QA/OPS/PRD agent roles · auto carrier phase indicator
+//   Appended: 2026-08-03T20:39:42Z
+// ════════════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════════════
+// PHASE 63 — Part 1: AI Migration Hub — Data Definitions
+//   9 swimlanes × 3 phases, complexity drivers, role badge config,
+//   COF station → swimlane mapping
+// ════════════════════════════════════════════════════════════════════════════
+(function(){
+  'use strict';
+
+  // ── Role badge palette ────────────────────────────────────────────────────
+  window._p63roles = {
+    BA:  { color:'#7c3aed', bg:'#f3e8ff', label:'BA'  },
+    DEV: { color:'#2563eb', bg:'#eff6ff', label:'DEV' },
+    MIG: { color:'#ea580c', bg:'#fff7ed', label:'MIG' },
+    QA:  { color:'#059669', bg:'#ecfdf5', label:'QA'  },
+    OPS: { color:'#dc2626', bg:'#fef2f2', label:'OPS' },
+    PRD: { color:'#b45309', bg:'#fffbeb', label:'PRD' }
+  };
+
+  // ── Phase headers ─────────────────────────────────────────────────────────
+  window._p63phases = [
+    { id:'ph1', label:'Phase 1 of 3', agents:'BA Agents',
+      grad:'linear-gradient(135deg,#7c3aed,#a855f7)',
+      sub:'Discover & Specify — understand legacy, capture requirements' },
+    { id:'ph2', label:'Phase 2 of 3', agents:'DEV + MIG Agents',
+      grad:'linear-gradient(135deg,#2563eb,#ea580c)',
+      sub:'Build & Migrate — construct target, clean data, spec controls' },
+    { id:'ph3', label:'Phase 3 of 3', agents:'QA + OPS Agents',
+      grad:'linear-gradient(135deg,#059669,#dc2626)',
+      sub:'Validate & Release — test, rehearse, go-live, train' }
+  ];
+
+  // ── 5 Legend discipline colours ───────────────────────────────────────────
+  window._p63legend = [
+    { label:'Discover & Specify', color:'#7c3aed' },
+    { label:'Data & Migration',   color:'#ea580c' },
+    { label:'Build & Refine',     color:'#2563eb' },
+    { label:'Validate',           color:'#059669' },
+    { label:'Release & Divert',   color:'#dc2626' }
+  ];
+
+  // ── 9 Swimlane rows ───────────────────────────────────────────────────────
+  // Each cell: [ { text, role, disc } ] — disc = legend discipline key
+  // disc keys: DS=Discover&Specify, DM=Data&Migration, BR=Build&Refine, V=Validate, RD=Release&Divert
+  // stations: COF station IDs this cell maps to (for click-drawer detail)
+  window._p63swimlanes = [
+    {
+      id:'it-mig', label:'IT Migration', icon:'fa-network-wired', rowColor:'#2563eb',
+      cofStations:['S1','S5'],
+      cells:[
+        { ph:'ph1', items:[
+            { text:'IT Migration Discovery', role:'BA', disc:'DS' }
+          ]},
+        { ph:'ph2', items:[
+            { text:'Migration Build + Refinement', role:'DEV', disc:'BR' }
+          ]},
+        { ph:'ph3', items:[
+            { text:'Test Support', role:'QA', disc:'V' },
+            { text:'Implementation', role:'OPS', disc:'RD' }
+          ]}
+      ]
+    },
+    {
+      id:'products', label:'Products & Calcs', icon:'fa-calculator', rowColor:'#2563eb',
+      cofStations:['S3','S4'],
+      cells:[
+        { ph:'ph1', items:[
+            { text:'Product Specification', role:'BA', disc:'DS' }
+          ]},
+        { ph:'ph2', items:[
+            { text:'Product Build + Refinement', role:'DEV', disc:'BR' }
+          ]},
+        { ph:'ph3', items:[
+            { text:'Parameter + Static Data Support', role:'PRD', disc:'V' },
+            { text:'Implementation', role:'OPS', disc:'RD' }
+          ]}
+      ]
+    },
+    {
+      id:'operations', label:'Operations & ALPHA', icon:'fa-sitemap', rowColor:'#2563eb',
+      cofStations:['S3','S5'],
+      cells:[
+        { ph:'ph1', items:[
+            { text:'Business Requirements', role:'BA', disc:'DS' }
+          ]},
+        { ph:'ph2', items:[
+            { text:'Functional/Process Specification', role:'BA', disc:'DS' },
+            { text:'Functionality/Process Build', role:'DEV', disc:'BR' }
+          ]},
+        { ph:'ph3', items:[
+            { text:'Functionality/Process Test', role:'QA', disc:'V' },
+            { text:'Implementation', role:'OPS', disc:'RD' }
+          ]}
+      ]
+    },
+    {
+      id:'data', label:'Data', icon:'fa-database', rowColor:'#ea580c',
+      cofStations:['S2','S6'],
+      cells:[
+        { ph:'ph1', items:[
+            { text:'Data Clean — Identify', role:'MIG', disc:'DM' }
+          ]},
+        { ph:'ph2', items:[
+            { text:'Identify / Specify / Clean', role:'MIG', disc:'DM' }
+          ]},
+        { ph:'ph3', items:[
+            { text:'Data Validation + Reconciliation', role:'MIG', disc:'DM' },
+            { text:'Data Freeze', role:'MIG', disc:'DM' }
+          ]}
+      ]
+    },
+    {
+      id:'cutover', label:'Cutover', icon:'fa-flag-checkered', rowColor:'#dc2626',
+      cofStations:['S8'],
+      cells:[
+        { ph:'ph1', items:[] },
+        { ph:'ph2', items:[
+            { text:'Cutover Initiation', role:'OPS', disc:'RD' },
+            { text:'Implementation Specification', role:'OPS', disc:'RD' }
+          ]},
+        { ph:'ph3', items:[
+            { text:'Dress Rehearsal', role:'OPS', disc:'RD' },
+            { text:'Config + Implementation', role:'OPS', disc:'RD' }
+          ]}
+      ]
+    },
+    {
+      id:'uat', label:'UAT & Testing', icon:'fa-vials', rowColor:'#059669',
+      cofStations:['S7'],
+      cells:[
+        { ph:'ph1', items:[] },
+        { ph:'ph2', items:[
+            { text:'UAT Test Specification', role:'QA', disc:'V' },
+            { text:'Create Test + System Test', role:'QA', disc:'V' }
+          ]},
+        { ph:'ph3', items:[
+            { text:'UAT ×4 Checkpoints', role:'QA', disc:'V' },
+            { text:'Implementation', role:'OPS', disc:'RD' }
+          ]}
+      ]
+    },
+    {
+      id:'control', label:'Control', icon:'fa-shield-alt', rowColor:'#2563eb',
+      cofStations:['S4','S7'],
+      cells:[
+        { ph:'ph1', items:[] },
+        { ph:'ph2', items:[
+            { text:'Control Specification', role:'BA', disc:'DS' },
+            { text:'Control Build', role:'DEV', disc:'BR' }
+          ]},
+        { ph:'ph3', items:[
+            { text:'Control Test', role:'QA', disc:'V' },
+            { text:'Implementation', role:'OPS', disc:'RD' }
+          ]}
+      ]
+    },
+    {
+      id:'archive', label:'Archive', icon:'fa-archive', rowColor:'#2563eb',
+      cofStations:['S6','S8'],
+      cells:[
+        { ph:'ph1', items:[] },
+        { ph:'ph2', items:[
+            { text:'Archive Specification', role:'BA', disc:'DS' },
+            { text:'Archive Build', role:'DEV', disc:'BR' }
+          ]},
+        { ph:'ph3', items:[
+            { text:'Archive Test', role:'QA', disc:'V' },
+            { text:'Implementation', role:'OPS', disc:'RD' }
+          ]}
+      ]
+    },
+    {
+      id:'training', label:'Training', icon:'fa-chalkboard-teacher', rowColor:'#b45309',
+      cofStations:['S8'],
+      cells:[
+        { ph:'ph1', items:[] },
+        { ph:'ph2', items:[
+            { text:'Training Specification', role:'BA', disc:'DS' }
+          ]},
+        { ph:'ph3', items:[
+            { text:'Deliver Training', role:'QA', disc:'V' },
+            { text:'Configuration', role:'OPS', disc:'RD' }
+          ]}
+      ]
+    }
+  ];
+
+  // ── 5 Complexity Drivers ─────────────────────────────────────────────────
+  window._p63drivers = [
+    {
+      id:'sme', icon:'fa-brain', label:'Source Knowledge & SME Dependency',
+      desc:'Availability and depth of source-side expertise to enable efficient knowledge transfer and reduce delivery risk.',
+      cofImpact:'Drives Phase 1 BA agent workload — more dependency = more discovery iterations'
+    },
+    {
+      id:'3p', icon:'fa-handshake', label:'Third-Party Dependencies',
+      desc:'Extent of reliance on external providers for platform access, documentation, and critical knowledge.',
+      cofImpact:'Impacts S5 Integration & API Plumbing — each 3rd party adds 1–2 weeks per integration point'
+    },
+    {
+      id:'data', icon:'fa-database', label:'Data Extraction & Platform Landscape',
+      desc:'Complexity of data migration driven by extract processes, data quality, and number of source systems involved.',
+      cofImpact:'Direct driver of S2 Data Quality Remediation workload and MIG agent cycles'
+    },
+    {
+      id:'legacy', icon:'fa-server', label:'Legacy Platform Architecture',
+      desc:'Age, structure, and fragmentation of source platforms impacting migration approach, tooling, and timelines.',
+      cofImpact:'Determines S1 Legacy Data Archaeology depth and overall production run duration (4–14 weeks)'
+    },
+    {
+      id:'prop', icon:'fa-puzzle-piece', label:'Proposition & Functional Alignment',
+      desc:'Degree of alignment between source and target propositions, including gaps requiring design, build, or workaround solutions.',
+      cofImpact:'Governs S3 Policy Product Configuration scope and S4 State Regulatory Compliance complexity'
+    }
+  ];
+
+  // ── COF station → migration phase mapping ────────────────────────────────
+  // Used to auto-calculate carrier's current migration phase from station progress
+  window._p63stationPhaseMap = {
+    S1: 1, S2: 1,          // Phase 1 — Discover & Specify
+    S3: 2, S4: 2, S5: 2, S6: 2,  // Phase 2 — Build & Migrate
+    S7: 3, S8: 3           // Phase 3 — Validate & Release
+  };
+
+  // ── COF station detail for drawer (maps station ID to swimlane context) ───
+  window._p63stationDetail = {
+    S1:{ label:'Legacy Data Archaeology',     agent:'SchemaMapper Agent',         agentId:'schemamapper' },
+    S2:{ label:'Data Quality Remediation',    agent:'DataQuality Refiner',         agentId:'dqrefiner' },
+    S3:{ label:'Policy Product Configuration',agent:'PolicyForm Configurator',     agentId:'policyform' },
+    S4:{ label:'State Regulatory Compliance', agent:'ComplianceMatrix Agent',      agentId:'compliance' },
+    S5:{ label:'Integration & API Plumbing',  agent:'IntegrationPlumber Agent',    agentId:'integplumber' },
+    S6:{ label:'In-Force Block Migration',    agent:'MigrationReconciler Agent',   agentId:'migrationrec' },
+    S7:{ label:'UAT & Parallel Run',          agent:'UAT Orchestrator Agent',      agentId:'uatorchestrator' },
+    S8:{ label:'Training & Production Cutover',agent:'Cutover Orchestrator Agent', agentId:'cutoverorchestrator' }
+  };
+
+  console.log('[Phase 63 Part 1] Data definitions loaded · 9 swimlanes · 3 phases · 5 complexity drivers');
+})();
+// ════════════════════════════════════════════════════════════════════════════
+// PHASE 63 — Part 3: Tab injection via MutationObserver
+//   Watches for P61's tab strip and injects "Accelerating Conversion" as
+//   the 6th tab — non-destructive, chained after P62's MutationObserver.
+// ════════════════════════════════════════════════════════════════════════════
+(function(){
+  'use strict';
+
+  var _p63tabInjected = false;
+
+  // ── Build the 6th tab button HTML ────────────────────────────────────────
+  function _p63tabBtn(active){
+    var COF = '#1e3a5f';
+    return '<button id="p63-migration-tab-btn" '
+      +'onclick="window._p61switchTab(\'migration\')" '
+      +'style="padding:7px 14px;border-radius:7px;border:none;cursor:pointer;font-size:12px;font-weight:700;'
+      +'display:flex;align-items:center;gap:6px;transition:all .2s;'
+      +'background:'+(active?COF:'#f1f5f9')+';color:'+(active?'#fff':'#64748b')+'">'
+      +'<i class="fas fa-rocket"></i>Accelerating Conversion'
+      +'</button>';
+  }
+
+  // ── Inject the 6th tab into the tab strip ────────────────────────────────
+  function _p63injectTab(pc){
+    if(!pc) return;
+
+    // Find the tab strip — it's a flex div containing P61's 5 tab buttons
+    // P61 renders buttons with fa-industry, fa-th-large, fa-drafting-compass, fa-cogs, fa-calendar-check
+    var allBtns = pc.querySelectorAll('button');
+    var tabStrip = null;
+
+    allBtns.forEach(function(btn){
+      var txt = btn.textContent || '';
+      if(txt.indexOf('Factory Overview') !== -1 || txt.indexOf('Capacity Planner') !== -1){
+        // This button's parent is the tab strip container
+        if(btn.parentNode && btn.parentNode.style){
+          tabStrip = btn.parentNode;
+        }
+      }
+    });
+
+    if(!tabStrip) return;
+
+    // Check if already injected
+    if(tabStrip.querySelector('#p63-migration-tab-btn')) return;
+
+    // Determine if migration tab is active
+    var isActive = (window._p61activeTab === 'migration');
+
+    // Create button element and append
+    var wrapper = document.createElement('div');
+    wrapper.innerHTML = _p63tabBtn(isActive);
+    var newBtn = wrapper.firstChild;
+    tabStrip.appendChild(newBtn);
+
+    _p63tabInjected = true;
+  }
+
+  // ── Update tab button active state ───────────────────────────────────────
+  function _p63syncTabActive(){
+    var btn = document.getElementById('p63-migration-tab-btn');
+    if(!btn) return;
+    var COF = '#1e3a5f';
+    var isActive = (window._p61activeTab === 'migration');
+    btn.style.background = isActive ? COF : '#f1f5f9';
+    btn.style.color = isActive ? '#fff' : '#64748b';
+  }
+
+  // ── Expose sync function for Part 4 to call ──────────────────────────────
+  window._p63syncTabActive = _p63syncTabActive;
+  window._p63injectTab = _p63injectTab;
+
+  // ── MutationObserver: watches page-content for P61 renders ───────────────
+  function _p63attachObserver(){
+    var pc = document.getElementById('page-content');
+    if(!pc) return;
+
+    var obs = new MutationObserver(function(mutations){
+      mutations.forEach(function(m){
+        if(m.type !== 'childList') return;
+
+        // Check if COF page was just rendered (contains Factory Overview button)
+        var html = pc.innerHTML || '';
+        if(html.indexOf('Factory Overview') !== -1 && html.indexOf('Carrier Onboarding Factory') !== -1){
+          // Inject tab if not present
+          if(!pc.querySelector('#p63-migration-tab-btn')){
+            _p63tabInjected = false;
+            _p63injectTab(pc);
+          }
+          // Sync active state
+          _p63syncTabActive();
+        }
+      });
+    });
+
+    obs.observe(pc, { childList: true, subtree: true });
+    return obs;
+  }
+
+  // ── Init ──────────────────────────────────────────────────────────────────
+  function _p63tabInit(){
+    _p63attachObserver();
+
+    // Also try immediately if COF is already visible
+    var pc = document.getElementById('page-content');
+    if(pc && pc.innerHTML.indexOf('Factory Overview') !== -1){
+      _p63injectTab(pc);
+    }
+  }
+
+  if(document.readyState === 'complete'){ _p63tabInit(); }
+  else { window.addEventListener('load', _p63tabInit); }
+  setTimeout(_p63tabInit, 300);
+
+  console.log('[Phase 63 Part 3] Tab injector attached · "Accelerating Conversion" 6th tab');
+})();
+// ════════════════════════════════════════════════════════════════════════════
+// PHASE 63 — Part 2: _p63buildHTML() — Main page renderer
+//   Complexity drivers panel + 3-phase × 9-swimlane grid + legend + chevron
+// ════════════════════════════════════════════════════════════════════════════
+(function(){
+  'use strict';
+
+  // ── Helper: role badge pill ───────────────────────────────────────────────
+  function _p63badge(roleKey){
+    var r = window._p63roles[roleKey] || { color:'#64748b', bg:'#f1f5f9', label:roleKey };
+    return '<span style="display:inline-block;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:700;'
+      +'background:'+r.bg+';color:'+r.color+';border:1px solid '+r.color+'20;margin-left:4px;vertical-align:middle">'
+      +r.label+'</span>';
+  }
+
+  // ── Helper: discipline color dot ─────────────────────────────────────────
+  function _p63discColor(disc){
+    var map = { DS:'#7c3aed', DM:'#ea580c', BR:'#2563eb', V:'#059669', RD:'#dc2626' };
+    return map[disc] || '#64748b';
+  }
+
+  // ── Helper: cell item pill ────────────────────────────────────────────────
+  function _p63cellItem(item){
+    var dc = _p63discColor(item.disc);
+    return '<div style="display:flex;align-items:flex-start;gap:4px;margin-bottom:5px">'
+      +'<div style="min-width:3px;border-radius:2px;background:'+dc+';margin-top:3px;align-self:stretch"></div>'
+      +'<span style="font-size:11px;color:#1e293b;line-height:1.4;flex:1">'+item.text+'</span>'
+      +_p63badge(item.role)
+      +'</div>';
+  }
+
+  // ── Auto-calculate carrier migration phase from station progress ──────────
+  function _p63getCarrierPhase(){
+    // Reads from window._p61bottlenecks (the 8-station array set by P62 Part 3)
+    // Each station has a 'status' field set when P61 simulation runs
+    // We derive phase from the furthest completed station
+    var bottlenecks = window._p61bottlenecks;
+    if(!bottlenecks || !bottlenecks.length) return null;
+
+    // P61 simulation stores selected carrier in _p61simCarrier — check window
+    var simCarrier = window._p61simCarrier;
+    if(!simCarrier) return null;
+
+    var phaseMap = window._p63stationPhaseMap || { S1:1,S2:1,S3:2,S4:2,S5:2,S6:2,S7:3,S8:3 };
+
+    // Carrier stations completed = stations where carrier progress > 50%
+    // Derived from carrier.eta values in _p61bottlenecks
+    var maxPhase = 1;
+    var completedStations = [];
+    bottlenecks.forEach(function(b, idx){
+      var sid = 'S'+(idx+1);
+      // If this station is "earlier" in the pipeline relative to today, mark complete
+      // Use idx + 1 as station order; assume first half done = phase 1, etc.
+      var ph = phaseMap[sid] || 1;
+      if(idx < 3){ completedStations.push(sid); }  // S1-S3 always in progress for demo
+      if(ph > maxPhase) maxPhase = ph;
+    });
+
+    // Better: use the carrier's actual station index
+    // _p61simCarrier is a carrier object with .name; find it in _p61bottlenecks[x].carriers
+    var currentStationIdx = 0;
+    for(var i=0; i<bottlenecks.length; i++){
+      var b = bottlenecks[i];
+      if(b.carriers && b.carriers.indexOf && b.carriers.indexOf(simCarrier.name) !== -1){
+        currentStationIdx = i;
+        break;
+      }
+    }
+    var currentStation = 'S'+(currentStationIdx+1);
+    var currentPhase = phaseMap[currentStation] || 1;
+    return {
+      carrierName: simCarrier.name || simCarrier,
+      currentStation: currentStation,
+      stationLabel: window._p63stationDetail[currentStation]
+        ? window._p63stationDetail[currentStation].label
+        : 'Station '+(currentStationIdx+1),
+      phase: currentPhase,
+      stationIdx: currentStationIdx
+    };
+  }
+
+  // ── Carrier phase banner ─────────────────────────────────────────────────
+  function _p63carrierBanner(){
+    var cp = _p63getCarrierPhase();
+    if(!cp) return '';
+    var phases = window._p63phases || [];
+    var ph = phases[cp.phase-1] || {};
+    var phColor = ['#7c3aed','#2563eb','#059669'][cp.phase-1] || '#64748b';
+
+    // Progress bar: stationIdx / 7 (0-7 = 8 stations)
+    var pct = Math.round((cp.stationIdx / 7) * 100);
+    var stationsRemaining = 8 - cp.stationIdx - 1;
+
+    return '<div style="background:linear-gradient(135deg,#0f172a,#1e293b);border-radius:12px;padding:14px 20px;'
+      +'margin-bottom:18px;display:flex;align-items:center;gap:20px;flex-wrap:wrap">'
+      +'<div style="flex:1;min-width:200px">'
+      +'<div style="color:#94a3b8;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px">Active Carrier</div>'
+      +'<div style="color:#fff;font-size:15px;font-weight:800">'+cp.carrierName+'</div>'
+      +'<div style="color:#94a3b8;font-size:11px;margin-top:2px">Currently at '+cp.stationLabel+'</div>'
+      +'</div>'
+      +'<div style="flex:1;min-width:180px">'
+      +'<div style="color:#94a3b8;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px">Migration Progress</div>'
+      +'<div style="background:#1e3a5f;border-radius:6px;height:8px;overflow:hidden">'
+      +'<div style="background:linear-gradient(90deg,'+phColor+','+phColor+'aa);height:100%;width:'+pct+'%;border-radius:6px;transition:width .6s"></div>'
+      +'</div>'
+      +'<div style="color:#94a3b8;font-size:10px;margin-top:4px">'+pct+'% complete · '+stationsRemaining+' station'+(stationsRemaining!==1?'s':'')+' remaining</div>'
+      +'</div>'
+      +'<div style="text-align:center;padding:10px 16px;border-radius:10px;background:'+phColor+'22;border:1px solid '+phColor+'44">'
+      +'<div style="color:'+phColor+';font-size:11px;font-weight:800">'+ph.label+'</div>'
+      +'<div style="color:#fff;font-size:13px;font-weight:700;margin-top:2px">'+ph.agents+'</div>'
+      +'<div style="color:#94a3b8;font-size:10px;margin-top:1px">Currently active</div>'
+      +'</div>'
+      +'</div>';
+  }
+
+  // ── Complexity drivers panel ─────────────────────────────────────────────
+  function _p63driversPanel(){
+    var drivers = window._p63drivers || [];
+    var severities = [3, 2, 4, 5, 3]; // static severity scores (1–5)
+    var sevLabels  = ['','Low','Medium','High','Critical','Critical'];
+    var sevColors  = ['','#059669','#0891b2','#ea580c','#dc2626','#dc2626'];
+
+    var html = '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:18px;margin-bottom:18px">'
+      +'<div style="font-size:12px;font-weight:800;color:#0f172a;margin-bottom:4px;display:flex;align-items:center;gap:8px">'
+      +'<i class="fas fa-exclamation-triangle" style="color:#ea580c"></i>Key Complexity Drivers</div>'
+      +'<div style="font-size:11px;color:#64748b;margin-bottom:14px">Forces that determine migration complexity and agent workload</div>';
+
+    drivers.forEach(function(d, i){
+      var sev = severities[i];
+      var sevColor = sevColors[sev];
+      var bars = '';
+      for(var b=1; b<=5; b++){
+        bars += '<div style="width:14px;height:14px;border-radius:3px;background:'+(b<=sev?sevColor:'#e2e8f0')+'"></div>';
+      }
+      html += '<div style="border:1px solid #f1f5f9;border-radius:10px;padding:12px 14px;margin-bottom:8px;'
+        +'border-left:3px solid '+sevColor+'">'
+        +'<div style="display:flex;align-items:flex-start;gap:10px">'
+        +'<div style="width:30px;height:30px;border-radius:8px;background:'+sevColor+'18;display:flex;align-items:center;justify-content:center;flex-shrink:0">'
+        +'<i class="fas '+d.icon+'" style="color:'+sevColor+';font-size:13px"></i></div>'
+        +'<div style="flex:1">'
+        +'<div style="font-size:11px;font-weight:700;color:#0f172a;margin-bottom:2px">'+d.label+'</div>'
+        +'<div style="font-size:10px;color:#64748b;line-height:1.4;margin-bottom:6px">'+d.desc+'</div>'
+        +'<div style="display:flex;align-items:center;justify-content:space-between">'
+        +'<div style="display:flex;gap:3px">'+bars+'</div>'
+        +'<span style="font-size:10px;font-weight:700;color:'+sevColor+';background:'+sevColor+'18;padding:2px 8px;border-radius:10px">'+sevLabels[sev]+'</span>'
+        +'</div>'
+        +'<div style="font-size:10px;color:#94a3b8;margin-top:5px;font-style:italic">'+d.cofImpact+'</div>'
+        +'</div></div></div>';
+    });
+
+    html += '<div style="background:#fef3c7;border-radius:8px;padding:10px 12px;margin-top:4px;font-size:10px;color:#92400e;line-height:1.5">'
+      +'<i class="fas fa-lightbulb" style="margin-right:6px"></i>'
+      +'Our data migration experts have often had to overcome many of these challenges by analyzing just the source data '
+      +'to understand system functionality &amp; calculations.'
+      +'</div>'
+      +'</div>';
+
+    return html;
+  }
+
+  // ── Phase header row ─────────────────────────────────────────────────────
+  function _p63phaseHeaders(){
+    var phases = window._p63phases || [];
+    var html = '<div style="display:grid;grid-template-columns:130px repeat(3,1fr);gap:0;margin-bottom:2px">'
+      +'<div style="padding:10px;background:#0f172a;border-radius:10px 0 0 0;display:flex;align-items:center;justify-content:center">'
+      +'<span style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.6px">Workstream</span>'
+      +'</div>';
+    phases.forEach(function(ph, i){
+      var radius = i===2?'0 10px 0 0':'0';
+      html += '<div style="padding:10px 14px;background:'+ph.grad+';'+(i===2?'border-radius:0 10px 0 0':'')+'">'
+        +'<div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.75);text-transform:uppercase;letter-spacing:.6px">'+ph.label+'</div>'
+        +'<div style="font-size:13px;font-weight:800;color:#fff;margin-top:1px">'+ph.agents+'</div>'
+        +'<div style="font-size:10px;color:rgba(255,255,255,.7);margin-top:2px">'+ph.sub+'</div>'
+        +'</div>';
+    });
+    html += '</div>';
+    return html;
+  }
+
+  // ── Single swimlane row ──────────────────────────────────────────────────
+  function _p63swimlaneRow(lane, rowIdx, expandedCell){
+    var isExpanded = (expandedCell === lane.id);
+    var borderBottom = rowIdx < 8 ? '1px solid #f1f5f9' : 'none';
+    var bg = rowIdx % 2 === 0 ? '#ffffff' : '#f8fafc';
+
+    var html = '<div id="p63row-'+lane.id+'" style="display:grid;grid-template-columns:130px repeat(3,1fr);'
+      +'border-bottom:'+borderBottom+';background:'+bg+'">';
+
+    // Row label
+    html += '<div style="padding:12px 10px;border-right:1px solid #f1f5f9;display:flex;flex-direction:column;'
+      +'align-items:flex-start;justify-content:center;gap:4px;cursor:pointer" '
+      +'onclick="window._p63toggleRow(\''+lane.id+'\')" '
+      +'title="Click to expand row detail">'
+      +'<div style="display:flex;align-items:center;gap:6px">'
+      +'<div style="width:6px;height:6px;border-radius:50%;background:'+lane.rowColor+';flex-shrink:0"></div>'
+      +'<span style="font-size:11px;font-weight:700;color:#0f172a;line-height:1.2">'+lane.label+'</span>'
+      +'</div>'
+      +'<div style="display:flex;gap:4px;flex-wrap:wrap">'
+      +lane.cofStations.map(function(s){
+        return '<span style="font-size:9px;font-weight:700;background:#f1f5f9;color:#64748b;padding:1px 5px;border-radius:4px">'+s+'</span>';
+      }).join('')
+      +'</div>'
+      +'<i class="fas fa-chevron-'+(isExpanded?'up':'down')+'" style="font-size:9px;color:#94a3b8;margin-top:2px"></i>'
+      +'</div>';
+
+    // 3 phase cells
+    var phIds = ['ph1','ph2','ph3'];
+    phIds.forEach(function(phId, pi){
+      var cellData = null;
+      for(var ci=0; ci<lane.cells.length; ci++){
+        if(lane.cells[ci].ph === phId){ cellData = lane.cells[ci]; break; }
+      }
+      var phColors = ['#7c3aed','#2563eb','#059669'];
+      var items = cellData ? cellData.items : [];
+
+      html += '<div style="padding:10px 12px;border-right:'+(pi<2?'1px solid #f1f5f9':'none')+'">';
+      if(items.length === 0){
+        html += '<div style="height:100%;display:flex;align-items:center;justify-content:center">'
+          +'<span style="font-size:10px;color:#cbd5e1;font-style:italic">—</span></div>';
+      } else {
+        items.forEach(function(item){
+          html += _p63cellItem(item);
+        });
+      }
+      html += '</div>';
+    });
+
+    html += '</div>';
+
+    // Expanded drawer
+    if(isExpanded){
+      html += _p63expandedDrawer(lane);
+    }
+
+    return html;
+  }
+
+  // ── Expanded row drawer ──────────────────────────────────────────────────
+  function _p63expandedDrawer(lane){
+    var stDet = window._p63stationDetail || {};
+    var html = '<div style="background:linear-gradient(135deg,#f8fafc,#f0f9ff);border-bottom:2px solid '
+      +lane.rowColor+';padding:16px 20px;margin:0">'
+      +'<div style="font-size:11px;font-weight:800;color:#0f172a;margin-bottom:10px;display:flex;align-items:center;gap:8px">'
+      +'<i class="fas '+lane.icon+'" style="color:'+lane.rowColor+'"></i>'
+      +lane.label+' — COF Station Mapping'
+      +'</div>'
+      +'<div style="display:flex;gap:10px;flex-wrap:wrap">';
+
+    lane.cofStations.forEach(function(sid){
+      var sd = stDet[sid];
+      if(!sd) return;
+      html += '<div style="background:#fff;border:1px solid #e2e8f0;border-left:3px solid '+lane.rowColor+';'
+        +'border-radius:8px;padding:10px 14px;min-width:200px;flex:1">'
+        +'<div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px">'+sid+'</div>'
+        +'<div style="font-size:12px;font-weight:700;color:#0f172a;margin:3px 0">'+sd.label+'</div>'
+        +'<div style="font-size:11px;color:#64748b;margin-bottom:8px">'
+        +'<i class="fas fa-robot" style="margin-right:4px;color:'+lane.rowColor+'"></i>'+sd.agent
+        +'</div>'
+        +'<button onclick="_p61showAgentDetail && _p61showAgentDetail(\''+sd.agentId+'\')" '
+        +'style="background:'+lane.rowColor+';color:#fff;border:none;border-radius:6px;padding:5px 12px;'
+        +'font-size:10px;font-weight:700;cursor:pointer">View Agent →</button>'
+        +'</div>';
+    });
+
+    html += '</div></div>';
+    return html;
+  }
+
+  // ── Full grid ────────────────────────────────────────────────────────────
+  function _p63grid(expandedCell){
+    var lanes = window._p63swimlanes || [];
+    var html = '<div style="border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;margin-bottom:16px">';
+    html += _p63phaseHeaders();
+    lanes.forEach(function(lane, i){
+      html += _p63swimlaneRow(lane, i, expandedCell||null);
+    });
+    html += '</div>';
+    return html;
+  }
+
+  // ── Legend strip ─────────────────────────────────────────────────────────
+  function _p63legendStrip(){
+    var items = window._p63legend || [];
+    var html = '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px">'
+      +'<span style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.6px;margin-right:4px">Legend:</span>';
+    items.forEach(function(it){
+      html += '<div style="display:flex;align-items:center;gap:5px">'
+        +'<div style="width:12px;height:12px;border-radius:3px;background:'+it.color+'"></div>'
+        +'<span style="font-size:11px;color:#374151">'+it.label+'</span>'
+        +'</div>';
+    });
+    html += '</div>';
+    return html;
+  }
+
+  // ── Orange chevron workstreams banner ────────────────────────────────────
+  function _p63chevron(){
+    return '<div style="position:relative;background:linear-gradient(135deg,#ea580c,#f97316);border-radius:10px;'
+      +'padding:12px 20px 12px 18px;margin-bottom:4px;display:flex;align-items:center;gap:14px">'
+      +'<i class="fas fa-chevron-right" style="font-size:20px;color:rgba(255,255,255,.6)"></i>'
+      +'<div>'
+      +'<div style="font-size:11px;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.6px;margin-bottom:2px">Other Key Work Streams</div>'
+      +'<div style="font-size:12px;color:rgba(255,255,255,.9)">3rd Parties &nbsp;·&nbsp; Operational Finance &nbsp;·&nbsp; HR &amp; People &nbsp;·&nbsp; Operating Model &nbsp;·&nbsp; Go-Live Readiness</div>'
+      +'</div>'
+      +'</div>';
+  }
+
+  // ── Main build function ───────────────────────────────────────────────────
+  window._p63buildHTML = function(expandedCell){
+    var COF1 = '#1e3a5f';
+    var COF2 = '#0891b2';
+
+    var html = '<div style="padding:4px 0">';
+
+    // Page header
+    html += '<div style="background:linear-gradient(135deg,#0f172a,#1e3a5f,#0891b2);border-radius:14px;padding:20px 24px;'
+      +'margin-bottom:18px;position:relative;overflow:hidden">'
+      +'<div style="position:absolute;top:-20px;right:-20px;width:120px;height:120px;border-radius:50%;'
+      +'background:rgba(255,255,255,.05)"></div>'
+      +'<div style="position:relative">'
+      +'<div style="display:flex;align-items:flex-start;gap:16px">'
+      +'<div style="width:48px;height:48px;border-radius:12px;background:rgba(255,255,255,.15);'
+      +'display:flex;align-items:center;justify-content:center;flex-shrink:0">'
+      +'<i class="fas fa-rocket" style="font-size:22px;color:#fff"></i>'
+      +'</div>'
+      +'<div>'
+      +'<div style="font-size:20px;font-weight:900;color:#fff;letter-spacing:-.3px">Accelerating Conversion</div>'
+      +'<div style="font-size:12px;color:rgba(255,255,255,.75);margin-top:4px;line-height:1.5;max-width:700px">'
+      +'Proven AI powered Migration Hub capability to deliver complex programs at scale, powered by deep product expertise '
+      +'and in-house accelerators for controlled, low-risk outcomes.'
+      +'</div>'
+      +'<div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap">'
+      +'<span style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;'
+      +'font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px"><i class="fas fa-layer-group" style="margin-right:5px"></i>3 Migration Phases</span>'
+      +'<span style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;'
+      +'font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px"><i class="fas fa-th" style="margin-right:5px"></i>9 Workstreams</span>'
+      +'<span style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;'
+      +'font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px"><i class="fas fa-robot" style="margin-right:5px"></i>6 Agent Types</span>'
+      +'<span style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;'
+      +'font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px"><i class="fas fa-industry" style="margin-right:5px"></i>8 COF Stations Covered</span>'
+      +'</div>'
+      +'</div></div></div></div>';
+
+    // Carrier phase banner (if carrier selected)
+    html += _p63carrierBanner();
+
+    // Two-column layout: drivers (left) + grid (right)
+    html += '<div style="display:grid;grid-template-columns:260px 1fr;gap:16px;align-items:start">';
+
+    // Left: complexity drivers
+    html += '<div>'+_p63driversPanel()+'</div>';
+
+    // Right: swimlane grid + legend + chevron
+    html += '<div>';
+    html += _p63grid(expandedCell);
+    html += _p63legendStrip();
+    html += _p63chevron();
+    html += '</div>';
+
+    html += '</div>'; // close two-col
+    html += '</div>'; // close outer
+
+    return html;
+  };
+
+  // ── Row toggle handler (global for onclick) ───────────────────────────────
+  window._p63expandedCell = null;
+  window._p63toggleRow = function(laneId){
+    if(window._p63expandedCell === laneId){
+      window._p63expandedCell = null;
+    } else {
+      window._p63expandedCell = laneId;
+    }
+    // Re-render only the grid area if migration tab is active
+    var pc = document.getElementById('page-content');
+    if(pc && pc.getAttribute('data-tab') === 'migration'){
+      var gridEl = pc.querySelector('[data-p63-grid]');
+      if(gridEl){
+        gridEl.innerHTML = window._p63grid(window._p63expandedCell);
+        return;
+      }
+      // Full re-render fallback
+      if(window._p63fullRender){ window._p63fullRender(); }
+    }
+  };
+
+  console.log('[Phase 63 Part 2] _p63buildHTML() loaded · swimlane grid · complexity drivers · carrier phase indicator');
+})();
+// ════════════════════════════════════════════════════════════════════════════
+// PHASE 63 — Part 4: _p61switchTab intercept + full render + init
+//   Intercepts _p61switchTab to catch 'migration' tab, renders the full
+//   Accelerating Conversion page, and syncs tab active state.
+// ════════════════════════════════════════════════════════════════════════════
+(function(){
+  'use strict';
+
+  // ── Full page render ─────────────────────────────────────────────────────
+  function _p63fullRender(){
+    var pc = document.getElementById('page-content');
+    if(!pc) return;
+
+    var expanded = window._p63expandedCell || null;
+    var html = window._p63buildHTML ? window._p63buildHTML(expanded) : '<p>Loading…</p>';
+
+    // Wrap in the same chrome that P61 uses — header banner + tab strip above
+    // We need to preserve the outer chrome (nav badge, tab strip).
+    // Strategy: only replace the body area that comes AFTER the tab strip.
+    // P61 renders: [header badge] [tab strip] [body content]
+    // We look for the tab strip div by finding our injected button's parent,
+    // then replace everything after it.
+
+    var tabBtn = pc.querySelector('#p63-migration-tab-btn');
+    if(tabBtn && tabBtn.parentNode && tabBtn.parentNode.parentNode){
+      // tabBtn.parentNode = tab strip div
+      // tabBtn.parentNode.parentNode = COF page wrapper
+      var cofWrapper = tabBtn.parentNode.parentNode;
+
+      // Find the body content div — it's the sibling after the tab strip
+      var tabStrip = tabBtn.parentNode;
+      var bodyDiv = null;
+      var children = cofWrapper.children;
+      for(var i=0; i<children.length; i++){
+        if(children[i] !== tabStrip && children[i].tagName !== 'DIV'){ continue; }
+        if(children[i] !== tabStrip){
+          // Check if it's not the header badge div (that one has the gradient background)
+          var bgStyle = children[i].style.background || '';
+          if(bgStyle.indexOf('linear-gradient') === -1){
+            bodyDiv = children[i];
+            break;
+          }
+        }
+      }
+
+      if(bodyDiv){
+        // Mark page-content with data-tab for _p63toggleRow to know migration is active
+        pc.setAttribute('data-tab', 'migration');
+        bodyDiv.innerHTML = html;
+        // Sync tab active state
+        if(window._p63syncTabActive) window._p63syncTabActive();
+        return;
+      }
+    }
+
+    // Fallback: full page re-render preserving COF chrome
+    // This re-uses P61's _p61buildPage but injects migration body
+    pc.setAttribute('data-tab', 'migration');
+
+    // Build the full COF shell manually to match P61's chrome
+    var COF = '#1e3a5f';
+    var COF2 = '#0891b2';
+
+    var fullHtml = '<div style="max-width:1200px;margin:0 auto;padding:8px 16px">';
+
+    // COF brand banner (same as P61)
+    fullHtml += '<div style="margin-bottom:16px;background:linear-gradient(135deg,'+COF+','+COF2+');'
+      +'border-radius:12px;padding:14px 20px;color:#fff;display:flex;align-items:center;gap:16px">'
+      +'<i class="fas fa-industry" style="font-size:24px;opacity:.9"></i>'
+      +'<div>'
+      +'<div style="font-weight:800;font-size:13px">Carrier Onboarding Factory™ — Industrial-Scale Onboarding for LTC · Health · Annuity · Life</div>'
+      +'<div style="font-size:11px;opacity:.9;margin-top:2px">8 Automation Stations · AI powered Migration Hub · 3 migration phases · 9 workstreams · Microsoft Fabric + Azure AI Foundry</div>'
+      +'</div></div>';
+
+    // Tab strip
+    fullHtml += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">';
+    var tabs = [
+      { id:'overview',    label:'Factory Overview',       icon:'fa-industry' },
+      { id:'floor',       label:'Factory Floor',          icon:'fa-th-large' },
+      { id:'blueprint',   label:'Production Blueprint',   icon:'fa-drafting-compass' },
+      { id:'automation',  label:'Automation Assembly',    icon:'fa-cogs' },
+      { id:'capacity',    label:'Capacity Planner',       icon:'fa-calendar-check' },
+      { id:'migration',   label:'Accelerating Conversion',icon:'fa-rocket' }
+    ];
+    tabs.forEach(function(t){
+      var active = (t.id === 'migration');
+      fullHtml += '<button id="'+(t.id==='migration'?'p63-migration-tab-btn':'')+'" '
+        +'onclick="window._p61switchTab(\''+t.id+'\')" '
+        +'style="padding:7px 14px;border-radius:7px;border:none;cursor:pointer;font-size:12px;font-weight:700;'
+        +'display:flex;align-items:center;gap:6px;transition:all .2s;'
+        +'background:'+(active?COF:'#f1f5f9')+';color:'+(active?'#fff':'#64748b')+'">'
+        +'<i class="fas '+t.icon+'"></i>'+t.label+'</button>';
+    });
+    fullHtml += '</div>';
+
+    // Body content
+    fullHtml += '<div data-p63-grid="1">'+html+'</div>';
+    fullHtml += '</div>';
+
+    pc.innerHTML = fullHtml;
+  }
+
+  // Expose for _p63toggleRow (in Part 2)
+  window._p63fullRender = _p63fullRender;
+
+  // ── _p61switchTab intercept ──────────────────────────────────────────────
+  var _p63origSwitch = window._p61switchTab;
+  window._p61switchTab = function(id){
+    if(id === 'migration'){
+      // Update active tab state (P61's internal var is closure-scoped,
+      // but we track it on window for our tab sync)
+      window._p61activeTab = 'migration';
+      window._p63expandedCell = null;
+
+      // Clear any carrier-specific state that would interfere
+      // (agents detail etc. should close when switching tabs)
+      // We do NOT touch _p61activeAgent or _p61simCarrier —
+      // the carrier banner reads those.
+
+      // Render migration page
+      setTimeout(function(){
+        _p63fullRender();
+        // Sync tab button active state via Part 3's injector
+        if(window._p63syncTabActive) window._p63syncTabActive();
+      }, 20);
+      return;
+    }
+
+    // For all other tabs — call the chain (P62's intercept → P61's original)
+    // Clear migration page data-tab marker
+    var pc = document.getElementById('page-content');
+    if(pc) pc.setAttribute('data-tab', id);
+
+    if(_p63origSwitch) _p63origSwitch(id);
+
+    // After the other tab renders, re-inject our tab button if it disappeared
+    setTimeout(function(){
+      var pc2 = document.getElementById('page-content');
+      if(pc2 && !pc2.querySelector('#p63-migration-tab-btn')){
+        if(window._p63injectTab) window._p63injectTab(pc2);
+      }
+      if(window._p63syncTabActive) window._p63syncTabActive();
+    }, 80);
+  };
+
+  // ── Also patch window.navigateTo to handle 'hal-mig' / 'hal-acc' keys ───
+  var _p63origNav = window.navigateTo;
+  window.navigateTo = function(page){
+    if(page === 'hal-mig' || page === 'hal-acc'){
+      // Treat like going to COF then switching to migration tab
+      document.querySelectorAll('.nav-item').forEach(function(e){ e.classList.remove('active'); });
+      var n = document.querySelector('.hal-coa-nav');
+      if(n) n.classList.add('active');
+      window._p61activeTab = 'migration';
+      window._p61activeAgent = null;
+      window._p61simCarrier = null;
+      window._p63expandedCell = null;
+      setTimeout(function(){
+        _p63fullRender();
+        if(window._p63syncTabActive) window._p63syncTabActive();
+      }, 30);
+      return;
+    }
+    if(_p63origNav) _p63origNav(page);
+  };
+
+  // ── Boot: if migration tab already active on page load (edge case) ────────
+  function _p63boot(){
+    // Ensure tab is injected if COF is visible
+    var pc = document.getElementById('page-content');
+    if(pc && pc.innerHTML.indexOf('Factory Overview') !== -1){
+      if(!pc.querySelector('#p63-migration-tab-btn')){
+        if(window._p63injectTab) window._p63injectTab(pc);
+      }
+    }
+  }
+
+  if(document.readyState === 'complete'){ _p63boot(); }
+  else { window.addEventListener('load', _p63boot); }
+  setTimeout(_p63boot, 400);
+
+  console.log('[Phase 63 Part 4] switchTab intercept live · navigateTo patched for hal-mig/hal-acc · Accelerating Conversion ready');
+  console.log('[Phase 63] AI Migration Hub — 3 phases · 9 swimlanes · BA/DEV/MIG/QA/OPS/PRD agents · auto carrier phase indicator');
+})();
