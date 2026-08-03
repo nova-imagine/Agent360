@@ -66312,7 +66312,7 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
           + _hybridAIUseCase('fa-chart-line','Predictive Analytics','Both Lines','ML models predict LTC claim duration, HAL lapse risk, and care setting transitions. Enables proactive staffing and reserve management.','#0891b2')
           + _hybridAIUseCase('fa-comments','Conversational AI Portal','LTC + HAL','Policyholders and caregivers interact via AI-powered portal for claim status, benefit queries, payment schedules — reducing call volume 40%.','#059669')
           + _hybridAIUseCase('fa-shield-alt','Compliance Automation','Both Lines','Automated HIPAA audit trails, state regulatory filings, SOC 1/2 evidence collection. Reduces compliance labor 55%.','#d97706')
-          + _hybridAIUseCase('fa-exchange-alt','Carrier Conversion Engine','HAL Growth','AI-driven onboarding reduces new carrier conversion from 18 months to 9 months. Automated data migration, testing, and go-live validation.','#003087')
+          + _hybridAIUseCase('fa-industry','Carrier Onboarding Factory','HAL Growth','COF production line onboards LTC, Health, Annuity &amp; Life carriers in 9 months vs 18-month legacy. 5 automation stations, zero-defect standard, 10 concurrent production runs.','#003087')
         + '</div>'
       + '</div>'
 
@@ -66430,7 +66430,7 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
           + _techAccelerator('CloudBridge','Hybrid cloud migration toolkit for insurance legacy systems','fa-cloud','#7c3aed','Q3 2026')
           + _techAccelerator('PolicyIQ','API-first policy admin modernization framework','fa-file-contract','#d97706','Q3 2026')
           + _techAccelerator('CareCoordAI','Agentic care coordination with NLP clinical note processing','fa-hands-helping','#0d9488','Q4 2026')
-          + _techAccelerator('TPA Studio','No-code carrier onboarding configurator — 50% faster','fa-store','#6d28d9','Q1 2027')
+          + _techAccelerator('TPA Studio','No-code carrier onboarding configurator — COF-powered, 50% faster across LTC, Health, Annuity &amp; Life','fa-industry','#6d28d9','Q1 2027')
         + '</div>'
       + '</div>'
 
@@ -70309,7 +70309,7 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
           +'<strong>Portfolio Health:</strong> '+(allCarriers.length||4)+' active carrier relationships. Portfolio average SLA: '+avgSla+'% '+(avgSla>=95?'✅ on target':'⚠️ below 95% target — action required')+'.<br><br>'
           +'<strong>Top Performer:</strong> '+(allCarriers.find(function(x){return x.aiHealth==='Excellent';})||{name:'Prudential'}).name+' — Excellent AI health, consistent SLA compliance. Recommend increased volume allocation for Q3.<br><br>'
           +'<strong>Needs Attention:</strong> '+(redCount>0?redCount+' carrier(s) flagged Red status — immediate review required.':'No carriers at critical status. ')+(allCarriers.filter(function(x){return x.sla&&parseInt(x.sla)<95;}).map(function(x){return x.name;}).join(', ')||'All carriers meeting SLA targets.')+' <br><br>'
-          +'<strong>AI Action Plan:</strong> (1) Carriers below 95% SLA → formal corrective action · (2) Preferred tier candidates → volume increase proposal · (3) Q3 contract renewals → negotiate enhanced SLA terms · (4) New carrier onboarding opportunity identified in Southeast region.')
+          +'<strong>AI Action Plan:</strong> (1) Carriers below 95% SLA → formal corrective action · (2) Preferred tier candidates → volume increase proposal · (3) Q3 contract renewals → negotiate enhanced SLA terms · (4) COF candidate identified in Southeast region — LTC/Health dual-line onboarding, estimated 9-month production run.')
         +_p6tbl(['Carrier','Policies','Active Claims','SLA','AI Health','Action'],
           (allCarriers.length?allCarriers:[{name:'Prudential',totalPolicies:1250,activeClaims:18,sla:'97%',aiHealth:'Excellent'},{name:'MassMutual',totalPolicies:980,activeClaims:14,sla:'94%',aiHealth:'Good'},{name:'Northwestern Mutual',totalPolicies:760,activeClaims:11,sla:'96%',aiHealth:'Good'}]).map(function(x){
             var sn=parseInt(x.sla||'94');
@@ -76041,7 +76041,7 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
           + '<strong>Portfolio Health:</strong> ' + (allCarriers.length || 4) + ' active carrier relationships. Portfolio average SLA: ' + avgSla + '% ' + (avgSla >= 95 ? '✅ on target' : '⚠️ below 95% target — action required') + '.<br><br>'
           + '<strong>Top Performer:</strong> ' + ((allCarriers.find(function (x) { return x.aiHealth === 'Excellent'; }) || { name: 'Prudential' }).name) + ' — Excellent AI health, consistent SLA compliance. Recommend increased volume allocation for Q3.<br><br>'
           + '<strong>Needs Attention:</strong> ' + (redCount > 0 ? redCount + ' carrier(s) flagged Red status — immediate review required.' : 'No carriers at critical status. ') + (allCarriers.filter(function (x) { return x.sla && parseInt(x.sla) < 95; }).map(function (x) { return x.name; }).join(', ') || 'All carriers meeting SLA targets.') + ' <br><br>'
-          + '<strong>AI Action Plan:</strong> (1) Carriers below 95% SLA → formal corrective action · (2) Preferred tier candidates → volume increase proposal · (3) Q3 contract renewals → negotiate enhanced SLA terms · (4) New carrier onboarding opportunity identified in Southeast region.')
+          + '<strong>AI Action Plan:</strong> (1) Carriers below 95% SLA → formal corrective action · (2) Preferred tier candidates → volume increase proposal · (3) Q3 contract renewals → negotiate enhanced SLA terms · (4) COF candidate identified in Southeast region — LTC/Health dual-line onboarding, estimated 9-month production run.')
         + _p6tbl(['Carrier', 'Policies', 'Active Claims', 'SLA', 'AI Health', 'Action'],
             (allCarriers.length ? allCarriers : [
               { name: 'Prudential', totalPolicies: 1250, activeClaims: 18, sla: '97%', aiHealth: 'Excellent' },
@@ -108385,3 +108385,877 @@ var navigateTo=window.navigateTo;
 
   console.log('[P60] KG dark canvas v2 · '+GN.length+' nodes · '+GE.length+' edges · SVG path icons · force layout · pulse rings');
 })();
+// PHASE 61 — Carrier Onboarding Factory (COF)
+// Rebrand of Phase 26 COA → COF
+// Multi-line: LTC · Health · Annuity · Life
+// Factory branding: production line, stations, zero-defect standard
+// ─────────────────────────────────────────────────────────────────────────────
+(function(){ 'use strict';
+
+  // ── Brand colors (deep industrial navy + azure blue) ─────────────────────
+  var COF='#1e3a5f'; var COF2='#2d5a8e'; var COF3='#0f2340';
+  var HAL='#0078d4'; var SUC='#059669'; var DAN='#dc2626'; var PUR='#7c3aed';
+  var AMB='#d97706';
+
+  // ── Active tab/state ──────────────────────────────────────────────────────
+  var _p61activeTab='overview';
+  var _p61simCarrier=null;
+  var _p61activeAgent=null;
+  var _p61lineFilter='all'; // all | ltc | health | annuity | life
+
+  // ── Line type config ──────────────────────────────────────────────────────
+  var _p61lines={
+    ltc:     {label:'LTC',     color:'#1e3a5f', icon:'fa-heartbeat',      bg:'#e0e7ff'},
+    health:  {label:'Health',  color:'#0891b2', icon:'fa-hospital-alt',   bg:'#e0f7fa'},
+    annuity: {label:'Annuity', color:'#7c3aed', icon:'fa-chart-line',     bg:'#ede9fe'},
+    life:    {label:'Life',    color:'#059669', icon:'fa-leaf',            bg:'#dcfce7'}
+  };
+
+  // ── 8 Production Bottlenecks (multi-line aware) ───────────────────────────
+  var _p61bottlenecks=[
+    {id:'b1',icon:'fa-search',title:'Legacy Data Archaeology',
+     before:'4–8 months · 3–6 person team · $800K–$1.4M',
+     after:'3–5 days · SchemaMapper Agent · 94% auto-mapped',
+     reduction:96, wks:0.7,
+     hal:'Phase 20 Data Lake + Phase 23 RAG',
+     lines:['ltc','health','annuity','life'],
+     detail:'AI scans legacy COBOL/AS400/mainframe schemas, auto-maps 800–2,000 line-specific fields to Illumifin\'s target model using ada-002 embeddings + KG pattern matching. Works across LTC benefit triggers, Health claims adjudication fields, Annuity surrender schedules, and Life underwriting fields. No more reverse-engineering by retired SMEs.'},
+    {id:'b2',icon:'fa-cogs',title:'Policy Product Configuration',
+     before:'2–4 months · manual BA configuration · $400K–$700K',
+     after:'4–7 days · PolicyForm Configurator Agent · auto-reads DOI filings',
+     reduction:94, wks:1,
+     hal:'Phase 21 Semantic Layer + Phase 22 KG',
+     lines:['ltc','health','annuity','life'],
+     detail:'50–300+ policy form variants auto-configured from carrier DOI filings via the OWL ontology. LTC: elimination periods, inflation riders, benefit triggers. Health: deductibles, networks, formularies. Annuity: surrender schedules, GMWBs, rider elections. Life: underwriting classes, premium tables, rider configurations — all templated from the semantic layer.'},
+    {id:'b3',icon:'fa-database',title:'Data Quality Remediation',
+     before:'3–6 months · manual data cleansing · $600K–$1.2M',
+     after:'5–8 days · Bronze→Silver DQ pipeline · 99.2% accuracy',
+     reduction:95, wks:1.2,
+     hal:'Phase 20 Medallion Architecture · Bronze→Silver DQ rules',
+     lines:['ltc','health','annuity','life'],
+     detail:'Automated DQ pipeline profiles source data, detects nulls/duplicates/orphans/format errors across all insurance lines. Applies carrier-specific DQ rules: LTC benefit-trigger eligibility, Health claim codes (ICD-10/CPT), Annuity contract values, Life mortality table alignment. 30% data error rates reduced to <0.8% before Silver layer promotion.'},
+    {id:'b4',icon:'fa-balance-scale',title:'State Regulatory Compliance',
+     before:'2–4 months · compliance analysts · $350K–$600K',
+     after:'2–3 days · ComplianceMatrix Agent · all 50 states auto-applied',
+     reduction:97, wks:0.5,
+     hal:'Phase 22 Knowledge Graph · 50-state regulatory ontology',
+     lines:['ltc','health','annuity','life'],
+     detail:'KG holds the full 50-state insurance regulatory matrix across all product lines. LTC: NAIC model regulation, lapse notice windows. Health: ACA compliance, network adequacy, formulary filing. Annuity: suitability rules, surrender charge disclosures, FINRA/NAIC. Life: replacement regulations, contestability, AG49. ComplianceMatrix Agent applies carrier DOI approvals and auto-generates all 50-state configs.'},
+    {id:'b5',icon:'fa-plug',title:'Integration & API Plumbing',
+     before:'2–4 months · custom dev per integration · $500K–$900K',
+     after:'3–5 days · Integration Agent · pre-built connector library',
+     reduction:93, wks:0.7,
+     hal:'Phase 24 Agentification Hub · pre-built connectors',
+     lines:['ltc','health','annuity','life'],
+     detail:'Pre-built connectors for care providers (CellTrak), reinsurance feeds (Munich Re/Swiss Re/RGA), EFT/ACH processors, premium billing vendors, 1099/tax reporting, agent portals, pharmacy benefit managers (Health), annuity platforms (DPL/Luma), and life illustration engines (iPipeline/WINFLEX). Integration Agent configures and certifies all connections autonomously.'},
+    {id:'b6',icon:'fa-file-medical',title:'In-Force Block Migration',
+     before:'2–6 months · manual reconciliation · $700K–$1.5M',
+     after:'5–10 days · Migration Reconciliation Engine · zero payment gaps',
+     reduction:92, wks:1.5,
+     hal:'Phase 25 Lineage + Phase 23 RAG · active policyholder safeguard',
+     lines:['ltc','health','annuity','life'],
+     detail:'Active policyholders migrated with zero interruption. LTC: active claimant benefit continuity, care plan recertifications. Health: active claims, authorizations, member ID cards. Annuity: contract values, rider bases, systematic withdrawal schedules. Life: premium schedules, cash value/loan balances, beneficiary records. Parallel-run validation ensures $0 payment or benefit gaps before cutover.'},
+    {id:'b7',icon:'fa-vial',title:'UAT & Parallel Run Validation',
+     before:'2–4 months · manual testers · $400K–$700K',
+     after:'2–3 days · UAT Orchestrator Agent · 10,000+ scenarios overnight',
+     reduction:96, wks:0.5,
+     hal:'Phase 24 UAT Agent · automated test matrix',
+     lines:['ltc','health','annuity','life'],
+     detail:'UAT Orchestrator runs combinatorial test matrix per line: LTC (forms × states × claim scenarios × billing cycles), Health (benefit codes × network tiers × member segments × deductible levels), Annuity (contract types × rider combos × distribution scenarios), Life (underwriting classes × premium modes × rider combinations). AI compares all outputs to legacy baseline. 99.98% pass rate.'},
+    {id:'b8',icon:'fa-graduation-cap',title:'Training & Production Cutover',
+     before:'1–3 months · in-person training · $200K–$400K',
+     after:'3–5 days · AI-guided training · zero-downtime cutover',
+     reduction:88, wks:0.6,
+     hal:'Phase 23 RAG Copilot · Phase 24 Cutover Agent',
+     lines:['ltc','health','annuity','life'],
+     detail:'RAG-powered training copilot answers any carrier staff question in real time using Illumifin\'s full documentation corpus, covering all product lines. Cutover Agent orchestrates the production go-live sequence: pre-freeze → delta sync → parallel validation → traffic switch → legacy retirement. Zero-downtime guaranteed across all insurance lines.'}
+  ];
+
+  // ── Demo Carriers — 10 carriers across 4 lines ────────────────────────────
+  var _p61carriers=[
+    // LTC carriers
+    {id:'nylife',  name:'New York Life',     short:'NYL', line:'ltc',
+     system:'IBM AS/400 + homegrown PAS (1994)',
+     policies:320000, forms:187, states:48, activePH:42000,
+     reinsurers:['Munich Re','Swiss Re'],
+     legacyMonths:28, cofWeeks:8, stage:6, stageLabel:'UAT & Parallel Run',
+     portfolio:'Run-off LTC block — Traditional & Partnership policies',
+     savings:14200000},
+    {id:'genworth', name:'Genworth Financial', short:'GNW', line:'ltc',
+     system:'VPAS + homegrown claims engine (1999)',
+     policies:1100000, forms:312, states:50, activePH:115000,
+     reinsurers:['Munich Re','Swiss Re','RGA','Hannover Re'],
+     legacyMonths:42, cofWeeks:14, stage:3, stageLabel:'Product Config',
+     portfolio:'Largest standalone LTC carrier — full scope migration',
+     savings:38000000},
+    {id:'metlife', name:'MetLife LTC',        short:'MET', line:'ltc',
+     system:'LifePRO legacy + custom middleware (1997)',
+     policies:510000, forms:231, states:50, activePH:68000,
+     reinsurers:['Swiss Re','Munich Re','General Re'],
+     legacyMonths:36, cofWeeks:11, stage:2, stageLabel:'Data Quality & Schema Map',
+     portfolio:'Large run-off LTC block — all 50 states + DC',
+     savings:22500000},
+    // Health carriers
+    {id:'centene', name:'Centene Corp',       short:'CNC', line:'health',
+     system:'TriZetto Facets + homegrown claims (2003)',
+     policies:890000, forms:148, states:29, activePH:890000,
+     reinsurers:['General Re'],
+     legacyMonths:24, cofWeeks:7, stage:5, stageLabel:'Integration & APIs',
+     portfolio:'Medicaid managed care — commercial & ACA exchange plans',
+     savings:18600000},
+    {id:'molina',  name:'Molina Healthcare',  short:'MOH', line:'health',
+     system:'Nasco + legacy claims adjudication (1998)',
+     policies:520000, forms:94, states:19, activePH:520000,
+     reinsurers:['RGA'],
+     legacyMonths:20, cofWeeks:6, stage:7, stageLabel:'Go-Live Prep',
+     portfolio:'Medicaid & Medicare Advantage — government-sponsored plans',
+     savings:11400000},
+    // Annuity carriers
+    {id:'athene',  name:'Athene Annuity',     short:'ATH', line:'annuity',
+     system:'FAST + legacy admin (2005)',
+     policies:340000, forms:67, states:49, activePH:340000,
+     reinsurers:['Hannover Re'],
+     legacyMonths:18, cofWeeks:5, stage:4, stageLabel:'Regulatory Config',
+     portfolio:'Fixed & indexed annuities — retail & bank channel distribution',
+     savings:8900000},
+    {id:'protective', name:'Protective Life', short:'PLC', line:'annuity',
+     system:'INGENIUM + homegrown riders engine (2001)',
+     policies:280000, forms:83, states:47, activePH:280000,
+     reinsurers:['Munich Re','RGA'],
+     legacyMonths:22, cofWeeks:6, stage:2, stageLabel:'Data Quality & Schema Map',
+     portfolio:'Fixed annuity & stable value — independent advisor channel',
+     savings:10200000},
+    // Life carriers
+    {id:'banner',  name:'Banner Life / Legal & General', short:'BNR', line:'life',
+     system:'OIPA (Majesco) + legacy underwriting (2007)',
+     policies:1400000, forms:52, states:49, activePH:1400000,
+     reinsurers:['General Re','Swiss Re'],
+     legacyMonths:16, cofWeeks:4, stage:6, stageLabel:'UAT & Parallel Run',
+     portfolio:'Term life — high-volume direct & independent agent distribution',
+     savings:7600000},
+    {id:'pacific',  name:'Pacific Life',      short:'PAC', line:'life',
+     system:'CSC Cyberlife + actuarial custom (1999)',
+     policies:620000, forms:118, states:50, activePH:620000,
+     reinsurers:['Swiss Re','Hannover Re'],
+     legacyMonths:26, cofWeeks:7, stage:1, stageLabel:'Data Profile',
+     portfolio:'Indexed UL · VUL · Term — high-net-worth & estate planning',
+     savings:13800000},
+    {id:'securian', name:'Securian Financial', short:'SCR', line:'life',
+     system:'QS/1 + homegrown group admin (1996)',
+     policies:480000, forms:89, states:48, activePH:480000,
+     reinsurers:['Munich Re','General Re'],
+     legacyMonths:20, cofWeeks:6, stage:4, stageLabel:'Regulatory Config',
+     portfolio:'Group life · Whole life · Disability — employer benefit plans',
+     savings:9500000}
+  ];
+
+
+  // ── 5 Automation Station Agents (multi-line) ─────────────────────────────
+  var _p61agents=[
+    {id:'schema',icon:'fa-sitemap',name:'SchemaMapper Agent',
+     color:'#0078d4',
+     tagline:'Maps 800–2,000 legacy fields per line to Illumifin target model in hours',
+     lines:'LTC · Health · Annuity · Life',
+     tools:['Azure AI Search (ada-002)','Unity Catalog','KG pattern matching','ACORD schema library','LTC/Health/Annuity/Life field ontologies'],
+     steps:[
+       '► Connecting to carrier legacy system…',
+       '► Extracting full schema across all product lines…',
+       '► Running ada-002 embedding on all field names + sample values…',
+       '► Matching against Illumifin multi-line ontology (OWL 2 DL)…',
+       '► LTC fields: benefit triggers, elimination periods, inflation riders…',
+       '► Health fields: ICD-10 diagnosis, CPT procedure, network tier codes…',
+       '► Annuity fields: surrender schedules, GMWB bases, rider elections…',
+       '► Life fields: underwriting class, mortality table, CSV schedules…',
+       '► Auto-mapped: 94.1% of all fields — no human needed',
+       '► SchemaMapper complete · Saved: 5.2 months · Cost avoided: $940K'
+     ],
+     result:'94.1% auto-mapping rate across all insurance lines · Exceptions queued for human review · ACORD reconciliation report generated'},
+    {id:'policy',icon:'fa-file-contract',name:'PolicyForm Configurator',
+     color:'#7c3aed',
+     tagline:'Reads DOI filings, auto-configures all policy forms across LTC, Health, Annuity & Life',
+     lines:'LTC · Health · Annuity · Life',
+     tools:['Azure AI Search','Microsoft Purview','Semantic Layer API','DOI filing parser','State form library (50 states × 4 lines)'],
+     steps:[
+       '► Ingesting carrier DOI approved form filings for all lines + all states…',
+       '► LTC: parsing elimination periods, inflation riders, benefit triggers…',
+       '► Health: parsing deductibles, copay tiers, network adequacy requirements…',
+       '► Annuity: parsing surrender schedules, GMWB definitions, rider elections…',
+       '► Life: parsing underwriting classes, premium tables, rider configs…',
+       '► Auto-generating all product configs in Illumifin rules engine…',
+       '► 50-state regulatory overlays applied per line via ComplianceMatrix…',
+       '► PolicyForm Configurator complete · Saved: 3.1 months · Cost avoided: $620K'
+     ],
+     result:'All policy forms configured across 4 insurance lines · 50-state rules applied · 0 manual BA entries'},
+    {id:'compliance',icon:'fa-balance-scale',name:'ComplianceMatrix Agent',
+     color:'#059669',
+     tagline:'Applies full 50-state, 4-line insurance regulatory matrix from the KG',
+     lines:'LTC · Health · Annuity · Life',
+     tools:['Multi-Line Regulatory KG (OWL)','Cosmos DB Gremlin','NAIC model regulation library','State DOI API feeds','ACA/ERISA/FINRA compliance modules'],
+     steps:[
+       '► Loading 50-state multi-line regulatory matrix from Knowledge Graph…',
+       '► LTC: lapse notice windows, NAIC model regulation, rate increase workflows…',
+       '► Health: ACA essential health benefits, network adequacy, formulary rules…',
+       '► Annuity: suitability rules (FINRA/NAIC), surrender charge disclosures…',
+       '► Life: replacement regulations (NAIC Model 613), AG49, contestability…',
+       '► Cross-referencing carrier DOI approvals against KG nodes…',
+       '► Auto-generating state-by-state regulatory sign-off package…',
+       '► ComplianceMatrix complete · Saved: 2.8 months · Cost avoided: $510K'
+     ],
+     result:'50 states × 4 insurance lines configured · NAIC/ACA/FINRA compliance validated · Regulatory sign-off packages generated'},
+    {id:'uat',icon:'fa-vial',name:'UAT Orchestrator Agent',
+     color:'#d97706',
+     tagline:'Runs millions of test permutations overnight across all insurance lines — humans review exceptions only',
+     lines:'LTC · Health · Annuity · Life',
+     tools:['Azure AI Foundry','Semantic Kernel','Multi-line test scenario library','Legacy output comparator','GPT-4o anomaly detector'],
+     steps:[
+       '► Building combinatorial test matrix for all 4 insurance lines…',
+       '► LTC: forms × states × claim scenarios × billing cycles…',
+       '► Health: benefit codes × network tiers × member segments × cost-sharing…',
+       '► Annuity: contract types × rider combos × distribution scenarios…',
+       '► Life: underwriting classes × premium modes × rider combinations…',
+       '► Launching parallel test execution (Azure AI Foundry — 512 workers)…',
+       '► Comparing all outputs vs legacy system baseline (GPT-4o diff engine)…',
+       '► 99.98% PASS across all lines · Exceptions queued for human review',
+       '► UAT Orchestrator complete · Saved: 3.4 months · Cost avoided: $680K'
+     ],
+     result:'Millions of test permutations across 4 lines · 99.98% pass rate · Exception-only human review · Sign-off report generated'},
+    {id:'cutover',icon:'fa-play-circle',name:'Cutover Orchestrator Agent',
+     color:'#0f2340',
+     tagline:'Manages zero-downtime production go-live across all insurance lines and policyholders',
+     lines:'LTC · Health · Annuity · Life',
+     tools:['Azure AI Foundry','Service Bus','Active–Active failover','Parallel run validator','Rollback engine'],
+     steps:[
+       '► Initiating production cutover sequence…',
+       '► Phase 1: Pre-freeze — capturing all in-flight transactions…',
+       '► Phase 2: Delta sync — replicating last-mile changes to new platform…',
+       '► Phase 3: Parallel validation — running both systems simultaneously…',
+       '► LTC: confirming zero active claimant payment gaps…',
+       '► Health: confirming active authorizations and claims transfer…',
+       '► Annuity: confirming contract values and systematic withdrawals…',
+       '► Life: confirming premium schedules and beneficiary records…',
+       '► Phase 4: Traffic switch — routing all transactions to new platform…',
+       '► Phase 5: Legacy retirement — archiving + audit trail generation…',
+       '► Cutover Orchestrator complete · Zero-downtime · Zero policyholder impact'
+     ],
+     result:'Zero-downtime go-live across all insurance lines · All policyholders migrated · Zero payment or benefit gaps · Legacy retired cleanly'}
+  ];
+  var _p61agentTimer=null;
+
+  // ── Stages ────────────────────────────────────────────────────────────────
+  var _p61stations=['Data Profile','Schema Map','Product Config','Reg Setup','Integration','UAT','Go-Live','Live ✓'];
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  function _p61kpi(val,lbl,col,sub){
+    return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:12px 16px;min-width:110px;flex:1">'
+      +'<div style="font-size:22px;font-weight:800;color:'+(col||COF)+'">'+val+'</div>'
+      +'<div style="font-size:11px;color:#64748b;margin-top:2px;font-weight:600">'+lbl+'</div>'
+      +(sub?'<div style="font-size:10px;color:#94a3b8;margin-top:1px">'+sub+'</div>':'')
+      +'</div>';
+  }
+  function _p61prog(pct,col){
+    return '<div style="background:#e2e8f0;border-radius:4px;height:8px;width:100%;overflow:hidden">'
+      +'<div style="width:'+pct+'%;background:'+(col||COF)+';height:8px;border-radius:4px;transition:width .6s"></div></div>';
+  }
+  function _p61money(n){
+    if(n>=1000000000) return '$'+(n/1000000000).toFixed(1)+'B';
+    if(n>=1000000) return '$'+(n/1000000).toFixed(1)+'M';
+    if(n>=1000) return '$'+(n/1000).toFixed(0)+'K';
+    return '$'+n;
+  }
+  function _p61lineBadge(line){
+    var l=_p61lines[line]; if(!l) return '';
+    return '<span style="background:'+l.color+'22;color:'+l.color+';border:1px solid '+l.color+'44;border-radius:4px;padding:1px 6px;font-size:9px;font-weight:700;text-transform:uppercase"><i class="fas '+l.icon+'" style="margin-right:3px"></i>'+l.label+'</span>';
+  }
+  function _p61stationBadge(n,label,active,done){
+    var bg=done?SUC:active?COF:'#e2e8f0';
+    var col=done||active?'#fff':'#94a3b8';
+    return '<div style="display:flex;flex-direction:column;align-items:center;gap:3px">'
+      +'<div style="width:28px;height:28px;border-radius:50%;background:'+bg+';color:'+col+';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800">'
+      +(done?'<i class="fas fa-check"></i>':n)+'</div>'
+      +'<div style="font-size:9px;color:#64748b;text-align:center;max-width:60px;line-height:1.2">'+label+'</div></div>';
+  }
+  function _p61tabBtn(id,label,icon){
+    var active=(_p61activeTab===id);
+    return '<button onclick="_p61switchTab(\''+id+'\')" style="padding:7px 14px;border-radius:7px;border:none;cursor:pointer;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;transition:all .2s;background:'+(active?COF:'#f1f5f9')+';color:'+(active?'#fff':'#64748b')+'"><i class="fas '+icon+'"></i>'+label+'</button>';
+  }
+  window._p61switchTab=function(id){ _p61activeTab=id; _p61buildPage(); };
+  window._p61selectCarrier=function(id){
+    _p61simCarrier=(_p61simCarrier===id)?null:id;
+    _p61buildPage();
+  };
+  window._p61setLineFilter=function(f){ _p61lineFilter=f; _p61buildPage(); };
+
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // TAB 1 — FACTORY OVERVIEW
+  // ══════════════════════════════════════════════════════════════════════════
+  function _p61overviewTab(){
+    // Line capability summary strip
+    var lineStrip='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px">';
+    var lineItems=[
+      {key:'ltc',    title:'LTC Insurance',    desc:'Run-off blocks, traditional & partnership policies, active claimant continuity guarantee',kpi:'18–42mo → 6–14wk'},
+      {key:'health', title:'Health Insurance', desc:'Medicaid, Medicare Advantage, ACA exchange, commercial — ICD-10/CPT/HCPCS field mapping',kpi:'20–28mo → 6–8wk'},
+      {key:'annuity',title:'Annuity Products', desc:'Fixed, indexed & variable annuities — surrender schedules, GMWB riders, systematic withdrawals',kpi:'18–22mo → 5–6wk'},
+      {key:'life',   title:'Life Insurance',   desc:'Term, Whole, UL, VUL, Group Life — underwriting classes, mortality tables, premium schedules',kpi:'16–26mo → 4–7wk'}
+    ];
+    lineItems.forEach(function(li){
+      var l=_p61lines[li.key];
+      lineStrip+='<div style="background:#fff;border:1px solid '+l.color+'44;border-radius:10px;padding:14px;border-top:3px solid '+l.color+'">'
+        +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">'
+        +'<div style="width:32px;height:32px;background:'+l.color+';border-radius:8px;display:flex;align-items:center;justify-content:center"><i class="fas '+l.icon+'" style="color:#fff;font-size:13px"></i></div>'
+        +'<div style="font-size:12px;font-weight:800;color:#0f172a">'+li.title+'</div></div>'
+        +'<div style="font-size:10px;color:#64748b;margin-bottom:8px;line-height:1.4">'+li.desc+'</div>'
+        +'<div style="font-size:11px;font-weight:700;color:'+l.color+'"><i class="fas fa-tachometer-alt" style="margin-right:4px"></i>'+li.kpi+'</div>'
+        +'</div>';
+    });
+    lineStrip+='</div>';
+
+    // Pain cards
+    var pCards='';
+    _p61bottlenecks.forEach(function(p,i){
+      pCards+='<div style="background:#fff;border:1px solid #e2e8f0;border-left:4px solid '+COF+';border-radius:10px;padding:14px 16px;cursor:pointer" onclick="_p61switchTab(\'blueprint\')">';
+      pCards+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">';
+      pCards+='<div style="width:34px;height:34px;background:'+COF+'22;border-radius:8px;display:flex;align-items:center;justify-content:center"><i class="fas '+p.icon+'" style="color:'+COF+';font-size:15px"></i></div>';
+      pCards+='<div><div style="font-size:13px;font-weight:700;color:#0f172a">S'+(i+1)+'. '+p.title+'</div>';
+      pCards+='<div style="font-size:11px;color:'+DAN+'"><i class="fas fa-clock" style="margin-right:4px"></i>'+p.before+'</div></div></div>';
+      pCards+='<div style="font-size:10px;font-weight:700;color:'+SUC+';margin-bottom:5px"><i class="fas fa-bolt" style="margin-right:3px"></i>HAL: '+p.after+'</div>';
+      pCards+=_p61prog(p.reduction,SUC);
+      pCards+='<div style="font-size:10px;color:#64748b;margin-top:3px;text-align:right">'+p.reduction+'% reduction</div>';
+      pCards+='</div>';
+    });
+
+    // HAL capability map
+    var halMap='';
+    var halItems=[
+      {phase:'P20',label:'Data Lake',icon:'fa-database',col:'#0078d4',solves:'S1, S3'},
+      {phase:'P21',label:'Semantic Layer',icon:'fa-layer-group',col:'#0891b2',solves:'S2, S4'},
+      {phase:'P22',label:'KG + Ontology',icon:'fa-project-diagram',col:'#7c3aed',solves:'S4, S5'},
+      {phase:'P23',label:'Vector RAG',icon:'fa-search',col:'#4f46e5',solves:'S1, S6, S8'},
+      {phase:'P24',label:'Agent Hub',icon:'fa-robot',col:'#059669',solves:'S2, S5, S7, S8'},
+      {phase:'P25',label:'Lineage',icon:'fa-sitemap',col:'#d97706',solves:'S3, S6'}
+    ];
+    halItems.forEach(function(h){
+      halMap+='<div style="background:#fff;border:1px solid '+h.col+'44;border-radius:10px;padding:12px;text-align:center">';
+      halMap+='<div style="width:36px;height:36px;background:'+h.col+';border-radius:8px;display:flex;align-items:center;justify-content:center;margin:0 auto 6px">';
+      halMap+='<i class="fas '+h.icon+'" style="color:#fff;font-size:14px"></i></div>';
+      halMap+='<div style="font-size:11px;font-weight:800;color:#0f172a">'+h.phase+' '+h.label+'</div>';
+      halMap+='<div style="font-size:10px;color:'+h.col+';margin-top:3px;font-weight:600">Solves '+h.solves+'</div>';
+      halMap+='</div>';
+    });
+
+    return lineStrip
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">'
+      // LEFT
+      +'<div>'
+      +'<div style="background:linear-gradient(135deg,#f0f4ff,#e8edf8);border:1px solid #c7d2fe;border-radius:12px;padding:16px 18px;margin-bottom:16px">'
+      +'<div style="font-size:13px;font-weight:800;color:'+COF3+';margin-bottom:8px"><i class="fas fa-exclamation-triangle" style="margin-right:6px"></i>Legacy State — The Onboarding Crisis (All Lines)</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">'
+      +'<div style="background:#fff;border-radius:8px;padding:10px;text-align:center"><div style="font-size:26px;font-weight:900;color:'+DAN+'">16–42</div><div style="font-size:10px;color:#64748b;font-weight:600">months avg timeline</div></div>'
+      +'<div style="background:#fff;border-radius:8px;padding:10px;text-align:center"><div style="font-size:26px;font-weight:900;color:'+DAN+'">$8–22M</div><div style="font-size:10px;color:#64748b;font-weight:600">avg onboarding cost</div></div>'
+      +'<div style="background:#fff;border-radius:8px;padding:10px;text-align:center"><div style="font-size:26px;font-weight:900;color:'+DAN+'">67%</div><div style="font-size:10px;color:#64748b;font-weight:600">projects run over time</div></div>'
+      +'<div style="background:#fff;border-radius:8px;padding:10px;text-align:center"><div style="font-size:26px;font-weight:900;color:'+DAN+'">84%</div><div style="font-size:10px;color:#64748b;font-weight:600">miss expectations</div></div>'
+      +'</div>'
+      +'<div style="font-size:11px;color:#3730a3">Sources: Gartner · Bloor Research · Decerto 2026 · Industry benchmarks — applies across LTC, Health, Annuity & Life</div>'
+      +'</div>'
+      +'<div style="font-size:12px;font-weight:700;color:#0f172a;margin-bottom:10px"><i class="fas fa-industry" style="color:'+COF+';margin-right:6px"></i>8 Production Bottlenecks — All Insurance Lines</div>'
+      +'<div style="display:flex;flex-direction:column;gap:8px">'+pCards+'</div>'
+      +'</div>'
+      // RIGHT
+      +'<div>'
+      +'<div style="background:linear-gradient(135deg,#d1fae5,#a7f3d0);border:1px solid #6ee7b7;border-radius:12px;padding:16px 18px;margin-bottom:16px">'
+      +'<div style="font-size:13px;font-weight:800;color:#065f46;margin-bottom:8px"><i class="fas fa-industry" style="margin-right:6px"></i>Factory Output — HAL-Automated Production</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">'
+      +'<div style="background:#fff;border-radius:8px;padding:10px;text-align:center"><div style="font-size:26px;font-weight:900;color:'+SUC+'">4–14</div><div style="font-size:10px;color:#64748b;font-weight:600">weeks target (any line)</div></div>'
+      +'<div style="background:#fff;border-radius:8px;padding:10px;text-align:center"><div style="font-size:26px;font-weight:900;color:'+SUC+'">$900K–$2M</div><div style="font-size:10px;color:#64748b;font-weight:600">total run cost (88% reduction)</div></div>'
+      +'<div style="background:#fff;border-radius:8px;padding:10px;text-align:center"><div style="font-size:26px;font-weight:900;color:'+SUC+'">94%</div><div style="font-size:10px;color:#64748b;font-weight:600">auto-mapped avg fields</div></div>'
+      +'<div style="background:#fff;border-radius:8px;padding:10px;text-align:center"><div style="font-size:26px;font-weight:900;color:'+SUC+'">99.98%</div><div style="font-size:10px;color:#64748b;font-weight:600">UAT first-pass quality rate</div></div>'
+      +'</div>'
+      +'<div style="font-size:11px;color:#065f46">Zero policyholder payment gaps across all lines · Fully automated compliance (NAIC/ACA/FINRA) · Millions of test permutations overnight</div>'
+      +'</div>'
+      +'<div style="font-size:12px;font-weight:700;color:#0f172a;margin-bottom:10px"><i class="fas fa-cubes" style="color:'+HAL+';margin-right:6px"></i>HAL Platform — 6 Capabilities Unlocked</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px">'+halMap+'</div>'
+      // Timeline comparison
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px">'
+      +'<div style="font-size:12px;font-weight:700;color:#0f172a;margin-bottom:12px"><i class="fas fa-clock" style="color:'+COF+';margin-right:6px"></i>Station-by-Station Timeline Compression</div>'
+      +'<div style="display:flex;flex-direction:column;gap:10px">'
+      +'<div style="display:flex;align-items:center;gap:8px;font-size:10px;font-weight:700;color:#94a3b8;margin-bottom:2px"><span style="flex:1">Station</span><span>Legacy</span><span style="margin:0 8px">→</span><span>COF</span></div>'
+      +_p61timelineRow('S1 · Data Archaeology','4–8 months','3–5 days',96,'#0078d4')
+      +_p61timelineRow('S2 · Product Config','2–4 months','4–7 days',94,'#7c3aed')
+      +_p61timelineRow('S3 · Data Quality','3–6 months','5–8 days',95,'#059669')
+      +_p61timelineRow('S4 · Regulatory Setup','2–4 months','2–3 days',97,'#0891b2')
+      +_p61timelineRow('S5 · Integration','2–4 months','3–5 days',93,'#d97706')
+      +_p61timelineRow('S6 · Block Migration','2–6 months','5–10 days',92,'#dc2626')
+      +_p61timelineRow('S7 · UAT & Validation','2–4 months','2–3 days',96,'#4f46e5')
+      +_p61timelineRow('S8 · Training & Cutover','1–3 months','3–5 days',88,'#0078d4')
+      +'</div></div>'
+      +'</div>'
+      +'</div>';
+  }
+
+  function _p61timelineRow(label,before,after,pct,col){
+    return '<div>'
+      +'<div style="display:flex;justify-content:space-between;margin-bottom:3px">'
+      +'<span style="font-size:11px;font-weight:600;color:#374151">'+label+'</span>'
+      +'<span style="font-size:11px"><span style="color:'+DAN+';text-decoration:line-through;margin-right:6px">'+before+'</span><span style="color:'+SUC+';font-weight:700">'+after+'</span></span>'
+      +'</div>'
+      +_p61prog(pct,col)
+      +'<div style="font-size:10px;color:#94a3b8;text-align:right;margin-top:1px">'+pct+'% time reduction</div>'
+      +'</div>';
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // TAB 2 — FACTORY FLOOR (10 carrier production runs)
+  // ══════════════════════════════════════════════════════════════════════════
+  function _p61factoryFloorTab(){
+    var filtered=_p61carriers.filter(function(c){
+      return _p61lineFilter==='all' || c.line===_p61lineFilter;
+    });
+    var total=_p61carriers.length;
+    var live=_p61carriers.filter(function(c){return c.stage>=8;}).length;
+    var active=_p61carriers.filter(function(c){return c.stage>0&&c.stage<8;}).length;
+    var totalSavings=_p61carriers.reduce(function(s,c){return s+c.savings;},0);
+
+    // capacity gauge
+    var maxSlots=12;
+    var usedSlots=_p61carriers.length;
+    var capacityGauge='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px 18px;margin-bottom:14px">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'
+      +'<div style="font-size:12px;font-weight:700;color:#0f172a"><i class="fas fa-industry" style="color:'+COF+';margin-right:6px"></i>Factory Capacity Gauge</div>'
+      +'<div style="font-size:11px;font-weight:700;color:'+COF+'">'+(maxSlots-usedSlots)+' production slots available</div>'
+      +'</div>'
+      +'<div style="display:flex;gap:2px;margin-bottom:8px">';
+    for(var i=0;i<maxSlots;i++){
+      var slotC=i<usedSlots?COF:'#e2e8f0';
+      capacityGauge+='<div style="flex:1;height:20px;border-radius:3px;background:'+slotC+'"></div>';
+    }
+    capacityGauge+='</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">'
+      +'<div style="text-align:center"><div style="font-size:18px;font-weight:900;color:'+COF+'">'+usedSlots+'</div><div style="font-size:10px;color:#64748b">Active Runs</div></div>'
+      +'<div style="text-align:center"><div style="font-size:18px;font-weight:900;color:'+(maxSlots-usedSlots>0?SUC:DAN)+'">'+(maxSlots-usedSlots)+'</div><div style="font-size:10px;color:#64748b">Open Slots</div></div>'
+      +'<div style="text-align:center"><div style="font-size:18px;font-weight:900;color:'+AMB+'">'+active+'</div><div style="font-size:10px;color:#64748b">In Production</div></div>'
+      +'<div style="text-align:center"><div style="font-size:18px;font-weight:900;color:'+SUC+'">'+_p61money(totalSavings)+'</div><div style="font-size:10px;color:#64748b">Total Savings Pipeline</div></div>'
+      +'</div></div>';
+
+    // Line filter pills
+    var lineFilters='<div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">';
+    var allActive=(_p61lineFilter==='all');
+    lineFilters+='<button onclick="_p61setLineFilter(\'all\')" style="padding:5px 12px;border-radius:6px;border:none;cursor:pointer;font-size:11px;font-weight:700;background:'+(allActive?COF:'#f1f5f9')+';color:'+(allActive?'#fff':'#64748b')+'"><i class="fas fa-th" style="margin-right:4px"></i>All Lines</button>';
+    Object.keys(_p61lines).forEach(function(k){
+      var l=_p61lines[k];
+      var isActive=(_p61lineFilter===k);
+      var cnt=_p61carriers.filter(function(c){return c.line===k;}).length;
+      lineFilters+='<button onclick="_p61setLineFilter(\''+k+'\')" style="padding:5px 12px;border-radius:6px;border:none;cursor:pointer;font-size:11px;font-weight:700;background:'+(isActive?l.color:'#f1f5f9')+';color:'+(isActive?'#fff':l.color)+'"><i class="fas '+l.icon+'" style="margin-right:4px"></i>'+l.label+' ('+cnt+')</button>';
+    });
+    lineFilters+='</div>';
+
+    // Carrier cards
+    var cards='';
+    filtered.forEach(function(c){
+      var l=_p61lines[c.line]; var lineColor=l?l.color:COF;
+      var pct=Math.round((c.stage/8)*100);
+      var stationDots='<div style="display:flex;gap:4px;align-items:center;overflow-x:auto;padding-bottom:2px">';
+      _p61stations.forEach(function(s,i){
+        var done=i<c.stage; var active=i===c.stage-1;
+        stationDots+=_p61stationBadge(i+1,s,active,done);
+        if(i<7) stationDots+='<div style="height:2px;width:12px;background:'+(done?SUC:'#e2e8f0')+';margin-bottom:12px;flex-shrink:0"></div>';
+      });
+      stationDots+='</div>';
+
+      cards+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;cursor:pointer;border-top:3px solid '+lineColor+';transition:box-shadow .2s" onmouseenter="this.style.boxShadow=\'0 4px 16px rgba(0,0,0,.1)\'" onmouseleave="this.style.boxShadow=\'none\'" onclick="_p61selectCarrier(\''+c.id+'\')">'
+        +'<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px">'
+        +'<div style="display:flex;align-items:center;gap:10px">'
+        +'<div style="width:40px;height:40px;border-radius:10px;background:'+lineColor+';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff">'+c.short+'</div>'
+        +'<div><div style="font-size:14px;font-weight:800;color:#0f172a">'+c.name+'</div>'
+        +'<div style="display:flex;gap:4px;align-items:center;margin-top:2px">'+_p61lineBadge(c.line)
+        +'<span style="font-size:10px;color:#64748b">'+c.portfolio+'</span></div></div></div>'
+        +'<div style="text-align:right"><div style="font-size:11px;font-weight:700;color:'+SUC+'">COF: '+c.cofWeeks+'w</div>'
+        +'<div style="font-size:10px;color:'+DAN+';text-decoration:line-through">Legacy: '+c.legacyMonths+'mo</div></div>'
+        +'</div>'
+        +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:12px">'
+        +'<div style="text-align:center"><div style="font-size:14px;font-weight:800;color:#0f172a">'+c.policies.toLocaleString()+'</div><div style="font-size:10px;color:#64748b">Policies</div></div>'
+        +'<div style="text-align:center"><div style="font-size:14px;font-weight:800;color:#0f172a">'+c.forms+'</div><div style="font-size:10px;color:#64748b">Policy Forms</div></div>'
+        +'<div style="text-align:center"><div style="font-size:14px;font-weight:800;color:#0f172a">'+c.states+'</div><div style="font-size:10px;color:#64748b">States</div></div>'
+        +'<div style="text-align:center"><div style="font-size:14px;font-weight:800;color:#0f172a">'+c.activePH.toLocaleString()+'</div><div style="font-size:10px;color:#64748b">Active PHolders</div></div>'
+        +'</div>'
+        +'<div style="margin-bottom:8px">'+_p61prog(pct,lineColor)+'</div>'
+        +'<div style="font-size:10px;color:#64748b;margin-bottom:10px;display:flex;justify-content:space-between">'
+        +'<span>Station '+c.stage+'/8 · <strong style="color:'+lineColor+'">'+c.stageLabel+'</strong></span>'
+        +'<span style="color:'+SUC+';font-weight:700">Savings: '+_p61money(c.savings)+'</span></div>'
+        +stationDots
+        +'</div>';
+    });
+
+    // Detail panel
+    var detail='';
+    if(_p61simCarrier){
+      var cv=_p61carriers.filter(function(x){return x.id===_p61simCarrier;})[0];
+      if(cv){
+        var lv=_p61lines[cv.line]; var lineColor=lv?lv.color:COF;
+        detail='<div style="background:#fff;border:2px solid '+lineColor+';border-radius:12px;padding:18px;margin-top:16px">'
+          +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">'
+          +'<div style="display:flex;align-items:center;gap:10px">'
+          +'<div style="width:44px;height:44px;border-radius:10px;background:'+lineColor+';display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#fff">'+cv.short+'</div>'
+          +'<div><div style="font-size:16px;font-weight:800;color:#0f172a">'+cv.name+' — Production Run Detail</div>'
+          +'<div style="display:flex;gap:6px;align-items:center;margin-top:3px">'+_p61lineBadge(cv.line)
+          +'<span style="font-size:12px;color:#64748b">'+cv.system+'</span></div></div></div>'
+          +'<button onclick="_p61simCarrier=null;_p61buildPage()" style="background:#f1f5f9;border:none;border-radius:6px;padding:5px 12px;cursor:pointer;font-size:12px;color:#64748b">✕ Close</button></div>'
+          +'<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px">'
+          +_p61kpi(cv.policies.toLocaleString(),'Policies',lineColor)
+          +_p61kpi(cv.forms,'Policy Forms',PUR)
+          +_p61kpi(cv.states,'States',HAL)
+          +_p61kpi(cv.activePH.toLocaleString(),'Active PHolders',DAN,'zero-gap guarantee')
+          +_p61kpi(_p61money(cv.savings),'Run Savings',SUC,'vs legacy onboarding')
+          +'</div>'
+          +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'
+          +'<div><div style="font-size:11px;font-weight:700;color:#0f172a;margin-bottom:8px">Station-by-Station Timeline</div>'
+          +'<table style="width:100%;border-collapse:collapse;font-size:11px">'
+          +'<tr style="background:#f8fafc"><th style="padding:5px 8px;text-align:left;color:#64748b">Station</th><th style="color:#dc2626;padding:5px">Legacy</th><th style="color:'+SUC+';padding:5px">COF</th></tr>';
+        _p61bottlenecks.forEach(function(p,i){
+          var bw=p.before.split('·')[0].trim(); var aw=p.after.split('·')[0].trim();
+          detail+='<tr style="border-top:1px solid #f1f5f9"><td style="padding:4px 8px;color:#374151">S'+(i+1)+'. '+p.title+'</td>'
+            +'<td style="padding:4px 5px;text-align:center;color:#dc2626;text-decoration:line-through">'+bw+'</td>'
+            +'<td style="padding:4px 5px;text-align:center;color:'+SUC+';font-weight:700">'+aw.replace('days','d')+'</td></tr>';
+        });
+        detail+='<tr style="background:#f0fdf4;font-weight:800"><td style="padding:5px 8px">TOTAL</td>'
+          +'<td style="padding:5px;text-align:center;color:#dc2626">'+cv.legacyMonths+' months</td>'
+          +'<td style="padding:5px;text-align:center;color:'+SUC+'">'+cv.cofWeeks+' weeks</td></tr>'
+          +'</table></div>'
+          +'<div><div style="font-size:11px;font-weight:700;color:#0f172a;margin-bottom:8px">Production Run Profile</div>'
+          +'<div style="background:#f8fafc;border-radius:8px;padding:12px;font-size:11px;display:flex;flex-direction:column;gap:6px">'
+          +'<div><span style="color:#64748b;font-weight:600">Insurance Line: </span>'+_p61lineBadge(cv.line)+'</div>'
+          +'<div><span style="color:#64748b;font-weight:600">Legacy System: </span><span style="color:#0f172a">'+cv.system+'</span></div>'
+          +'<div><span style="color:#64748b;font-weight:600">Reinsurers: </span><span style="color:#0f172a">'+cv.reinsurers.join(', ')+'</span></div>'
+          +'<div><span style="color:#64748b;font-weight:600">Portfolio: </span><span style="color:#0f172a">'+cv.portfolio+'</span></div>'
+          +'<div><span style="color:#64748b;font-weight:600">Current Station: </span><span style="color:'+lineColor+';font-weight:700">'+cv.stageLabel+'</span></div>'
+          +'</div>'
+          +'<div style="margin-top:10px;background:linear-gradient(135deg,'+COF+','+COF2+');border-radius:8px;padding:12px;color:#fff">'
+          +'<div style="font-size:12px;font-weight:800;margin-bottom:4px"><i class="fas fa-chart-line" style="margin-right:6px"></i>Production Run ROI</div>'
+          +'<div style="font-size:11px;opacity:.92">Legacy run cost: ~'+_p61money(cv.savings*6/5)+'<br>COF run cost: ~'+_p61money(cv.savings/5)+'<br>'
+          +'<strong>Net savings: '+_p61money(cv.savings)+'</strong><br>Time saved: '+(cv.legacyMonths-Math.round(cv.cofWeeks/4.3))+' months</div></div>'
+          +'</div></div></div>';
+      }
+    }
+
+    return capacityGauge+lineFilters
+      +'<div style="font-size:12px;font-weight:700;color:#0f172a;margin-bottom:12px"><i class="fas fa-industry" style="color:'+COF+';margin-right:6px"></i>Factory Floor — '+filtered.length+' Active Production Runs'+(filtered.length<total?' (filtered)':' · All Insurance Lines')+'</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'+cards+'</div>'
+      +detail;
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // TAB 3 — PRODUCTION BLUEPRINT (8 bottlenecks detail)
+  // ══════════════════════════════════════════════════════════════════════════
+  function _p61blueprintTab(){
+    var rows='';
+    _p61bottlenecks.forEach(function(p,i){
+      var lineIcons=p.lines.map(function(k){return _p61lineBadge(k);}).join(' ');
+      rows+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden">';
+      rows+='<div style="background:linear-gradient(135deg,#e8edf8,#f0f4ff);padding:14px 16px;border-bottom:1px solid #c7d2fe;display:flex;align-items:center;gap:12px">';
+      rows+='<div style="width:38px;height:38px;background:'+COF+';border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="fas '+p.icon+'" style="color:#fff;font-size:15px"></i></div>';
+      rows+='<div style="flex:1"><div style="font-size:13px;font-weight:800;color:'+COF3+'">Station '+(i+1)+': '+p.title+'</div>';
+      rows+='<div style="display:flex;gap:4px;align-items:center;margin-top:4px">'+lineIcons+'</div></div>';
+      rows+='<div style="text-align:right;flex-shrink:0"><div style="font-size:20px;font-weight:900;color:'+SUC+'">'+p.reduction+'%</div><div style="font-size:10px;color:#64748b">reduction</div></div>';
+      rows+='</div>';
+      rows+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0">';
+      rows+='<div style="padding:12px 14px;border-right:1px solid #fee2e2;background:#fff5f5">';
+      rows+='<div style="font-size:10px;font-weight:700;color:'+DAN+';margin-bottom:6px;text-transform:uppercase">❌ Legacy</div>';
+      rows+='<div style="font-size:11px;color:#374151">'+p.before+'</div></div>';
+      rows+='<div style="padding:12px 14px;border-right:1px solid #d1fae5;background:#f0fdf4">';
+      rows+='<div style="font-size:10px;font-weight:700;color:'+SUC+';margin-bottom:6px;text-transform:uppercase">✅ COF Output</div>';
+      rows+='<div style="font-size:11px;color:#374151">'+p.after+'</div></div>';
+      rows+='<div style="padding:12px 14px;background:#f8fafc">';
+      rows+='<div style="font-size:10px;font-weight:700;color:'+HAL+';margin-bottom:6px;text-transform:uppercase">⚙ How It Works</div>';
+      rows+='<div style="font-size:11px;color:#374151;line-height:1.5">'+p.detail+'</div></div>';
+      rows+='</div>';
+      rows+='<div style="padding:8px 14px;background:#fafafa;border-top:1px solid #f1f5f9;display:flex;align-items:center;gap:10px">';
+      rows+='<div style="flex:1">'+_p61prog(p.reduction,SUC)+'</div>';
+      rows+='<div style="font-size:11px;font-weight:700;color:'+SUC+';white-space:nowrap">'+p.reduction+'% faster</div>';
+      rows+='</div></div>';
+    });
+
+    return '<div style="font-size:12px;font-weight:700;color:#0f172a;margin-bottom:12px"><i class="fas fa-drafting-compass" style="color:'+COF+';margin-right:6px"></i>Production Blueprint — 8-Station Process · LTC · Health · Annuity · Life</div>'
+      +'<div style="display:flex;flex-direction:column;gap:10px">'+rows+'</div>'
+      +'<div style="margin-top:16px;background:linear-gradient(135deg,'+COF+','+COF2+');border-radius:12px;padding:16px 20px;color:#fff;display:flex;align-items:center;justify-content:space-between">'
+      +'<div><div style="font-size:14px;font-weight:800">Total: 22–36 months → 4–14 weeks (depending on line & carrier size)</div>'
+      +'<div style="font-size:12px;opacity:.9;margin-top:2px">Avg cost: $8–22M → $900K–$2M · 88% cost reduction · 100% zero-defect policyholder continuity · Works across LTC, Health, Annuity & Life</div></div>'
+      +'<div style="text-align:center"><div style="font-size:28px;font-weight:900">~94%</div><div style="font-size:11px;opacity:.9">avg time reduction</div></div>'
+      +'</div>';
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // TAB 4 — AUTOMATION ASSEMBLY (5 agents)
+  // ══════════════════════════════════════════════════════════════════════════
+  function _p61automationTab(){
+    if(_p61activeAgent){
+      return _p61agentDetail(_p61activeAgent);
+    }
+    var cards='';
+    _p61agents.forEach(function(ag){
+      cards+='<div style="background:#fff;border:1px solid '+ag.color+'33;border-radius:12px;padding:16px">'
+        +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">'
+        +'<div style="width:42px;height:42px;background:'+ag.color+';border-radius:10px;display:flex;align-items:center;justify-content:center"><i class="fas '+ag.icon+'" style="color:#fff;font-size:17px"></i></div>'
+        +'<div><div style="font-size:13px;font-weight:800;color:#0f172a">'+ag.name+'</div>'
+        +'<div style="font-size:11px;color:#64748b">'+ag.tagline+'</div>'
+        +'<div style="font-size:10px;font-weight:700;color:'+ag.color+';margin-top:3px">'+ag.lines+'</div></div></div>'
+        +'<div style="font-size:11px;font-weight:600;color:#64748b;margin-bottom:5px">Tool Chain:</div>'
+        +'<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px">';
+      ag.tools.forEach(function(t){
+        cards+='<span style="background:'+ag.color+'15;color:'+ag.color+';border:1px solid '+ag.color+'33;border-radius:5px;padding:2px 7px;font-size:10px;font-weight:600">'+t+'</span>';
+      });
+      cards+='</div>'
+        +'<div style="display:flex;gap:8px">'
+        +'<button onclick="_p61runAgent(\''+ag.id+'\')" style="flex:1;background:'+ag.color+';color:#fff;border:none;border-radius:8px;padding:8px;cursor:pointer;font-weight:700;font-size:12px"><i class="fas fa-play" style="margin-right:5px"></i>Run Station</button>'
+        +'<button onclick="_p61showAgentDetail(\''+ag.id+'\')" style="background:#f1f5f9;border:none;border-radius:8px;padding:8px 12px;cursor:pointer;font-size:12px;color:#64748b">Details</button>'
+        +'</div></div>';
+    });
+    return '<div style="font-size:12px;font-weight:700;color:#0f172a;margin-bottom:12px"><i class="fas fa-cogs" style="color:'+COF+';margin-right:6px"></i>Automation Assembly — 5 Production Stations · Covers All Insurance Lines</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'+cards+'</div>';
+  }
+
+  function _p61agentDetail(agId){
+    var ag=_p61agents.filter(function(x){return x.id===agId;})[0];
+    if(!ag) return '';
+    return '<div style="background:#fff;border:2px solid '+ag.color+';border-radius:12px;padding:18px">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">'
+      +'<div style="display:flex;align-items:center;gap:10px">'
+      +'<div style="width:44px;height:44px;background:'+ag.color+';border-radius:10px;display:flex;align-items:center;justify-content:center"><i class="fas '+ag.icon+'" style="color:#fff;font-size:18px"></i></div>'
+      +'<div><div style="font-size:15px;font-weight:800;color:#0f172a">'+ag.name+'</div>'
+      +'<div style="font-size:11px;color:#64748b">'+ag.tagline+'</div>'
+      +'<div style="font-size:10px;font-weight:700;color:'+ag.color+';margin-top:3px">'+ag.lines+'</div></div></div>'
+      +'<button onclick="_p61activeAgent=null;_p61buildPage()" style="background:#f1f5f9;border:none;border-radius:6px;padding:5px 12px;cursor:pointer;font-size:12px;color:#64748b">← Back</button></div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'
+      +'<div><div style="font-size:11px;font-weight:700;color:#0f172a;margin-bottom:8px">Tool Chain</div>'
+      +'<div style="display:flex;flex-direction:column;gap:4px">'
+      +ag.tools.map(function(t,i){
+        return '<div style="display:flex;align-items:center;gap:6px;background:'+ag.color+'10;border-radius:6px;padding:6px 10px"><span style="background:'+ag.color+';color:#fff;border-radius:4px;width:18px;height:18px;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+(i+1)+'</span><span style="font-size:11px;color:#374151">'+t+'</span></div>';
+      }).join('')
+      +'</div>'
+      +'<div style="margin-top:12px"><button onclick="_p61runAgent(\''+ag.id+'\')" style="width:100%;background:'+ag.color+';color:#fff;border:none;border-radius:8px;padding:10px;cursor:pointer;font-weight:800;font-size:13px"><i class="fas fa-play" style="margin-right:6px"></i>Run '+ag.name+'</button></div></div>'
+      +'<div><div style="font-size:11px;font-weight:700;color:#0f172a;margin-bottom:8px">Station Execution Log</div>'
+      +'<div id="p61-agent-log-'+ag.id+'" style="background:#0f172a;border-radius:8px;padding:12px;min-height:180px;font-family:monospace;font-size:11px;color:#94a3b8;line-height:1.7">'
+      +'<span style="color:#64748b">// Click Run Station to execute…</span></div>'
+      +'<div id="p61-agent-result-'+ag.id+'" style="display:none;margin-top:10px;background:#f0fdf4;border:1px solid #6ee7b7;border-radius:8px;padding:12px;font-size:11px;color:#065f46"><i class="fas fa-check-circle" style="margin-right:6px"></i>'+ag.result+'</div>'
+      +'</div></div></div>';
+  }
+
+  window._p61showAgentDetail=function(id){ _p61activeAgent=id; _p61buildPage(); };
+  window._p61runAgent=function(agId){
+    var ag=_p61agents.filter(function(x){return x.id===agId;})[0];
+    if(!ag) return;
+    _p61activeAgent=agId;
+    _p61buildPage();
+    var logEl=document.getElementById('p61-agent-log-'+agId);
+    var resEl=document.getElementById('p61-agent-result-'+agId);
+    if(!logEl) return;
+    logEl.innerHTML=''; if(resEl) resEl.style.display='none';
+    var steps=ag.steps; var idx=0;
+    function showStep(){
+      if(idx>=steps.length){ if(resEl) resEl.style.display='block'; return; }
+      var line=document.createElement('div');
+      var col=steps[idx].indexOf('complete')>=0?'#6ee7b7':
+              steps[idx].indexOf('►')>=0?'#60a5fa':
+              steps[idx].indexOf('⚠')>=0?'#fbbf24':'#94a3b8';
+      line.style.color=col; line.textContent=steps[idx];
+      logEl.appendChild(line); logEl.scrollTop=logEl.scrollHeight;
+      idx++; setTimeout(showStep,480);
+    }
+    showStep();
+  };
+
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // TAB 5 — CAPACITY PLANNER (replaces ROI Simulator)
+  // ══════════════════════════════════════════════════════════════════════════
+  var _p61plan={line:'ltc',legacy:'as400',forms:150,states:45,activePH:30000,reinsurers:2};
+
+  function _p61capacityTab(){
+    var f=_p61plan;
+    var legacyBase={as400:24,cobol:30,lifepro:20,duckcreek:18,facets:22,nasco:20,fast:18,ingenium:20,oipa:16,cyberlife:24,qs1:20,custom:36};
+    var legacyMo=(legacyBase[f.legacy]||22)
+      + Math.round((f.forms-100)/100*3)
+      + Math.round((f.states-40)/10*1.5)
+      + Math.round(f.activePH/10000*2)
+      + f.reinsurers*1.5;
+    var lineAdj={ltc:0,health:-2,annuity:-4,life:-6};
+    legacyMo=Math.max(12,Math.round(legacyMo+(lineAdj[f.line]||0)));
+    var cofWks=Math.round(legacyMo*0.45);
+    cofWks=Math.max(4,Math.min(16,cofWks));
+    var legacyCost=Math.round(legacyMo*420000);
+    var coaCost=Math.round(cofWks*95000);
+    var savings=legacyCost-coaCost;
+    var savPct=Math.round(savings/legacyCost*100);
+    var schemaFields=Math.round(800+f.forms*4.2);
+    var testCount=Math.round(f.forms*f.states*12*8);
+    var reduction=Math.round(((legacyMo*4.3-cofWks)/(legacyMo*4.3))*100);
+
+    var sysOptions={
+      ltc:    {as400:'IBM AS/400',cobol:'UNISYS COBOL Mainframe',lifepro:'LifePRO Legacy',duckcreek:'Duck Creek On-Premise',custom:'Custom/Homegrown PAS'},
+      health: {facets:'TriZetto Facets',nasco:'Nasco Claims',cobol:'COBOL Mainframe',as400:'IBM AS/400',custom:'Custom Claims System'},
+      annuity:{fast:'FAST Admin',ingenium:'INGENIUM',duckcreek:'Duck Creek',cobol:'COBOL Legacy',custom:'Custom Annuity Platform'},
+      life:   {oipa:'OIPA (Majesco)',cyberlife:'CSC Cyberlife',qs1:'QS/1',cobol:'COBOL Legacy',custom:'Custom Life Admin'}
+    };
+    var sysLabels=sysOptions[f.line]||sysOptions.ltc;
+    var l=_p61lines[f.line];
+
+    // Next available slot (simulated scheduling)
+    var slotLabels=['Q3 2026','Q4 2026','Q1 2027'];
+    var slotIdx=Math.floor(Math.random()*3);
+
+    return '<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">'
+      // LEFT — inputs
+      +'<div><div style="font-size:12px;font-weight:700;color:#0f172a;margin-bottom:12px"><i class="fas fa-sliders-h" style="color:'+COF+';margin-right:6px"></i>Configure Your Production Run</div>'
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:14px">'
+      // Insurance line
+      +'<div>'
+      +'<label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:6px">Insurance Line</label>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">'
+      +Object.keys(_p61lines).map(function(k){
+        var lk=_p61lines[k]; var isA=(f.line===k);
+        return '<button onclick="_p61plan.line=\''+k+'\';_p61plan.legacy=Object.keys({as400:1,facets:1,fast:1,oipa:1})[0];_p61buildPage()" style="padding:8px;border-radius:7px;border:2px solid '+(isA?lk.color:'#e2e8f0')+';cursor:pointer;font-size:11px;font-weight:700;background:'+(isA?lk.color+'15':'#fff')+';color:'+(isA?lk.color:'#64748b')+'"><i class="fas '+lk.icon+'" style="margin-right:4px"></i>'+lk.label+'</button>';
+      }).join('')
+      +'</div></div>'
+      // Legacy system
+      +'<div>'
+      +'<label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:6px">Legacy System Type</label>'
+      +'<select onchange="_p61plan.legacy=this.value;_p61buildPage()" style="width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:7px;font-size:12px;color:#0f172a">'
+      +Object.keys(sysLabels).map(function(k){return '<option value="'+k+'"'+(f.legacy===k?' selected':'')+'>'+sysLabels[k]+'</option>';}).join('')
+      +'</select></div>'
+      // Policy forms
+      +'<div>'
+      +'<label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:6px">Number of Policy Forms: <strong style="color:'+COF+'">'+f.forms+'</strong></label>'
+      +'<input type="range" min="10" max="350" value="'+f.forms+'" oninput="_p61plan.forms=+this.value;_p61buildPage()" style="width:100%"></div>'
+      // States
+      +'<div>'
+      +'<label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:6px">States of Operation: <strong style="color:'+COF+'">'+f.states+'</strong></label>'
+      +'<input type="range" min="1" max="50" value="'+f.states+'" oninput="_p61plan.states=+this.value;_p61buildPage()" style="width:100%"></div>'
+      // Active policyholders
+      +'<div>'
+      +'<label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:6px">Active Policyholders: <strong style="color:'+COF+'">'+f.activePH.toLocaleString()+'</strong></label>'
+      +'<input type="range" min="500" max="1500000" step="500" value="'+f.activePH+'" oninput="_p61plan.activePH=+this.value;_p61buildPage()" style="width:100%"></div>'
+      // Reinsurers
+      +'<div>'
+      +'<label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:6px">Reinsurance Relationships: <strong style="color:'+COF+'">'+f.reinsurers+'</strong></label>'
+      +'<input type="range" min="0" max="6" value="'+f.reinsurers+'" oninput="_p61plan.reinsurers=+this.value;_p61buildPage()" style="width:100%"></div>'
+      +'</div></div>'
+      // RIGHT — results
+      +'<div><div style="font-size:12px;font-weight:700;color:#0f172a;margin-bottom:12px"><i class="fas fa-chart-bar" style="color:'+SUC+';margin-right:6px"></i>Production Run Estimate — '+l.label+' Insurance</div>'
+      +'<div style="display:flex;flex-direction:column;gap:10px">'
+      // Line badge
+      +'<div style="background:'+l.color+'15;border:1px solid '+l.color+'44;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:8px">'
+      +'<div style="width:32px;height:32px;background:'+l.color+';border-radius:8px;display:flex;align-items:center;justify-content:center"><i class="fas '+l.icon+'" style="color:#fff;font-size:14px"></i></div>'
+      +'<div><div style="font-size:12px;font-weight:800;color:'+l.color+'">'+l.label+' Insurance Production Run</div>'
+      +'<div style="font-size:10px;color:#64748b">COF 8-Station Production Line</div></div>'
+      +'</div>'
+      // Timeline card
+      +'<div style="background:linear-gradient(135deg,#f0f4ff,#e8edf8);border:1px solid #c7d2fe;border-radius:12px;padding:14px">'
+      +'<div style="font-size:11px;font-weight:700;color:'+COF3+';margin-bottom:8px"><i class="fas fa-clock" style="margin-right:4px"></i>Production Cycle Time</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
+      +'<div style="text-align:center;background:#fff;border-radius:8px;padding:10px"><div style="font-size:28px;font-weight:900;color:'+DAN+'">'+legacyMo+'</div><div style="font-size:11px;color:#64748b;font-weight:600">months (legacy)</div></div>'
+      +'<div style="text-align:center;background:#fff;border-radius:8px;padding:10px"><div style="font-size:28px;font-weight:900;color:'+SUC+'">'+cofWks+'</div><div style="font-size:11px;color:#64748b;font-weight:600">weeks (COF)</div></div>'
+      +'</div>'
+      +'<div style="margin-top:8px;text-align:center;font-size:12px;font-weight:800;color:'+COF3+'">'+reduction+'% cycle time reduction</div></div>'
+      // Cost card
+      +'<div style="background:linear-gradient(135deg,#d1fae5,#ecfdf5);border:1px solid #6ee7b7;border-radius:12px;padding:14px">'
+      +'<div style="font-size:11px;font-weight:700;color:#065f46;margin-bottom:8px"><i class="fas fa-dollar-sign" style="margin-right:4px"></i>Run Cost Analysis</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">'
+      +'<div style="text-align:center;background:#fff;border-radius:8px;padding:8px"><div style="font-size:16px;font-weight:900;color:'+DAN+'">'+_p61money(legacyCost)+'</div><div style="font-size:10px;color:#64748b">Legacy cost</div></div>'
+      +'<div style="text-align:center;background:#fff;border-radius:8px;padding:8px"><div style="font-size:16px;font-weight:900;color:'+SUC+'">'+_p61money(coaCost)+'</div><div style="font-size:10px;color:#64748b">COF run cost</div></div>'
+      +'<div style="text-align:center;background:#fff;border-radius:8px;padding:8px"><div style="font-size:16px;font-weight:900;color:'+COF+'">'+_p61money(savings)+'</div><div style="font-size:10px;color:#64748b">Savings ('+savPct+'%)</div></div>'
+      +'</div></div>'
+      // Automation metrics
+      +'<div style="background:#fff;border:1px solid #e0e7ff;border-radius:12px;padding:14px">'
+      +'<div style="font-size:11px;font-weight:700;color:'+PUR+';margin-bottom:8px"><i class="fas fa-robot" style="margin-right:4px"></i>Zero-Defect Automation Metrics</div>'
+      +'<div style="display:flex;flex-direction:column;gap:6px;font-size:11px">'
+      +'<div style="display:flex;justify-content:space-between"><span style="color:#64748b">Schema fields to map</span><span style="font-weight:700;color:#0f172a">~'+schemaFields.toLocaleString()+'</span></div>'
+      +'<div style="display:flex;justify-content:space-between"><span style="color:#64748b">Auto-mapped (SchemaMapper)</span><span style="font-weight:700;color:'+SUC+'">~'+Math.round(schemaFields*0.94).toLocaleString()+' (94%)</span></div>'
+      +'<div style="display:flex;justify-content:space-between"><span style="color:#64748b">UAT test permutations</span><span style="font-weight:700;color:#0f172a">'+testCount.toLocaleString()+'</span></div>'
+      +'<div style="display:flex;justify-content:space-between"><span style="color:#64748b">First-pass quality rate</span><span style="font-weight:700;color:'+SUC+'">99.98%</span></div>'
+      +'<div style="display:flex;justify-content:space-between"><span style="color:#64748b">Policyholder payment gaps</span><span style="font-weight:700;color:'+SUC+'">Zero guaranteed</span></div>'
+      +'<div style="display:flex;justify-content:space-between"><span style="color:#64748b">States auto-configured</span><span style="font-weight:700;color:'+HAL+'">'+f.states+' / '+f.states+'</span></div>'
+      +'</div></div>'
+      // Schedule CTA
+      +'<div style="background:linear-gradient(135deg,'+COF+','+COF2+');border-radius:12px;padding:14px;color:#fff">'
+      +'<div style="font-size:13px;font-weight:900;margin-bottom:4px"><i class="fas fa-calendar-check" style="margin-right:6px"></i>Your production run starts in '+cofWks+' weeks</div>'
+      +'<div style="font-size:11px;opacity:.92">Next available slot: <strong>'+slotLabels[1]+'</strong> · 2 slots remaining · COF can save your carrier <strong>'+_p61money(savings)+'</strong> vs. legacy onboarding</div>'
+      +'<div style="margin-top:8px;background:rgba(255,255,255,.15);border-radius:6px;padding:6px 10px;font-size:11px">📋 Schedule your intake assessment to reserve a production slot</div>'
+      +'</div>'
+      +'</div></div>';
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // MAIN BUILD
+  // ══════════════════════════════════════════════════════════════════════════
+  function _p61buildPage(){
+    var pc=document.getElementById('page-content');
+    if(!pc) return;
+
+    // Aggregate KPIs
+    var totalSavings=_p61carriers.reduce(function(s,c){return s+c.savings;},0);
+
+    var tabs=['overview','floor','blueprint','automation','capacity'];
+    var tabCfg={
+      overview:   {label:'Factory Overview',    icon:'fa-industry'},
+      floor:      {label:'Factory Floor',       icon:'fa-th-large'},
+      blueprint:  {label:'Production Blueprint',icon:'fa-drafting-compass'},
+      automation: {label:'Automation Assembly', icon:'fa-cogs'},
+      capacity:   {label:'Capacity Planner',    icon:'fa-calendar-check'}
+    };
+    var tabBar=tabs.map(function(t){return _p61tabBtn(t,tabCfg[t].label,tabCfg[t].icon);}).join('');
+
+    var body='';
+    if(_p61activeTab==='overview')    body=_p61overviewTab();
+    else if(_p61activeTab==='floor')       body=_p61factoryFloorTab();
+    else if(_p61activeTab==='blueprint')   body=_p61blueprintTab();
+    else if(_p61activeTab==='automation')  body=_p61automationTab();
+    else if(_p61activeTab==='capacity')    body=_p61capacityTab();
+
+    pc.innerHTML=
+      '<div style="padding:20px 24px;background:#f8fafc;min-height:100vh;font-family:Inter,sans-serif">'
+      // Header
+      +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">'
+      +'<div style="display:flex;align-items:center;gap:12px">'
+      +'<div style="width:44px;height:44px;background:linear-gradient(135deg,'+COF+','+COF2+');border-radius:11px;display:flex;align-items:center;justify-content:center"><i class="fas fa-industry" style="color:#fff;font-size:19px"></i></div>'
+      +'<div><div style="font-size:20px;font-weight:800;color:#0f172a">Carrier Onboarding Factory</div>'
+      +'<div style="font-size:12px;color:#64748b;margin-top:2px">Illumifin · LTC · Health · Annuity · Life · Powered by HAL Platform (P20–P25) · Microsoft Fabric · Azure AI · Semantic Kernel · <strong style="color:'+COF+'">Industrial-scale. Zero defects. Repeatable.</strong></div></div></div>'
+      +'<div style="display:flex;gap:8px">'
+      +'<span style="background:'+COF+'22;color:'+COF+';border:1px solid '+COF+'44;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:700"><i class="fas fa-industry" style="margin-right:4px"></i>COF Production Line</span>'
+      +'<span style="background:'+SUC+'22;color:'+SUC+';border:1px solid '+SUC+'44;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:700"><i class="fas fa-shield-alt" style="margin-right:4px"></i>Zero Defect Standard</span>'
+      +'<span style="background:'+HAL+'22;color:'+HAL+';border:1px solid '+HAL+'44;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:700"><i class="fas fa-cogs" style="margin-right:4px"></i>5 Automation Stations</span>'
+      +'<span style="background:#0891b222;color:#0891b2;border:1px solid #0891b244;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:700"><i class="fas fa-layer-group" style="margin-right:4px"></i>4 Insurance Lines</span>'
+      +'</div></div>'
+      // KPI bar
+      +'<div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">'
+      +_p61kpi('16–42mo→4–14wk','Cycle Time (Any Line)',COF,'LTC/Health/Annuity/Life')
+      +_p61kpi('88%','Cost Per Run',SUC,'$8–22M → $900K–$2M')
+      +_p61kpi('94%','Auto-Mapping Rate',HAL,'SchemaMapper Station')
+      +_p61kpi('99.98%','First-Pass Quality',PUR,'Zero Defect Standard')
+      +_p61kpi('Zero','Policyholder Gaps',SUC,'All 4 insurance lines')
+      +_p61kpi(_p61money(totalSavings),'Savings Pipeline',COF,'10 active runs')
+      +'</div>'
+      // Tab bar
+      +'<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">'+tabBar+'</div>'
+      // Body
+      +body
+      // Footer
+      +'<div style="margin-top:16px;background:linear-gradient(135deg,'+COF+','+COF2+');border-radius:12px;padding:14px 20px;color:#fff;display:flex;align-items:center;gap:16px">'
+      +'<i class="fas fa-industry" style="font-size:24px;opacity:.9"></i>'
+      +'<div><div style="font-weight:800;font-size:13px">Carrier Onboarding Factory™ — Industrial-Scale Onboarding for LTC · Health · Annuity · Life</div>'
+      +'<div style="font-size:11px;opacity:.9;margin-top:2px">8-station production line · 5 automation stations · All 6 HAL platform phases (P20–P25) orchestrated in sequence · Microsoft Fabric + Azure AI Foundry + Semantic Kernel + Microsoft Purview · 4–14 weeks per production run · Zero policyholder payment gaps — guaranteed by the COF zero-defect standard · 10 carriers currently in production</div></div>'
+      +'</div></div>';
+  }
+
+  // ── Nav intercept — overrides P26 ─────────────────────────────────────────
+  var _p61origNav=window.navigateTo;
+  window.navigateTo=function(page){
+    if(page==='hal-coa'||page==='hal-cof'){
+      document.querySelectorAll('.nav-item').forEach(function(e){e.classList.remove('active');});
+      var n=document.querySelector('.hal-coa-nav'); if(n)n.classList.add('active');
+      _p61activeTab='overview'; _p61activeAgent=null; _p61simCarrier=null;
+      _p61buildPage(); return;
+    }
+    if(_p61origNav) _p61origNav(page);
+  };
+
+  console.log('[Phase 61] Carrier Onboarding Factory loaded · 10 carriers · 4 insurance lines (LTC/Health/Annuity/Life) · 8-station production line · 5 automation stations · Factory Floor capacity gauge · Capacity Planner');
+})();
+
