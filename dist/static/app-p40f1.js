@@ -2,6 +2,11 @@
    WIPRO WEALTHAI AGENT 360 — Frontend JavaScript
    ============================================= */
 
+// ---- NAV QUEUE: capture clicks that arrive before this script finishes executing ----
+window._navQueue = window._navQueue || [];
+var _navQueueActive = true;
+window.navigateTo = function() { if(_navQueueActive) window._navQueue.push(Array.prototype.slice.call(arguments)); };
+
 // ---- NAVIGATION ----
 let _currentPage = 'dashboard';
 
@@ -148,6 +153,11 @@ function navigateTo(page) {
     }
   }
 }
+// ---- NAV QUEUE FLUSH: real navigateTo is now defined — replay any queued clicks ----
+_navQueueActive = false;
+window.navigateTo = navigateTo;
+(window._navQueue || []).forEach(function(a){ try{ navigateTo.apply(null,a); }catch(e){} });
+window._navQueue = [];
 
 // ---- SIDEBAR TOGGLE ----
 function toggleSidebar() {
