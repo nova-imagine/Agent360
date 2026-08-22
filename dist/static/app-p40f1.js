@@ -110908,3 +110908,170 @@ var navigateTo=window.navigateTo;
   console.log('[Phase 63 Part 4] switchTab intercept live · navigateTo patched for hal-mig/hal-acc · Accelerating Conversion ready');
   console.log('[Phase 63] AI Migration Hub — 3 phases · 9 swimlanes · BA/DEV/MIG/QA/OPS/PRD agents · auto carrier phase indicator');
 })();
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   NAVFIX — Final navigateTo override
+   Root cause: the P1–P63 wrapper chain never calls content.innerHTML = clone.innerHTML
+   for standard pages. This final override reinstates the real page-swap logic
+   and delegates to the old chain for special-purpose pages only.
+   ─────────────────────────────────────────────────────────────────────────── */
+(function() {
+  'use strict';
+
+  /* Pages that have their own custom renderer (set content.innerHTML directly)
+     and must NOT be handled by the generic template swap. */
+  var CUSTOM_PAGES = [
+    'hal-datalake','hal-semantic','hal-ontology','hal-vectorstore','hal-agents',
+    'hal-lineage','hal-coa','hal-cih','hal-caid','hal-rimd','hal-psp',
+    'hal-pni','hal-wfa','hal-ai-gov','hal-lit','hal-iop','hal-hce','hal-rct',
+    'hal-cof','hal-mig','hal-acc','pc-claims','pc-ops','ltc-policy-admin',
+    'ltc-arch','core-admin','data-ai','digital-eco','contact-doc','mod-roadmap',
+    'ltc-ai-agents','tpa-command','hybrid-ops','ai-modernization','rfp-showcase',
+    'insurance-carrier-360','healthcare-provider-360','hal-client360',
+    'ltc-claimant','hal-hybrid-compare','hal-reg-tracker','hal-ai-models',
+    'ltc-bre','hal-medsup'
+  ];
+
+  var _prevNav = window.navigateTo; /* save old chain for custom pages & post-hooks */
+
+  var _titles = {
+    dashboard:'Dashboard', clients:'Client 360', prospects:'Prospect Pipeline',
+    policies:'Policy Management', 'ai-agents':'Agentic AI', campaigns:'Campaigns',
+    upsell:'Growth Opportunities', alerts:'Policy Alerts', 'pipeline-view':'Sales Pipeline',
+    sales:'Sales Pipeline', products:'Product Intelligence Hub', reports:'Reports & Analytics',
+    calendar:'AI Planner', 'ai-insights':'AI Insights', claims:'Claims Management',
+    underwriting:'Underwriting Pipeline', settings:'Settings', help:'Help & Support',
+    fna:'Needs Analysis', delivery:'Policy Delivery', leads:'Leads — Pre-Qualification',
+    'inv-accounts':'Investment Accounts', 'inv-proposals':'Investment Proposals',
+    'ret-accounts':'Annuity Accounts', 'adv-wealth':'Wealth Management',
+    'adv-accounts':'Advisory Accounts', 'adv-estate':'Estate Planning',
+    'adv-smallbiz':'Small Business Advisory', 'eapp-submissions':'E-App & Submissions',
+    'ltc-claims':'LTC Claims', 'ltc-care':'Care Coordination',
+    'ltc-eligibility':'Assessments', 'ann-application':'Annuity Application',
+    'suitability-review':'Suitability Review', 'contract-delivery':'Contract Delivery',
+    'hal-health':'Health Operations', 'hal-annuity':'Annuity Operations',
+    'hal-life':'Life Operations', 'hal-policy':'Policy Administration',
+    'hal-pipeline':'HAL Pipeline', 'hal-medsup':'Medicare Supplement',
+    'ltc-claimant':'Claimant 360', 'insurance-carrier-360':'Insurance Carrier 360°',
+    'healthcare-provider-360':'Healthcare Provider 360°', 'hal-client360':'Client 360 Simulator',
+    'tpa-command':'TPA Command Center', 'hybrid-ops':'Hybrid LTC+HAL Hub',
+    'ai-modernization':'AI Modernization', 'rfp-showcase':'RFP Response Center'
+  };
+
+  var _breadcrumbs = {
+    dashboard:'Home / Dashboard', clients:'Home / Client 360',
+    prospects:'Home / Sales / Prospects', policies:'Home / Policies',
+    'ai-agents':'Home / Agentic AI', campaigns:'Home / Marketing / Campaigns',
+    upsell:'Home / Sales / Growth Opportunities', sales:'Home / Sales / Sales Pipeline',
+    products:'Home / Products', reports:'Home / Reports', calendar:'Home / AI Planner',
+    'ai-insights':'Home / Insights / AI Insights', claims:'Home / Claims',
+    underwriting:'Home / Sales / Underwriting', settings:'Home / Settings',
+    help:'Home / Help & Support', fna:'Home / Sales / Needs Analysis',
+    delivery:'Home / Insurance / Policy Delivery', leads:'Home / Marketing / Leads',
+    'inv-accounts':'Home / Investments / Investment Accounts',
+    'inv-proposals':'Home / Investments / Investment Proposals',
+    'ret-accounts':'Home / Retirement / Annuity Accounts',
+    'adv-accounts':'Home / Advisory / Advisory Accounts',
+    'adv-estate':'Home / Advisory / Estate Planning',
+    'adv-smallbiz':'Home / Advisory / Small Business',
+    'eapp-submissions':'Home / Insurance / E-App & Submissions',
+    'ltc-claims':'Home / LTC Operations / LTC Claims',
+    'ltc-care':'Home / LTC Operations / Care Coordination',
+    'ltc-eligibility':'Home / LTC Operations / Assessments'
+  };
+
+  window.navigateTo = function(page, opts) {
+    /* ── 1. Delegate custom-renderer pages to the old chain ── */
+    if (CUSTOM_PAGES.indexOf(page) !== -1) {
+      if (typeof _prevNav === 'function') _prevNav(page, opts);
+      return;
+    }
+
+    /* ── 2. Active nav highlight ── */
+    document.querySelectorAll('.nav-item').forEach(function(el){ el.classList.remove('active'); });
+    var matchingNav = Array.from(document.querySelectorAll('.nav-item')).find(function(el) {
+      var oc = el.getAttribute('onclick') || '';
+      return oc.indexOf("'" + page + "'") !== -1 || oc.indexOf('"' + page + '"') !== -1;
+    });
+    if (matchingNav) matchingNav.classList.add('active');
+
+    /* ── 3. Page title + breadcrumb ── */
+    var titleEl = document.getElementById('page-title');
+    var bcEl    = document.getElementById('page-breadcrumb');
+    if (titleEl) titleEl.textContent = _titles[page] || page;
+    if (bcEl)    bcEl.textContent    = _breadcrumbs[page] || '';
+
+    /* ── 4. Template swap ── */
+    var content = document.getElementById('page-content');
+    if (!content) return;
+
+    /* Special reroute: alerts → policies/alerts tab */
+    if (page === 'alerts') {
+      window.navigateTo('policies');
+      requestAnimationFrame(function(){ setTimeout(function(){ if(window.polSwitchTab) polSwitchTab('alerts'); }, 200); });
+      return;
+    }
+
+    var tpl = document.getElementById('tpl-' + page);
+    if (tpl) {
+      content.innerHTML = tpl.innerHTML;
+    }
+
+    /* ── 5. Post-init hooks (same as original navigateTo) ── */
+    if (page === 'dashboard') {
+      requestAnimationFrame(function(){ setTimeout(function(){
+        var mb = document.getElementById('home-pane-mybook');
+        if (mb && mb.style.display !== 'none' && window.initDashboardCharts) initDashboardCharts();
+        if (window.animateKPICards) animateKPICards();
+      }, 80); });
+    } else if (page === 'reports') {
+      requestAnimationFrame(function(){ setTimeout(function(){ if(window.initReportCharts) initReportCharts(); }, 80); });
+    } else if (page === 'upsell') {
+      if (window.initUpsellPage) initUpsellPage();
+    } else if (page === 'pipeline-view') {
+      if (window.initPipelineViewPage) initPipelineViewPage();
+    } else if (page === 'products') {
+      requestAnimationFrame(function(){ setTimeout(function(){ if(window.initProductsPage) initProductsPage(); }, 80); });
+    } else if (page === 'fna') {
+      requestAnimationFrame(function(){ setTimeout(function(){ if(window.initFNAPage) initFNAPage(); }, 80); });
+    } else if (page === 'delivery') {
+      requestAnimationFrame(function(){ setTimeout(function(){ if(window.initDeliveryPage) initDeliveryPage(); }, 80); });
+    } else if (page === 'leads') {
+      requestAnimationFrame(function(){ setTimeout(function(){ if(window.initLeadsPage) initLeadsPage(); }, 80); });
+    } else if (page === 'campaigns') {
+      requestAnimationFrame(function(){ setTimeout(function(){ if(window.initCampaignsPage) initCampaignsPage(); }, 80); });
+    } else if (page === 'underwriting') {
+      requestAnimationFrame(function(){ setTimeout(function(){ if(window.initUnderwritingPage) initUnderwritingPage(); }, 80); });
+    } else if (page === 'eapp-submissions') {
+      requestAnimationFrame(function(){ setTimeout(function(){ if(window.initEAppSubmissionsPage) initEAppSubmissionsPage(); }, 80); });
+    } else if (page === 'sales') {
+      requestAnimationFrame(function(){ setTimeout(function(){ if(window.initSalesPage) initSalesPage(); }, 80); });
+    } else if (page === 'inv-proposals') {
+      requestAnimationFrame(function(){ setTimeout(function(){ if(window.initInvestmentProposalsPage) initInvestmentProposalsPage(); }, 80); });
+    } else if (page === 'calendar') {
+      requestAnimationFrame(function(){ setTimeout(function(){ if(window.renderCalendar) renderCalendar(); }, 80); });
+    } else if (page === 'ai-insights') {
+      requestAnimationFrame(function(){ setTimeout(function(){ if(window.initAIScoreCharts) initAIScoreCharts(); }, 120); });
+    } else if (page === 'claims') {
+      var goTab = (opts && opts.tab) ? opts.tab : 'overview';
+      requestAnimationFrame(function(){ setTimeout(function(){ if(window.initClaimsPage) initClaimsPage(goTab); }, 80); });
+    } else if (page === 'policies') {
+      requestAnimationFrame(function(){ setTimeout(function(){ if(window.initPoliciesPage) initPoliciesPage(); }, 80); });
+    } else if (page === 'ltc-claims') {
+      /* ltc-claims has a custom renderer — delegate */
+      if (typeof _prevNav === 'function') _prevNav(page, opts);
+      return;
+    } else if (page === 'prospects') {
+      setTimeout(function(){ var lbl=document.getElementById('prosp-count-lbl'); if(lbl) lbl.textContent='Showing 14 leads'; }, 100);
+    } else if (page === 'adv-accounts') {
+      requestAnimationFrame(function(){ setTimeout(function(){ if(window.initAdvAccountsPage) initAdvAccountsPage(); }, 80); });
+    } else if (page === 'adv-estate') {
+      requestAnimationFrame(function(){ setTimeout(function(){ if(window.initEstatePlanningPage) initEstatePlanningPage(); }, 80); });
+    }
+  };
+
+  /* Keep bare global in sync */
+  var navigateTo = window.navigateTo;
+
+  console.log('[NAVFIX] Final navigateTo override installed — template-swap restored for all standard pages');
+})();
