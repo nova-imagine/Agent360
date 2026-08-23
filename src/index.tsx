@@ -1094,10 +1094,7 @@ function Sidebar() {
           <i class="fas fa-microchip"></i><span>AI Modernization</span>
           <span class="nav-badge" style="background:#059669;color:#fff">AI</span>
         </a>
-        <a class="nav-item rfp-showcase-nav nav-grp-tpa" onclick="navigateTo('rfp-showcase')" href="javascript:void(0)">
-          <i class="fas fa-award"></i><span>RFP Response Center</span>
-          <span class="nav-badge" style="background:#d97706;color:#fff">RFP</span>
-        </a>
+        {/* RFP Response Center removed per user request */}
 
         {/* Intelligence Stack */}
         <a class="nav-item hal-datalake-nav nav-grp-tpa" onclick="navigateTo('hal-datalake')" href="javascript:void(0)">
