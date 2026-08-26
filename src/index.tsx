@@ -853,6 +853,9 @@ function Sidebar() {
           <i class="fas fa-calendar-alt"></i><span>AI Planner</span>
           <span class="nav-badge alert">3</span>
         </a>
+        <a class="nav-item practice-nav nav-grp-carrier nav-grp-tpa" onclick="navigateTo('practice')" href="javascript:void(0)">
+          <i class="fas fa-flask"></i><span>Practice</span>
+        </a>
 
         {/* ── CARRIER DIVIDER ── */}
         <div class="nav-persona-divider nav-grp-carrier" id="carrier-divider">
